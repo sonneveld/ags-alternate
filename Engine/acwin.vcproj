@@ -51,7 +51,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include"
 				PreprocessorDefinitions="VS2005;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ALLEGRO_NO_ASM;NO_MP3_PLAYER"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -152,7 +152,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include"
 				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="1"
 				StructMemberAlignment="0"
@@ -257,7 +257,7 @@
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include"
 				PreprocessorDefinitions="VS2005;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ALLEGRO_NO_ASM"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -1791,7 +1791,7 @@
 				Name="DUMB"
 				>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\alplay.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\alplay.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -1822,7 +1822,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\atexit.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\atexit.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -1853,7 +1853,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\helpers\clickrem.c"
+					RelativePath="..\External\dumb-0.9.2\src\helpers\clickrem.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -1884,7 +1884,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\datduh.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\datduh.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -1915,7 +1915,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\datit.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\datit.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -1946,7 +1946,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\datmod.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\datmod.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -1977,7 +1977,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\dats3m.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\dats3m.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2008,7 +2008,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\datunld.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\datunld.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2039,7 +2039,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\datxm.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\datxm.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2070,7 +2070,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\duhlen.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\duhlen.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2101,7 +2101,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\dumbfile.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\dumbfile.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2132,7 +2132,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\itload.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\itload.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2163,7 +2163,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\itmisc.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\itmisc.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2194,7 +2194,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\itorder.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\itorder.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2225,7 +2225,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\itread.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\itread.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2256,7 +2256,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\itrender.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\itrender.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2287,7 +2287,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\itunload.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\itunload.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2318,7 +2318,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\loadduh.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\loadduh.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2349,7 +2349,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\loadmod.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\loadmod.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2380,7 +2380,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\loads3m.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\loads3m.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2411,7 +2411,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\loadxm.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\loadxm.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2442,7 +2442,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\makeduh.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\makeduh.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2473,7 +2473,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\helpers\memfile.c"
+					RelativePath="..\External\dumb-0.9.2\src\helpers\memfile.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2504,7 +2504,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\allegro\packfile.c"
+					RelativePath="..\External\dumb-0.9.2\src\allegro\packfile.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2535,7 +2535,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\rawsig.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\rawsig.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2566,7 +2566,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\readduh.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\readduh.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2597,7 +2597,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\readmod.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\readmod.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2628,7 +2628,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\reads3m.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\reads3m.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2659,7 +2659,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\readxm.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\readxm.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2690,7 +2690,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\register.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\register.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2721,7 +2721,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\rendduh.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\rendduh.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2752,7 +2752,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\rendsig.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\rendsig.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2783,7 +2783,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\helpers\resample.c"
+					RelativePath="..\External\dumb-0.9.2\src\helpers\resample.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2814,7 +2814,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\helpers\sampbuf.c"
+					RelativePath="..\External\dumb-0.9.2\src\helpers\sampbuf.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2845,7 +2845,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\helpers\silence.c"
+					RelativePath="..\External\dumb-0.9.2\src\helpers\silence.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2876,7 +2876,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\helpers\stdfile.c"
+					RelativePath="..\External\dumb-0.9.2\src\helpers\stdfile.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2907,7 +2907,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\core\unload.c"
+					RelativePath="..\External\dumb-0.9.2\src\core\unload.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
@@ -2938,7 +2938,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath="..\External\src\dumb-0.9.2\it\xmeffect.c"
+					RelativePath="..\External\dumb-0.9.2\src\it\xmeffect.c"
 					>
 					<FileConfiguration
 						Name="ReleaseNoMP3|Win32"
