@@ -51,7 +51,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".;..\common;..\External\include"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1"
 				PreprocessorDefinitions="VS2005;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ALLEGRO_NO_ASM;NO_MP3_PLAYER"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -152,7 +152,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;..\common;..\External\include"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1"
 				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="1"
 				StructMemberAlignment="0"
@@ -257,7 +257,7 @@
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;..\common;..\External\include"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1"
 				PreprocessorDefinitions="VS2005;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ALLEGRO_NO_ASM"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -1097,19 +1097,19 @@
 				>
 			</File>
 			<File
-				RelativePath="..\External\lib\ogg_static.lib"
+				RelativePath="..\External\xiph\lib\ogg_static.lib"
 				>
 			</File>
 			<File
-				RelativePath="..\External\lib\theora_static.lib"
+				RelativePath="..\External\xiph\lib\theora_static.lib"
 				>
 			</File>
 			<File
-				RelativePath="..\External\lib\vorbis_static.lib"
+				RelativePath="..\External\xiph\lib\vorbis_static.lib"
 				>
 			</File>
 			<File
-				RelativePath="..\External\lib\vorbisfile_static.lib"
+				RelativePath="..\External\xiph\lib\vorbisfile_static.lib"
 				>
 			</File>
 		</Filter>
@@ -2989,11 +2989,11 @@
 				Name="aastr"
 				>
 				<File
-					RelativePath="..\External\src\aastr-0.1.1\AASTR.C"
+					RelativePath="..\External\aastr-0.1.1\AASTR.C"
 					>
 				</File>
 				<File
-					RelativePath="..\External\src\aastr-0.1.1\AAUTIL.C"
+					RelativePath="..\External\aastr-0.1.1\AAUTIL.C"
 					>
 				</File>
 			</Filter>
