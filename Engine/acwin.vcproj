@@ -51,7 +51,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include;..\External\libcda-0.4\include;..\External\hq2x\include"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include;..\External\libcda-0.4\include;..\External\hq2x\include;..\External\allegro-4.2.2-agspatch\include"
 				PreprocessorDefinitions="VS2005;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ALLEGRO_NO_ASM;NO_MP3_PLAYER"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -152,7 +152,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include;..\External\libcda-0.4\include;..\External\hq2x\include"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include;..\External\libcda-0.4\include;..\External\hq2x\include;..\External\allegro-4.2.2-agspatch\include"
 				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS"
 				RuntimeLibrary="1"
 				StructMemberAlignment="0"
@@ -257,7 +257,7 @@
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="true"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include;..\External\libcda-0.4\include;..\External\hq2x\include"
+				AdditionalIncludeDirectories=".;..\common;..\External\include;..\External\xiph\include;..\External\aastr-0.1.1;..\External\dumb-0.9.2\include;..\External\libcda-0.4\include;..\External\hq2x\include;..\External\allegro-4.2.2-agspatch\include"
 				PreprocessorDefinitions="VS2005;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ALLEGRO_NO_ASM"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -1077,7 +1077,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\External\lib\alleg_s_crt.lib"
+				RelativePath="..\External\allegro-4.2.2-agspatch\lib\alleg_s_crt.lib"
 				>
 			</File>
 			<File
@@ -3001,23 +3001,23 @@
 				Name="AllegroPatches"
 				>
 				<File
-					RelativePath="..\External\src\allegro-4.2.2-agspatch\c\cstretch.c"
+					RelativePath="..\External\allegro-4.2.2-agspatch\src\c\cstretch.c"
 					>
 				</File>
 				<File
-					RelativePath="..\External\src\allegro-4.2.2-agspatch\file.c"
+					RelativePath="..\External\allegro-4.2.2-agspatch\src\file.c"
 					>
 				</File>
 				<File
-					RelativePath="..\External\src\allegro-4.2.2-agspatch\win\wkeybd.c"
+					RelativePath="..\External\allegro-4.2.2-agspatch\src\win\wkeybd.c"
 					>
 				</File>
 				<File
-					RelativePath="..\External\src\allegro-4.2.2-agspatch\win\wmouse.c"
+					RelativePath="..\External\allegro-4.2.2-agspatch\src\win\wmouse.c"
 					>
 				</File>
 				<File
-					RelativePath="..\External\src\allegro-4.2.2-agspatch\win\wwnd.c"
+					RelativePath="..\External\allegro-4.2.2-agspatch\src\win\wwnd.c"
 					>
 				</File>
 			</Filter>
