@@ -10,6 +10,8 @@
 **
 */
 
+#include "bmp.h"
+
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL
 #pragma unmanaged

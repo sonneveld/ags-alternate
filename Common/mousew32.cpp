@@ -12,6 +12,8 @@
   prior express permission from Chris Jones.
 */
 
+#include "bmp.h"
+
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #include <dos.h>
 #include <conio.h>

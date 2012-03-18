@@ -11,6 +11,9 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
+
+#include "bmp.h"
+
 #include "acplatfm.h"
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;

@@ -12,6 +12,8 @@
 
 */
 
+#include "bmp.h"
+
 #define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #define CROOM_NOFUNCTIONS

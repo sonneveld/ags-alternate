@@ -11,6 +11,9 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
+
+#include "bmp.h"
+
 #ifdef NO_MP3_PLAYER
 #define SPECIAL_VERSION "NMP"
 #else

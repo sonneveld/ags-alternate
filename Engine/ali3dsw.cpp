@@ -811,3 +811,7 @@ IGraphicsDriver* GetSoftwareGraphicsDriver(GFXFilter *filter)
   return _alsoftware_driver;
 }
 
+
+IGraphicsDriver* GetStubGraphicsDriver(GFXFilter *filter) {
+	return NULL;
+}
