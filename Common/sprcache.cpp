@@ -408,21 +408,21 @@ int SpriteCache::loadSprite(int index)
     getw(ff); // skip data size
     if (coldep == 1) {
       for (hh = 0; hh < htt; hh++)
-        cunpackbitl(&images[index]->line[hh][0], wdd, ff);
+        cunpackbitl(&BMP_LINE(images[index])[hh][0], wdd, ff);
     }
     else if (coldep == 2) {
       for (hh = 0; hh < htt; hh++)
-        cunpackbitl16((unsigned short*)&images[index]->line[hh][0], wdd, ff);
+        cunpackbitl16((unsigned short*)&BMP_LINE(images[index])[hh][0], wdd, ff);
     }
     else {
       for (hh = 0; hh < htt; hh++)
-        cunpackbitl32((unsigned long*)&images[index]->line[hh][0], wdd, ff);
+        cunpackbitl32((unsigned long*)&BMP_LINE(images[index])[hh][0], wdd, ff);
     }
   }
   else {
     for (hh = 0; hh < htt; hh++)
       // MACPORT FIX: size and nmemb split
-      fread(&images[index]->line[hh][0], coldep, wdd, ff);
+      fread(&BMP_LINE(images[index])[hh][0], coldep, wdd, ff);
   }
 
   lastLoad = index;
@@ -457,16 +457,16 @@ void SpriteCache::compressSprite(block sprite, FILE *ooo) {
   int depth = bitmap_color_depth(sprite) / 8;
 
   if (depth == 1) {
-    for (int yy = 0; yy < sprite->h; yy++)
-      cpackbitl(&sprite->line[yy][0], sprite->w, ooo);
+    for (int yy = 0; yy < BMP_H(sprite); yy++)
+      cpackbitl(&BMP_LINE(sprite)[yy][0], BMP_W(sprite), ooo);
   }
   else if (depth == 2) {
-    for (int yy = 0; yy < sprite->h; yy++)
-      cpackbitl16((unsigned short *)&sprite->line[yy][0], sprite->w, ooo);
+    for (int yy = 0; yy < BMP_H(sprite); yy++)
+      cpackbitl16((unsigned short *)&BMP_LINE(sprite)[yy][0], BMP_W(sprite), ooo);
   }
   else {
-    for (int yy = 0; yy < sprite->h; yy++)
-      cpackbitl32((unsigned long *)&sprite->line[yy][0], sprite->w, ooo);
+    for (int yy = 0; yy < BMP_H(sprite); yy++)
+      cpackbitl32((unsigned long *)&BMP_LINE(sprite)[yy][0], BMP_W(sprite), ooo);
   }
 
 }
@@ -528,8 +528,8 @@ int SpriteCache::saveToFile(const char *filnam, int lastElement, bool compressOu
       // image in memory -- write it out
       pre_save_sprite(i);
       int bpss = bitmap_color_depth(images[i]) / 8;
-      spritewidths[i] = images[i]->w;
-      spriteheights[i] = images[i]->h;
+      spritewidths[i] = BMP_W(images[i]);
+      spriteheights[i] = BMP_H(images[i]);
       putshort(bpss, output);
       putshort(spritewidths[i], output);
       putshort(spriteheights[i], output);
@@ -548,7 +548,7 @@ int SpriteCache::saveToFile(const char *filnam, int lastElement, bool compressOu
         fseek(output, 0, SEEK_END);
       }
       else
-        fwrite(&images[i]->line[0][0], spritewidths[i] * bpss, spriteheights[i], output);
+        fwrite(&BMP_LINE(images[i])[0][0], spritewidths[i] * bpss, spriteheights[i], output);
 
       continue;
     }

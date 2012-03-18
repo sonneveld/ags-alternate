@@ -48,7 +48,7 @@ char dataDirectory[512];
 char appDirectory[512];
 extern "C"
 {
-   int osx_sys_question(AL_CONST char *msg, AL_CONST char *but1, AL_CONST char *but2);
+   //int osx_sys_question(AL_CONST char *msg, AL_CONST char *but1, AL_CONST char *but2);
 }
 #endif
 
@@ -2137,12 +2137,13 @@ void set_game_speed(int fps) {
 
 #ifdef USE_15BIT_FIX
 extern "C" {
-AL_FUNC(GFX_VTABLE *, _get_vtable, (int color_depth));
+    extern GFX_VTABLE *_get_vtable(int color_depth);
 }
 
 block convert_16_to_15(block iii) {
+#ifdef ENABLE_THIS_LATER
 //  int xx,yy,rpix;
-  int iwid = iii->w, ihit = iii->h;
+  int iwid = BMP_W(iii), ihit = BMP_H(iii);
   int x,y;
 
   if (bitmap_color_depth(iii) > 16) {
@@ -2162,12 +2163,12 @@ block convert_16_to_15(block iii) {
 
     tempbl->vtable = vtable;
 
-    for (y=0; y < tempbl->h; y++) {
-      unsigned char*p32 = (unsigned char *)iii->line[y];
-      unsigned char*p24 = (unsigned char *)tempbl->line[y];
+    for (y=0; y < BMP_H(tempbl); y++) {
+      unsigned char*p32 = (unsigned char *)BMP_LINE(iii)[y];
+      unsigned char*p24 = (unsigned char *)BMP_LINE(tempbl)[y];
 
       // strip out the alpha channel bit and copy the rest across
-      for (x=0; x < tempbl->w; x++) {
+      for (x=0; x < BMP_W(tempbl); x++) {
         memcpy(&p24[x * 3], &p32[x * 4], 3);
 		  }
     }
@@ -2190,11 +2191,11 @@ block convert_16_to_15(block iii) {
 
   tempbl->vtable = vtable;
 
-  for (y=0; y < tempbl->h; y++) {
-    unsigned short*p16 = (unsigned short *)iii->line[y];
-    unsigned short*p15 = (unsigned short *)tempbl->line[y];
+  for (y=0; y < BMP_H(tempbl); y++) {
+    unsigned short*p16 = (unsigned short *)BMP_LINE(iii)[y];
+    unsigned short*p15 = (unsigned short *)BMP_LINE(tempbl)[y];
 
-    for (x=0; x < tempbl->w; x++) {
+    for (x=0; x < BMP_W(tempbl); x++) {
 			c = p16[x];
 			b = _rgb_scale_5[c & 0x1F];
 			g = _rgb_scale_6[(c >> 5) & 0x3F];
@@ -2214,6 +2215,10 @@ block convert_16_to_15(block iii) {
   }*/
 
   return tempbl;
+#else
+    abort();
+    return NULL;
+#endif
 }
 
 int _places_r = 3, _places_g = 2, _places_b = 3;
@@ -2224,10 +2229,10 @@ block convert_16_to_16bgr(block tempbl) {
   int x,y;
   unsigned short c,r,g,b;
 
-  for (y=0; y < tempbl->h; y++) {
-    unsigned short*p16 = (unsigned short *)tempbl->line[y];
+  for (y=0; y < BMP_H(tempbl); y++) {
+    unsigned short*p16 = (unsigned short *)BMP_LINE(tempbl)[y];
 
-    for (x=0; x < tempbl->w; x++) {
+    for (x=0; x < BMP_W(tempbl); x++) {
 			c = p16[x];
       if (c != MASK_COLOR_16) {
         b = _rgb_scale_5[c & 0x1F];
@@ -2400,7 +2405,7 @@ void update_invalid_region(int x, int y, block src, block dest) {
   y = -y;
 
   if (numDirtyRegions == WHOLESCREENDIRTY) {
-    blit(src, dest, x, y, 0, 0, dest->w, dest->h);
+    blit(src, dest, x, y, 0, 0, BMP_W(dest), BMP_H(dest));
   }
   else {
     int k, tx1, tx2, srcdepth = bitmap_color_depth(src);
@@ -2411,7 +2416,7 @@ void update_invalid_region(int x, int y, block src, block dest) {
         for (k = 0; k < dirtyRow[i].numSpans; k++) {
           tx1 = dirtyRow[i].span[k].x1;
           tx2 = dirtyRow[i].span[k].x2;
-          memcpyfast(&dest->line[i][tx1 * bypp], &src->line[i + y][(tx1 + x) * bypp], ((tx2 - tx1) + 1) * bypp);
+          memcpyfast(&BMP_LINE(dest)[i][tx1 * bypp], &BMP_LINE(src)[i + y][(tx1 + x) * bypp], ((tx2 - tx1) + 1) * bypp);
         }
       }
     }
@@ -2673,7 +2678,7 @@ void TintScreen(int red, int grn, int blu) {
 
 int get_screen_y_adjustment(BITMAP *checkFor) {
 
-  if ((screen == _sub_screen) && (checkFor->h < final_scrn_hit))
+  if ((screen == _sub_screen) && (BMP_H(checkFor) < final_scrn_hit))
     return get_fixed_pixel_size(20);
 
   return 0;
@@ -2681,8 +2686,8 @@ int get_screen_y_adjustment(BITMAP *checkFor) {
 
 int get_screen_x_adjustment(BITMAP *checkFor) {
 
-  if ((screen == _sub_screen) && (checkFor->w < final_scrn_wid))
-    return (final_scrn_wid - checkFor->w) / 2;
+  if (((screen) == _sub_screen) && (BMP_W(checkFor) < final_scrn_wid))
+    return (final_scrn_wid - BMP_W(checkFor)) / 2;
 
   return 0;
 }
@@ -2749,8 +2754,8 @@ void clear_letterbox_borders() {
 
   if (multiply_up_coordinate(thisroom.height) < final_scrn_hit) {
     // blank out any traces in borders left by a full-screen room
-    gfxDriver->ClearRectangle(0, 0, _old_screen->w - 1, get_fixed_pixel_size(20) - 1, NULL);
-    gfxDriver->ClearRectangle(0, final_scrn_hit - get_fixed_pixel_size(20), _old_screen->w - 1, final_scrn_hit - 1, NULL);
+    gfxDriver->ClearRectangle(0, 0, BMP_W(_old_screen) - 1, get_fixed_pixel_size(20) - 1, NULL);
+    gfxDriver->ClearRectangle(0, final_scrn_hit - get_fixed_pixel_size(20), BMP_W(_old_screen) - 1, final_scrn_hit - 1, NULL);
   }
 
 }
@@ -3499,7 +3504,7 @@ int GetMaxScreenHeight () {
 }
 
 block fix_bitmap_size(block todubl) {
-  int oldw=todubl->w, oldh=todubl->h;
+  int oldw=BMP_W(todubl), oldh=BMP_H(todubl);
   int newWidth = multiply_up_coordinate(thisroom.width);
   int newHeight = multiply_up_coordinate(thisroom.height);
 
@@ -3508,10 +3513,10 @@ block fix_bitmap_size(block todubl) {
 
 //  block tempb=create_bitmap(scrnwid,scrnhit);
   block tempb=create_bitmap_ex(bitmap_color_depth(todubl), newWidth, newHeight);
-  set_clip(tempb,0,0,tempb->w-1,tempb->h-1);
+  set_clip(tempb,0,0,BMP_W(tempb)-1,BMP_H(tempb)-1);
   set_clip(todubl,0,0,oldw-1,oldh-1);
   clear(tempb);
-  stretch_blit(todubl,tempb,0,0,oldw,oldh,0,0,tempb->w,tempb->h);
+  stretch_blit(todubl,tempb,0,0,oldw,oldh,0,0,BMP_W(tempb),BMP_H(tempb));
   destroy_bitmap(todubl); todubl=tempb;
   return todubl;
 }
@@ -3547,8 +3552,8 @@ void current_fade_out_effect () {
   else 
   {
     get_palette(old_palette);
-    temp_virtual = create_bitmap_ex(bitmap_color_depth(abuf),virtual_screen->w,virtual_screen->h);
-    //blit(abuf,temp_virtual,0,0,0,0,abuf->w,abuf->h);
+    temp_virtual = create_bitmap_ex(bitmap_color_depth(abuf),BMP_W(virtual_screen),BMP_H(virtual_screen));
+    //blit(abuf,temp_virtual,0,0,0,0,BMP_W(abuf),BMP_H(abuf));
     gfxDriver->GetCopyOfScreenIntoBitmap(temp_virtual);
   }
 }
@@ -3693,13 +3698,13 @@ void redo_walkable_areas() {
   if ((!is_linear_bitmap(thisroom.walls)) || (bitmap_color_depth(thisroom.walls) != 8))
     quit("Walkable areas bitmap not linear");
 
-  blit(walkareabackup, thisroom.walls, 0, 0, 0, 0, thisroom.walls->w, thisroom.walls->h);
+  blit(walkareabackup, thisroom.walls, 0, 0, 0, 0, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
 
   int hh,ww;
-  for (hh=0;hh<walkareabackup->h;hh++) {
-    for (ww=0;ww<walkareabackup->w;ww++) {
+  for (hh=0;hh<BMP_H(walkareabackup);hh++) {
+    for (ww=0;ww<BMP_W(walkareabackup);ww++) {
 //      if (play.walkable_areas_on[_getpixel(thisroom.walls,ww,hh)]==0)
-      if (play.walkable_areas_on[thisroom.walls->line[hh][ww]]==0)
+      if (play.walkable_areas_on[BMP_LINE(thisroom.walls)[hh][ww]]==0)
         _putpixel(thisroom.walls,ww,hh,0);
     }
   }
@@ -3887,10 +3892,10 @@ void update_walk_behind_images()
       {
         for (yy = startY; yy <= walkBehindBottom[ee]; yy++)
         {
-          if (thisroom.object->line[yy][rr] == ee)
+          if (BMP_LINE(thisroom.object)[yy][rr] == ee)
           {
             for (int ii = 0; ii < bpp; ii++)
-              wbbmp->line[yy - startY][(rr - startX) * bpp + ii] = thisroom.ebscene[play.bg_frame]->line[yy][rr * bpp + ii];
+              BMP_LINE(wbbmp)[yy - startY][(rr - startX) * bpp + ii] = BMP_LINE(thisroom.ebscene[play.bg_frame])[yy][rr * bpp + ii];
           }
         }
       }
@@ -3916,9 +3921,9 @@ void recache_walk_behinds () {
     free (walkBehindEndY);
   }
 
-  walkBehindExists = (char*)malloc (thisroom.object->w);
-  walkBehindStartY = (int*)malloc (thisroom.object->w * sizeof(int));
-  walkBehindEndY = (int*)malloc (thisroom.object->w * sizeof(int));
+  walkBehindExists = (char*)malloc (BMP_W(thisroom.object));
+  walkBehindStartY = (int*)malloc (BMP_W(thisroom.object) * sizeof(int));
+  walkBehindEndY = (int*)malloc (BMP_W(thisroom.object) * sizeof(int));
   noWalkBehindsAtAll = 1;
 
   int ee,rr,tmm;
@@ -3944,10 +3949,10 @@ void recache_walk_behinds () {
   if ((!is_linear_bitmap(thisroom.object)) || (bitmap_color_depth(thisroom.object) != 8))
     quit("Walk behinds bitmap not linear");
 
-  for (ee=0;ee<thisroom.object->w;ee++) {
+  for (ee=0;ee<BMP_W(thisroom.object);ee++) {
     walkBehindExists[ee] = 0;
-    for (rr=0;rr<thisroom.object->h;rr++) {
-      tmm = thisroom.object->line[rr][ee];
+    for (rr=0;rr<BMP_H(thisroom.object);rr++) {
+      tmm = BMP_LINE(thisroom.object)[rr][ee];
       //tmm = _getpixel(thisroom.object,ee,rr);
       if ((tmm >= 1) && (tmm < MAX_OBJ)) {
         if (!walkBehindExists[ee]) {
@@ -4148,15 +4153,15 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       newScreenHeight = get_fixed_pixel_size(200);
     }
 
-    if (newScreenHeight == _sub_screen->h)
+    if (newScreenHeight == BMP_H(_sub_screen))
     {
       screen = _sub_screen;
     }
-    else if (_sub_screen->w != final_scrn_wid)
+    else if (BMP_W(_sub_screen) != final_scrn_wid)
     {
-      int subBitmapWidth = _sub_screen->w;
+      int subBitmapWidth = BMP_W(_sub_screen);
       destroy_bitmap(_sub_screen);
-      _sub_screen = create_sub_bitmap(_old_screen, _old_screen->w / 2 - subBitmapWidth / 2, _old_screen->h / 2 - newScreenHeight / 2, subBitmapWidth, newScreenHeight);
+      _sub_screen = create_sub_bitmap(_old_screen, BMP_W(_old_screen) / 2 - subBitmapWidth / 2, BMP_H(_old_screen) / 2 - newScreenHeight / 2, subBitmapWidth, newScreenHeight);
       screen = _sub_screen;
     }
     else
@@ -4164,14 +4169,14 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       screen = _old_screen;
     }
 
-    scrnhit = screen->h;
+    scrnhit = BMP_H(screen);
     vesa_yres = scrnhit;
 
 #if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
     filter->SetMouseArea(0,0, scrnwid-1, vesa_yres-1);
 #endif
 
-    if (virtual_screen->h != scrnhit) {
+    if (BMP_H(virtual_screen) != scrnhit) {
       int cdepth=bitmap_color_depth(virtual_screen);
       wfreeblock(virtual_screen);
       virtual_screen=create_bitmap_ex(cdepth,scrnwid,scrnhit);
@@ -4199,16 +4204,16 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   // copy of the walkable areas - allocate it here to save time later
   if (walkable_areas_temp != NULL)
     wfreeblock (walkable_areas_temp);
-  walkable_areas_temp = create_bitmap_ex (8, thisroom.walls->w, thisroom.walls->h);
+  walkable_areas_temp = create_bitmap_ex (8, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
 
   // Make a backup copy of the walkable areas prior to
   // any RemoveWalkableArea commands
   if (walkareabackup!=NULL) wfreeblock(walkareabackup);
-  walkareabackup=create_bitmap(thisroom.walls->w,thisroom.walls->h);
+  walkareabackup=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
 
   our_eip=204;
   // copy the walls screen
-  blit(thisroom.walls,walkareabackup,0,0,0,0,thisroom.walls->w,thisroom.walls->h);
+  blit(thisroom.walls,walkareabackup,0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
   update_polled_stuff();
   redo_walkable_areas();
   // fix walk-behinds to current screen resolution
@@ -4222,12 +4227,12 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       thisroom.ebscene[cc] = fix_bitmap_size(thisroom.ebscene[cc]);
   }
 
-  if ((thisroom.ebscene[0]->w < scrnwid) ||
-      (thisroom.ebscene[0]->h < scrnhit))
+  if ((BMP_W(thisroom.ebscene[0]) < scrnwid) ||
+      (BMP_H(thisroom.ebscene[0]) < scrnhit))
   {
     quitprintf("!The background scene for this room is smaller than the game resolution. If you have recently changed " 
                "the game resolution, you will need to re-import the background for this room. (Room: %d, BG Size: %d x %d)",
-               newnum, thisroom.ebscene[0]->w, thisroom.ebscene[0]->h);
+               newnum, BMP_W(thisroom.ebscene[0]), BMP_H(thisroom.ebscene[0]));
   }
 
   recache_walk_behinds();
@@ -4685,17 +4690,17 @@ IDriverDependantBitmap* prepare_screen_for_transition_in()
     quit("Crossfade: buffer is null attempting transition");
 
   temp_virtual = gfxDriver->ConvertBitmapToSupportedColourDepth(temp_virtual);
-  if (temp_virtual->h < scrnhit)
+  if (BMP_H(temp_virtual) < scrnhit)
   {
-    block enlargedBuffer = create_bitmap_ex(bitmap_color_depth(temp_virtual), temp_virtual->w, scrnhit);
-    blit(temp_virtual, enlargedBuffer, 0, 0, 0, (scrnhit - temp_virtual->h) / 2, temp_virtual->w, temp_virtual->h);
+    block enlargedBuffer = create_bitmap_ex(bitmap_color_depth(temp_virtual), BMP_W(temp_virtual), scrnhit);
+    blit(temp_virtual, enlargedBuffer, 0, 0, 0, (scrnhit - BMP_H(temp_virtual)) / 2, BMP_W(temp_virtual), BMP_H(temp_virtual));
     destroy_bitmap(temp_virtual);
     temp_virtual = enlargedBuffer;
   }
-  else if (temp_virtual->h > scrnhit)
+  else if (BMP_H(temp_virtual) > scrnhit)
   {
-    block clippedBuffer = create_bitmap_ex(bitmap_color_depth(temp_virtual), temp_virtual->w, scrnhit);
-    blit(temp_virtual, clippedBuffer, 0, (temp_virtual->h - scrnhit) / 2, 0, 0, temp_virtual->w, temp_virtual->h);
+    block clippedBuffer = create_bitmap_ex(bitmap_color_depth(temp_virtual), BMP_W(temp_virtual), scrnhit);
+    blit(temp_virtual, clippedBuffer, 0, (BMP_H(temp_virtual) - scrnhit) / 2, 0, 0, BMP_W(temp_virtual), BMP_H(temp_virtual));
     destroy_bitmap(temp_virtual);
     temp_virtual = clippedBuffer;
   }
@@ -4832,7 +4837,7 @@ void process_event(EventHappened*evp) {
 
         int boxwid = get_fixed_pixel_size(16);
         int boxhit = multiply_up_coordinate(GetMaxScreenHeight() / 20);
-        while (boxwid < screen->w) {
+        while (boxwid < BMP_W(screen)) {
           timerloop = 0;
           boxwid += get_fixed_pixel_size(16);
           boxhit += multiply_up_coordinate(GetMaxScreenHeight() / 20);
@@ -4868,7 +4873,7 @@ void process_event(EventHappened*evp) {
         {
           // on last frame of fade (where transparency < 16), don't
           // draw the old screen on top
-          gfxDriver->DrawSprite(0, -(temp_virtual->h - virtual_screen->h), ddb);
+          gfxDriver->DrawSprite(0, -(BMP_H(temp_virtual) - BMP_H(virtual_screen)), ddb);
         }
         render_to_screen(screen, 0, 0);
         update_polled_stuff();
@@ -4907,7 +4912,7 @@ void process_event(EventHappened*evp) {
         gfxDriver->UpdateDDBFromBitmap(ddb, temp_virtual, false);
         invalidate_screen();
         draw_screen_callback();
-        gfxDriver->DrawSprite(0, -(temp_virtual->h - virtual_screen->h), ddb);
+        gfxDriver->DrawSprite(0, -(BMP_H(temp_virtual) - BMP_H(virtual_screen)), ddb);
         render_to_screen(screen, 0, 0);
         update_polled_stuff();
         while (timerloop == 0) ;
@@ -5066,8 +5071,8 @@ void set_mouse_cursor(int newcurs) {
       ((game.hotdot > 0) || (game.invhotdotsprite > 0)) ) {
     // If necessary, create a copy of the cursor and put the hotspot
     // dot onto it
-    dotted_mouse_cursor = create_bitmap_ex (bitmap_color_depth(mousecurs[0]), mousecurs[0]->w,mousecurs[0]->h);
-    blit (mousecurs[0], dotted_mouse_cursor, 0, 0, 0, 0, mousecurs[0]->w, mousecurs[0]->h);
+    dotted_mouse_cursor = create_bitmap_ex (bitmap_color_depth(mousecurs[0]), BMP_W(mousecurs[0]),BMP_H(mousecurs[0]));
+    blit (mousecurs[0], dotted_mouse_cursor, 0, 0, 0, 0, BMP_W(mousecurs[0]), BMP_H(mousecurs[0]));
 
     if (game.invhotdotsprite > 0) {
       block abufWas = abuf;
@@ -6251,8 +6256,8 @@ void get_char_blocking_rect(int charid, int *x1, int *y1, int *width, int *y2) {
     cwidth += fromx;
     fromx = 0;
   }
-  if (fromx + cwidth >= convert_back_to_high_res(walkable_areas_temp->w))
-    cwidth = convert_back_to_high_res(walkable_areas_temp->w) - fromx;
+  if (fromx + cwidth >= convert_back_to_high_res(BMP_W(walkable_areas_temp)))
+    cwidth = convert_back_to_high_res(BMP_W(walkable_areas_temp)) - fromx;
 
   if (x1)
     *x1 = fromx;
@@ -6304,8 +6309,8 @@ void get_object_blocking_rect(int objid, int *x1, int *y1, int *width, int *y2) 
     cwidth += fromx;
     fromx = 0;
   }
-  if (fromx + cwidth >= convert_back_to_high_res(walkable_areas_temp->w))
-    cwidth = convert_back_to_high_res(walkable_areas_temp->w) - fromx;
+  if (fromx + cwidth >= convert_back_to_high_res(BMP_W(walkable_areas_temp)))
+    cwidth = convert_back_to_high_res(BMP_W(walkable_areas_temp)) - fromx;
 
   if (x1)
     *x1 = fromx;
@@ -7059,7 +7064,7 @@ void update_stuff() {
       
       if (game.options[OPT_SPEECHTYPE] == 3) {
         // QFG4-style fullscreen dialog
-        yPos = (screenover[face_talking].pic->h / 2) - (spriteheight[thisPic] / 2);
+        yPos = (BMP_H(screenover[face_talking].pic) / 2) - (spriteheight[thisPic] / 2);
         clear_to_color(screenover[face_talking].pic, 0);
       }
       else {
@@ -7232,7 +7237,7 @@ IDriverDependantBitmap* recycle_ddb_bitmap(IDriverDependantBitmap *bimp, BITMAP 
   if (bimp != NULL) {
     // same colour depth, width and height -> reuse
     if (((bimp->GetColorDepth() + 1) / 8 == bmp_bpp(source)) && 
-        (bimp->GetWidth() == source->w) && (bimp->GetHeight() == source->h))
+        (bimp->GetWidth() == BMP_W(source)) && (bimp->GetHeight() == BMP_H(source)))
     {
       gfxDriver->UpdateDDBFromBitmap(bimp, source, hasAlpha);
       return bimp;
@@ -7259,7 +7264,7 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
   // precalculate this to try and shave some time off
   int maskcol = bitmap_mask_color(sprit);
   int spcoldep = bitmap_color_depth(sprit);
-  int screenhit = thisroom.object->h;
+  int screenhit = BMP_H(thisroom.object);
   short *shptr, *shptr2;
   long *loptr, *loptr2;
   int pixelsChanged = 0;
@@ -7270,16 +7275,16 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
   if ((checkPixelsFrom != NULL) && (bitmap_color_depth(checkPixelsFrom) != spcoldep))
     quit("sprite colour depth does not match background colour depth");
 
-  for ( ; ee < sprit->w; ee++) {
-    if (ee + xx >= thisroom.object->w)
+  for ( ; ee < BMP_W(sprit); ee++) {
+    if (ee + xx >= BMP_W(thisroom.object))
       break;
 
     if ((!walkBehindExists[ee+xx]) ||
         (walkBehindEndY[ee+xx] <= yy) ||
-        (walkBehindStartY[ee+xx] > yy+sprit->h))
+        (walkBehindStartY[ee+xx] > yy+BMP_H(sprit)))
       continue;
 
-    toheight = sprit->h;
+    toheight = BMP_H(sprit);
 
     if (walkBehindStartY[ee+xx] < yy)
       rr = 0;
@@ -7302,7 +7307,7 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
       //tmm = _getpixel(thisroom.object,ee+xx,rr+yy);
       // actually, _getpixel is well inefficient, do it ourselves
       // since we know it's 8-bit bitmap
-      tmm = thisroom.object->line[rr+yy][ee+xx];
+      tmm = BMP_LINE(thisroom.object)[rr+yy][ee+xx];
       if (tmm<1) continue;
       if (croom->walkbehind_base[tmm] <= basel) continue;
 
@@ -7310,32 +7315,32 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
       {
         if (spcoldep <= 8)
         {
-          if (checkPixelsFrom->line[(rr * 100) / zoom][(ee * 100) / zoom] != maskcol) {
-            sprit->line[rr][ee] = copyPixelsFrom->line[rr + yy][ee + xx];
+          if (BMP_LINE(checkPixelsFrom)[(rr * 100) / zoom][(ee * 100) / zoom] != maskcol) {
+            BMP_LINE(sprit)[rr][ee] = BMP_LINE(copyPixelsFrom)[rr + yy][ee + xx];
             pixelsChanged = 1;
           }
         }
         else if (spcoldep <= 16) {
-          shptr = (short*)&sprit->line[rr][0];
-          shptr2 = (short*)&checkPixelsFrom->line[(rr * 100) / zoom][0];
+          shptr = (short*)&BMP_LINE(sprit)[rr][0];
+          shptr2 = (short*)&BMP_LINE(checkPixelsFrom)[(rr * 100) / zoom][0];
           if (shptr2[(ee * 100) / zoom] != maskcol) {
-            shptr[ee] = ((short*)(&copyPixelsFrom->line[rr + yy][0]))[ee + xx];
+            shptr[ee] = ((short*)(&BMP_LINE(copyPixelsFrom)[rr + yy][0]))[ee + xx];
             pixelsChanged = 1;
           }
         }
         else if (spcoldep == 24) {
-          char *chptr = (char*)&sprit->line[rr][0];
-          char *chptr2 = (char*)&checkPixelsFrom->line[(rr * 100) / zoom][0];
+          char *chptr = (char*)&BMP_LINE(sprit)[rr][0];
+          char *chptr2 = (char*)&BMP_LINE(checkPixelsFrom)[(rr * 100) / zoom][0];
           if (memcmp(&chptr2[((ee * 100) / zoom) * 3], &maskcol, 3) != 0) {
-            memcpy(&chptr[ee * 3], &copyPixelsFrom->line[rr + yy][(ee + xx) * 3], 3);
+            memcpy(&chptr[ee * 3], &BMP_LINE(copyPixelsFrom)[rr + yy][(ee + xx) * 3], 3);
             pixelsChanged = 1;
           }
         }
         else if (spcoldep <= 32) {
-          loptr = (long*)&sprit->line[rr][0];
-          loptr2 = (long*)&checkPixelsFrom->line[(rr * 100) / zoom][0];
+          loptr = (long*)&BMP_LINE(sprit)[rr][0];
+          loptr2 = (long*)&BMP_LINE(checkPixelsFrom)[(rr * 100) / zoom][0];
           if (loptr2[(ee * 100) / zoom] != maskcol) {
-            loptr[ee] = ((long*)(&copyPixelsFrom->line[rr + yy][0]))[ee + xx];
+            loptr[ee] = ((long*)(&BMP_LINE(copyPixelsFrom)[rr + yy][0]))[ee + xx];
             pixelsChanged = 1;
           }
         }
@@ -7344,17 +7349,17 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
       {
         pixelsChanged = 1;
         if (spcoldep <= 8)
-          sprit->line[rr][ee] = maskcol;
+          BMP_LINE(sprit)[rr][ee] = maskcol;
         else if (spcoldep <= 16) {
-          shptr = (short*)&sprit->line[rr][0];
+          shptr = (short*)&BMP_LINE(sprit)[rr][0];
           shptr[ee] = maskcol;
         }
         else if (spcoldep == 24) {
-          char *chptr = (char*)&sprit->line[rr][0];
+          char *chptr = (char*)&BMP_LINE(sprit)[rr][0];
           memcpy(&chptr[ee * 3], &maskcol, 3);
         }
         else if (spcoldep <= 32) {
-          loptr = (long*)&sprit->line[rr][0];
+          loptr = (long*)&BMP_LINE(sprit)[rr][0];
           loptr[ee] = maskcol;
         }
         else
@@ -7476,14 +7481,14 @@ void put_sprite_256(int xxx,int yyy,block piccy) {
     }
     // 256-col spirte -> hi-color background, or
     // 16-bit sprite -> 32-bit background
-    block hctemp=create_bitmap_ex(screen_depth, piccy->w, piccy->h);
-    blit(piccy,hctemp,0,0,0,0,hctemp->w,hctemp->h);
+    block hctemp=create_bitmap_ex(screen_depth, BMP_W(piccy), BMP_H(piccy));
+    blit(piccy,hctemp,0,0,0,0,BMP_W(hctemp),BMP_H(hctemp));
     int bb,cc,mask_col = bitmap_mask_color(abuf);
     if (bitmap_color_depth(piccy) == 8) {
       // only do this for 256-col, cos the blit call converts
       // transparency for 16->32 bit
-      for (bb=0;bb<hctemp->w;bb++) {
-        for (cc=0;cc<hctemp->h;cc++)
+      for (bb=0;bb<BMP_W(hctemp);bb++) {
+        for (cc=0;cc<BMP_H(hctemp);cc++)
           if (_getpixel(piccy,bb,cc)==0) putpixel(hctemp,bb,cc,mask_col);
       }
     }
@@ -7510,12 +7515,12 @@ void repair_alpha_channel(block dest, block bgpic)
 {
   // Repair the alpha channel, because sprites may have been drawn
   // over it by the buttons, etc
-  int theWid = (dest->w < bgpic->w) ? dest->w : bgpic->w;
-  int theHit = (dest->h < bgpic->h) ? dest->h : bgpic->h;
+  int theWid = (BMP_W(dest) < BMP_W(bgpic)) ? BMP_W(dest) : BMP_W(bgpic);
+  int theHit = (BMP_H(dest) < BMP_H(bgpic)) ? BMP_H(dest) : BMP_H(bgpic);
   for (int y = 0; y < theHit; y++) 
   {
-    unsigned long *destination = ((unsigned long*)dest->line[y]);
-    unsigned long *source = ((unsigned long*)bgpic->line[y]);
+    unsigned long *destination = ((unsigned long*)BMP_LINE(dest)[y]);
+    unsigned long *source = ((unsigned long*)BMP_LINE(bgpic)[y]);
     for (int x = 0; x < theWid; x++) 
     {
       destination[x] |= (source[x] & 0xff000000);
@@ -7592,8 +7597,8 @@ void draw_sprite_list() {
 block recycle_bitmap(block bimp, int coldep, int wid, int hit) {
   if (bimp != NULL) {
     // same colour depth, width and height -> reuse
-    if ((bitmap_color_depth(bimp) == coldep) && (bimp->w == wid)
-       && (bimp->h == hit))
+    if ((bitmap_color_depth(bimp) == coldep) && (BMP_W(bimp) == wid)
+       && (BMP_H(bimp) == hit))
       return bimp;
 
     destroy_bitmap(bimp);
@@ -7609,10 +7614,10 @@ int GetRegionAt (int xxx, int yyy) {
   xxx = convert_to_low_res(xxx);
   yyy = convert_to_low_res(yyy);
 
-  if (xxx >= thisroom.regions->w)
-	  xxx = thisroom.regions->w - 1;
-  if (yyy >= thisroom.regions->h)
-	  yyy = thisroom.regions->h - 1;
+  if (xxx >= BMP_W(thisroom.regions))
+	  xxx = BMP_W(thisroom.regions) - 1;
+  if (yyy >= BMP_H(thisroom.regions))
+	  yyy = BMP_H(thisroom.regions) - 1;
   if (xxx < 0)
 	  xxx = 0;
   if (yyy < 0)
@@ -7746,7 +7751,7 @@ void apply_tint_or_light(int actspsindex, int light_level,
     // otherwise, make a new target bmp
     else {
       oldwas = actsps[actspsindex];
-      actsps[actspsindex] = create_bitmap_ex(coldept, oldwas->w, oldwas->h);
+      actsps[actspsindex] = create_bitmap_ex(coldept, BMP_W(oldwas), BMP_H(oldwas));
     }
 
     if (tint_amount) {
@@ -7784,7 +7789,7 @@ void apply_tint_or_light(int actspsindex, int light_level,
   else if (blitFrom) {
     // sprite colour depth != game colour depth, so don't try and tint
     // but we do need to do something, so copy the source
-    blit(blitFrom, actsps[actspsindex], 0, 0, 0, 0, actsps[actspsindex]->w, actsps[actspsindex]->h);
+    blit(blitFrom, actsps[actspsindex], 0, 0, 0, 0, BMP_W(actsps[actspsindex]), BMP_H(actsps[actspsindex]));
   }
 
 }
@@ -7863,7 +7868,7 @@ int scale_and_flip_sprite(int useindx, int coldept, int zoom_level,
       draw_sprite_h_flip (actsps[useindx], spriteset[sppic], 0, 0);
     else
       actsps_used = 0;
-      //blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, actsps[useindx]->w, actsps[useindx]->h);
+      //blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
   }
 
   return actsps_used;
@@ -8039,7 +8044,7 @@ int construct_object_gfx(int aa, int *drawnWidth, int *drawnHeight, bool alwaysU
         (walk_behind_baselines_changed == 0))
       return 1;
     actsps[useindx] = recycle_bitmap(actsps[useindx], coldept, sprwidth, sprheight);
-    blit(objcache[aa].image, actsps[useindx], 0, 0, 0, 0, objcache[aa].image->w, objcache[aa].image->h);
+    blit(objcache[aa].image, actsps[useindx], 0, 0, 0, 0, BMP_W(objcache[aa].image), BMP_H(objcache[aa].image));
     return 0;
   }
 
@@ -8213,7 +8218,7 @@ void tint_image (block srcimg, block destimg, int red, int grn, int blu, int lig
       (bitmap_color_depth(srcimg) <= 8)) {
     debug_log("Image tint failed - images must both be hi-color");
     // the caller expects something to have been copied
-    blit(srcimg, destimg, 0, 0, 0, 0, srcimg->w, srcimg->h);
+    blit(srcimg, destimg, 0, 0, 0, 0, BMP_W(srcimg), BMP_H(srcimg));
     return;
   }
 
@@ -8236,10 +8241,10 @@ void tint_image (block srcimg, block destimg, int red, int grn, int blu, int lig
     light_level = (light_level * 25) / 10;
 
     // Copy the image to the new bitmap
-    blit(srcimg, destimg, 0, 0, 0, 0, srcimg->w, srcimg->h);
+    blit(srcimg, destimg, 0, 0, 0, 0, BMP_W(srcimg), BMP_H(srcimg));
     // Render the colourised image to a temporary bitmap,
     // then transparently draw it over the original image
-    block finaltarget = create_bitmap_ex(bitmap_color_depth(srcimg), srcimg->w, srcimg->h);
+    block finaltarget = create_bitmap_ex(bitmap_color_depth(srcimg), BMP_W(srcimg), BMP_H(srcimg));
     clear_to_color(finaltarget, bitmap_mask_color(finaltarget));
     draw_lit_sprite(finaltarget, srcimg, 0, 0, luminance);
 
@@ -8351,8 +8356,8 @@ void prepare_characters_for_drawing() {
     {
       if (walkBehindMethod == DrawOverCharSprite)
       {
-        actsps[useindx] = recycle_bitmap(actsps[useindx], bitmap_color_depth(charcache[aa].image), charcache[aa].image->w, charcache[aa].image->h);
-        blit (charcache[aa].image, actsps[useindx], 0, 0, 0, 0, actsps[useindx]->w, actsps[useindx]->h);
+        actsps[useindx] = recycle_bitmap(actsps[useindx], bitmap_color_depth(charcache[aa].image), BMP_W(charcache[aa].image), BMP_H(charcache[aa].image));
+        blit (charcache[aa].image, actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
       }
       else 
       {
@@ -8436,13 +8441,13 @@ void prepare_characters_for_drawing() {
       }
       else if (!actspsUsed)
         // no scaling, flipping or tinting was done, so just blit it normally
-        blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, actsps[useindx]->w, actsps[useindx]->h);
+        blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
 
       // update the character cache with the new image
       charcache[aa].inUse = 1;
-      //charcache[aa].image = create_bitmap_ex (coldept, actsps[useindx]->w, actsps[useindx]->h);
-      charcache[aa].image = recycle_bitmap(charcache[aa].image, coldept, actsps[useindx]->w, actsps[useindx]->h);
-      blit (actsps[useindx], charcache[aa].image, 0, 0, 0, 0, actsps[useindx]->w, actsps[useindx]->h);
+      //charcache[aa].image = create_bitmap_ex (coldept, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
+      charcache[aa].image = recycle_bitmap(charcache[aa].image, coldept, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
+      blit (actsps[useindx], charcache[aa].image, 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
 
     } // end if !cache.inUse
 
@@ -8643,16 +8648,16 @@ void get_overlay_position(int overlayidx, int *x, int *y) {
     else
       tdyp -= charextra[charid].height;
 
-    tdyp -= screenover[overlayidx].pic->h;
+    tdyp -= BMP_H(screenover[overlayidx].pic);
     if (tdyp < 5) tdyp=5;
-    tdxp = (multiply_up_coordinate(game.chars[charid].x) - screenover[overlayidx].pic->w/2) - offsetx;
+    tdxp = (multiply_up_coordinate(game.chars[charid].x) - BMP_W(screenover[overlayidx].pic)/2) - offsetx;
     if (tdxp < 0) tdxp=0;
 
-    if ((tdxp + screenover[overlayidx].pic->w) >= scrnwid)
-      tdxp = (scrnwid - screenover[overlayidx].pic->w) - 1;
+    if ((tdxp + BMP_W(screenover[overlayidx].pic)) >= scrnwid)
+      tdxp = (scrnwid - BMP_W(screenover[overlayidx].pic)) - 1;
     if (game.chars[charid].room != displayed_room) {
-      tdxp = scrnwid/2 - screenover[overlayidx].pic->w/2;
-      tdyp = scrnhit/2 - screenover[overlayidx].pic->h/2;
+      tdxp = scrnwid/2 - BMP_W(screenover[overlayidx].pic)/2;
+      tdyp = scrnhit/2 - BMP_H(screenover[overlayidx].pic)/2;
     }
   }
   else {
@@ -8693,7 +8698,7 @@ void draw_fps()
   else
     gfxDriver->UpdateDDBFromBitmap(ddb, fpsDisplay, false);
 
-  int yp = scrnhit - fpsDisplay->h;
+  int yp = scrnhit - BMP_H(fpsDisplay);
 
   gfxDriver->DrawSprite(1, yp, ddb);
   invalidate_sprite(1, yp, ddb);
@@ -9929,8 +9934,8 @@ ScriptDrawingSurface* DrawingSurface_CreateCopy(ScriptDrawingSurface *sds)
   {
     if (dynamicallyCreatedSurfaces[i] == NULL)
     {
-      dynamicallyCreatedSurfaces[i] = create_bitmap_ex(bitmap_color_depth(sourceBitmap), sourceBitmap->w, sourceBitmap->h);
-      blit(sourceBitmap, dynamicallyCreatedSurfaces[i], 0, 0, 0, 0, sourceBitmap->w, sourceBitmap->h);
+      dynamicallyCreatedSurfaces[i] = create_bitmap_ex(bitmap_color_depth(sourceBitmap), BMP_W(sourceBitmap), BMP_H(sourceBitmap));
+      blit(sourceBitmap, dynamicallyCreatedSurfaces[i], 0, 0, 0, 0, BMP_W(sourceBitmap), BMP_H(sourceBitmap));
       ScriptDrawingSurface *newSurface = new ScriptDrawingSurface();
       newSurface->dynamicSurfaceNumber = i;
       newSurface->hasAlphaChannel = sds->hasAlphaChannel;
@@ -9955,7 +9960,7 @@ void DrawingSurface_DrawSurface(ScriptDrawingSurface* target, ScriptDrawingSurfa
 
   if (translev == 0) {
     // just draw it over the top, no transparency
-    blit(surfaceToDraw, abuf, 0, 0, 0, 0, surfaceToDraw->w, surfaceToDraw->h);
+    blit(surfaceToDraw, abuf, 0, 0, 0, 0, BMP_W(surfaceToDraw), BMP_H(surfaceToDraw));
     target->FinishedDrawing();
     return;
   }
@@ -10076,7 +10081,7 @@ int DrawingSurface_GetUseHighResCoordinates(ScriptDrawingSurface *sds)
 int DrawingSurface_GetHeight(ScriptDrawingSurface *sds) 
 {
   sds->StartDrawing();
-  int height = abuf->h;
+  int height = BMP_H(abuf);
   sds->FinishedDrawingReadOnly();
   sds->UnMultiplyThickness(&height);
   return height;
@@ -10085,7 +10090,7 @@ int DrawingSurface_GetHeight(ScriptDrawingSurface *sds)
 int DrawingSurface_GetWidth(ScriptDrawingSurface *sds) 
 {
   sds->StartDrawing();
-  int width = abuf->w;
+  int width = BMP_W(abuf);
   sds->FinishedDrawingReadOnly();
   sds->UnMultiplyThickness(&width);
   return width;
@@ -10930,11 +10935,11 @@ void DynamicSprite_CopyTransparencyMask(ScriptDynamicSprite *sds, int sourceSpri
 
   unsigned short *shortPtr;
   unsigned long *longPtr;
-  for (int y = 0; y < target->h; y++)
+  for (int y = 0; y < BMP_H(target); y++)
   {
-    unsigned char * sourcePixel = source->line[y];
-    unsigned char * targetPixel = target->line[y];
-    for (int x = 0; x < target->w; x++)
+    unsigned char * sourcePixel = BMP_LINE(source)[y];
+    unsigned char * targetPixel = BMP_LINE(target)[y];
+    for (int x = 0; x < BMP_W(target); x++)
     {
       shortPtr = (unsigned short*)sourcePixel;
       longPtr = (unsigned long*)sourcePixel;
@@ -11007,7 +11012,7 @@ void DynamicSprite_Crop(ScriptDynamicSprite *sds, int x1, int y1, int width, int
 
   block newPic = create_bitmap_ex(bitmap_color_depth(spriteset[sds->slot]), width, height);
   // blit it cropped
-  blit(spriteset[sds->slot], newPic, x1, y1, 0, 0, newPic->w, newPic->h);
+  blit(spriteset[sds->slot], newPic, x1, y1, 0, 0, BMP_W(newPic), BMP_H(newPic));
 
   wfreeblock(spriteset[sds->slot]);
 
@@ -11061,7 +11066,7 @@ void DynamicSprite_Rotate(ScriptDynamicSprite *sds, int angle, int width, int he
 void DynamicSprite_Tint(ScriptDynamicSprite *sds, int red, int green, int blue, int saturation, int luminance) 
 {
   block source = spriteset[sds->slot];
-  block newPic = create_bitmap_ex(bitmap_color_depth(source), source->w, source->h);
+  block newPic = create_bitmap_ex(bitmap_color_depth(source), BMP_W(source), BMP_H(source));
 
   tint_image(source, newPic, red, green, blue, saturation, (luminance * 25) / 10);
 
@@ -11109,12 +11114,12 @@ ScriptDynamicSprite* DynamicSprite_CreateFromScreenShot(int width, int height) {
     return NULL;
 
   if (width <= 0)
-    width = virtual_screen->w;
+    width = BMP_W(virtual_screen);
   else
     width = multiply_up_coordinate(width);
 
   if (height <= 0)
-    height = virtual_screen->h;
+    height = BMP_H(virtual_screen);
   else
     height = multiply_up_coordinate(height);
 
@@ -11131,7 +11136,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromScreenShot(int width, int height) {
     {
       newPic = create_bitmap_ex(final_col_dep, width, height);
       stretch_blit(scrndump, newPic,
-                   0, 0, scrndump->w, scrndump->h,
+                   0, 0, BMP_W(scrndump), BMP_H(scrndump),
                    0, 0, width, height);
       destroy_bitmap(scrndump);
     }
@@ -11146,7 +11151,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromScreenShot(int width, int height) {
     newPic = create_bitmap_ex(bitmap_color_depth(virtual_screen), width, height);
 
     stretch_blit(virtual_screen, newPic,
-               0, 0, virtual_screen->w, virtual_screen->h,
+               0, 0, BMP_W(virtual_screen), BMP_H(virtual_screen),
                0, 0, width, height);
   }
 
@@ -11190,7 +11195,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromDrawingSurface(ScriptDrawingSurface
 
   sds->StartDrawing();
 
-  if ((x < 0) || (y < 0) || (x + width > abuf->w) || (y + height > abuf->h))
+  if ((x < 0) || (y < 0) || (x + width > BMP_W(abuf)) || (y + height > BMP_H(abuf)))
     quit("!DynamicSprite.CreateFromDrawingSurface: requested area is outside the surface");
 
   int colDepth = bitmap_color_depth(abuf);
@@ -12450,7 +12455,7 @@ void draw_button_background(int xx1,int yy1,int xx2,int yy2,GUIMain*iep) {
         bgoffsx += spritewidth[iep->bgpic];
       }
       // return to normal clipping rectangle
-      set_clip(abuf, 0, 0, abuf->w - 1, abuf->h - 1);
+      set_clip(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1);
     }
     int uu;
     for (uu=yy1;uu <= yy2;uu+=spriteheight[get_but_pic(iep,4)]) {
@@ -12523,7 +12528,7 @@ void draw_text_window(int*xins,int*yins,int*xx,int*yy,int*wii,int ovrheight=0, i
   if (ifnum <= 0) {
     if (ovrheight)
       quit("!Cannot use QFG4 style options without custom text window");
-    draw_button_background(0,0,abuf->w - 1,abuf->h - 1,NULL);
+    draw_button_background(0,0,BMP_W(abuf) - 1,BMP_H(abuf) - 1,NULL);
     wtextcolor(16);
     xins[0]=3;
     yins[0]=3;
@@ -12548,7 +12553,7 @@ void draw_text_window(int*xins,int*yins,int*xx,int*yy,int*wii,int ovrheight=0, i
     clear_to_color(screenop, bitmap_mask_color(screenop));
     wsetscreen(screenop);
     int xoffs=spritewidth[tbnum],yoffs=spriteheight[tbnum];
-    draw_button_background(xoffs,yoffs,(abuf->w - xoffs) - 1,(abuf->h - yoffs) - 1,&guis[ifnum]);
+    draw_button_background(xoffs,yoffs,(BMP_W(abuf) - xoffs) - 1,(BMP_H(abuf) - yoffs) - 1,&guis[ifnum]);
     wtextcolor(guis[ifnum].fgcol);
     xins[0]=xoffs+3;
     yins[0]=yoffs+3;
@@ -12563,23 +12568,23 @@ void draw_text_window_and_bar(int*xins,int*yins,int*xx,int*yy,int*wii,int ovrhei
   if ((topBar.wantIt) && (screenop != NULL)) {
     // top bar on the dialog window with character's name
     // create an enlarged window, then free the old one
-    block newScreenop = create_bitmap_ex(final_col_dep, screenop->w, screenop->h + topBar.height);
-    blit(screenop, newScreenop, 0, 0, 0, topBar.height, screenop->w, screenop->h);
+    block newScreenop = create_bitmap_ex(final_col_dep, BMP_W(screenop), BMP_H(screenop) + topBar.height);
+    blit(screenop, newScreenop, 0, 0, 0, topBar.height, BMP_W(screenop), BMP_H(screenop));
     wfreeblock(screenop);
     screenop = newScreenop;
     wsetscreen(screenop);
 
     // draw the top bar
-    rectfill(screenop, 0, 0, screenop->w - 1, topBar.height - 1, get_col8_lookup(play.top_bar_backcolor));
+    rectfill(screenop, 0, 0, BMP_W(screenop) - 1, topBar.height - 1, get_col8_lookup(play.top_bar_backcolor));
     if (play.top_bar_backcolor != play.top_bar_bordercolor) {
       // draw the border
       for (int j = 0; j < multiply_up_coordinate(play.top_bar_borderwidth); j++)
-        rect(screenop, j, j, screenop->w - (j + 1), topBar.height - (j + 1), get_col8_lookup(play.top_bar_bordercolor));
+        rect(screenop, j, j, BMP_W(screenop) - (j + 1), topBar.height - (j + 1), get_col8_lookup(play.top_bar_bordercolor));
     }
     
     int textcolwas = textcol;
     // draw the text
-    int textx = (screenop->w / 2) - wgettextwidth_compensate(topBar.text, topBar.font) / 2;
+    int textx = (BMP_W(screenop) / 2) - wgettextwidth_compensate(topBar.text, topBar.font) / 2;
     wtextcolor(play.top_bar_textcolor);
     wouttext_outline(textx, play.top_bar_borderwidth + get_fixed_pixel_size(1), topBar.font, topBar.text);
     // restore the current text colour
@@ -14345,8 +14350,8 @@ void RawSaveScreen () {
   if (raw_saved_screen != NULL)
     wfreeblock(raw_saved_screen);
   block source = thisroom.ebscene[play.bg_frame];
-  raw_saved_screen = wallocblock(source->w, source->h);
-  blit(source, raw_saved_screen, 0, 0, 0, 0, source->w, source->h);
+  raw_saved_screen = wallocblock(BMP_W(source), BMP_H(source));
+  blit(source, raw_saved_screen, 0, 0, 0, 0, BMP_W(source), BMP_H(source));
 }
 // RawRestoreScreen: copy backup bitmap back to screen; we
 // deliberately don't free the block cos they can multiple restore
@@ -14357,7 +14362,7 @@ void RawRestoreScreen() {
     return;
   }
   block deston = thisroom.ebscene[play.bg_frame];
-  blit(raw_saved_screen, deston, 0, 0, 0, 0, deston->w, deston->h);
+  blit(raw_saved_screen, deston, 0, 0, 0, 0, BMP_W(deston), BMP_H(deston));
   invalidate_screen();
   mark_current_background_dirty();
 }
@@ -14393,7 +14398,7 @@ void RawDrawFrameTransparent (int frame, int translev) {
 
   if (translev == 0) {
     // just draw it over the top, no transparency
-    blit(thisroom.ebscene[frame], thisroom.ebscene[play.bg_frame], 0, 0, 0, 0, thisroom.ebscene[frame]->w, thisroom.ebscene[frame]->h);
+    blit(thisroom.ebscene[frame], thisroom.ebscene[play.bg_frame], 0, 0, 0, 0, BMP_W(thisroom.ebscene[frame]), BMP_H(thisroom.ebscene[frame]));
     play.raw_modified[play.bg_frame] = 1;
     return;
   }
@@ -15055,11 +15060,11 @@ int Object_IsCollidingWithObject(ScriptObject *objj, ScriptObject *obj2) {
 }
 
 int my_getpixel(BITMAP *blk, int x, int y) {
-  if ((x < 0) || (y < 0) || (x >= blk->w) || (y >= blk->h))
+  if ((x < 0) || (y < 0) || (x >= BMP_W(blk)) || (y >= BMP_H(blk)))
     return -1;
 
   // strip the alpha channel
-  return blk->vtable->getpixel(blk, x, y) & 0x00ffffff;
+  return getpixel(blk, x, y) & 0x00ffffff;
 }
 
 block GetCharacterImage(int charid, int *isFlipped) 
@@ -15689,7 +15694,7 @@ void play_flc_file(int numb,int playflags) {
     render_to_screen(screen, 0, 0);
   }
 
-  fli_target = create_bitmap_ex(final_col_dep, screen->w, screen->h);
+  fli_target = create_bitmap_ex(final_col_dep, BMP_W(screen), BMP_H(screen));
   fli_ddb = gfxDriver->CreateDDBFromBitmap(fli_target, false, true);
 
   if (play_fli(flicnam,fli_buffer,0,fli_callback)==FLI_ERROR)
@@ -15732,7 +15737,7 @@ int theora_playing_callback(BITMAP *theoraBuffer)
     drawAtY = scrnhit / 2 - fliTargetHeight / 2;
     if (!gfxDriver->HasAcceleratedStretchAndFlip())
     {
-      stretch_blit(theoraBuffer, fli_target, 0, 0, theoraBuffer->w, theoraBuffer->h, 
+      stretch_blit(theoraBuffer, fli_target, 0, 0, BMP_W(theoraBuffer), BMP_H(theoraBuffer), 
                    drawAtX, drawAtY, fliTargetWidth, fliTargetHeight);
       gfxDriver->UpdateDDBFromBitmap(fli_ddb, fli_target, false);
       drawAtX = 0;
@@ -15747,8 +15752,8 @@ int theora_playing_callback(BITMAP *theoraBuffer)
   else
   {
     gfxDriver->UpdateDDBFromBitmap(fli_ddb, theoraBuffer, false);
-    drawAtX = scrnwid / 2 - theoraBuffer->w / 2;
-    drawAtY = scrnhit / 2 - theoraBuffer->h / 2;
+    drawAtX = scrnwid / 2 - BMP_W(theoraBuffer) / 2;
+    drawAtY = scrnhit / 2 - BMP_H(theoraBuffer) / 2;
   }
 
   gfxDriver->DrawSprite(drawAtX, drawAtY, fli_ddb);
@@ -15757,6 +15762,8 @@ int theora_playing_callback(BITMAP *theoraBuffer)
 
   return check_if_user_input_should_cancel_video();
 }
+
+#ifdef ENABLE_THIS_LATER
 
 APEG_STREAM* get_theora_size(const char *fileName, int *width, int *height)
 {
@@ -15910,6 +15917,10 @@ void scrPlayVideo(const char* name, int skip, int flags) {
 
   pause_sound_if_necessary_and_play_video(name, skip, flags);
 }
+
+#else
+void scrPlayVideo(const char* name, int skip, int flags) {}
+#endif
 
 // returns -1 on failure, channel number on success
 int PlaySoundEx(int val1, int channel) {
@@ -16145,8 +16156,8 @@ int isposinbox(int mmx,int mmy,int lf,int tp,int rt,int bt) {
 // xx,yy is the position in room co-ordinates that we are checking
 // arx,ary is the sprite x/y co-ordinates
 int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww,int sphh, int flipped = 0) {
-  if (spww==0) spww = divide_down_coordinate(sprit->w) - 1;
-  if (sphh==0) sphh = divide_down_coordinate(sprit->h) - 1;
+  if (spww==0) spww = divide_down_coordinate(BMP_W(sprit)) - 1;
+  if (sphh==0) sphh = divide_down_coordinate(BMP_H(sprit)) - 1;
 
   if (isposinbox(xx,yy,arx,ary,arx+spww,ary+sphh)==FALSE)
     return FALSE;
@@ -16164,14 +16175,14 @@ int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww,int sp
       // calculations to compensate
       multiply_up_coordinates(&spww, &sphh);
 
-      if (spww != sprit->w)
-        xpos = (xpos * sprit->w) / spww;
-      if (sphh != sprit->h)
-        ypos = (ypos * sprit->h) / sphh;
+      if (spww != BMP_W(sprit))
+        xpos = (xpos * BMP_W(sprit)) / spww;
+      if (sphh != BMP_H(sprit))
+        ypos = (ypos * BMP_H(sprit)) / sphh;
     }
 
     if (flipped)
-      xpos = (sprit->w - 1) - xpos;
+      xpos = (BMP_W(sprit) - 1) - xpos;
 
     int gpcol = my_getpixel(sprit, xpos, ypos);
 
@@ -16415,8 +16426,8 @@ void remove_walkable_areas_from_temp(int fromx, int cwidth, int starty, int endy
   endy = convert_to_low_res(endy);
 
   int yyy;
-  if (endy >= walkable_areas_temp->h)
-    endy = walkable_areas_temp->h - 1;
+  if (endy >= BMP_H(walkable_areas_temp))
+    endy = BMP_H(walkable_areas_temp) - 1;
   if (starty < 0)
     starty = 0;
   
@@ -16430,7 +16441,7 @@ void remove_walkable_areas_from_temp(int fromx, int cwidth, int starty, int endy
 
 block prepare_walkable_areas (int sourceChar) {
   // copy the walkable areas to the temp bitmap
-  blit (thisroom.walls, walkable_areas_temp, 0,0,0,0,thisroom.walls->w,thisroom.walls->h);
+  blit (thisroom.walls, walkable_areas_temp, 0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
   // if the character who's moving doesn't block, don't bother checking
   if (sourceChar < 0) ;
   else if (game.chars[sourceChar].flags & CHF_NOBLOCKING)
@@ -16444,8 +16455,8 @@ block prepare_walkable_areas (int sourceChar) {
     if (game.chars[ww].room != displayed_room) continue;
     if (ww == sourceChar) continue;
     if (game.chars[ww].flags & CHF_NOBLOCKING) continue;
-    if (convert_to_low_res(game.chars[ww].y) >= walkable_areas_temp->h) continue;
-    if (convert_to_low_res(game.chars[ww].x) >= walkable_areas_temp->w) continue;
+    if (convert_to_low_res(game.chars[ww].y) >= BMP_H(walkable_areas_temp)) continue;
+    if (convert_to_low_res(game.chars[ww].x) >= BMP_W(walkable_areas_temp)) continue;
     if ((game.chars[ww].y < 0) || (game.chars[ww].x < 0)) continue;
 
     CharacterInfo *char1 = &game.chars[ww];
@@ -16465,8 +16476,8 @@ block prepare_walkable_areas (int sourceChar) {
     if (objs[ww].on != 1) continue;
     if ((objs[ww].flags & OBJF_SOLID) == 0)
       continue;
-    if (convert_to_low_res(objs[ww].y) >= walkable_areas_temp->h) continue;
-    if (convert_to_low_res(objs[ww].x) >= walkable_areas_temp->w) continue;
+    if (convert_to_low_res(objs[ww].y) >= BMP_H(walkable_areas_temp)) continue;
+    if (convert_to_low_res(objs[ww].x) >= BMP_W(walkable_areas_temp)) continue;
     if ((objs[ww].y < 0) || (objs[ww].x < 0)) continue;
 
     int x1, y1, width, y2;
@@ -21067,10 +21078,10 @@ void script_debug(int cmdd,int dataa) {
     }
   else if (cmdd==2) 
   {  // show walkable areas from here
-    block tempw=create_bitmap(thisroom.walls->w,thisroom.walls->h);
-    blit(prepare_walkable_areas(-1),tempw,0,0,0,0,tempw->w,tempw->h);
+    block tempw=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+    blit(prepare_walkable_areas(-1),tempw,0,0,0,0,BMP_W(tempw),BMP_H(tempw));
     block stretched = create_bitmap(scrnwid, scrnhit);
-    stretch_sprite(stretched, tempw, -offsetx, -offsety, get_fixed_pixel_size(tempw->w), get_fixed_pixel_size(tempw->h));
+    stretch_sprite(stretched, tempw, -offsetx, -offsety, get_fixed_pixel_size(BMP_W(tempw)), get_fixed_pixel_size(BMP_H(tempw)));
 
     IDriverDependantBitmap *ddb = gfxDriver->CreateDDBFromBitmap(stretched, false, true);
     render_graphics(ddb, 0, 0);
@@ -21112,7 +21123,7 @@ void script_debug(int cmdd,int dataa) {
       Display("Not currently moving.");
       return;
     }
-    block tempw=create_bitmap(thisroom.walls->w,thisroom.walls->h);
+    block tempw=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
     int mlsnum = game.chars[dataa].walking;
     if (game.chars[dataa].walking >= TURNING_AROUND)
       mlsnum %= TURNING_AROUND;
@@ -21125,7 +21136,7 @@ void script_debug(int cmdd,int dataa) {
       short targety=short(cmls->pos[i+1] & 0x00ffff);
       line (tempw, srcx, srcy, targetx, targety, get_col8_lookup(i+1));
     }
-    stretch_sprite(screen, tempw, -offsetx, -offsety, multiply_up_coordinate(tempw->w), multiply_up_coordinate(tempw->h));
+    stretch_sprite(screen, tempw, -offsetx, -offsety, multiply_up_coordinate(BMP_W(tempw)), multiply_up_coordinate(BMP_H(tempw)));
     render_to_screen(screen, 0, 0);
     wfreeblock(tempw);
     while (!kbhit()) ;
@@ -21953,7 +21964,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
 
   update_polled_stuff();
 
-  block tempScrn = create_bitmap_ex(final_col_dep, screen->w, screen->h);
+  block tempScrn = create_bitmap_ex(final_col_dep, BMP_W(screen), BMP_H(screen));
 
   set_mouse_cursor(CURS_ARROW);
 
@@ -21993,7 +22004,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
     int mouseison=-1,curyp;
     int mousewason=-10;
     int dirtyx = 0, dirtyy = 0;
-    int dirtywidth = virtual_screen->w, dirtyheight = virtual_screen->h;
+    int dirtywidth = BMP_W(virtual_screen), dirtyheight = BMP_H(virtual_screen);
     bool usingCustomRendering = false;
 
     dlgxp = 1;
@@ -22054,7 +22065,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
     mouseison=-10;
     
     update_polled_stuff();
-    //blit(virtual_screen, tempScrn, 0, 0, 0, 0, screen->w, screen->h);
+    //blit(virtual_screen, tempScrn, 0, 0, 0, 0, BMP_W(screen), BMP_H(screen));
     if (!play.mouse_cursor_hidden)
       domouse(1);
     update_polled_stuff();
@@ -22097,7 +22108,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
         curyp = multiply_up_coordinate(ccDialogOptionsRendering.parserTextboxY);
         areawid = multiply_up_coordinate(ccDialogOptionsRendering.parserTextboxWidth);
         if (areawid == 0)
-          areawid = tempScrn->w;
+          areawid = BMP_W(tempScrn);
       }
     }
     else if (is_textwindow) {
@@ -22137,8 +22148,8 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
 
       dirtyx = xspos;
       dirtyy = yspos;
-      dirtywidth = screenop->w;
-      dirtyheight = screenop->h;
+      dirtywidth = BMP_W(screenop);
+      dirtyheight = BMP_H(screenop);
 
       wputblock(xspos,yspos,screenop,1);
       wfreeblock(screenop); screenop = NULL;
@@ -22235,8 +22246,8 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
 
     if (usingCustomRendering)
     {
-      blit(tempScrn, subBitmap, 0, 0, 0, 0, tempScrn->w, tempScrn->h);
-      invalidate_rect(dirtyx, dirtyy, dirtyx + subBitmap->w, dirtyy + subBitmap->h);
+      blit(tempScrn, subBitmap, 0, 0, 0, 0, BMP_W(tempScrn), BMP_H(tempScrn));
+      invalidate_rect(dirtyx, dirtyy, dirtyx + BMP_W(subBitmap), dirtyy + BMP_H(subBitmap));
     }
     else
     {
@@ -22310,8 +22321,8 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
       if (usingCustomRendering)
       {
         if ((mousex >= dirtyx) && (mousey >= dirtyy) &&
-            (mousex < dirtyx + tempScrn->w) &&
-            (mousey < dirtyy + tempScrn->h))
+            (mousex < dirtyx + BMP_W(tempScrn)) &&
+            (mousey < dirtyy + BMP_H(tempScrn)))
         {
           getDialogOptionUnderCursorFunc.param1 = &ccDialogOptionsRendering;
           run_function_on_non_blocking_thread(&getDialogOptionUnderCursorFunc);
@@ -22592,11 +22603,11 @@ int find_highest_room_entered() {
 
 void serialize_bitmap(block thispic, FILE*ooo) {
   if (thispic != NULL) {
-    putw(thispic->w,ooo);
-    putw(thispic->h,ooo);
+    putw(BMP_W(thispic),ooo);
+    putw(BMP_H(thispic),ooo);
     putw(bitmap_color_depth(thispic),ooo);
-    for (int cc=0;cc<thispic->h;cc++)
-      fwrite(&thispic->line[cc][0],thispic->w,bitmap_color_depth(thispic)/8,ooo);
+    for (int cc=0;cc<BMP_H(thispic);cc++)
+      fwrite(&BMP_LINE(thispic)[cc][0],BMP_W(thispic),bitmap_color_depth(thispic)/8,ooo);
     }
   }
 
@@ -22946,10 +22957,10 @@ void save_game(int slotn, const char*descript) {
   if (game.options[OPT_SAVESCREENSHOT]) {
     int usewid = multiply_up_coordinate(play.screenshot_width);
     int usehit = multiply_up_coordinate(play.screenshot_height);
-    if (usewid > virtual_screen->w)
-      usewid = virtual_screen->w;
-    if (usehit > virtual_screen->h)
-      usehit = virtual_screen->h;
+    if (usewid > BMP_W(virtual_screen))
+      usewid = BMP_W(virtual_screen);
+    if (usehit > BMP_H(virtual_screen))
+      usehit = BMP_H(virtual_screen);
 
     if ((play.screenshot_width < 16) || (play.screenshot_height < 16))
       quit("!Invalid game.screenshot_width/height, must be from 16x16 to screen res");
@@ -22959,18 +22970,18 @@ void save_game(int slotn, const char*descript) {
       screenShot = create_bitmap_ex(bitmap_color_depth(virtual_screen), usewid, usehit);
 
       stretch_blit(virtual_screen, screenShot, 0, 0,
-        virtual_screen->w, virtual_screen->h, 0, 0,
-        screenShot->w, screenShot->h);
+        BMP_W(virtual_screen), BMP_H(virtual_screen), 0, 0,
+        BMP_W(screenShot), BMP_H(screenShot));
     }
     else
     {
-      block tempBlock = create_bitmap_ex(final_col_dep, virtual_screen->w, virtual_screen->h);
+      block tempBlock = create_bitmap_ex(final_col_dep, BMP_W(virtual_screen), BMP_H(virtual_screen));
       gfxDriver->GetCopyOfScreenIntoBitmap(tempBlock);
 
       screenShot = create_bitmap_ex(final_col_dep, usewid, usehit);
       stretch_blit(tempBlock, screenShot, 0, 0,
-        tempBlock->w, tempBlock->h, 0, 0,
-        screenShot->w, screenShot->h);
+        BMP_W(tempBlock), BMP_H(tempBlock), 0, 0,
+        BMP_W(screenShot), BMP_H(screenShot));
 
       destroy_bitmap(tempBlock);
     }
@@ -23010,7 +23021,7 @@ block read_serialized_bitmap(FILE* ooo) {
   if (thispic == NULL)
     return NULL;
   for (int vv=0; vv < pichit; vv++)
-    fread(&thispic->line[vv][0], picwid, piccoldep/8, ooo);
+    fread(&BMP_LINE(thispic)[vv][0], picwid, piccoldep/8, ooo);
   return thispic;
 }
 
@@ -23690,8 +23701,8 @@ void add_dynamic_sprite(int gotSlot, block redin, bool hasAlpha) {
   if (hasAlpha)
     game.spriteflags[gotSlot] |= SPF_ALPHACHANNEL;
 
-  spritewidth[gotSlot] = redin->w;
-  spriteheight[gotSlot] = redin->h;
+  spritewidth[gotSlot] = BMP_W(redin);
+  spriteheight[gotSlot] = BMP_H(redin);
 }
 
 void free_dynamic_sprite (int gotSlot) {
@@ -25818,11 +25829,11 @@ void set_rgb_mask_using_alpha_channel(block image)
 {
   int x, y;
 
-  for (y=0; y < image->h; y++) 
+  for (y=0; y < BMP_H(image); y++) 
   {
-    unsigned long*psrc = (unsigned long *)image->line[y];
+    unsigned long*psrc = (unsigned long *)BMP_LINE(image)[y];
 
-    for (x=0; x < image->w; x++) 
+    for (x=0; x < BMP_W(image); x++) 
     {
       if ((psrc[x] & 0xff000000) == 0x00000000)
         psrc[x] = MASK_COLOR_32;
@@ -25834,18 +25845,18 @@ void set_rgb_mask_using_alpha_channel(block image)
 block remove_alpha_channel(block from) {
   int depth = final_col_dep;
 
-  block to = create_bitmap_ex(depth, from->w, from->h);
+  block to = create_bitmap_ex(depth, BMP_W(from), BMP_H(from));
   int maskcol = bitmap_mask_color(to);
   int y,x;
   unsigned long c,b,g,r;
 
   if (depth == 24) {
     // 32-to-24
-    for (y=0; y < from->h; y++) {
-      unsigned long*psrc = (unsigned long *)from->line[y];
-      unsigned char*pdest = (unsigned char*)to->line[y];
+    for (y=0; y < BMP_H(from); y++) {
+      unsigned long*psrc = (unsigned long *)BMP_LINE(from)[y];
+      unsigned char*pdest = (unsigned char*)BMP_LINE(to)[y];
 
-      for (x=0; x < from->w; x++) {
+      for (x=0; x < BMP_W(from); x++) {
 			  c = psrc[x];
         // less than 50% opaque, remove the pixel
         if (((c >> 24) & 0x00ff) < 128)
@@ -25858,11 +25869,11 @@ block remove_alpha_channel(block from) {
   }
   else {  // 32 to 15 or 16
 
-    for (y=0; y < from->h; y++) {
-      unsigned long*psrc = (unsigned long *)from->line[y];
-      unsigned short*pdest = (unsigned short *)to->line[y];
+    for (y=0; y < BMP_H(from); y++) {
+      unsigned long*psrc = (unsigned long *)BMP_LINE(from)[y];
+      unsigned short*pdest = (unsigned short *)BMP_LINE(to)[y];
 
-      for (x=0; x < from->w; x++) {
+      for (x=0; x < BMP_W(from); x++) {
 			  c = psrc[x];
         // less than 50% opaque, remove the pixel
         if (((c >> 24) & 0x00ff) < 128)
@@ -25916,12 +25927,12 @@ void initialize_sprite (int ee) {
     }
 
     curspr = spriteset[ee];
-    get_new_size_for_sprite (ee, curspr->w, curspr->h, newwid, newhit);
+    get_new_size_for_sprite (ee, BMP_W(curspr), BMP_H(curspr), newwid, newhit);
 
     eip_guinum = ee;
     eip_guiobj = newwid;
 
-    if ((newwid != curspr->w) || (newhit != curspr->h)) {
+    if ((newwid != BMP_W(curspr)) || (newhit != BMP_H(curspr))) {
       tmpdbl = create_bitmap_ex(bitmap_color_depth(curspr),newwid,newhit);
       if (tmpdbl == NULL)
         quit("Not enough memory to load sprite graphics");
@@ -25931,7 +25942,7 @@ void initialize_sprite (int ee) {
 /*#ifdef USE_CUSTOM_EXCEPTION_HANDLER
       __try {
 #endif*/
-        stretch_sprite(tmpdbl,curspr,0,0,tmpdbl->w,tmpdbl->h);
+        stretch_sprite(tmpdbl,curspr,0,0,BMP_W(tmpdbl),BMP_H(tmpdbl));
 /*#ifdef USE_CUSTOM_EXCEPTION_HANDLER
       } __except (1) {
         // I can't trace this fault, but occasionally stretch_sprite
@@ -26135,8 +26146,10 @@ int init_gfx_mode(int wid,int hit,int cdep) {
 
   platform->WriteDebugString("Attempt to switch gfx mode to %d x %d (%d-bit)", wid, hit, cdep);
 
+#ifdef ENABLE_THIS_LATER
   if (usetup.refresh >= 50)
     request_refresh_rate(usetup.refresh);
+#endif
 
   final_scrn_wid = wid;
   final_scrn_hit = hit;
@@ -26973,8 +26986,8 @@ void show_preload () {
   if (splashsc != NULL) {
     if (bitmap_color_depth(splashsc) == 8)
       wsetpalette(0,255,temppal);
-    block tsc = create_bitmap_ex(bitmap_color_depth(screen),splashsc->w,splashsc->h);
-    blit(splashsc,tsc,0,0,0,0,tsc->w,tsc->h);
+    block tsc = create_bitmap_ex(bitmap_color_depth(screen),BMP_W(splashsc),BMP_H(splashsc));
+    blit(splashsc,tsc,0,0,0,0,BMP_W(tsc),BMP_H(tsc));
     clear(screen);
     stretch_sprite(screen, tsc, 0, 0, scrnwid,scrnhit);
 
@@ -27022,7 +27035,7 @@ bool justRegisterGame = false;
 bool justUnRegisterGame = false;
 const char *loadSaveGameOnStartup = NULL;
 
-void initialise_game_file_name()
+void initialise_game_file_name(int argc,char **argv)
 {
 #ifdef WINDOWS_VERSION
   WCHAR buffer[MAX_PATH];
@@ -27224,12 +27237,16 @@ int main(int argc,char*argv[]) {
 
 void create_gfx_driver() 
 {
+#ifdef ENABLE_THIS_LATER
 #ifdef WINDOWS_VERSION
   if (stricmp(usetup.gfxDriverID, "D3D9") == 0)
     gfxDriver = GetD3DGraphicsDriver(filter);
   else
 #endif
     gfxDriver = GetSoftwareGraphicsDriver(filter);
+#else
+  gfxDriver = GetStubGraphicsDriver(filter);
+#endif
 
   gfxDriver->SetCallbackOnInit(GfxDriverOnInitCallback);
   gfxDriver->SetTintMethod(TintReColourise);
@@ -27314,7 +27331,7 @@ int initialize_engine(int argc,char*argv[])
   write_log_debug("Initializing game data");
 
   // initialize the data file
-  initialise_game_file_name();
+  initialise_game_file_name(argc, argv);
   if (game_file_name == NULL) return EXIT_NORMAL;
 
   int errcod = csetlib(game_file_name,"");  // assume it's appended to exe
@@ -27901,13 +27918,13 @@ int initialize_engine(int argc,char*argv[])
     screen = create_sub_bitmap(_old_screen, initasx / 2 - scrnwid / 2, initasy/2-scrnhit/2, scrnwid, scrnhit);
     _sub_screen=screen;
 
-    scrnhit = screen->h;
-    vesa_yres = screen->h;
-    scrnwid = screen->w;
-    vesa_xres = screen->w;
+    scrnhit = BMP_H(screen);
+    vesa_yres = BMP_H(screen);
+    scrnwid = BMP_W(screen);
+    vesa_xres = BMP_W(screen);
     gfxDriver->SetMemoryBackBuffer(screen);
 
-    platform->WriteDebugString("Screen resolution: %d x %d; game resolution %d x %d", _old_screen->w, _old_screen->h, scrnwid, scrnhit);
+    platform->WriteDebugString("Screen resolution: %d x %d; game resolution %d x %d", BMP_W(_old_screen), BMP_H(_old_screen), scrnwid, scrnhit);
   }
 
 

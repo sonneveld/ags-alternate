@@ -206,7 +206,7 @@ extern "C"
     if (tempbitm == NULL)
       return NULL;
 
-    blit(abuf, tempbitm, x1, y1, 0, 0, tempbitm->w, tempbitm->h);
+    blit(abuf, tempbitm, x1, y1, 0, 0, BMP_W(tempbitm), BMP_H(tempbitm));
     return tempbitm;
   }
 
@@ -236,7 +236,7 @@ extern "C"
     tempbitm = create_bitmap(widd, hitt);
 
     for (ff = 0; ff < hitt; ff++)
-      fread(&tempbitm->line[ff][0], widd, 1, fff);
+      fread(&BMP_LINE(tempbitm)[ff][0], widd, 1, fff);
 
     fclose(fff);
     return tempbitm;
@@ -303,7 +303,7 @@ extern "C"
       }
 
       for (hh = 0; hh < htt; hh++)
-        fread(&sarray[vv]->line[hh][0], wdd * coldep, 1, ff);
+        fread(&BMP_LINE(sarray[vv])[hh][0], wdd * coldep, 1, ff);
     }
     fclose(ff);
     return 0;
@@ -368,20 +368,20 @@ extern "C"
         continue;
       }
 
-      spritewidths[spidx] = spre[aa]->w;
-      spriteheights[spidx] = spre[aa]->h;
+      spritewidths[spidx] = BMP_W(spre[aa]);
+      spriteheights[spidx] = BMP_H(spre[aa]);
       spriteoffs[spidx] = ftell(ooo);
 
       bpss = bitmap_color_depth(spre[aa]) / 8;
       fwrite(&bpss, 2, 1, ooo);
 
-      topu = spre[aa]->w;
+      topu = BMP_W(spre[aa]);
       fwrite(&topu, 2, 1, ooo);
 
-      topu = spre[aa]->h;
+      topu = BMP_H(spre[aa]);
       fwrite(&topu, 2, 1, ooo);
 
-      fwrite(&spre[aa]->line[0][0], spre[aa]->w * bpss, spre[aa]->h, ooo);
+      fwrite(&BMP_LINE(spre[aa])[0][0], BMP_W(spre[aa]) * bpss, BMP_H(spre[aa]), ooo);
     }
     fclose(ooo);
 
@@ -415,7 +415,7 @@ extern "C"
     if (xray)
       draw_sprite(abuf, bll, xx, yy);
     else
-      blit(bll, abuf, 0, 0, xx, yy, bll->w, bll->h);
+      blit(bll, abuf, 0, 0, xx, yy, BMP_W(bll), BMP_H(bll));
   }
 
   const int col_lookups[32] = {
@@ -507,8 +507,8 @@ extern "C"
       }
     }
 
-    for (jj = 0; jj < (picc->w) * (picc->h); jj++) {
-      int xxl = jj % (picc->w), yyl = jj / (picc->w);
+    for (jj = 0; jj < (BMP_W(picc)) * (BMP_H(picc)); jj++) {
+      int xxl = jj % (BMP_W(picc)), yyl = jj / (BMP_W(picc));
       int rr = getpixel(picc, xxl, yyl);
       putpixel(picc, xxl, yyl, color_mapped_table[rr]);
     }
@@ -642,8 +642,8 @@ extern "C"
 #define wfade_out(from, to, speed, pal) fade_out_range(5, from, to)
 #define wfastputpixel(x1, y1)           _putpixel(abuf, x1, y1, currentcolor)
 #define wfreeblock(bll)                 destroy_bitmap(bll)
-#define wgetblockheight(bll)            bll->h
-#define wgetblockwidth(bll)             bll->w
+#define wgetblockheight(bll)            BMP_H(bll)
+#define wgetblockwidth(bll)             BMP_W(bll)
 #define wgetpixel(xx, yy)               getpixel(abuf, xx, yy)
 #define whline(x1, x2, yy)              hline(abuf, x1, yy, x2, currentcolor)
 #define wline(x1, y1, x2, y2)           line(abuf,x1,y1,x2,y2,currentcolor)

@@ -246,7 +246,7 @@ unsigned char ** IAGSEngine::GetRawBitmapSurface (BITMAP *bmp) {
   if (bmp == virtual_screen)
     plugins[this->pluginId].invalidatedRegion = 0;
 
-  return bmp->line;
+  return BMP_LINE(bmp);
 }
 void IAGSEngine::ReleaseBitmapSurface (BITMAP *bmp) {
   release_bitmap (bmp);
@@ -279,9 +279,9 @@ void IAGSEngine::GetBitmapDimensions (BITMAP *bmp, int32 *width, int32 *height, 
     return;
   
   if (width != NULL)
-    width[0] = bmp->w;
+    width[0] = BMP_W(bmp);
   if (height != NULL)
-    height[0] = bmp->h;
+    height[0] = BMP_H(bmp);
   if (coldepth != NULL)
     coldepth[0] = bitmap_color_depth(bmp);
 }
@@ -310,7 +310,7 @@ int IAGSEngine::LookupParserWord (const char *word) {
 }
 void IAGSEngine::BlitBitmap (int x, int y, BITMAP *bmp, int masked) {
   wputblock (x, y, bmp, masked);
-  invalidate_rect(x, y, x + bmp->w, y + bmp->h);
+  invalidate_rect(x, y, x + BMP_W(bmp), y + BMP_H(bmp));
 }
 void IAGSEngine::BlitSpriteTranslucent(int x, int y, BITMAP *bmp, int trans) {
   set_trans_blender(0, 0, 0, trans);

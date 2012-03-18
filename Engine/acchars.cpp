@@ -785,15 +785,15 @@ int Character_IsCollidingWithObject(CharacterInfo *chin, ScriptObject *objid) {
     return 0;
 
   block checkblk = GetObjectImage(objid->id, NULL);
-  int objWidth = checkblk->w;
-  int objHeight = checkblk->h;
+  int objWidth = BMP_W(checkblk);
+  int objHeight = BMP_H(checkblk);
   int o1x = objs[objid->id].x;
   int o1y = objs[objid->id].y - divide_down_coordinate(objHeight);
 
   block charpic = GetCharacterImage(chin->index_id, NULL);
   
-  int charWidth = charpic->w;
-  int charHeight = charpic->h;
+  int charWidth = BMP_W(charpic);
+  int charHeight = BMP_H(charpic);
   int o2x = chin->x - divide_down_coordinate(charWidth) / 2;
   int o2y = chin->get_effective_y() - 5;  // only check feet
 

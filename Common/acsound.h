@@ -13,6 +13,8 @@
 #ifndef __ACSOUND_H
 #define __ACSOUND_H
 
+#include "allegro.h"
+
 #define MUS_MIDI 1
 #define MUS_MP3  2
 #define MUS_WAVE 3

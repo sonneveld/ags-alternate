@@ -25,8 +25,11 @@ struct AGSMac : AGS32BitOSDriver {
   virtual void SetGameWindowIcon();
   virtual void ShutdownCDPlayer();
   virtual void WriteConsole(const char*, ...);
+  virtual void ReplaceSpecialPaths(const char *sourcePath, char *destPath);
 };
 
+
+void AGSMac::ReplaceSpecialPaths(const char *sourcePath, char *destPath) {}
 
 int AGSMac::CDPlayerCommand(int cmdd, int datt) {
   return cd_player_control(cmdd, datt);

@@ -119,5 +119,6 @@ public:
 
 extern IGraphicsDriver* GetD3DGraphicsDriver(GFXFilter *);
 extern IGraphicsDriver* GetSoftwareGraphicsDriver(GFXFilter *);
+extern IGraphicsDriver* GetStubGraphicsDriver(GFXFilter *);
 
 #endif

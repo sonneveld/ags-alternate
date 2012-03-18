@@ -9,9 +9,9 @@
 #include <stdlib.h>
 
 // MACPORT FIX 9/6/05: removed far and put space after *
-typedef unsigned char /* far */ * __block;
+typedef unsigned char /* far */ * __myblock;
 
-extern long csavecompressed(char *finam, __block tobesaved, color pala[256], long exto);
+extern long csavecompressed(char *finam, __myblock tobesaved, color pala[256], long exto);
 
 extern void cpackbitl(unsigned char *line, int size, FILE * outfile);
 extern void cpackbitl16(unsigned short *line, int size, FILE * outfile);

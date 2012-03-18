@@ -26,8 +26,7 @@
 #endif
 
 #include "bigend.h"
-
-typedef unsigned char *__block;
+typedef unsigned char *__myblock;
 
 extern long cliboffset(char *);
 extern char lib_file_name[13];
@@ -56,8 +55,8 @@ struct color
 #endif
 
 #ifndef __CJONES_H
-long csavecompressed(char *, __block, color[256], long = 0);
-long cloadcompressed(char *, __block, color *, long = 0);
+long csavecompressed(char *, __myblock, color[256], long = 0);
+long cloadcompressed(char *, __myblock, color *, long = 0);
 #endif
 
 void cpackbitl(unsigned char *line, int size, FILE * outfile)
@@ -169,7 +168,7 @@ void cpackbitl32(unsigned long *line, int size, FILE * outfile)
 }
 
 
-long csavecompressed(char *finam, __block tobesaved, color pala[256], long exto)
+long csavecompressed(char *finam, __myblock tobesaved, color pala[256], long exto)
 {
   FILE *outpt;
 

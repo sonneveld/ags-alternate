@@ -843,13 +843,13 @@ void GUIButton::Draw()
     if ((drawDisabled) && (gui_disabled_style == GUIDIS_GREYOUT)) {
       int col8 = get_col8_lookup(8);
       int jj, kk;             // darken the button when disabled
-      for (jj = 0; jj < spriteset[usepic]->w; jj++) {
-        for (kk = jj % 2; kk < spriteset[usepic]->h; kk += 2)
+      for (jj = 0; jj < BMP_W(spriteset[usepic]); jj++) {
+        for (kk = jj % 2; kk < BMP_H(spriteset[usepic]); kk += 2)
           putpixel(abuf, x + jj, y + kk, col8);
       }
     }
 
-    set_clip(abuf, 0, 0, abuf->w - 1, abuf->h - 1);
+    set_clip(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1);
   } 
   else if (text[0] != 0) {
     // it's a text button
@@ -1195,9 +1195,9 @@ void GUIMain::draw_at(int xx, int yy)
   SET_EIP(377)
 
   if (fgcol != bgcol) {
-    rect(abuf, 0, 0, abuf->w - 1, abuf->h - 1, get_col8_lookup(fgcol));
+    rect(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1, get_col8_lookup(fgcol));
     if (get_fixed_pixel_size(1) > 1)
-      rect(abuf, 1, 1, abuf->w - 2, abuf->h - 2, get_col8_lookup(fgcol));
+      rect(abuf, 1, 1, BMP_W(abuf) - 2, BMP_H(abuf) - 2, get_col8_lookup(fgcol));
   }
 
   SET_EIP(378)

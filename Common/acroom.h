@@ -1306,9 +1306,9 @@ long save_lzw(char *fnn, BITMAP *bmpp, color *pall, long offe) {
   long  fll, toret, gobacto;
 
   ooo = ci_fopen(lztempfnm, "wb");
-  putw(bmpp->w * bmp_bpp(bmpp), ooo);
-  putw(bmpp->h, ooo);
-  fwrite(&bmpp->line[0][0], bmpp->w * bmp_bpp(bmpp), bmpp->h, ooo);
+  putw(BMP_W(bmpp) * bmp_bpp(bmpp), ooo);
+  putw(BMP_H(bmpp), ooo);
+  fwrite(&BMP_LINE(bmpp)[0][0], BMP_W(bmpp) * bmp_bpp(bmpp), BMP_H(bmpp), ooo);
   fclose(ooo);
 
   iii = ci_fopen(fnn, "r+b");
@@ -1409,7 +1409,7 @@ long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
   recalced = bmm;
 
   for (arin = 0; arin < loptr[1]; arin++)
-    memcpy(&bmm->line[arin][0], &membuffer[arin * loptr[0]], loptr[0]);
+    memcpy(&BMP_LINE(bmm)[arin][0], &membuffer[arin * loptr[0]], loptr[0]);
 
   release_bitmap (bmm);
 
@@ -1426,14 +1426,14 @@ long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
 }
 
 long savecompressed_allegro(char *fnn, BITMAP *bmpp, color *pall, long ooo) {
-  unsigned char *wgtbl = (unsigned char *)malloc(bmpp->w * bmpp->h + 4);
+  unsigned char *wgtbl = (unsigned char *)malloc(BMP_W(bmpp) * BMP_H(bmpp) + 4);
   short         *sss = (short *)wgtbl;
   long          toret;
 
-  sss[0] = bmpp->w;
-  sss[1] = bmpp->h;
+  sss[0] = BMP_W(bmpp);
+  sss[1] = BMP_H(bmpp);
 
-  memcpy(&wgtbl[4], &bmpp->line[0][0], bmpp->w * bmpp->h);
+  memcpy(&wgtbl[4], &BMP_LINE(bmpp)[0][0], BMP_W(bmpp) * BMP_H(bmpp));
 
   toret = csavecompressed(fnn, wgtbl, pall, ooo);
   free(wgtbl);
@@ -1456,7 +1456,7 @@ long loadcompressed_allegro(FILE *fpp, BITMAP **bimpp, color *pall, long ooo) {
   *bimpp = bim;
 
   for (ii = 0; ii < hitt; ii++) {
-    cunpackbitl(&bim->line[ii][0], widd, fpp);
+    cunpackbitl(&BMP_LINE(bim)[ii][0], widd, fpp);
     if (ii % 20 == 0)
       update_polled_stuff();
   }
@@ -1933,7 +1933,7 @@ void load_main_block(roomstruct *rstruc, char *files, FILE *opty, room_file_head
   else
     tesl = loadcompressed_allegro(opty, &rstruc->ebscene[0], rstruc->pal, ftell(opty));
 
-  if ((rstruc->ebscene[0]->w > 320) & (rfh.version < 11))
+  if ((BMP_W(rstruc->ebscene[0]) > 320) & (rfh.version < 11))
     rstruc->resolution = 2;
 
   update_polled_stuff();
@@ -1958,10 +1958,10 @@ void load_main_block(roomstruct *rstruc, char *files, FILE *opty, room_file_head
   if (rfh.version < 21) {
     // Old version - copy walkable areas to Regions
     if (rstruc->regions == NULL)
-      rstruc->regions = create_bitmap_ex (8, rstruc->walls->w, rstruc->walls->h);
+      rstruc->regions = create_bitmap_ex (8, BMP_W(rstruc->walls), BMP_H(rstruc->walls));
     clear (rstruc->regions);
 
-    blit (rstruc->walls, rstruc->regions, 0, 0, 0, 0, rstruc->regions->w, rstruc->regions->h);
+    blit (rstruc->walls, rstruc->regions, 0, 0, 0, 0, BMP_W(rstruc->regions), BMP_H(rstruc->regions));
     for (f = 0; f <= 15; f++) {
       rstruc->regionLightLevel[f] = rstruc->walk_area_light[f];
       rstruc->regionTintLevel[f] = 0;

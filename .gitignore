@@ -1,0 +1,4 @@
+*.o
+*.user
+*.suo
+*.log

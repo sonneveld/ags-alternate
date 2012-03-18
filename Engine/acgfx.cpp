@@ -414,7 +414,7 @@ BITMAP *AllegroGFXFilter::ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
 void AllegroGFXFilter::RenderScreen(BITMAP *toRender, int x, int y) {
 
   if (toRender != realScreen) 
-    blit(toRender, realScreen, 0, 0, x, y, toRender->w, toRender->h);
+    blit(toRender, realScreen, 0, 0, x, y, BMP_W(toRender), BMP_H(toRender));
 
   lastBlitX = x;
   lastBlitY = y;
@@ -445,7 +445,7 @@ void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap)
 void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap, bool copyWithOffset)
 {
   if (copyBitmap != realScreen)
-    blit(realScreen, copyBitmap, (copyWithOffset ? lastBlitX : 0), (copyWithOffset ? lastBlitY : 0), 0, 0, copyBitmap->w, copyBitmap->h);
+    blit(realScreen, copyBitmap, (copyWithOffset ? lastBlitX : 0), (copyWithOffset ? lastBlitY : 0), 0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
 }
 
 
@@ -465,7 +465,7 @@ public:
 
   virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
-    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth(screen), screen->w, screen->h);
+    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth(screen), BMP_W(screen), BMP_H(screen));
     fakeScreen = create_bitmap_ex(bitmap_color_depth(screen), fakeWidth, fakeHeight);
     return fakeScreen;
   }
@@ -480,7 +480,7 @@ public:
 
   virtual void RenderScreen(BITMAP *toRender, int x, int y) 
   {
-    stretch_blit(toRender, realScreen, 0, 0, toRender->w, toRender->h, x * MULTIPLIER, y * MULTIPLIER, toRender->w * MULTIPLIER, toRender->h * MULTIPLIER);
+    stretch_blit(toRender, realScreen, 0, 0, BMP_W(toRender), BMP_H(toRender), x * MULTIPLIER, y * MULTIPLIER, BMP_W(toRender) * MULTIPLIER, BMP_H(toRender) * MULTIPLIER);
     lastBlitX = x;
     lastBlitY = y;
     lastBlitFrom = toRender;
@@ -520,17 +520,17 @@ public:
     {
       // Can't stretch_blit from Video Memory to normal memory,
       // so copy the screen to a buffer first.
-      blit(realScreen, realScreenSizedBuffer, 0, 0, 0, 0, realScreen->w, realScreen->h);
+      blit(realScreen, realScreenSizedBuffer, 0, 0, 0, 0, BMP_W(realScreen), BMP_H(realScreen));
       stretch_blit(realScreenSizedBuffer, copyBitmap, 0, 0, 
-                  realScreenSizedBuffer->w, realScreenSizedBuffer->h, 
-                  0, 0, copyBitmap->w, copyBitmap->h);
+                  BMP_W(realScreenSizedBuffer), BMP_H(realScreenSizedBuffer), 
+                  0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
     }
     else if (lastBlitFrom == NULL)
       clear(copyBitmap);
     else
       stretch_blit(lastBlitFrom, copyBitmap, 0, 0, 
-                  lastBlitFrom->w, lastBlitFrom->h, 
-                  0, 0, copyBitmap->w, copyBitmap->h);
+                  BMP_W(lastBlitFrom), BMP_H(lastBlitFrom), 
+                  0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
   }
 
 };
@@ -557,9 +557,9 @@ public:
 
   virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
-    realScreenBuffer = create_bitmap(screen->w, screen->h);
-    fakeScreen = create_bitmap_ex(bitmap_color_depth(screen), fakeWidth, fakeHeight);
-    Init_2xSaI(bitmap_color_depth(screen));
+    realScreenBuffer = create_bitmap(BMP_W( screen), BMP_H( screen));
+    fakeScreen = create_bitmap_ex(bitmap_color_depth( screen), fakeWidth, fakeHeight);
+    Init_2xSaI(bitmap_color_depth( screen));
     return fakeScreen;
   }
 
@@ -572,10 +572,10 @@ public:
   virtual void RenderScreen(BITMAP *toRender, int x, int y) {
 
     acquire_bitmap(realScreenBuffer);
-    Super2xSaI(toRender, realScreenBuffer, 0, 0, 0, 0, toRender->w, toRender->h);
+    Super2xSaI(toRender, realScreenBuffer, 0, 0, 0, 0, BMP_W(toRender), BMP_H(toRender));
     release_bitmap(realScreenBuffer);
 
-    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, realScreen->w, realScreen->h);
+    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
 
     lastBlitFrom = toRender;
   }
@@ -609,9 +609,9 @@ public:
 
   virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
-    realScreenBuffer = create_bitmap(screen->w, screen->h);
-    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth(screen), screen->w, screen->h);
-    fakeScreen = create_bitmap_ex(bitmap_color_depth(screen), fakeWidth, fakeHeight);
+    realScreenBuffer = create_bitmap(BMP_W( screen), BMP_H( screen));
+    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth( screen), BMP_W( screen), BMP_H( screen));
+    fakeScreen = create_bitmap_ex(bitmap_color_depth( screen), fakeWidth, fakeHeight);
     InitLUTs();
     return fakeScreen;
   }
@@ -626,10 +626,10 @@ public:
   virtual void RenderScreen(BITMAP *toRender, int x, int y) {
 
     acquire_bitmap(realScreenBuffer);
-    hq2x_32(&toRender->line[0][0], &realScreenBuffer->line[0][0], toRender->w, toRender->h, realScreenBuffer->w * BYTES_PER_PIXEL(bitmap_color_depth(realScreenBuffer)));
+    hq2x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(bitmap_color_depth(realScreenBuffer)));
     release_bitmap(realScreenBuffer);
 
-    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, realScreen->w, realScreen->h);
+    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
 
     lastBlitFrom = toRender;
   }
@@ -661,8 +661,8 @@ public:
 
   virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
-    realScreenBuffer = create_bitmap(screen->w, screen->h);
-    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth(screen), screen->w, screen->h);
+    realScreenBuffer = create_bitmap(BMP_W(screen), BMP_H(screen));
+    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth(screen), BMP_W(screen), BMP_H(screen));
     fakeScreen = create_bitmap_ex(bitmap_color_depth(screen), fakeWidth, fakeHeight);
     InitLUTs();
     return fakeScreen;
@@ -678,10 +678,10 @@ public:
   virtual void RenderScreen(BITMAP *toRender, int x, int y) {
 
     acquire_bitmap(realScreenBuffer);
-    hq3x_32(&toRender->line[0][0], &realScreenBuffer->line[0][0], toRender->w, toRender->h, realScreenBuffer->w * BYTES_PER_PIXEL(bitmap_color_depth(realScreenBuffer)));
+    hq3x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(bitmap_color_depth(realScreenBuffer)));
     release_bitmap(realScreenBuffer);
 
-    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, realScreen->w, realScreen->h);
+    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
 
     lastBlitFrom = toRender;
   }
