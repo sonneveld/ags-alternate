@@ -34,18 +34,13 @@
 #endif
 
 #ifdef THIS_IS_THE_ENGINE
-#define fopen clibfopen
+#define CLIB32_REDEFINE_FOPEN
 #endif
+#include "clib32.h"
 
 typedef unsigned char* wgtfont;
 
-extern "C"
-{
-  extern FILE *clibfopen(char *, char *);
-  extern long cliboffset(char *);
-  extern long clibfilesize(char *);
-  extern long last_opened_size;
-}
+
 
 class WFNFontRenderer : public IAGSFontRenderer {
 public:

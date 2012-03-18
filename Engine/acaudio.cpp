@@ -15,9 +15,7 @@
 #include "acroom.h"
 #include "acruntim.h"
 
-extern "C" {
- extern FILE*clibfopen(char*,char*);
-}
+#include "clib32.h"
 
 ScriptAudioChannel scrAudioChannel[MAX_SOUND_CHANNELS + 1];
 CCAudioChannel ccDynamicAudio;

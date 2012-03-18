@@ -15,6 +15,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "stdint.h"
+
+#include "clib32.h"
 
 #define NATIVESTATIC
 
@@ -25,6 +28,7 @@
 #undef NATIVESTATIC
 #define NATIVESTATIC static
 #endif
+
 
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #include <io.h>
@@ -40,13 +44,13 @@
 
 #include "bigend.h"
 
-#define CLIB_IS_INSTALLED
-char clib32copyright[] = "CLIB32 v1.21 (c) 1995,1996,1998,2001,2007 Chris Jones";
+//#define CLIB_IS_INSTALLED
+//static char clib32copyright[] = "CLIB32 v1.21 (c) 1995,1996,1998,2001,2007 Chris Jones";
 char lib_file_name[255] = " ";
-char base_path[255] = ".";
-char original_base_filename[255];
-char clbuff[20];
-const int RAND_SEED_SALT = 9338638;  // must update editor agsnative.cpp if this changes
+static char base_path[255] = ".";
+static char original_base_filename[255];
+static char clbuff[20];
+static const int RAND_SEED_SALT = 9338638;  // must update editor agsnative.cpp if this changes
 #define MAX_FILES 10000
 #define MAXMULTIFILES 25
 
@@ -72,23 +76,23 @@ struct MultiFileLibNew
   int num_files;
 };
 
-MultiFileLibNew mflib;
-NATIVESTATIC char *clibendfilesig = "CLIB\x1\x2\x3\x4SIGE";
-NATIVESTATIC char *clibpasswencstring = "My\x1\xde\x4Jibzle";
-NATIVESTATIC int _last_rand;
+static MultiFileLibNew mflib;
+static NATIVESTATIC char *clibendfilesig = "CLIB\x1\x2\x3\x4SIGE";
+static NATIVESTATIC char *clibpasswencstring = "My\x1\xde\x4Jibzle";
+static NATIVESTATIC int _last_rand;
 
-void init_pseudo_rand_gen(int seed)
+static void init_pseudo_rand_gen(int seed)
 {
   _last_rand = seed;
 }
 
-int get_pseudo_rand()
+static int get_pseudo_rand()
 {
   return( ((_last_rand = _last_rand * 214013L
       + 2531011L) >> 16) & 0x7fff );
 }
 
-void clib_decrypt_text(char *toenc)
+static void clib_decrypt_text(char *toenc)
 {
   int adx = 0;
 
@@ -105,7 +109,7 @@ void clib_decrypt_text(char *toenc)
   }
 }
 
-void fgetnulltermstring(char *sss, FILE *ddd, int bufsize) {
+static void fgetnulltermstring(char *sss, FILE *ddd, int bufsize) {
   int b = -1;
   do {
     if (b < bufsize - 1)
@@ -120,7 +124,7 @@ extern "C"
 {
   long last_opened_size;
 
-  void fread_data_enc(void *data, int dataSize, int dataCount, FILE *ooo)
+  static void fread_data_enc(void *data, int dataSize, int dataCount, FILE *ooo)
   {
     fread(data, dataSize, dataCount, ooo);
     unsigned char *dataChar = (unsigned char*)data;
@@ -130,7 +134,7 @@ extern "C"
     }
   }
 
-  void fgetstring_enc(char *sss, FILE *ooo, int maxLength) 
+  static void fgetstring_enc(char *sss, FILE *ooo, int maxLength) 
   {
     int i = 0;
     while ((i == 0) || (sss[i - 1] != 0))
@@ -142,20 +146,53 @@ extern "C"
     }
   }
 
-  int getw_enc(FILE *ooo)
+  static int getw_enc(FILE *ooo)
   {
     int numberRead;
     fread_data_enc(&numberRead, 4, 1, ooo);
     return numberRead;
   }
 
-  int read_new_new_enc_format_clib(MultiFileLibNew * mfl, FILE * wout, int libver)
+
+
+    // read little endian 32 bit from file
+    uint32_t fget_le32(FILE* fp)
+    {
+        uint8_t buf[4];
+        size_t count = fread(buf, 4, 1, fp);
+        if (count != 1)
+            abort();
+
+        uint32_t result;
+        result  = buf[0];
+        result |= buf[1] <<  8;
+        result |= buf[2] << 16;
+        result |= buf[3] << 24;
+        return result;
+    }
+
+
+    // read little endian 16 bit from file
+    uint16_t fget_le16(FILE* fp)
+    {
+        uint8_t buf[2];
+        size_t count = fread(buf, 2, 1, fp);
+        if (count != 1)
+            abort();
+
+        uint16_t result;
+        result  = buf[0];
+        result |= buf[1] <<  8;
+        return result;
+    }
+
+  static int read_new_new_enc_format_clib(MultiFileLibNew * mfl, FILE * wout, int libver)
   {
-    int aa;
-    int randSeed = getw(wout);
+    int randSeed = fget_le32(wout);
+
     init_pseudo_rand_gen(randSeed + RAND_SEED_SALT);
     mfl->num_data_files = getw_enc(wout);
-    for (aa = 0; aa < mfl->num_data_files; aa++)
+    for (int aa = 0; aa < mfl->num_data_files; aa++)
     {
       fgetstring_enc(mfl->data_filenames[aa], wout, 50);
     }
@@ -164,7 +201,7 @@ extern "C"
     if (mfl->num_files > MAX_FILES)
       return -1;
 
-    for (aa = 0; aa < mfl->num_files; aa++)
+    for (int aa = 0; aa < mfl->num_files; aa++)
     {
       fgetstring_enc(mfl->filenames[aa], wout, 100);
     }
@@ -174,15 +211,15 @@ extern "C"
     return 0;
   }
 
-  int read_new_new_format_clib(MultiFileLibNew * mfl, FILE * wout, int libver)
+  static int read_new_new_format_clib(MultiFileLibNew * mfl, FILE * wout, int libver)
   {
     int aa;
-    mfl->num_data_files = getw(wout);
+    mfl->num_data_files = fget_le32(wout);
     for (aa = 0; aa < mfl->num_data_files; aa++)
     {
       fgetnulltermstring(mfl->data_filenames[aa], wout, 50);
     }
-    mfl->num_files = getw(wout);
+    mfl->num_files = fget_le32(wout);
 
     if (mfl->num_files > MAX_FILES)
       return -1;
@@ -201,11 +238,11 @@ extern "C"
     return 0;
   }
 
-  int read_new_format_clib(MultiFileLib * mfl, FILE * wout, int libver)
+  static int read_new_format_clib(MultiFileLib * mfl, FILE * wout, int libver)
   {
-    mfl->num_data_files = getw(wout);
+    mfl->num_data_files = fget_le32(wout);
     fread(&mfl->data_filenames[0][0], 20, mfl->num_data_files, wout);
-    mfl->num_files = getw(wout);
+    mfl->num_files = fget_le32(wout);
 
     if (mfl->num_files > MAX_FILES)
       return -1;
@@ -224,74 +261,87 @@ extern "C"
     return 0;
   }
 
-  int csetlib(char *namm, char *passw)
+  // given a library path (an exe) and its password (normally empty string), 
+  // setup the clib.
+  int csetlib(char *libpath, char *passw)
   {
-    original_base_filename[0] = 0;
+    // clear original_base_filename
+    strcpy(original_base_filename, "");
 
-    if (namm == NULL) {
-      lib_file_name[0] = ' ';
-      lib_file_name[1] = 0;
+    // if given a null libpath, set lib_filename to " "
+    if (libpath == NULL) {
+      strcpy(lib_file_name, " ");
       return 0;
     }
+
     strcpy(base_path, ".");
 
-    int passwmodifier = 0, cc, aa;
-    FILE *fff = ci_fopen(namm, "rb");
-    if (fff == NULL)
+    FILE *lib_file = ci_fopen(libpath, "rb");
+    if (lib_file == NULL)
       return -1;
 
     long absoffs = 0;
-    fread(&clbuff[0], 5, 1, fff);
+    fread(&clbuff[0], 5, 1, lib_file);
 
+    // if we don't have CLIB header search for data at the
+    // end of file to show where actual start is.
     if (strncmp(clbuff, "CLIB", 4) != 0) {
-      fseek(fff, -12, SEEK_END);
-      fread(&clbuff[0], 12, 1, fff);
+      fseek(lib_file, -12, SEEK_END);
+      fread(&clbuff[0], 12, 1, lib_file);
 
       if (strncmp(clbuff, clibendfilesig, 12) != 0)
         return -2;
 
-      fseek(fff, -16, SEEK_END);  // it's an appended-to-end-of-exe thing
-      fread(&absoffs, 4, 1, fff);
-      fseek(fff, absoffs + 5, SEEK_SET);
+      fseek(lib_file, -16, SEEK_END);  // it's an appended-to-end-of-exe thing
+      fread(&absoffs, 4, 1, lib_file);
+      fseek(lib_file, absoffs + 5, SEEK_SET);
     }
 
-    int lib_version = fgetc(fff);
+    int lib_version = fgetc(lib_file);
     if ((lib_version != 6) && (lib_version != 10) &&
         (lib_version != 11) && (lib_version != 15) &&
         (lib_version != 20) && (lib_version != 21))
       return -3;  // unsupported version
 
-    char *nammwas = namm;
-    // remove slashes so that the lib name fits in the buffer
-    while ((strchr(namm, '\\') != NULL) || (strchr(namm, '/') != NULL))
-      namm++;
+    // if libpath was "c:\games\something\data.exe"
+    // then libpath = "data.exe"
+    // base_path = "c:\games\something"
 
-    if (namm != nammwas) {
+    char *libpathwas_prev = libpath;
+    // remove slashes so that the lib name fits in the buffer
+    while ((strchr(libpath, '\\') != NULL) || (strchr(libpath, '/') != NULL))
+      libpath++;
+
+    if (libpath != libpathwas_prev) {
       // store complete path
-      strcpy(base_path, nammwas);
-      base_path[namm - nammwas] = 0;
+      strcpy(base_path, libpathwas_prev);
+      base_path[libpath - libpathwas_prev] = 0;
       if ((base_path[strlen(base_path) - 1] == '\\') || (base_path[strlen(base_path) - 1] == '/'))
         base_path[strlen(base_path) - 1] = 0;
     }
 
     if (lib_version >= 10) {
-      if (fgetc(fff) != 0)
+      if (fgetc(lib_file) != 0)
         return -4;  // not first datafile in chain
 
+
+      // 21 -----
       if (lib_version >= 21)
       {
-        if (read_new_new_enc_format_clib(&mflib, fff, lib_version))
+        if (read_new_new_enc_format_clib(&mflib, lib_file, lib_version))
           return -5;
       }
+      // 20 ---------
       else if (lib_version == 20)
       {
-        if (read_new_new_format_clib(&mflib, fff, lib_version))
+        if (read_new_new_format_clib(&mflib, lib_file, lib_version))
           return -5;
       }
       else 
       {
+          // 10, 11, 15 ---------
         MultiFileLib mflibOld;
-        if (read_new_format_clib(&mflibOld, fff, lib_version))
+        if (read_new_format_clib(&mflibOld, lib_file, lib_version))
           return -5;
         // convert to newer format
         mflib.num_files = mflibOld.num_files;
@@ -299,21 +349,22 @@ extern "C"
         memcpy(&mflib.offset[0], &mflibOld.offset[0], sizeof(long) * mflib.num_files);
         memcpy(&mflib.length[0], &mflibOld.length[0], sizeof(long) * mflib.num_files);
         memcpy(&mflib.file_datafile[0], &mflibOld.file_datafile[0], sizeof(char) * mflib.num_files);
-        for (aa = 0; aa < mflib.num_data_files; aa++)
+        for (int aa = 0; aa < mflib.num_data_files; aa++)
           strcpy(mflib.data_filenames[aa], mflibOld.data_filenames[aa]);
-        for (aa = 0; aa < mflib.num_files; aa++)
+        for (int aa = 0; aa < mflib.num_files; aa++)
           strcpy(mflib.filenames[aa], mflibOld.filenames[aa]);
       }
 
-      fclose(fff);
-      strcpy(lib_file_name, namm);
+       // 10, 11, 15, 20, 21
+      fclose(lib_file);
+      strcpy(lib_file_name, libpath);
 
       // make a backup of the original file name
       strcpy(original_base_filename, mflib.data_filenames[0]);
       strlwr(original_base_filename);
 
-      strcpy(mflib.data_filenames[0], namm);
-      for (aa = 0; aa < mflib.num_files; aa++) {
+      strcpy(mflib.data_filenames[0], libpath);
+      for (int aa = 0; aa < mflib.num_files; aa++) {
         // correct offsetes for EXE file
         if (mflib.file_datafile[aa] == 0)
           mflib.offset[aa] += absoffs;
@@ -321,32 +372,33 @@ extern "C"
       return 0;
     }
 
-    passwmodifier = fgetc(fff);
-    fgetc(fff); // unused byte
+    // 6 ----------
+    int passwmodifier = fgetc(lib_file);
+    fgetc(lib_file); // unused byte
     mflib.num_data_files = 1;
-    strcpy(mflib.data_filenames[0], namm);
+    strcpy(mflib.data_filenames[0], libpath);
 
     short tempshort;
-    fread(&tempshort, 2, 1, fff);
+    fread(&tempshort, 2, 1, lib_file);
     mflib.num_files = tempshort;
 
     if (mflib.num_files > MAX_FILES)
       return -4;
 
-    fread(clbuff, 13, 1, fff);  // skip password dooberry
-    for (aa = 0; aa < mflib.num_files; aa++) {
-      fread(&mflib.filenames[aa][0], 13, 1, fff);
-      for (cc = 0; cc < (int)strlen(mflib.filenames[aa]); cc++)
+    fread(clbuff, 13, 1, lib_file);  // skip password dooberry
+    for (int aa = 0; aa < mflib.num_files; aa++) {
+      fread(&mflib.filenames[aa][0], 13, 1, lib_file);
+      for (int cc = 0; cc < (int)strlen(mflib.filenames[aa]); cc++)
         mflib.filenames[aa][cc] -= passwmodifier;
     }
-    fread(&mflib.length[0], 4, mflib.num_files, fff);
-    fseek(fff, 2 * mflib.num_files, SEEK_CUR);  // skip flags & ratio
+    fread(&mflib.length[0], 4, mflib.num_files, lib_file);
+    fseek(lib_file, 2 * mflib.num_files, SEEK_CUR);  // skip flags & ratio
 
-    mflib.offset[0] = ftell(fff);
-    strcpy(lib_file_name, namm);
-    fclose(fff);
+    mflib.offset[0] = ftell(lib_file);
+    strcpy(lib_file_name, libpath);
+    fclose(lib_file);
 
-    for (aa = 1; aa < mflib.num_files; aa++) {
+    for (int aa = 1; aa < mflib.num_files; aa++) {
       mflib.offset[aa] = mflib.offset[aa - 1] + mflib.length[aa - 1];
       mflib.file_datafile[aa] = 0;
     }
@@ -354,14 +406,15 @@ extern "C"
     return 0;
   }
 
-  int clibGetNumFiles()
+#if 0
+  static int clibGetNumFiles()
   {
     if (lib_file_name[0] == ' ')
       return 0;
     return mflib.num_files;
   }
 
-  const char *clibGetFileName(int index)
+  static const char *clibGetFileName(int index)
   {
     if (lib_file_name[0] == ' ')
       return NULL;
@@ -371,8 +424,9 @@ extern "C"
 
     return &mflib.filenames[index][0];
   }
+#endif
 
-  int clibfindindex(char *fill)
+  static int clibfindindex(char *fill)
   {
     if (lib_file_name[0] == ' ')
       return -1;
@@ -401,11 +455,14 @@ extern "C"
     return -1;
   }
 
-  const char *clibgetoriginalfilename() {
+#if 0
+  static const char *clibgetoriginalfilename() {
     return original_base_filename;
   }
+#endif
 
-  char actfilename[250];
+  static char actfilename[250];
+  // search and find a datafile name
   char *clibgetdatafile(char *fill)
   {
     int idxx = clibfindindex(fill);
@@ -420,7 +477,8 @@ extern "C"
     return NULL;
   }
 
-  FILE *tfil;
+  static FILE *tfil;
+  // open file from clib
   FILE *clibopenfile(char *filly, char *readmode)
   {
     int bb;
@@ -438,10 +496,12 @@ extern "C"
     return ci_fopen(filly, readmode);
   }
 
-#define PR_DATAFIRST 1
-#define PR_FILEFIRST 2
+
+  // public: set to datafirst or filefirst to configure the operation of clibfopen
   int cfopenpriority = PR_DATAFIRST;
 
+  // given a filename and mode, attempt to open file either as a normal file
+  // or through a clib file.
   FILE *clibfopen(char *filnamm, char *fmt)
   {
     last_opened_size = -1;

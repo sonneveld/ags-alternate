@@ -57,11 +57,7 @@ extern "C"
 
 #include "misc.h"
 
-// This is needed by a couple of headers, so it's at the top
-extern "C" {
- extern long cliboffset(char*);
-}
-extern char lib_file_name[];
+#include "clib32.h"
 /*
 extern "C" {
 extern void * memcpy_amd(void *dest, const void *src, size_t n);
@@ -209,11 +205,7 @@ LPWSTR *wArgv;
 #endif
 
 // ***** EXTERNS ****
-extern "C" {
- extern int  csetlib(char*,char*);
- extern FILE*clibfopen(char*,char*);
- extern int  cfopenpriority;
- }
+#include "clib32.h"
 extern int  minstalled();
 extern void mnewcursor(char);
 extern void mgetgraphpos();
@@ -1743,7 +1735,6 @@ void setpal() {
 // custom CLIB datafiles
 extern "C" {
 PACKFILE*_my_temppack;
-extern char* clibgetdatafile(char*);
 extern PACKFILE *__old_pack_fopen(char *,char *);
 
 #if ALLEGRO_DATE > 19991010
@@ -1751,6 +1742,10 @@ PACKFILE *pack_fopen(const char *filnam1, const char *modd1) {
 #else
 PACKFILE *pack_fopen(char *filnam1, char *modd1) {
 #endif
+      
+    char msg[2000];
+    sprintf(msg, "pack_fopen: %s - %s\n", filnam1, modd1);
+    write_log_debug(msg);
   char  *filnam = (char *)filnam1;
   char  *modd = (char *)modd1;
   int   needsetback = 0;
@@ -27069,7 +27064,7 @@ void initialise_game_file_name(int argc,char **argv)
 
 int main(int argc,char*argv[]) { 
   our_eip = -999;
-  cfopenpriority=2;
+  cfopenpriority=PR_FILEFIRST;
   int ee;
   play.recording = 0;
   play.playback = 0;
@@ -27250,7 +27245,8 @@ void create_gfx_driver()
 #else
   gfxDriver = GetStubGraphicsDriver(filter);
 #endif
-
+//gfxDriver = GetD3DGraphicsDriver(filter);
+gfxDriver = GetSoftwareGraphicsDriver(filter);
   gfxDriver->SetCallbackOnInit(GfxDriverOnInitCallback);
   gfxDriver->SetTintMethod(TintReColourise);
 }

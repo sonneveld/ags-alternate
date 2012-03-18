@@ -17,7 +17,7 @@
 #define __CROOM_H
 
 #ifndef CROOM_NOFUNCTIONS
-extern FILE *clibfopen(char *, char *);
+#include "clib32.h"
 #include "compress.h"
 #endif
 #include <string.h>

@@ -57,8 +57,7 @@ void msethotspot(int,int);   // Graphics mode only. Useful for crosshair.
 */
 void msetgraphpos(int,int);
 
-extern long cliboffset(char *);
-extern char lib_file_name[13];
+#include "clib32.h"
 extern void put_sprite_256(int, int, block);
 
 char *mouselibcopyr = "MouseLib32 (c) 1994, 1998 Chris Jones";

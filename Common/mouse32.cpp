@@ -53,8 +53,7 @@ int  ismouseinbox(int,int,int,int);
 void msethotspot(int,int);   // Graphics mode only. Useful for crosshair.
 */
 
-extern long cliboffset(char*);
-extern char lib_file_name[13];
+#include "clib32.h"
 
 struct REGPACK {
   unsigned short r_bx;

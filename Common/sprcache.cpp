@@ -26,9 +26,7 @@
 #include "compress.h"
 #include "bigend.h"
 
-extern "C" {
-  extern FILE *clibfopen(char *, char *);
-}
+#include "clib32.h"
 
 //#define DEBUG_SPRITECACHE
 extern void write_log(char *);

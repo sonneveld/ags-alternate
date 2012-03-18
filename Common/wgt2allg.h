@@ -126,14 +126,8 @@ extern "C"
 #endif
 
 #ifdef USE_CLIB
-  extern "C"
-  {
-    extern FILE *clibfopen(char *, char *);
-    extern long cliboffset(char *);
-    extern long clibfilesize(char *);
-    extern long last_opened_size;
-  }
-#define fopen clibfopen
+#define CLIB32_REDEFINE_FOPEN
+#include "clib32.h"
 #endif
 
   void wsetscreen(block nss)

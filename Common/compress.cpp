@@ -28,8 +28,8 @@
 #include "bigend.h"
 typedef unsigned char *__myblock;
 
-extern long cliboffset(char *);
-extern char lib_file_name[13];
+#include "clib32.h"
+
 extern void domouse(int);
 extern "C"
 {
