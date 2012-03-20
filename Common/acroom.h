@@ -133,7 +133,7 @@
 // thisroom.options[3] = player special view (0=normal)
 //                 [4] = music volume (0=normal, <0 quiter, >0 louder)
 
-const int ST_TUNE = 0, ST_SAVELOAD = 1, ST_MANDISABLED = 2, ST_MANVIEW = 3, ST_VOLUME = 4;
+enum { ST_TUNE = 0, ST_SAVELOAD = 1, ST_MANDISABLED = 2, ST_MANVIEW = 3, ST_VOLUME = 4 };
 
 #define GAME_FILE_VERSION 42
 
@@ -649,8 +649,6 @@ struct InteractionVariable {
   }
 #endif
 };
-extern InteractionVariable globalvars[];
-extern int numGlobalVars;
 
 struct InteractionScripts {
   int numEvents;
@@ -1471,5 +1469,8 @@ extern void load_room(char *files, roomstruct *rstruc, bool gameIsHighRes);
 extern int ff; // !
 extern void deserialize_interaction_scripts(FILE *iii, InteractionScripts *scripts);
 extern void read_dictionary (WordsDictionary *dict, FILE *writeto);
+extern int numGlobalVars;
+extern InteractionVariable globalvars[];
+extern int numGlobalVars;
 
 #endif  // __CROOM_H

@@ -12,9 +12,9 @@
 #include "acroom.h"
 
 
-char *croom_h_copyright = "ChrisRoom v2.00 - CRM reader/writer copyright (c) 1995, 1998, 1999 by Chris Jones.";
-char *game_file_sig = "Adventure Creator Game File v2";
-block backups[5];
+static char *croom_h_copyright = "ChrisRoom v2.00 - CRM reader/writer copyright (c) 1995, 1998, 1999 by Chris Jones.";
+static char *game_file_sig = "Adventure Creator Game File v2";
+static block backups[5];
 
 
 int cunpackbitl(unsigned char *, int size, FILE *infile);
@@ -94,7 +94,7 @@ int CustomProperties::UnSerialize (FILE *infrom) {
 }
 
 
-int in_interaction_editor = 0;
+static int in_interaction_editor = 0;
 
 
 void WordsDictionary::sort () {
@@ -127,7 +127,7 @@ int WordsDictionary::find_index (const char*wrem) {
 }
 
 // {name, flags, numArgs, {argTypes}, {argNames}, description, textscript}
-ActionTypes actions[NUM_ACTION_TYPES] = {
+static ActionTypes actions[NUM_ACTION_TYPES] = {
   {"Do nothing", 0, 0, {NULL}, {NULL}, "Does nothing.", ""},
   {"Run script", AFLG_RUNSCRIPT, 0, {NULL}, {NULL}, "Runs a text script. Click the 'Edit Script' button to modify the script.", ""},
   {"Game - Add score on first execution", 0, 1, {ARG_TYPE_INT}, {"Points to add"},
@@ -289,7 +289,7 @@ ActionTypes actions[NUM_ACTION_TYPES] = {
 InteractionVariable globalvars[MAX_GLOBAL_VARIABLES] = {{"Global 1", 0, 0}};
 int numGlobalVars = 1;
 
-void serialize_command_list (NewInteractionCommandList *nicl, FILE*ooo) {
+static void serialize_command_list (NewInteractionCommandList *nicl, FILE*ooo) {
   if (nicl == NULL)
     return;
   putw (nicl->numCommands, ooo);
@@ -344,8 +344,8 @@ NewInteractionCommandList *deserialize_command_list (FILE *ooo) {
   return nicl;
 }
 
-NewInteraction *nitemp;
-NewInteraction *deserialize_new_interaction (FILE *ooo) {
+static NewInteraction *nitemp;
+static NewInteraction *deserialize_new_interaction (FILE *ooo) {
   int a;
 
   if (getw(ooo) != 1)
@@ -447,7 +447,7 @@ struct room_file_header {
 #endif
 };
 
-int _acroom_bpp = 1;  // bytes per pixel of currently loading room
+static int _acroom_bpp = 1;  // bytes per pixel of currently loading room
 
 // returns bytes per pixel for bitmap's color depth
 int bmp_bpp(BITMAP*bmpt) {
@@ -468,9 +468,9 @@ extern void lzwcompress(FILE *,FILE *);
 extern void lzwexpand(FILE *,FILE *);
 extern unsigned char *lzwexpand_to_mem(FILE *);
 extern long maxsize, outbytes, putbytes;
-char *lztempfnm = "~aclzw.tmp";
+static char *lztempfnm = "~aclzw.tmp";
 
-long save_lzw(char *fnn, BITMAP *bmpp, color *pall, long offe) {
+static long save_lzw(char *fnn, BITMAP *bmpp, color *pall, long offe) {
   FILE  *ooo, *iii;
   long  fll, toret, gobacto;
 
@@ -503,13 +503,13 @@ long save_lzw(char *fnn, BITMAP *bmpp, color *pall, long offe) {
   return toret;
 }
 
-BITMAP *recalced;
+static BITMAP *recalced;
 /*long load_lzw(char*fnn,BITMAP*bmm,color*pall,long ooff) {
   recalced=bmm;
   FILE*iii=clibfopen(fnn,"rb");
   fseek(iii,ooff,SEEK_SET);*/
 
-long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
+static long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
   long          uncompsiz, *loptr;
   unsigned char *membuffer;
   int           arin;
@@ -594,7 +594,7 @@ long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
   return uncompsiz;
 }
 
-long savecompressed_allegro(char *fnn, BITMAP *bmpp, color *pall, long ooo) {
+static long savecompressed_allegro(char *fnn, BITMAP *bmpp, color *pall, long ooo) {
   unsigned char *wgtbl = (unsigned char *)malloc(BMP_W(bmpp) * BMP_H(bmpp) + 4);
   short         *sss = (short *)wgtbl;
   long          toret;
@@ -609,7 +609,7 @@ long savecompressed_allegro(char *fnn, BITMAP *bmpp, color *pall, long ooo) {
   return toret;
 }
 
-long loadcompressed_allegro(FILE *fpp, BITMAP **bimpp, color *pall, long ooo) {
+static long loadcompressed_allegro(FILE *fpp, BITMAP **bimpp, color *pall, long ooo) {
   short widd,hitt;
   int   ii;
 
@@ -650,7 +650,7 @@ long loadcompressed_allegro(FILE *fpp, BITMAP **bimpp, color *pall, long ooo) {
 #include "scrptrt.h"
 static char *passwencstring = "Avis Durgan";
 
-void decrypt_text(char*toenc) {
+static void decrypt_text(char*toenc) {
   int adx = 0;
 
   while (1) {
@@ -668,7 +668,7 @@ void decrypt_text(char*toenc) {
 
 #ifndef NO_SAVE_FUNCTIONS
 
-void encrypt_text(char *toenc) {
+static void encrypt_text(char *toenc) {
   int adx = 0, tobreak = 0;
 
   while (tobreak == 0) {
@@ -684,7 +684,7 @@ void encrypt_text(char *toenc) {
   }
 }
 
-void write_string_encrypt(FILE *ooo, char *sss) {
+static void write_string_encrypt(FILE *ooo, char *sss) {
   int stlent = (int)strlen(sss) + 1;
 
   putw(stlent, ooo);
@@ -693,7 +693,7 @@ void write_string_encrypt(FILE *ooo, char *sss) {
   decrypt_text(sss);
 }
 
-void write_dictionary (WordsDictionary *dict, FILE *writeto) {
+static void write_dictionary (WordsDictionary *dict, FILE *writeto) {
   int ii;
 
   putw(dict->num_words, writeto);
@@ -729,7 +729,7 @@ void read_dictionary (WordsDictionary *dict, FILE *writeto) {
   }
 }
 
-void freadmissout(short *pptr, FILE *opty) {
+static void freadmissout(short *pptr, FILE *opty) {
   fread(&pptr[0], 2, 5, opty);
   fread(&pptr[7], 2, NUM_CONDIT - 7, opty);
   pptr[5] = pptr[6] = 0;
@@ -745,7 +745,7 @@ void freadmissout(short *pptr, FILE *opty) {
 #define OBJ_TALKTO    2
 #define OBJ_USEINV    3
 
-void add_to_eventblock(EventBlock *evpt, int evnt, int whatac, int val1, int data, short scorr) {
+static void add_to_eventblock(EventBlock *evpt, int evnt, int whatac, int val1, int data, short scorr) {
   evpt->list[evpt->numcmd] = evnt;
   evpt->respond[evpt->numcmd] = whatac;
   evpt->respondval[evpt->numcmd] = val1;
@@ -754,7 +754,7 @@ void add_to_eventblock(EventBlock *evpt, int evnt, int whatac, int val1, int dat
   evpt->numcmd++;
 }
 
-int usesmisccond = 0;
+static int usesmisccond = 0;
 
 void deserialize_interaction_scripts(FILE *iii, InteractionScripts *scripts)
 {
@@ -772,7 +772,7 @@ void deserialize_interaction_scripts(FILE *iii, InteractionScripts *scripts)
   }
 }
 
-void load_main_block(roomstruct *rstruc, char *files, FILE *opty, room_file_header rfh) {
+static void load_main_block(roomstruct *rstruc, char *files, FILE *opty, room_file_header rfh) {
   int   f, gsmod, NUMREAD;
   char  buffre[3000];
   long  tesl;
@@ -1531,7 +1531,7 @@ int CharacterInfo::get_blocking_bottom() {
 }
 
 #define COPY_CHAR_VAR(name) ci->name = oci->name
-void ConvertOldCharacterToNew (OldCharacterInfo *oci, CharacterInfo *ci) {
+static void ConvertOldCharacterToNew (OldCharacterInfo *oci, CharacterInfo *ci) {
   COPY_CHAR_VAR (defview);
   COPY_CHAR_VAR (talkview);
   COPY_CHAR_VAR (view);
@@ -1566,7 +1566,7 @@ void ConvertOldCharacterToNew (OldCharacterInfo *oci, CharacterInfo *ci) {
   ci->flags = ci->flags & (~OCHF_SPEECHCOL);
 }
 
-void ConvertOldGameStruct (OldGameSetupStruct *ogss, GameSetupStruct *gss) {
+static void ConvertOldGameStruct (OldGameSetupStruct *ogss, GameSetupStruct *gss) {
   int i;
   strcpy (gss->gamename, ogss->gamename);
   for (i = 0; i < 20; i++)
@@ -1602,7 +1602,7 @@ void ConvertOldGameStruct (OldGameSetupStruct *ogss, GameSetupStruct *gss) {
   gss->numcursors = 10;
 }
 
-void Convert272ViewsToNew (int numof, ViewStruct272 *oldv, ViewStruct *newv) {
+static void Convert272ViewsToNew (int numof, ViewStruct272 *oldv, ViewStruct *newv) {
   
   for (int a = 0; a < numof; a++) {
     newv[a].Initialize(oldv[a].numloops);
