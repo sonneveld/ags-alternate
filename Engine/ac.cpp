@@ -1553,16 +1553,19 @@ void stop_and_destroy_channel_ex(int chid, bool resetLegacyMusicSettings) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] StopChannel *** */
 void stop_and_destroy_channel (int chid) 
 {
 	stop_and_destroy_channel_ex(chid, true);
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] PlayMusic *** */
 void PlayMusicResetQueue(int newmus) {
   play.music_queue_size = 0;
   newmusic(newmus);
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] StopAmbientSound *** */
 void StopAmbientSound (int channel) {
   if ((channel < 0) || (channel >= MAX_SOUND_CHANNELS))
     quit("!StopAmbientSound: invalid channel");
@@ -1586,6 +1589,7 @@ SOUNDCLIP *load_sound_from_path(int soundNumber, int volume, bool repeat)
   return soundfx;
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] PlayAmbientSound *** */
 void PlayAmbientSound (int channel, int sndnum, int vol, int x, int y) {
   // the channel parameter is to allow multiple ambient sounds in future
   if ((channel < 1) || (channel == SCHAN_SPEECH) || (channel >= MAX_SOUND_CHANNELS))
@@ -1675,6 +1679,7 @@ const char *load_game_errors[9] =
   "Saved under a different game", "Resolution mismatch",
   "Colour depth mismatch", ""};
 
+/* *** SCRIPT SYMBOL: [Game] RestartGame *** */
 void restart_game() {
   can_run_delayed_command();
   if (inside_script) {
@@ -1986,6 +1991,7 @@ bool init_translation (const char *lang) {
   return true;
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetTranslation *** */
 char *get_translation (const char *text) {
   if (text == NULL)
     quit("!Null string supplied to CheckForTranslations");
@@ -2019,12 +2025,14 @@ char *get_translation (const char *text) {
   return (char*)text;
 }
 
+/* *** SCRIPT SYMBOL: [Game] IsTranslationAvailable *** */
 int IsTranslationAvailable () {
   if (transtree != NULL)
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetTranslationName *** */
 int GetTranslationName (char* buffer) {
   VALIDATE_STRING (buffer);
   const char *copyFrom = transFileName;
@@ -2046,12 +2054,14 @@ int GetTranslationName (char* buffer) {
   return IsTranslationAvailable();
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_TranslationFilename *** */
 const char* Game_GetTranslationFilename() {
   char buffer[STD_BUFFER_SIZE];
   GetTranslationName(buffer);
   return CreateNewScriptString(buffer);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::ChangeTranslation^1 *** */
 int Game_ChangeTranslation(const char *newFilename)
 {
   if ((newFilename == NULL) || (newFilename[0] == 0))
@@ -2565,6 +2575,7 @@ inline int is_valid_object(int obtest) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetAmbientTint *** */
 void SetAmbientTint (int red, int green, int blue, int opacity, int luminance) {
   if ((red < 0) || (green < 0) || (blue < 0) ||
       (red > 255) || (green > 255) || (blue > 255) ||
@@ -2581,6 +2592,7 @@ void SetAmbientTint (int red, int green, int blue, int opacity, int luminance) {
   play.rtint_light = (luminance * 25) / 10;
 }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectTint *** */
 void SetObjectTint(int obj, int red, int green, int blue, int opacity, int luminance) {
   if ((red < 0) || (green < 0) || (blue < 0) ||
       (red > 255) || (green > 255) || (blue > 255) ||
@@ -2601,10 +2613,12 @@ void SetObjectTint(int obj, int red, int green, int blue, int opacity, int lumin
   objs[obj].flags |= OBJF_HASTINT;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::Tint^5 *** */
 void Object_Tint(ScriptObject *objj, int red, int green, int blue, int saturation, int luminance) {
   SetObjectTint(objj->id, red, green, blue, saturation, luminance);
 }
 
+/* *** SCRIPT SYMBOL: [Object] RemoveObjectTint *** */
 void RemoveObjectTint(int obj) {
   if (!is_valid_object(obj))
     quit("!RemoveObjectTint: invalid object");
@@ -2618,10 +2632,12 @@ void RemoveObjectTint(int obj) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::RemoveTint^0 *** */
 void Object_RemoveTint(ScriptObject *objj) {
   RemoveObjectTint(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Screen] TintScreen *** */
 void TintScreen(int red, int grn, int blu) {
   if ((red < 0) || (grn < 0) || (blu < 0) || (red > 100) || (grn > 100) || (blu > 100))
     quit("!TintScreen: RGB values must be 0-100");
@@ -2772,6 +2788,7 @@ void restore_after_dialog() {
   construct_virtual_screen(true);
 }
 
+/* *** SCRIPT SYMBOL: [Game] RestoreGameSlot *** */
 void RestoreGameSlot(int slnum) {
   if (displayed_room < 0)
     quit("!RestoreGameSlot: a game cannot be restored from within game_start");
@@ -2790,6 +2807,7 @@ void get_save_game_path(int slotNum, char *buffer) {
   strcat(buffer, saveGameSuffix);
 }
 
+/* *** SCRIPT SYMBOL: [Game] DeleteSaveSlot *** */
 void DeleteSaveSlot (int slnum) {
   char nametouse[260];
   get_save_game_path(slnum, nametouse);
@@ -2810,6 +2828,7 @@ void DeleteSaveSlot (int slnum) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::SetSaveGameDirectory^1 *** */
 int Game_SetSaveGameDirectory(const char *newFolder) {
 
   // don't allow them to go to another folder
@@ -2862,6 +2881,7 @@ int Game_SetSaveGameDirectory(const char *newFolder) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetSaveSlotDescription *** */
 int GetSaveSlotDescription(int slnum,char*desbuf) {
   VALIDATE_STRING(desbuf);
   if (load_game(slnum, desbuf, NULL) == 0)
@@ -2870,6 +2890,7 @@ int GetSaveSlotDescription(int slnum,char*desbuf) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetSaveSlotDescription^1 *** */
 const char* Game_GetSaveSlotDescription(int slnum) {
   char buffer[STD_BUFFER_SIZE];
   if (load_game(slnum, buffer, NULL) == 0)
@@ -2877,6 +2898,7 @@ const char* Game_GetSaveSlotDescription(int slnum) {
   return NULL;
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] LoadSaveSlotScreenshot *** */
 int LoadSaveSlotScreenshot(int slnum, int width, int height) {
   int gotSlot;
   multiply_up_coordinates(&width, &height);
@@ -2918,6 +2940,7 @@ void get_current_dir_path(char* buffer, const char *fileName)
   }
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] LoadImageFile *** */
 int LoadImageFile(const char *filename) {
   
   char loadFromPath[MAX_PATH];
@@ -2950,6 +2973,7 @@ int load_game_and_print_error(int toload) {
   return ecret;
 }
 
+/* *** SCRIPT SYMBOL: [Game] RestoreGameDialog *** */
 void restore_game_dialog() {
   can_run_delayed_command();
   if (thisroom.options[ST_SAVELOAD] == 1) {
@@ -2968,6 +2992,7 @@ void restore_game_dialog() {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Game] SaveGameDialog *** */
 void save_game_dialog() {
   if (thisroom.options[ST_SAVELOAD] == 1) {
     DisplayMessage (983);
@@ -3425,6 +3450,7 @@ int add_screen_overlay(int x,int y,int type,block piccy, bool alphaChannel = fal
   return numscreenover-1;
   }
 
+/* *** SCRIPT SYMBOL: [Screen] FadeOut *** */
 void my_fade_out(int spdd) {
   EndSkippingUntilCharStops();
 
@@ -3686,6 +3712,7 @@ void generate_light_table() {
     }
   }
 
+/* *** SCRIPT SYMBOL: [Region] SetAreaLightLevel *** */
 void SetAreaLightLevel(int area, int brightness) {
   if ((area < 0) || (area > MAX_REGIONS))
     quit("!SetAreaLightLevel: invalid region");
@@ -3698,14 +3725,17 @@ void SetAreaLightLevel(int area, int brightness) {
   DEBUG_CONSOLE("Region %d light level set to %d", area, brightness);
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::set_LightLevel *** */
 void Region_SetLightLevel(ScriptRegion *ssr, int brightness) {
   SetAreaLightLevel(ssr->id, brightness);
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_LightLevel *** */
 int Region_GetLightLevel(ScriptRegion *ssr) {
   return thisroom.regionLightLevel[ssr->id];
 }
 
+/* *** SCRIPT SYMBOL: [Region] SetRegionTint *** */
 void SetRegionTint (int area, int red, int green, int blue, int amount) {
   if ((area < 0) || (area > MAX_REGIONS))
     quit("!SetRegionTint: invalid region");
@@ -3739,32 +3769,38 @@ void SetRegionTint (int area, int red, int green, int blue, int amount) {
   thisroom.regionLightLevel[area] = amount;
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_TintEnabled *** */
 int Region_GetTintEnabled(ScriptRegion *srr) {
   if (thisroom.regionTintLevel[srr->id] & TINT_IS_ENABLED)
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_TintRed *** */
 int Region_GetTintRed(ScriptRegion *srr) {
   
   return thisroom.regionTintLevel[srr->id] & 0x000000ff;
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_TintGreen *** */
 int Region_GetTintGreen(ScriptRegion *srr) {
   
   return (thisroom.regionTintLevel[srr->id] >> 8) & 0x000000ff;
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_TintBlue *** */
 int Region_GetTintBlue(ScriptRegion *srr) {
   
   return (thisroom.regionTintLevel[srr->id] >> 16) & 0x000000ff;
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_TintSaturation *** */
 int Region_GetTintSaturation(ScriptRegion *srr) {
   
   return thisroom.regionLightLevel[srr->id];
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::Tint^4 *** */
 void Region_Tint(ScriptRegion *srr, int red, int green, int blue, int amount) {
   SetRegionTint(srr->id, red, green, blue, amount);
 }
@@ -3788,16 +3824,19 @@ int GetBaseWidth () {
   return BASEWIDTH;
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] HideMouseCursor *** */
 void HideMouseCursor () {
   play.mouse_cursor_hidden = 1;
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] ShowMouseCursor *** */
 void ShowMouseCursor () {
   play.mouse_cursor_hidden = 0;
 }
 
 // The Mouse:: functions are static so the script doesn't pass
 // in an object parameter
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::set_Visible *** */
 void Mouse_SetVisible(int isOn) {
   if (isOn)
     ShowMouseCursor();
@@ -3805,6 +3844,7 @@ void Mouse_SetVisible(int isOn) {
     HideMouseCursor();
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::get_Visible *** */
 int Mouse_GetVisible() {
   if (play.mouse_cursor_hidden)
     return 0;
@@ -3812,6 +3852,8 @@ int Mouse_GetVisible() {
 }
 
 #define MOUSE_MAX_Y divide_down_coordinate(vesa_yres)
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::SetBounds^4 *** */
+/* *** SCRIPT SYMBOL: [Mouse] SetMouseBounds *** */
 void SetMouseBounds (int x1, int y1, int x2, int y2) {
   if ((x1 == 0) && (y1 == 0) && (x2 == 0) && (y2 == 0)) {
     x2 = BASEWIDTH-1;
@@ -4937,10 +4979,12 @@ void update_events() {
 // end event list functions
 
 
+/* *** SCRIPT SYMBOL: [Game] PauseGame *** */
 void PauseGame() {
   game_paused++;
   DEBUG_CONSOLE("Game paused");
 }
+/* *** SCRIPT SYMBOL: [Game] UnPauseGame *** */
 void UnPauseGame() {
   if (game_paused > 0)
     game_paused--;
@@ -5019,6 +5063,8 @@ void draw_sprite_support_alpha(int xpos, int ypos, block image, int slot) {
 
 // mouse cursor functions:
 // set_mouse_cursor: changes visual appearance to specified cursor
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::UseModeGraphic^1 *** */
+/* *** SCRIPT SYMBOL: [Mouse] SetMouseCursor *** */
 void set_mouse_cursor(int newcurs) {
   int hotspotx = game.mcurs[newcurs].hotx, hotspoty = game.mcurs[newcurs].hoty;
 
@@ -5086,11 +5132,15 @@ void precache_view(int view)
 }
 
 // set_default_cursor: resets visual appearance to current mode (walk, look, etc)
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::UseDefaultGraphic^0 *** */
+/* *** SCRIPT SYMBOL: [Mouse] SetDefaultCursor *** */
 void set_default_cursor() {
   set_mouse_cursor(cur_mode);
   }
 
 // permanently change cursor graphic
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::ChangeModeGraphic^2 *** */
+/* *** SCRIPT SYMBOL: [Mouse] ChangeCursorGraphic *** */
 void ChangeCursorGraphic (int curs, int newslot) {
   if ((curs < 0) || (curs >= game.numcursors))
     quit("!ChangeCursorGraphic: invalid mouse cursor");
@@ -5104,6 +5154,7 @@ void ChangeCursorGraphic (int curs, int newslot) {
     set_mouse_cursor (curs);
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::GetModeGraphic^1 *** */
 int Mouse_GetModeGraphic(int curs) {
   if ((curs < 0) || (curs >= game.numcursors))
     quit("!Mouse.GetModeGraphic: invalid mouse cursor");
@@ -5111,6 +5162,8 @@ int Mouse_GetModeGraphic(int curs) {
   return game.mcurs[curs].pic;
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::ChangeModeHotspot^3 *** */
+/* *** SCRIPT SYMBOL: [Mouse] ChangeCursorHotspot *** */
 void ChangeCursorHotspot (int curs, int x, int y) {
   if ((curs < 0) || (curs >= game.numcursors))
     quit("!ChangeCursorHotspot: invalid mouse cursor");
@@ -5120,6 +5173,7 @@ void ChangeCursorHotspot (int curs, int x, int y) {
     set_mouse_cursor (cur_cursor);
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::ChangeModeView^2 *** */
 void Mouse_ChangeModeView(int curs, int newview) {
   if ((curs < 0) || (curs >= game.numcursors))
     quit("!Mouse.ChangeModeView: invalid mouse cursor");
@@ -5164,11 +5218,15 @@ int find_next_enabled_cursor(int startwith) {
   return testing;
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::SelectNextMode^0 *** */
+/* *** SCRIPT SYMBOL: [Mouse] SetNextCursorMode *** */
 void SetNextCursor () {
   set_cursor_mode (find_next_enabled_cursor(cur_mode + 1));
 }
 
 // set_cursor_mode: changes mode and appearance
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::set_Mode *** */
+/* *** SCRIPT SYMBOL: [Mouse] SetCursorMode *** */
 void set_cursor_mode(int newmode) {
   if ((newmode < 0) || (newmode >= game.numcursors))
     quit("!SetCursorMode: invalid cursor mode specified");
@@ -5201,16 +5259,19 @@ void set_inv_item_cursorpic(int invItemId, int piccy)
   }
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::set_CursorGraphic *** */
 void InventoryItem_SetCursorGraphic(ScriptInvItem *iitem, int newSprite) 
 {
   set_inv_item_cursorpic(iitem->id, newSprite);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::get_CursorGraphic *** */
 int InventoryItem_GetCursorGraphic(ScriptInvItem *iitem) 
 {
   return game.invinfo[iitem->id].cursorPic;
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] SetInvItemPic *** */
 void set_inv_item_pic(int invi, int piccy) {
   if ((invi < 1) || (invi > game.numinvitems))
     quit("!SetInvItemPic: invalid inventory item specified");
@@ -5229,10 +5290,12 @@ void set_inv_item_pic(int invi, int piccy) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::set_Graphic *** */
 void InventoryItem_SetGraphic(ScriptInvItem *iitem, int piccy) {
   set_inv_item_pic(iitem->id, piccy);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] SetInvItemName *** */
 void SetInvItemName(int invi, const char *newName) {
   if ((invi < 1) || (invi > game.numinvitems))
     quit("!SetInvName: invalid inventory item specified");
@@ -5245,14 +5308,19 @@ void SetInvItemName(int invi, const char *newName) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::SetName^1 *** */
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::set_Name *** */
 void InventoryItem_SetName(ScriptInvItem *scii, const char *newname) {
   SetInvItemName(scii->id, newname);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::get_ID *** */
 int InventoryItem_GetID(ScriptInvItem *scii) {
   return scii->id;
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::EnableMode^1 *** */
+/* *** SCRIPT SYMBOL: [Mouse] EnableCursorMode *** */
 void enable_cursor_mode(int modd) {
   game.mcurs[modd].flags&=~MCF_DISABLED;
   // now search the interfaces for related buttons to re-enable
@@ -5270,6 +5338,8 @@ void enable_cursor_mode(int modd) {
   guis_need_update = 1;
   }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::DisableMode^1 *** */
+/* *** SCRIPT SYMBOL: [Mouse] DisableCursorMode *** */
 void disable_cursor_mode(int modd) {
   game.mcurs[modd].flags|=MCF_DISABLED;
   // now search the interfaces for related buttons to kill
@@ -5373,6 +5443,7 @@ void run_event_block_inv(int invNum, int aaa) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetActiveInventory *** */
 void SetActiveInventory(int iit) {
 
   ScriptInvItem *tosend = NULL;
@@ -5384,11 +5455,14 @@ void SetActiveInventory(int iit) {
   Character_SetActiveInventory(playerchar, tosend);
 }
 
+/* *** SCRIPT SYMBOL: [Game] IsGamePaused *** */
 int IsGamePaused() {
   if (game_paused>0) return 1;
   return 0;
   }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::IsButtonDown^1 *** */
+/* *** SCRIPT SYMBOL: [Mouse] IsButtonDown *** */
 int IsButtonDown(int which) {
   if ((which < 1) || (which > 3))
     quit("!IsButtonDown: only works with eMouseLeft, eMouseRight, eMouseMiddle");
@@ -5397,6 +5471,7 @@ int IsButtonDown(int which) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterIdle *** */
 void SetCharacterIdle(int who, int iview, int itime) {
   if (!is_valid_character(who))
     quit("!SetCharacterIdle: Invalid character specified");
@@ -5404,6 +5479,7 @@ void SetCharacterIdle(int who, int iview, int itime) {
   Character_SetIdleView(&game.chars[who], iview, itime);
 }
 
+/* *** SCRIPT SYMBOL: [Game] IsKeyPressed *** */
 int IsKeyPressed (int keycode) {
 #ifdef ALLEGRO_KEYBOARD_HANDLER
   if (keyboard_needs_poll())
@@ -5565,6 +5641,7 @@ void check_skip_cutscene_keypress (int kgn) {
 
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] RunInventoryInteraction *** */
 void RunInventoryInteraction (int iit, int modd) {
   if ((iit < 0) || (iit >= game.numinvitems))
     quit("!RunInventoryInteraction: invalid inventory number");
@@ -5584,6 +5661,7 @@ void RunInventoryInteraction (int iit, int modd) {
     run_event_block_inv(iit, 4);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::RunInteraction^1 *** */
 void InventoryItem_RunInteraction(ScriptInvItem *iitem, int mood) {
   RunInventoryInteraction(iitem->id, mood);
 }
@@ -5919,6 +5997,7 @@ void check_controls() {
 }  // end check_controls
 
 
+/* *** SCRIPT SYMBOL: [AudioChannel] IsChannelPlaying *** */
 int IsChannelPlaying(int chan) {
   if (play.fast_forward)
     return 0;
@@ -5932,6 +6011,7 @@ int IsChannelPlaying(int chan) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Multimedia] IsSoundPlaying *** */
 int IsSoundPlaying() {
   if (play.fast_forward)
     return 0;
@@ -5945,6 +6025,7 @@ int IsSoundPlaying() {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] SetFrameSound *** */
 void SetFrameSound (int vii, int loop, int frame, int sound) {
   if ((vii < 1) || (vii > game.numviews))
     quit("!SetFrameSound: invalid view number");
@@ -7110,6 +7191,7 @@ void replace_macro_tokens(char*statusbarformat,char*cur_stb_text) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Game] UpdateInventory *** */
 void update_invorder() {
   for (int cc = 0; cc < game.numcharacters; cc++) {
     charextra[cc].invorder_count = 0;
@@ -7568,6 +7650,7 @@ block recycle_bitmap(block bimp, int coldep, int wid, int hit) {
   return bimp;
 }
 
+/* *** SCRIPT SYMBOL: [Region] GetRegionAt *** */
 int GetRegionAt (int xxx, int yyy) {
   // if the co-ordinates are off the edge of the screen,
   // correct them to be just within
@@ -7599,6 +7682,7 @@ int GetRegionAt (int xxx, int yyy) {
   return hsthere;
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::GetAtRoomXY^2 *** */
 ScriptRegion *GetRegionAtLocation(int xx, int yy) {
   int hsnum = GetRegionAt(xx, yy);
   if (hsnum <= 0)
@@ -8059,6 +8143,7 @@ int construct_object_gfx(int aa, int *drawnWidth, int *drawnHeight, bool alwaysU
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Room] GetScalingAt *** */
 int GetScalingAt (int x, int y) {
   int onarea = get_walkable_area_pixel(x, y);
   if (onarea < 0)
@@ -8067,6 +8152,7 @@ int GetScalingAt (int x, int y) {
   return get_area_scaling (onarea, x, y);
 }
 
+/* *** SCRIPT SYMBOL: [Room] SetAreaScaling *** */
 void SetAreaScaling(int area, int min, int max) {
   if ((area < 0) || (area > MAX_WALK_AREAS))
     quit("!SetAreaScaling: invalid walkalbe area");
@@ -8867,6 +8953,7 @@ void GfxDriverOnInitCallback(void *data)
   platform->RunPluginInitGfxHooks(gfxDriver->GetDriverID(), data);
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] SeekMIDIPosition *** */
 void SeekMIDIPosition (int position) {
   if (play.silent_midi)
     midi_seek (position);
@@ -8876,6 +8963,7 @@ void SeekMIDIPosition (int position) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] GetMIDIPosition *** */
 int GetMIDIPosition () {
   if (play.silent_midi)
     return midi_pos;
@@ -9071,6 +9159,7 @@ void start_replay_record () {
   play.recording = 1;
 }
 
+/* *** SCRIPT SYMBOL: [??] StartRecording *** */
 void scStartRecording (int keyToStop) {
   quit("!StartRecording: not et suppotreD");
 }
@@ -9767,6 +9856,7 @@ struct CCObject : AGSCCDynamicObject {
 
 // ** SCRIPT DRAWINGSURFACE OBJECT
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::Release^0 *** */
 void DrawingSurface_Release(ScriptDrawingSurface* sds)
 {
   if (sds->roomBackgroundNumber >= 0)
@@ -9887,6 +9977,7 @@ void ScriptDrawingSurface::UnMultiplyThickness(int *valueToAdjust)
   }
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::CreateCopy^0 *** */
 ScriptDrawingSurface* DrawingSurface_CreateCopy(ScriptDrawingSurface *sds)
 {
   BITMAP *sourceBitmap = sds->GetBitmapSurface();
@@ -9909,6 +10000,7 @@ ScriptDrawingSurface* DrawingSurface_CreateCopy(ScriptDrawingSurface *sds)
   return NULL;
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawSurface^2 *** */
 void DrawingSurface_DrawSurface(ScriptDrawingSurface* target, ScriptDrawingSurface* source, int translev) {
   if ((translev < 0) || (translev > 99))
     quit("!DrawingSurface.DrawSurface: invalid parameter (transparency must be 0-99)");
@@ -9935,6 +10027,7 @@ void DrawingSurface_DrawSurface(ScriptDrawingSurface* target, ScriptDrawingSurfa
   target->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawImage^6 *** */
 void DrawingSurface_DrawImage(ScriptDrawingSurface* sds, int xx, int yy, int slot, int trans, int width, int height)
 {
   if ((slot < 0) || (slot >= MAX_SPRITES) || (spriteset[slot] == NULL))
@@ -9991,6 +10084,7 @@ void DrawingSurface_DrawImage(ScriptDrawingSurface* sds, int xx, int yy, int slo
     destroy_bitmap(sourcePic);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetColorFromRGB^3 *** */
 int Game_GetColorFromRGB(int red, int grn, int blu) {
   if ((red < 0) || (red > 255) || (grn < 0) || (grn > 255) ||
       (blu < 0) || (blu > 255))
@@ -10007,6 +10101,7 @@ int Game_GetColorFromRGB(int red, int grn, int blu) {
   return agscolor;
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::set_DrawingColor *** */
 void DrawingSurface_SetDrawingColor(ScriptDrawingSurface *sds, int newColour) 
 {
   sds->currentColourScript = newColour;
@@ -10024,21 +10119,25 @@ void DrawingSurface_SetDrawingColor(ScriptDrawingSurface *sds, int newColour)
   sds->FinishedDrawingReadOnly();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::get_DrawingColor *** */
 int DrawingSurface_GetDrawingColor(ScriptDrawingSurface *sds) 
 {
   return sds->currentColourScript;
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::set_UseHighResCoordinates *** */
 void DrawingSurface_SetUseHighResCoordinates(ScriptDrawingSurface *sds, int highRes) 
 {
   sds->highResCoordinates = (highRes) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::get_UseHighResCoordinates *** */
 int DrawingSurface_GetUseHighResCoordinates(ScriptDrawingSurface *sds) 
 {
   return sds->highResCoordinates;
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::get_Height *** */
 int DrawingSurface_GetHeight(ScriptDrawingSurface *sds) 
 {
   sds->StartDrawing();
@@ -10048,6 +10147,7 @@ int DrawingSurface_GetHeight(ScriptDrawingSurface *sds)
   return height;
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::get_Width *** */
 int DrawingSurface_GetWidth(ScriptDrawingSurface *sds) 
 {
   sds->StartDrawing();
@@ -10057,6 +10157,7 @@ int DrawingSurface_GetWidth(ScriptDrawingSurface *sds)
   return width;
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::Clear^1 *** */
 void DrawingSurface_Clear(ScriptDrawingSurface *sds, int colour) 
 {
   sds->StartDrawing();
@@ -10073,6 +10174,7 @@ void DrawingSurface_Clear(ScriptDrawingSurface *sds, int colour)
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawCircle^3 *** */
 void DrawingSurface_DrawCircle(ScriptDrawingSurface *sds, int x, int y, int radius) 
 {
   sds->MultiplyCoordinates(&x, &y);
@@ -10083,6 +10185,7 @@ void DrawingSurface_DrawCircle(ScriptDrawingSurface *sds, int x, int y, int radi
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawRectangle^4 *** */
 void DrawingSurface_DrawRectangle(ScriptDrawingSurface *sds, int x1, int y1, int x2, int y2) 
 {
   sds->MultiplyCoordinates(&x1, &y1);
@@ -10093,6 +10196,7 @@ void DrawingSurface_DrawRectangle(ScriptDrawingSurface *sds, int x1, int y1, int
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawTriangle^6 *** */
 void DrawingSurface_DrawTriangle(ScriptDrawingSurface *sds, int x1, int y1, int x2, int y2, int x3, int y3) 
 {
   sds->MultiplyCoordinates(&x1, &y1);
@@ -10104,6 +10208,7 @@ void DrawingSurface_DrawTriangle(ScriptDrawingSurface *sds, int x1, int y1, int 
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawString^104 *** */
 void DrawingSurface_DrawString(ScriptDrawingSurface *sds, int xx, int yy, int font, const char* texx, ...) 
 {
   char displbuf[STD_BUFFER_SIZE];
@@ -10125,6 +10230,7 @@ void DrawingSurface_DrawString(ScriptDrawingSurface *sds, int xx, int yy, int fo
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawStringWrapped^6 *** */
 void DrawingSurface_DrawStringWrapped(ScriptDrawingSurface *sds, int xx, int yy, int wid, int font, int alignment, const char *msg) {
   int texthit = wgetfontheight(font);
   sds->MultiplyCoordinates(&xx, &yy);
@@ -10155,6 +10261,7 @@ void DrawingSurface_DrawStringWrapped(ScriptDrawingSurface *sds, int xx, int yy,
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawMessageWrapped^5 *** */
 void DrawingSurface_DrawMessageWrapped(ScriptDrawingSurface *sds, int xx, int yy, int wid, int font, int msgm)
 {
   char displbuf[3000];
@@ -10166,6 +10273,7 @@ void DrawingSurface_DrawMessageWrapped(ScriptDrawingSurface *sds, int xx, int yy
   DrawingSurface_DrawStringWrapped(sds, xx, yy, wid, font, SCALIGN_LEFT, displbuf);
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawLine^5 *** */
 void DrawingSurface_DrawLine(ScriptDrawingSurface *sds, int fromx, int fromy, int tox, int toy, int thickness) {
   sds->MultiplyCoordinates(&fromx, &fromy);
   sds->MultiplyCoordinates(&tox, &toy);
@@ -10185,6 +10293,7 @@ void DrawingSurface_DrawLine(ScriptDrawingSurface *sds, int fromx, int fromy, in
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::DrawPixel^2 *** */
 void DrawingSurface_DrawPixel(ScriptDrawingSurface *sds, int x, int y) {
   sds->MultiplyCoordinates(&x, &y);
   int thickness = 1;
@@ -10202,6 +10311,7 @@ void DrawingSurface_DrawPixel(ScriptDrawingSurface *sds, int x, int y) {
   sds->FinishedDrawing();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::GetPixel^2 *** */
 int DrawingSurface_GetPixel(ScriptDrawingSurface *sds, int x, int y) {
   sds->MultiplyCoordinates(&x, &y);
   sds->StartDrawing();
@@ -10323,92 +10433,110 @@ ScriptDrawingSurface::ScriptDrawingSurface()
 
 // ** SCRIPT DIALOGOPTIONSRENDERING OBJECT
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_X *** */
 int DialogOptionsRendering_GetX(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->x;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_X *** */
 void DialogOptionsRendering_SetX(ScriptDialogOptionsRendering *dlgOptRender, int newX)
 {
   dlgOptRender->x = newX;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_Y *** */
 int DialogOptionsRendering_GetY(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->y;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_Y *** */
 void DialogOptionsRendering_SetY(ScriptDialogOptionsRendering *dlgOptRender, int newY)
 {
   dlgOptRender->y = newY;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_Width *** */
 int DialogOptionsRendering_GetWidth(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->width;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_Width *** */
 void DialogOptionsRendering_SetWidth(ScriptDialogOptionsRendering *dlgOptRender, int newWidth)
 {
   dlgOptRender->width = newWidth;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_Height *** */
 int DialogOptionsRendering_GetHeight(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->height;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_Height *** */
 void DialogOptionsRendering_SetHeight(ScriptDialogOptionsRendering *dlgOptRender, int newHeight)
 {
   dlgOptRender->height = newHeight;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_ParserTextBoxX *** */
 int DialogOptionsRendering_GetParserTextboxX(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->parserTextboxX;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_ParserTextBoxX *** */
 void DialogOptionsRendering_SetParserTextboxX(ScriptDialogOptionsRendering *dlgOptRender, int newX)
 {
   dlgOptRender->parserTextboxX = newX;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_ParserTextBoxY *** */
 int DialogOptionsRendering_GetParserTextboxY(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->parserTextboxY;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_ParserTextBoxY *** */
 void DialogOptionsRendering_SetParserTextboxY(ScriptDialogOptionsRendering *dlgOptRender, int newY)
 {
   dlgOptRender->parserTextboxY = newY;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_ParserTextBoxWidth *** */
 int DialogOptionsRendering_GetParserTextboxWidth(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->parserTextboxWidth;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_ParserTextBoxWidth *** */
 void DialogOptionsRendering_SetParserTextboxWidth(ScriptDialogOptionsRendering *dlgOptRender, int newWidth)
 {
   dlgOptRender->parserTextboxWidth = newWidth;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_DialogToRender *** */
 ScriptDialog* DialogOptionsRendering_GetDialogToRender(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return &scrDialog[dlgOptRender->dialogID];
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_Surface *** */
 ScriptDrawingSurface* DialogOptionsRendering_GetSurface(ScriptDialogOptionsRendering *dlgOptRender)
 {
   dlgOptRender->surfaceAccessed = true;
   return dlgOptRender->surfaceToRenderTo;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::get_ActiveOptionID *** */
 int DialogOptionsRendering_GetActiveOptionID(ScriptDialogOptionsRendering *dlgOptRender)
 {
   return dlgOptRender->activeOptionID + 1;
 }
 
+/* *** SCRIPT SYMBOL: [DialogOptionsRenderingInfo] DialogOptionsRenderingInfo::set_ActiveOptionID *** */
 void DialogOptionsRendering_SetActiveOptionID(ScriptDialogOptionsRendering *dlgOptRender, int activeOptionID)
 {
   int optionCount = dialog[scrDialog[dlgOptRender->dialogID].id].numoptions;
@@ -10572,6 +10700,7 @@ ScriptString::ScriptString(const char *fromText) {
   strcpy(text, fromText);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::IsNullOrEmpty^1 *** */
 int String_IsNullOrEmpty(const char *thisString) 
 {
   if ((thisString == NULL) || (thisString[0] == 0))
@@ -10580,10 +10709,12 @@ int String_IsNullOrEmpty(const char *thisString)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [String] String::Copy^0 *** */
 const char* String_Copy(const char *srcString) {
   return CreateNewScriptString(srcString);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::Append^1 *** */
 const char* String_Append(const char *thisString, const char *extrabit) {
   char *buffer = (char*)malloc(strlen(thisString) + strlen(extrabit) + 1);
   strcpy(buffer, thisString);
@@ -10591,12 +10722,14 @@ const char* String_Append(const char *thisString, const char *extrabit) {
   return CreateNewScriptString(buffer, false);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::AppendChar^1 *** */
 const char* String_AppendChar(const char *thisString, char extraOne) {
   char *buffer = (char*)malloc(strlen(thisString) + 2);
   sprintf(buffer, "%s%c", thisString, extraOne);
   return CreateNewScriptString(buffer, false);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::ReplaceCharAt^2 *** */
 const char* String_ReplaceCharAt(const char *thisString, int index, char newChar) {
   if ((index < 0) || (index >= (int)strlen(thisString)))
     quit("!String.ReplaceCharAt: index outside range of string");
@@ -10607,6 +10740,7 @@ const char* String_ReplaceCharAt(const char *thisString, int index, char newChar
   return CreateNewScriptString(buffer, false);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::Truncate^1 *** */
 const char* String_Truncate(const char *thisString, int length) {
   if (length < 0)
     quit("!String.Truncate: invalid length");
@@ -10620,6 +10754,7 @@ const char* String_Truncate(const char *thisString, int length) {
   return CreateNewScriptString(buffer, false);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::Substring^2 *** */
 const char* String_Substring(const char *thisString, int index, int length) {
   if (length < 0)
     quit("!String.Substring: invalid length");
@@ -10632,6 +10767,7 @@ const char* String_Substring(const char *thisString, int index, int length) {
   return CreateNewScriptString(buffer, false);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::CompareTo^2 *** */
 int String_CompareTo(const char *thisString, const char *otherString, bool caseSensitive) {
 
   if (caseSensitive) {
@@ -10642,6 +10778,7 @@ int String_CompareTo(const char *thisString, const char *otherString, bool caseS
   }
 }
 
+/* *** SCRIPT SYMBOL: [String] String::StartsWith^2 *** */
 int String_StartsWith(const char *thisString, const char *checkForString, bool caseSensitive) {
 
   if (caseSensitive) {
@@ -10652,6 +10789,7 @@ int String_StartsWith(const char *thisString, const char *checkForString, bool c
   }
 }
 
+/* *** SCRIPT SYMBOL: [String] String::EndsWith^2 *** */
 int String_EndsWith(const char *thisString, const char *checkForString, bool caseSensitive) {
 
   int checkAtOffset = strlen(thisString) - strlen(checkForString);
@@ -10671,6 +10809,7 @@ int String_EndsWith(const char *thisString, const char *checkForString, bool cas
   }
 }
 
+/* *** SCRIPT SYMBOL: [String] String::Replace^3 *** */
 const char* String_Replace(const char *thisString, const char *lookForText, const char *replaceWithText, bool caseSensitive)
 {
   char resultBuffer[STD_BUFFER_SIZE] = "";
@@ -10706,6 +10845,7 @@ const char* String_Replace(const char *thisString, const char *lookForText, cons
   return CreateNewScriptString(resultBuffer, true);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::LowerCase^0 *** */
 const char* String_LowerCase(const char *thisString) {
   char *buffer = (char*)malloc(strlen(thisString) + 1);
   strcpy(buffer, thisString);
@@ -10713,6 +10853,7 @@ const char* String_LowerCase(const char *thisString) {
   return CreateNewScriptString(buffer, false);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::UpperCase^0 *** */
 const char* String_UpperCase(const char *thisString) {
   char *buffer = (char*)malloc(strlen(thisString) + 1);
   strcpy(buffer, thisString);
@@ -10720,6 +10861,7 @@ const char* String_UpperCase(const char *thisString) {
   return CreateNewScriptString(buffer, false);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::Format^101 *** */
 const char* String_Format(const char *texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
 
@@ -10731,6 +10873,7 @@ const char* String_Format(const char *texx, ...) {
   return CreateNewScriptString(displbuf);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::geti_Chars *** */
 int String_GetChars(const char *texx, int index) {
   if ((index < 0) || (index >= (int)strlen(texx)))
     return 0;
@@ -10775,6 +10918,7 @@ ScriptDynamicSprite::ScriptDynamicSprite() {
   slot = 0;
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::Delete *** */
 void DynamicSprite_Delete(ScriptDynamicSprite *sds) {
   if (sds->slot) {
     free_dynamic_sprite(sds->slot);
@@ -10782,6 +10926,7 @@ void DynamicSprite_Delete(ScriptDynamicSprite *sds) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::GetDrawingSurface^0 *** */
 ScriptDrawingSurface* DynamicSprite_GetDrawingSurface(ScriptDynamicSprite *dss)
 {
   ScriptDrawingSurface *surface = new ScriptDrawingSurface();
@@ -10794,20 +10939,24 @@ ScriptDrawingSurface* DynamicSprite_GetDrawingSurface(ScriptDynamicSprite *dss)
   return surface;
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::get_Graphic *** */
 int DynamicSprite_GetGraphic(ScriptDynamicSprite *sds) {
   if (sds->slot == 0)
     quit("!DynamicSprite.Graphic: Cannot get graphic, sprite has been deleted");
   return sds->slot;
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::get_Width *** */
 int DynamicSprite_GetWidth(ScriptDynamicSprite *sds) {
   return divide_down_coordinate(spritewidth[sds->slot]);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::get_Height *** */
 int DynamicSprite_GetHeight(ScriptDynamicSprite *sds) {
   return divide_down_coordinate(spriteheight[sds->slot]);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::get_ColorDepth *** */
 int DynamicSprite_GetColorDepth(ScriptDynamicSprite *sds) {
   int depth = bitmap_color_depth(spriteset[sds->slot]);
   if (depth == 15)
@@ -10817,6 +10966,7 @@ int DynamicSprite_GetColorDepth(ScriptDynamicSprite *sds) {
   return depth;
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::Resize^2 *** */
 void DynamicSprite_Resize(ScriptDynamicSprite *sds, int width, int height) {
   if ((width < 1) || (height < 1))
     quit("!DynamicSprite.Resize: width and height must be greater than zero");
@@ -10841,6 +10991,7 @@ void DynamicSprite_Resize(ScriptDynamicSprite *sds, int width, int height) {
   add_dynamic_sprite(sds->slot, newPic, (game.spriteflags[sds->slot] & SPF_ALPHACHANNEL) != 0);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::Flip^1 *** */
 void DynamicSprite_Flip(ScriptDynamicSprite *sds, int direction) {
   if ((direction < 1) || (direction > 3))
     quit("!DynamicSprite.Flip: invalid direction");
@@ -10864,6 +11015,7 @@ void DynamicSprite_Flip(ScriptDynamicSprite *sds, int direction) {
   add_dynamic_sprite(sds->slot, newPic, (game.spriteflags[sds->slot] & SPF_ALPHACHANNEL) != 0);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CopyTransparencyMask^1 *** */
 void DynamicSprite_CopyTransparencyMask(ScriptDynamicSprite *sds, int sourceSprite) {
   if (sds->slot == 0)
     quit("!DynamicSprite.CopyTransparencyMask: sprite has been deleted");
@@ -10938,6 +11090,7 @@ void DynamicSprite_CopyTransparencyMask(ScriptDynamicSprite *sds, int sourceSpri
   }
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::ChangeCanvasSize^4 *** */
 void DynamicSprite_ChangeCanvasSize(ScriptDynamicSprite *sds, int width, int height, int x, int y) 
 {
   if (sds->slot == 0)
@@ -10959,6 +11112,7 @@ void DynamicSprite_ChangeCanvasSize(ScriptDynamicSprite *sds, int width, int hei
   add_dynamic_sprite(sds->slot, newPic, (game.spriteflags[sds->slot] & SPF_ALPHACHANNEL) != 0);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::Crop^4 *** */
 void DynamicSprite_Crop(ScriptDynamicSprite *sds, int x1, int y1, int width, int height) {
   if ((width < 1) || (height < 1))
     quit("!DynamicSprite.Crop: co-ordinates do not make sense");
@@ -10981,6 +11135,7 @@ void DynamicSprite_Crop(ScriptDynamicSprite *sds, int x1, int y1, int width, int
   add_dynamic_sprite(sds->slot, newPic, (game.spriteflags[sds->slot] & SPF_ALPHACHANNEL) != 0);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::Rotate^3 *** */
 void DynamicSprite_Rotate(ScriptDynamicSprite *sds, int angle, int width, int height) {
   if ((angle < 1) || (angle > 359))
     quit("!DynamicSprite.Rotate: invalid angle (must be 1-359)");
@@ -11024,6 +11179,7 @@ void DynamicSprite_Rotate(ScriptDynamicSprite *sds, int angle, int width, int he
   add_dynamic_sprite(sds->slot, newPic, (game.spriteflags[sds->slot] & SPF_ALPHACHANNEL) != 0);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::Tint^5 *** */
 void DynamicSprite_Tint(ScriptDynamicSprite *sds, int red, int green, int blue, int saturation, int luminance) 
 {
   block source = spriteset[sds->slot];
@@ -11036,6 +11192,7 @@ void DynamicSprite_Tint(ScriptDynamicSprite *sds, int red, int green, int blue, 
   add_dynamic_sprite(sds->slot, newPic, (game.spriteflags[sds->slot] & SPF_ALPHACHANNEL) != 0);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::SaveToFile^1 *** */
 int DynamicSprite_SaveToFile(ScriptDynamicSprite *sds, const char* namm) {
   if (sds->slot == 0)
     quit("!DynamicSprite.SaveToFile: sprite has been deleted");
@@ -11052,6 +11209,7 @@ int DynamicSprite_SaveToFile(ScriptDynamicSprite *sds, const char* namm) {
   return 1;  // successful
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CreateFromSaveGame *** */
 ScriptDynamicSprite* DynamicSprite_CreateFromSaveGame(int sgslot, int width, int height) {
   int slotnum = LoadSaveSlotScreenshot(sgslot, width, height);
   if (slotnum) {
@@ -11060,6 +11218,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromSaveGame(int sgslot, int width, int
   return NULL;
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CreateFromFile *** */
 ScriptDynamicSprite* DynamicSprite_CreateFromFile(const char *filename) {
   int slotnum = LoadImageFile(filename);
   if (slotnum) {
@@ -11068,6 +11227,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromFile(const char *filename) {
   return NULL;
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CreateFromScreenShot *** */
 ScriptDynamicSprite* DynamicSprite_CreateFromScreenShot(int width, int height) {
   
   int gotSlot = spriteset.findFreeSlot();
@@ -11121,6 +11281,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromScreenShot(int width, int height) {
   return new ScriptDynamicSprite(gotSlot);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CreateFromExistingSprite^2 *** */
 ScriptDynamicSprite* DynamicSprite_CreateFromExistingSprite(int slot, int preserveAlphaChannel) {
   
   int gotSlot = spriteset.findFreeSlot();
@@ -11144,6 +11305,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromExistingSprite(int slot, int preser
   return new ScriptDynamicSprite(gotSlot);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CreateFromDrawingSurface^5 *** */
 ScriptDynamicSprite* DynamicSprite_CreateFromDrawingSurface(ScriptDrawingSurface *sds, int x, int y, int width, int height) 
 {
   int gotSlot = spriteset.findFreeSlot();
@@ -11173,6 +11335,7 @@ ScriptDynamicSprite* DynamicSprite_CreateFromDrawingSurface(ScriptDrawingSurface
   return new ScriptDynamicSprite(gotSlot);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::Create^3 *** */
 ScriptDynamicSprite* DynamicSprite_Create(int width, int height, int alphaChannel) 
 {
   multiply_up_coordinates(&width, &height);
@@ -11193,11 +11356,13 @@ ScriptDynamicSprite* DynamicSprite_Create(int width, int height, int alphaChanne
   return new ScriptDynamicSprite(gotSlot);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CreateFromExistingSprite^1 *** */
 ScriptDynamicSprite* DynamicSprite_CreateFromExistingSprite_Old(int slot) 
 {
   return DynamicSprite_CreateFromExistingSprite(slot, 0);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DynamicSprite::CreateFromBackground *** */
 ScriptDynamicSprite* DynamicSprite_CreateFromBackground(int frame, int x1, int y1, int width, int height) {
 
   if (frame == SCR_NO_VALUE) {
@@ -12158,6 +12323,7 @@ void unload_game_file() {
 
 // **** text script exported functions
 
+/* *** SCRIPT SYMBOL: [Multimedia] IsMusicPlaying *** */
 int IsMusicPlaying() {
   // in case they have a "while (IsMusicPlaying())" loop
   if ((play.fast_forward) && (play.skip_until_char_stops < 0))
@@ -12189,6 +12355,7 @@ void clear_music_cache() {
 
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] PlayMusicQueued *** */
 int PlayMusicQueued(int musnum) {
 
   // Just get the queue size
@@ -12372,6 +12539,7 @@ int get_but_pic(GUIMain*guo,int indx) {
   return guibuts[guo->objrefptr[indx] & 0x000ffff].pic;
   }
 
+/* *** SCRIPT SYMBOL: [Game] ClaimEvent *** */
 void ClaimEvent() {
   if (eventClaimed == EVENT_NONE)
     quit("!ClaimEvent: no event to claim");
@@ -13048,6 +13216,7 @@ void _display_at(int xx,int yy,int wii,char*todis,int blocking,int asspch, int i
     stop_speech();
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetTextWindowGUI *** */
 void SetTextWindowGUI (int guinum) {
   if ((guinum < -1) | (guinum >= game.numgui))
     quit("!SetTextWindowGUI: invalid GUI number");
@@ -13065,15 +13234,18 @@ void SetTextWindowGUI (int guinum) {
 
 
 
+/* *** SCRIPT SYMBOL: [Overlay] RemoveOverlay *** */
 void RemoveOverlay(int ovrid) {
   if (find_overlay_of_type(ovrid) < 0) quit("!RemoveOverlay: invalid overlay id passed");
   remove_screen_overlay(ovrid);
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::Remove^0 *** */
 void Overlay_Remove(ScriptOverlay *sco) {
   sco->Remove();
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] CreateGraphicOverlay *** */
 int CreateGraphicOverlay(int xx,int yy,int slott,int trans) {
   multiply_up_coordinates(&xx, &yy);
 
@@ -13099,6 +13271,7 @@ int CreateTextOverlayCore(int xx, int yy, int wii, int fontid, int clr, const ch
   return _display_main(xx,yy,wii, (char*)tex, blcode,fontid,-clr, 0, allowShrink, false);
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] CreateTextOverlay *** */
 int CreateTextOverlay(int xx,int yy,int wii,int fontid,int clr,char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
@@ -13118,6 +13291,7 @@ int CreateTextOverlay(int xx,int yy,int wii,int fontid,int clr,char*texx, ...) {
   return CreateTextOverlayCore(xx, yy, wii, fontid, clr, displbuf, allowShrink);
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] SetTextOverlay *** */
 void SetTextOverlay(int ovrid,int xx,int yy,int wii,int fontid,int clr,char*texx,...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
@@ -13130,6 +13304,7 @@ void SetTextOverlay(int ovrid,int xx,int yy,int wii,int fontid,int clr,char*texx
     quit("SetTextOverlay internal error: inconsistent type ids");
   }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::SetText^104 *** */
 void Overlay_SetText(ScriptOverlay *scover, int wii, int fontid, int clr, char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
@@ -13150,6 +13325,7 @@ void Overlay_SetText(ScriptOverlay *scover, int wii, int fontid, int clr, char*t
     quit("SetTextOverlay internal error: inconsistent type ids");
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::get_X *** */
 int Overlay_GetX(ScriptOverlay *scover) {
   int ovri = find_overlay_of_type(scover->overlayId);
   if (ovri < 0)
@@ -13161,6 +13337,7 @@ int Overlay_GetX(ScriptOverlay *scover) {
   return divide_down_coordinate(tdxp);
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::set_X *** */
 void Overlay_SetX(ScriptOverlay *scover, int newx) {
   int ovri = find_overlay_of_type(scover->overlayId);
   if (ovri < 0)
@@ -13169,6 +13346,7 @@ void Overlay_SetX(ScriptOverlay *scover, int newx) {
   screenover[ovri].x = multiply_up_coordinate(newx);
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::get_Y *** */
 int Overlay_GetY(ScriptOverlay *scover) {
   int ovri = find_overlay_of_type(scover->overlayId);
   if (ovri < 0)
@@ -13180,6 +13358,7 @@ int Overlay_GetY(ScriptOverlay *scover) {
   return divide_down_coordinate(tdyp);
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::set_Y *** */
 void Overlay_SetY(ScriptOverlay *scover, int newy) {
   int ovri = find_overlay_of_type(scover->overlayId);
   if (ovri < 0)
@@ -13188,6 +13367,7 @@ void Overlay_SetY(ScriptOverlay *scover, int newy) {
   screenover[ovri].y = multiply_up_coordinate(newy);
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] MoveOverlay *** */
 void MoveOverlay(int ovrid, int newx,int newy) {
   multiply_up_coordinates(&newx, &newy);
   
@@ -13197,6 +13377,7 @@ void MoveOverlay(int ovrid, int newx,int newy) {
   screenover[ovri].y=newy;
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] IsOverlayValid *** */
 int IsOverlayValid(int ovrid) {
   if (find_overlay_of_type(ovrid) < 0)
     return 0;
@@ -13204,6 +13385,7 @@ int IsOverlayValid(int ovrid) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::get_Valid *** */
 int Overlay_GetValid(ScriptOverlay *scover) {
   if (scover->overlayId == -1)
     return 0;
@@ -13217,6 +13399,7 @@ int Overlay_GetValid(ScriptOverlay *scover) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::CreateGraphical^4 *** */
 ScriptOverlay* Overlay_CreateGraphical(int x, int y, int slot, int transparent) {
   ScriptOverlay *sco = new ScriptOverlay();
   sco->overlayId = CreateGraphicOverlay(x, y, slot, transparent);
@@ -13228,6 +13411,7 @@ ScriptOverlay* Overlay_CreateGraphical(int x, int y, int slot, int transparent) 
   return sco;
 }
 
+/* *** SCRIPT SYMBOL: [Overlay] Overlay::CreateTextual^106 *** */
 ScriptOverlay* Overlay_CreateTextual(int x, int y, int width, int font, int colour, const char* text, ...) {
   ScriptOverlay *sco = new ScriptOverlay();
 
@@ -13252,6 +13436,7 @@ ScriptOverlay* Overlay_CreateTextual(int x, int y, int width, int font, int colo
 }
 
 
+/* *** SCRIPT SYMBOL: [Character] DisplaySpeechBackground *** */
 int DisplaySpeechBackground(int charid,char*speel) {
   // remove any previous background speech for this character
   int cc;
@@ -13262,6 +13447,7 @@ int DisplaySpeechBackground(int charid,char*speel) {
     }
   }
 
+/* *** SCRIPT SYMBOL: [Overlay] CreateTextOverlay *** */
   int ovrl=CreateTextOverlay(OVR_AUTOPLACE,charid,scrnwid/2,FONT_SPEECH,
     -game.chars[charid].talkcolor, get_translation(speel));
 
@@ -13271,6 +13457,7 @@ int DisplaySpeechBackground(int charid,char*speel) {
   return ovrl;
 }
 
+/* *** SCRIPT SYMBOL: [Text] DisplayAt *** */
 void DisplayAt(int xxp,int yyp,int widd,char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
@@ -13402,6 +13589,7 @@ void stop_speech() {
     }
   }
 }
+/* *** SCRIPT SYMBOL: [Multimedia] SetSpeechVolume *** */
 void SetSpeechVolume(int newvol) {
   if ((newvol<0) | (newvol>255))
     quit("!SetSpeechVolume: invalid volume - must be from 0-255");
@@ -13412,29 +13600,37 @@ void SetSpeechVolume(int newvol) {
   play.speech_volume = newvol;
   }
 
+/* *** SCRIPT SYMBOL: [Game] Game::set_SpeechFont *** */
+/* *** SCRIPT SYMBOL: [Game] SetSpeechFont *** */
 void SetSpeechFont (int fontnum) {
   if ((fontnum < 0) || (fontnum >= game.numfonts))
     quit("!SetSpeechFont: invalid font number.");
   play.speech_font = fontnum;
   }
+/* *** SCRIPT SYMBOL: [Game] Game::set_NormalFont *** */
+/* *** SCRIPT SYMBOL: [Game] SetNormalFont *** */
 void SetNormalFont (int fontnum) {
   if ((fontnum < 0) || (fontnum >= game.numfonts))
     quit("!SetNormalFont: invalid font number.");
   play.normal_font = fontnum;
   }
+/* *** SCRIPT SYMBOL: [Game] Game::get_SpeechFont *** */
 int Game_GetSpeechFont() {
   return play.speech_font;
 }
+/* *** SCRIPT SYMBOL: [Game] Game::get_NormalFont *** */
 int Game_GetNormalFont() {
   return play.normal_font;
 }
 
+/* *** SCRIPT SYMBOL: [Text] SetSpeechStyle *** */
 void SetSpeechStyle (int newstyle) {
   if ((newstyle < 0) || (newstyle > 3))
     quit("!SetSpeechStyle: must use a SPEECH_* constant as parameter");
   game.options[OPT_SPEECHTYPE] = newstyle;
 }
 
+/* *** SCRIPT SYMBOL: [Text] PlaySpeech *** */
 void __scr_play_speech(int who, int which) {
   // *** implement this - needs to call stop_speech as well
   // to reset the volume
@@ -13444,6 +13640,7 @@ void __scr_play_speech(int who, int which) {
 // 0 = text only
 // 1 = voice & text
 // 2 = voice only
+/* *** SCRIPT SYMBOL: [Multimedia] SetVoiceMode *** */
 void SetVoiceMode (int newmod) {
   if ((newmod < 0) | (newmod > 2))
     quit("!SetVoiceMode: invalid mode number (must be 0,1,2)");
@@ -13455,12 +13652,14 @@ void SetVoiceMode (int newmod) {
     play.want_speech = newmod;
 }
 
+/* *** SCRIPT SYMBOL: [Multimedia] IsVoxAvailable *** */
 int IsVoxAvailable() {
   if (play.want_speech < 0)
     return 0;
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] IsMusicVoxAvailable *** */
 int IsMusicVoxAvailable () {
   return play.seperate_music_lib;
 }
@@ -13827,6 +14026,7 @@ void _displayspeech(char*texx, int aschar, int xx, int yy, int widd, int isThoug
       }
 
       // set up the speed of the first frame
+/* *** SCRIPT SYMBOL: [Character] Character::get_SpeechAnimationDelay *** */
       speakingChar->wait = GetCharacterSpeechAnimationDelay(speakingChar) + 
                            views[speakingChar->view].loops[speakingChar->loop].frames[0].speed;
 
@@ -13893,6 +14093,7 @@ int get_character_currently_talking() {
   return -1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_SpeakingFrame *** */
 int Character_GetSpeakingFrame(CharacterInfo *chaa) {
 
   if ((face_talking >= 0) && (facetalkrepeat))
@@ -13921,12 +14122,14 @@ void DisplaySpeech(char*texx, int aschar) {
 
 // **** THIS IS UNDOCUMENTED BECAUSE IT DOESN'T WORK PROPERLY
 // **** AT 640x400 AND DOESN'T USE THE RIGHT SPEECH STYLE
+/* *** SCRIPT SYMBOL: [Character] DisplaySpeechAt *** */
 void DisplaySpeechAt (int xx, int yy, int wii, int aschar, char*spch) {
   multiply_up_coordinates(&xx, &yy);
   wii = multiply_up_coordinate(wii);
   _displayspeech (get_translation(spch), aschar, xx, yy, wii, 0);
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetGlobalInt *** */
 void SetGlobalInt(int index,int valu) {
   if ((index<0) | (index>=MAXGSVALUES))
     quit("!SetGlobalInt: invalid index");
@@ -13937,12 +14140,15 @@ void SetGlobalInt(int index,int valu) {
 
   play.globalscriptvars[index]=valu;
 }
+/* *** SCRIPT SYMBOL: [Game] GetGlobalInt *** */
 int GetGlobalInt(int index) {
   if ((index<0) | (index>=MAXGSVALUES))
     quit("!GetGlobalInt: invalid index");
   return play.globalscriptvars[index];
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::seti_GlobalStrings *** */
+/* *** SCRIPT SYMBOL: [Game] SetGlobalString *** */
 void SetGlobalString (int index, char *newval) {
   if ((index<0) | (index >= MAXGLOBALSTRINGS))
     quit("!SetGlobalString: invalid index");
@@ -13952,12 +14158,14 @@ void SetGlobalString (int index, char *newval) {
   play.globalstrings[index][MAX_MAXSTRLEN - 1] = 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetGlobalString *** */
 void GetGlobalString (int index, char *strval) {
   if ((index<0) | (index >= MAXGLOBALSTRINGS))
     quit("!GetGlobalString: invalid index");
   strcpy (strval, play.globalstrings[index]);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::geti_GlobalStrings *** */
 const char* Game_GetGlobalStrings(int index) {
   if ((index < 0) || (index >= MAXGLOBALSTRINGS))
     quit("!Game.GlobalStrings: invalid index");
@@ -13966,6 +14174,7 @@ const char* Game_GetGlobalStrings(int index) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Screen] SetScreenTransition *** */
 void SetScreenTransition(int newtrans) {
   if ((newtrans < 0) || (newtrans > FADE_LAST))
     quit("!SetScreenTransition: invalid transition type");
@@ -13975,6 +14184,7 @@ void SetScreenTransition(int newtrans) {
   DEBUG_CONSOLE("Screen transition changed");
 }
 
+/* *** SCRIPT SYMBOL: [Screen] SetNextScreenTransition *** */
 void SetNextScreenTransition(int newtrans) {
   if ((newtrans < 0) || (newtrans > FADE_LAST))
     quit("!SetNextScreenTransition: invalid transition type");
@@ -13984,6 +14194,7 @@ void SetNextScreenTransition(int newtrans) {
   DEBUG_CONSOLE("SetNextScreenTransition engaged");
 }
 
+/* *** SCRIPT SYMBOL: [Screen] SetFadeColor *** */
 void SetFadeColor(int red, int green, int blue) {
   if ((red < 0) || (red > 255) || (green < 0) || (green > 255) ||
       (blue < 0) || (blue > 255))
@@ -13999,6 +14210,7 @@ void SetFadeColor(int red, int green, int blue) {
 // 2 = can't skip at all
 // 3 = only on keypress, no auto timer
 // 4 = mouseclick only
+/* *** SCRIPT SYMBOL: [Text] SetSkipSpeech *** */
 void SetSkipSpeech (int newval) {
   if ((newval < 0) || (newval > 4))
     quit("!SetSkipSpeech: invalid skip mode specified (0-4)");
@@ -14007,6 +14219,7 @@ void SetSkipSpeech (int newval) {
   play.cant_skip_speech = user_to_internal_skip_speech(newval);
 }
 
+/* *** SCRIPT SYMBOL: [Text] DisplayAtY *** */
 void DisplayAtY (int ypos, char *texx) {
   if ((ypos < -1) || (ypos >= GetMaxScreenHeight()))
     quitprintf("!DisplayAtY: invalid Y co-ordinate supplied (used: %d; valid: 0..%d)", ypos, GetMaxScreenHeight());
@@ -14034,6 +14247,7 @@ void DisplayAtY (int ypos, char *texx) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Text] Display *** */
 void Display(char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
@@ -14060,6 +14274,7 @@ void _DisplaySpeechCore(int chid, char *displbuf) {
   DisplaySpeech(displbuf, chid);
 }
 
+/* *** SCRIPT SYMBOL: [Character] DisplaySpeech *** */
 void __sc_displayspeech(int chid,char*texx, ...) {
   if ((chid<0) || (chid>=game.numcharacters))
     quit("!DisplaySpeech: invalid character specified");
@@ -14074,6 +14289,7 @@ void __sc_displayspeech(int chid,char*texx, ...) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Text] DisplayTopBar *** */
 void DisplayTopBar(int ypos, int ttexcol, int backcol, char *title, char*texx, ...) {
 
   strcpy(topBar.text, get_translation(title));
@@ -14108,6 +14324,7 @@ void DisplayTopBar(int ypos, int ttexcol, int backcol, char *title, char*texx, .
 }
 
 // Display a room/global message in the bar
+/* *** SCRIPT SYMBOL: [Text] DisplayMessageBar *** */
 void DisplayMessageBar(int ypos, int ttexcol, int backcol, char *title, int msgnum) {
   char msgbufr[3001];
   get_message_text(msgnum, msgbufr);
@@ -14136,6 +14353,7 @@ void _DisplayThoughtCore(int chid, const char *displbuf) {
   _displayspeech ((char*)displbuf, chid, xpp, ypp, width, 1);
 }
 
+/* *** SCRIPT SYMBOL: [Character] DisplayThought *** */
 void DisplayThought(int chid, const char*texx, ...) {
   if ((chid < 0) || (chid >= game.numcharacters))
     quit("!DisplayThought: invalid character specified");
@@ -14228,11 +14446,13 @@ void get_message_text (int msnum, char *buffer, char giveErr) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Room] GetMessageText *** */
 void GetMessageText (int msg, char *buffer) {
   VALIDATE_STRING(buffer);
   get_message_text (msg, buffer, 0);
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::geti_Messages *** */
 const char* Room_GetMessages(int index) {
   if ((index < 0) || (index >= thisroom.nummes)) {
     return NULL;
@@ -14243,6 +14463,7 @@ const char* Room_GetMessages(int index) {
   return CreateNewScriptString(buffer);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::geti_GlobalMessages *** */
 const char* Game_GetGlobalMessages(int index) {
   if ((index < 500) || (index >= MAXGLOBALMES + 500)) {
     return NULL;
@@ -14253,6 +14474,7 @@ const char* Game_GetGlobalMessages(int index) {
   return CreateNewScriptString(buffer);
 }
 
+/* *** SCRIPT SYMBOL: [Text] DisplayMessageAtY *** */
 void DisplayMessageAtY(int msnum, int ypos) {
   char msgbufr[3001];
   if (msnum>=500) { //quit("global message requseted, nto yet supported");
@@ -14299,6 +14521,7 @@ void DisplayMessageAtY(int msnum, int ypos) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Text] DisplayMessage *** */
 void DisplayMessage(int msnum) {
   DisplayMessageAtY (msnum, -1);
 }
@@ -14307,6 +14530,7 @@ void DisplayMessage(int msnum) {
 #define RAW_START() block oldabuf=abuf; abuf=thisroom.ebscene[play.bg_frame]; play.raw_modified[play.bg_frame] = 1
 #define RAW_END() abuf = oldabuf
 // RawSaveScreen: copy the current screen to a backup bitmap
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawSaveScreen *** */
 void RawSaveScreen () {
   if (raw_saved_screen != NULL)
     wfreeblock(raw_saved_screen);
@@ -14317,6 +14541,7 @@ void RawSaveScreen () {
 // RawRestoreScreen: copy backup bitmap back to screen; we
 // deliberately don't free the block cos they can multiple restore
 // and it gets freed on room exit anyway
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawRestoreScreen *** */
 void RawRestoreScreen() {
   if (raw_saved_screen == NULL) {
     debug_log("RawRestoreScreen: unable to restore, since the screen hasn't been saved previously.");
@@ -14328,6 +14553,7 @@ void RawRestoreScreen() {
   mark_current_background_dirty();
 }
 // Restores the backup bitmap, but tints it to the specified level
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawRestoreScreenTinted *** */
 void RawRestoreScreenTinted(int red, int green, int blue, int opacity) {
   if (raw_saved_screen == NULL) {
     debug_log("RawRestoreScreenTinted: unable to restore, since the screen hasn't been saved previously.");
@@ -14346,6 +14572,7 @@ void RawRestoreScreenTinted(int red, int green, int blue, int opacity) {
   mark_current_background_dirty();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawFrameTransparent *** */
 void RawDrawFrameTransparent (int frame, int translev) {
   if ((frame < 0) || (frame >= thisroom.num_bscenes) ||
       (translev < 0) || (translev > 99))
@@ -14372,6 +14599,7 @@ void RawDrawFrameTransparent (int frame, int translev) {
   RAW_END();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawClearScreen *** */
 void RawClear (int clr) {
   play.raw_modified[play.bg_frame] = 1;
   clr = get_col8_lookup(clr);
@@ -14379,6 +14607,7 @@ void RawClear (int clr) {
   invalidate_screen();
   mark_current_background_dirty();
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawSetColor *** */
 void RawSetColor (int clr) {
   push_screen();
   wsetscreen(thisroom.ebscene[play.bg_frame]);
@@ -14386,6 +14615,7 @@ void RawSetColor (int clr) {
   play.raw_color = get_col8_lookup(clr);
   pop_screen();
 }
+/* *** SCRIPT SYMBOL: [Game] RawSetColorRGB *** */
 void RawSetColorRGB(int red, int grn, int blu) {
   if ((red < 0) || (red > 255) || (grn < 0) || (grn > 255) ||
       (blu < 0) || (blu > 255))
@@ -14393,6 +14623,7 @@ void RawSetColorRGB(int red, int grn, int blu) {
 
   play.raw_color = makecol_depth(bitmap_color_depth(thisroom.ebscene[play.bg_frame]), red, grn, blu);
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawPrint *** */
 void RawPrint (int xx, int yy, char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
@@ -14415,6 +14646,7 @@ void RawPrint (int xx, int yy, char*texx, ...) {
   mark_current_background_dirty();
   RAW_END();
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawPrintMessageWrapped *** */
 void RawPrintMessageWrapped (int xx, int yy, int wid, int font, int msgm) {
   char displbuf[3000];
   int texthit = wgetfontheight(font);
@@ -14452,11 +14684,13 @@ void RawDrawImageCore(int xx, int yy, int slot) {
   RAW_END();
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawImage *** */
 void RawDrawImage(int xx, int yy, int slot) {
   multiply_up_coordinates(&xx, &yy);
   RawDrawImageCore(xx, yy, slot);
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawImageOffset *** */
 void RawDrawImageOffset(int xx, int yy, int slot) {
 
   if ((current_screen_resolution_multiplier == 1) && (game.default_resolution >= 3)) {
@@ -14473,6 +14707,7 @@ void RawDrawImageOffset(int xx, int yy, int slot) {
   RawDrawImageCore(xx, yy, slot);
 }
 
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawImageTransparent *** */
 void RawDrawImageTransparent(int xx, int yy, int slot, int trans) {
   if ((trans < 0) || (trans > 100))
     quit("!RawDrawImageTransparent: invalid transparency setting");
@@ -14484,6 +14719,7 @@ void RawDrawImageTransparent(int xx, int yy, int slot, int trans) {
 
   update_polled_stuff();  // this operation can be slow so stop music skipping
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawImageResized *** */
 void RawDrawImageResized(int xx, int yy, int gotSlot, int width, int height) {
   if ((gotSlot < 0) || (gotSlot >= MAX_SPRITES) || (spriteset[gotSlot] == NULL))
     quit("!RawDrawImageResized: invalid sprite slot number specified");
@@ -14512,6 +14748,7 @@ void RawDrawImageResized(int xx, int yy, int gotSlot, int width, int height) {
   update_polled_stuff();  // this operation can be slow so stop music skipping
   RAW_END();
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawLine *** */
 void RawDrawLine (int fromx, int fromy, int tox, int toy) {
   multiply_up_coordinates(&fromx, &fromy);
   multiply_up_coordinates(&tox, &toy);
@@ -14526,6 +14763,7 @@ void RawDrawLine (int fromx, int fromy, int tox, int toy) {
   invalidate_screen();
   mark_current_background_dirty();
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawCircle *** */
 void RawDrawCircle (int xx, int yy, int rad) {
   multiply_up_coordinates(&xx, &yy);
   rad = multiply_up_coordinate(rad);
@@ -14535,6 +14773,7 @@ void RawDrawCircle (int xx, int yy, int rad) {
   invalidate_screen();
   mark_current_background_dirty();
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawRectangle *** */
 void RawDrawRectangle(int x1, int y1, int x2, int y2) {
   play.raw_modified[play.bg_frame] = 1;
   multiply_up_coordinates(&x1, &y1);
@@ -14544,6 +14783,7 @@ void RawDrawRectangle(int x1, int y1, int x2, int y2) {
   invalidate_screen();
   mark_current_background_dirty();
 }
+/* *** SCRIPT SYMBOL: [DrawingSurface] RawDrawTriangle *** */
 void RawDrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
   play.raw_modified[play.bg_frame] = 1;
   multiply_up_coordinates(&x1, &y1);
@@ -14555,6 +14795,7 @@ void RawDrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
   mark_current_background_dirty();
 }
 
+/* *** SCRIPT SYMBOL: [Game] SaveScreenShot *** */
 int SaveScreenShot(char*namm) {
   char fileName[MAX_PATH];
 
@@ -14581,6 +14822,7 @@ int SaveScreenShot(char*namm) {
   return 1;  // successful
 }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectView *** */
 void SetObjectView(int obn,int vii) {
   if (!is_valid_object(obn)) quit("!SetObjectView: invalid object number specified");
   DEBUG_CONSOLE("Object %d set to view %d", obn, vii);
@@ -14599,6 +14841,7 @@ void SetObjectView(int obn,int vii) {
   objs[obn].num = views[vii].loops[0].frames[0].pic;
   }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectFrame *** */
 void SetObjectFrame(int obn,int viw,int lop,int fra) {
   if (!is_valid_object(obn)) quit("!SetObjectFrame: invalid object number specified");
   viw--;
@@ -14623,11 +14866,13 @@ void SetObjectFrame(int obn,int viw,int lop,int fra) {
   CheckViewFrame(viw, objs[obn].loop, objs[obn].frame);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::SetView^3 *** */
 void Object_SetView(ScriptObject *objj, int view, int loop, int frame) {
   SetObjectFrame(objj->id, view, loop, frame);
 }
 
 // pass trans=0 for fully solid, trans=100 for fully transparent
+/* *** SCRIPT SYMBOL: [Object] SetObjectTransparency *** */
 void SetObjectTransparency(int obn,int trans) {
   if (!is_valid_object(obn)) quit("!SetObjectTransparent: invalid object number specified");
   if ((trans < 0) || (trans > 100)) quit("!SetObjectTransparent: transparency value must be between 0 and 100");
@@ -14639,10 +14884,12 @@ void SetObjectTransparency(int obn,int trans) {
     objs[obn].transparent=((100-trans) * 25) / 10;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_Transparency *** */
 void Object_SetTransparency(ScriptObject *objj, int trans) {
   SetObjectTransparency(objj->id, trans);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Transparency *** */
 int Object_GetTransparency(ScriptObject *objj) {
   if (!is_valid_object(objj->id))
     quit("!Object.Transparent: invalid object number specified");
@@ -14656,6 +14903,7 @@ int Object_GetTransparency(ScriptObject *objj) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectBaseline *** */
 void SetObjectBaseline (int obn, int basel) {
   if (!is_valid_object(obn)) quit("!SetObjectBaseline: invalid object number specified");
   // baseline has changed, invalidate the cache
@@ -14665,10 +14913,12 @@ void SetObjectBaseline (int obn, int basel) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_Baseline *** */
 void Object_SetBaseline(ScriptObject *objj, int basel) {
   SetObjectBaseline(objj->id, basel);
 }
 
+/* *** SCRIPT SYMBOL: [Object] GetObjectBaseline *** */
 int GetObjectBaseline(int obn) {
   if (!is_valid_object(obn)) quit("!GetObjectBaseline: invalid object number specified");
 
@@ -14678,10 +14928,12 @@ int GetObjectBaseline(int obn) {
   return objs[obn].baseline;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Baseline *** */
 int Object_GetBaseline(ScriptObject *objj) {
   return GetObjectBaseline(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterBaseline *** */
 void SetCharacterBaseline (int obn, int basel) {
   if (!is_valid_character(obn)) quit("!SetCharacterBaseline: invalid object number specified");
   
@@ -14689,6 +14941,7 @@ void SetCharacterBaseline (int obn, int basel) {
 }
 
 // pass trans=0 for fully solid, trans=100 for fully transparent
+/* *** SCRIPT SYMBOL: [Character] SetCharacterTransparency *** */
 void SetCharacterTransparency(int obn,int trans) {
   if (!is_valid_character(obn))
     quit("!SetCharTransparent: invalid character number specified");
@@ -14696,6 +14949,7 @@ void SetCharacterTransparency(int obn,int trans) {
   Character_SetTransparency(&game.chars[obn], trans);
 }
 
+/* *** SCRIPT SYMBOL: [Character] AnimateCharacter *** */
 void scAnimateCharacter (int chh, int loopn, int sppd, int rept) {
   if (!is_valid_character(chh))
     quit("AnimateCharacter: invalid character");
@@ -14703,6 +14957,7 @@ void scAnimateCharacter (int chh, int loopn, int sppd, int rept) {
   animate_character(&game.chars[chh], loopn, sppd, rept);
 }
 
+/* *** SCRIPT SYMBOL: [Character] AnimateCharacterEx *** */
 void AnimateCharacterEx(int chh, int loopn, int sppd, int rept, int direction, int blocking) {
   if ((direction < 0) || (direction > 1))
     quit("!AnimateCharacterEx: invalid direction");
@@ -14756,6 +15011,7 @@ void animate_character(CharacterInfo *chap, int loopn,int sppd,int rept, int noi
   CheckViewFrameForCharacter(chap);
 }
 
+/* *** SCRIPT SYMBOL: [Object] AnimateObjectEx *** */
 void AnimateObjectEx(int obn,int loopn,int spdd,int rept, int direction, int blocking) {
   if (obn>=MANOBJNUM) {
     scAnimateCharacter(obn - 100,loopn,spdd,rept);
@@ -14793,6 +15049,7 @@ void AnimateObjectEx(int obn,int loopn,int spdd,int rept, int direction, int blo
     do_main_cycle(UNTIL_CHARIS0,(int)&objs[obn].cycling);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::Animate^5 *** */
 void Object_Animate(ScriptObject *objj, int loop, int delay, int repeat, int blocking, int direction) {
   if (direction == FORWARDS)
     direction = 0;
@@ -14811,6 +15068,7 @@ void Object_Animate(ScriptObject *objj, int loop, int delay, int repeat, int blo
   AnimateObjectEx(objj->id, loop, delay, repeat, direction, blocking);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::StopAnimating^0 *** */
 void Object_StopAnimating(ScriptObject *objj) {
   if (!is_valid_object(objj->id))
     quit("!Object.StopAnimating: invalid object number");
@@ -14821,10 +15079,12 @@ void Object_StopAnimating(ScriptObject *objj) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Object] AnimateObject *** */
 void AnimateObject(int obn,int loopn,int spdd,int rept) {
   AnimateObjectEx (obn, loopn, spdd, rept, 0, 0);
 }
 
+/* *** SCRIPT SYMBOL: [Object] MergeObject *** */
 void MergeObject(int obn) {
   if (!is_valid_object(obn)) quit("!MergeObject: invalid object specified");
   int theHeight;
@@ -14849,10 +15109,12 @@ void MergeObject(int obn) {
   DEBUG_CONSOLE("Object %d merged into background", obn);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::MergeIntoBackground^0 *** */
 void Object_MergeIntoBackground(ScriptObject *objj) {
   MergeObject(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Object] StopObjectMoving *** */
 void StopObjectMoving(int objj) {
   if (!is_valid_object(objj))
     quit("!StopObjectMoving: invalid object number");
@@ -14861,10 +15123,12 @@ void StopObjectMoving(int objj) {
   DEBUG_CONSOLE("Object %d stop moving", objj);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::StopMoving^0 *** */
 void Object_StopMoving(ScriptObject *objj) {
   StopObjectMoving(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Object] ObjectOff *** */
 void ObjectOff(int obn) {
   if (!is_valid_object(obn)) quit("!ObjectOff: invalid object specified");
   // don't change it if on == 2 (merged)
@@ -14875,6 +15139,7 @@ void ObjectOff(int obn) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Object] ObjectOn *** */
 void ObjectOn(int obn) {
   if (!is_valid_object(obn)) quit("!ObjectOn: invalid object specified");
   if (objs[obn].on == 0) {
@@ -14883,6 +15148,7 @@ void ObjectOn(int obn) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_Visible *** */
 void Object_SetVisible(ScriptObject *objj, int onoroff) {
   if (onoroff)
     ObjectOn(objj->id);
@@ -14890,6 +15156,7 @@ void Object_SetVisible(ScriptObject *objj, int onoroff) {
     ObjectOff(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Object] IsObjectOn *** */
 int IsObjectOn (int objj) {
   if (!is_valid_object(objj)) quit("!IsObjectOn: invalid object number");
   
@@ -14900,28 +15167,33 @@ int IsObjectOn (int objj) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_View *** */
 int Object_GetView(ScriptObject *objj) {
   if (objj->obj->view < 0)
     return 0;
   return objj->obj->view + 1;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Loop *** */
 int Object_GetLoop(ScriptObject *objj) {
   if (objj->obj->view < 0)
     return 0;
   return objj->obj->loop;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Frame *** */
 int Object_GetFrame(ScriptObject *objj) {
   if (objj->obj->view < 0)
     return 0;
   return objj->obj->frame;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Visible *** */
 int Object_GetVisible(ScriptObject *objj) {
   return IsObjectOn(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectGraphic *** */
 void SetObjectGraphic(int obn,int slott) {
   if (!is_valid_object(obn)) quit("!SetObjectGraphic: invalid object specified");
 
@@ -14935,15 +15207,18 @@ void SetObjectGraphic(int obn,int slott) {
   objs[obn].view = -1;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_Graphic *** */
 void Object_SetGraphic(ScriptObject *objj, int slott) {
   SetObjectGraphic(objj->id, slott);
 }
 
+/* *** SCRIPT SYMBOL: [Object] GetObjectGraphic *** */
 int GetObjectGraphic(int obn) {
   if (!is_valid_object(obn)) quit("!GetObjectGraphic: invalid object specified");
   return objs[obn].num;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Graphic *** */
 int Object_GetGraphic(ScriptObject *objj) {
   return GetObjectGraphic(objj->id);
 }
@@ -14979,6 +15254,7 @@ int GetThingRect(int thing, Rect *rect) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Room] AreThingsOverlapping *** */
 int AreThingsOverlapping(int thing1, int thing2) {
   Rect r1, r2;
   // get the bounding rectangles, and return 0 if the object/char
@@ -15009,6 +15285,7 @@ int AreThingsOverlapping(int thing1, int thing2) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Object] AreObjectsColliding *** */
 int AreObjectsColliding(int obj1,int obj2) {
   if ((!is_valid_object(obj1)) | (!is_valid_object(obj2)))
     quit("!AreObjectsColliding: invalid object specified");
@@ -15016,6 +15293,7 @@ int AreObjectsColliding(int obj1,int obj2) {
   return (AreThingsOverlapping(obj1 + OVERLAPPING_OBJECT, obj2 + OVERLAPPING_OBJECT)) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::IsCollidingWithObject^1 *** */
 int Object_IsCollidingWithObject(ScriptObject *objj, ScriptObject *obj2) {
   return AreObjectsColliding(objj->id, obj2->id);
 }
@@ -15060,6 +15338,7 @@ block GetObjectImage(int obj, int *isFlipped)
   return spriteset[objs[obj].num];
 }
 
+/* *** SCRIPT SYMBOL: [Character] AreCharObjColliding *** */
 int AreCharObjColliding(int charid,int objid) {
   if (!is_valid_character(charid))
     quit("!AreCharObjColliding: invalid character");
@@ -15069,6 +15348,7 @@ int AreCharObjColliding(int charid,int objid) {
   return Character_IsCollidingWithObject(&game.chars[charid], &scrObj[objid]);
 }
 
+/* *** SCRIPT SYMBOL: [Character] AreCharactersColliding *** */
 int AreCharactersColliding(int cchar1,int cchar2) {
   if (!is_valid_character(cchar1))
     quit("!AreCharactersColliding: invalid char1");
@@ -15078,6 +15358,7 @@ int AreCharactersColliding(int cchar1,int cchar2) {
   return Character_IsCollidingWithChar(&game.chars[cchar1], &game.chars[cchar2]);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Wait *** */
 void scrWait(int nloops) {
   if (nloops < 1)
     quit("!Wait: must wait at least 1 loop");
@@ -15087,6 +15368,7 @@ void scrWait(int nloops) {
   do_main_cycle(UNTIL_MOVEEND,(int)&play.wait_counter);
   }
 
+/* *** SCRIPT SYMBOL: [Game] WaitKey *** */
 int WaitKey(int nloops) {
   if (nloops < 1)
     quit("!WaitKey: must wait at least 1 loop");
@@ -15099,6 +15381,7 @@ int WaitKey(int nloops) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] WaitMouseKey *** */
 int WaitMouseKey(int nloops) {
   if (nloops < 1)
     quit("!WaitMouseKey: must wait at least 1 loop");
@@ -15124,6 +15407,7 @@ enum RoundDirections {
   eRoundUp = 2
 };
 
+/* *** SCRIPT SYMBOL: [Maths] FloatToInt *** */
 int FloatToInt(SCRIPT_FLOAT(value), int roundDirection) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15154,18 +15438,21 @@ int FloatToInt(SCRIPT_FLOAT(value), int roundDirection) {
   return intval;
 }
 
+/* *** SCRIPT SYMBOL: [Maths] IntToFloat *** */
 FLOAT_RETURN_TYPE IntToFloat(int value) {
   float fval = value;
 
   RETURN_FLOAT(fval);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::get_AsFloat *** */
 FLOAT_RETURN_TYPE StringToFloat(const char *theString) {
   float fval = atof(theString);
 
   RETURN_FLOAT(fval);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Cos^1 *** */
 FLOAT_RETURN_TYPE Math_Cos(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15174,6 +15461,7 @@ FLOAT_RETURN_TYPE Math_Cos(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Sin^1 *** */
 FLOAT_RETURN_TYPE Math_Sin(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15182,6 +15470,7 @@ FLOAT_RETURN_TYPE Math_Sin(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Tan^1 *** */
 FLOAT_RETURN_TYPE Math_Tan(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15190,6 +15479,7 @@ FLOAT_RETURN_TYPE Math_Tan(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::ArcCos^1 *** */
 FLOAT_RETURN_TYPE Math_ArcCos(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15198,6 +15488,7 @@ FLOAT_RETURN_TYPE Math_ArcCos(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::ArcSin^1 *** */
 FLOAT_RETURN_TYPE Math_ArcSin(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15206,6 +15497,7 @@ FLOAT_RETURN_TYPE Math_ArcSin(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::ArcTan^1 *** */
 FLOAT_RETURN_TYPE Math_ArcTan(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15214,6 +15506,7 @@ FLOAT_RETURN_TYPE Math_ArcTan(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::ArcTan2^2 *** */
 FLOAT_RETURN_TYPE Math_ArcTan2(SCRIPT_FLOAT(yval), SCRIPT_FLOAT(xval)) {
   INIT_SCRIPT_FLOAT(yval);
   INIT_SCRIPT_FLOAT(xval);
@@ -15223,6 +15516,7 @@ FLOAT_RETURN_TYPE Math_ArcTan2(SCRIPT_FLOAT(yval), SCRIPT_FLOAT(xval)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Log^1 *** */
 FLOAT_RETURN_TYPE Math_Log(SCRIPT_FLOAT(num)) {
   INIT_SCRIPT_FLOAT(num);
 
@@ -15231,6 +15525,7 @@ FLOAT_RETURN_TYPE Math_Log(SCRIPT_FLOAT(num)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Log10^1 *** */
 FLOAT_RETURN_TYPE Math_Log10(SCRIPT_FLOAT(num)) {
   INIT_SCRIPT_FLOAT(num);
 
@@ -15239,6 +15534,7 @@ FLOAT_RETURN_TYPE Math_Log10(SCRIPT_FLOAT(num)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Exp^1 *** */
 FLOAT_RETURN_TYPE Math_Exp(SCRIPT_FLOAT(num)) {
   INIT_SCRIPT_FLOAT(num);
 
@@ -15247,6 +15543,7 @@ FLOAT_RETURN_TYPE Math_Exp(SCRIPT_FLOAT(num)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Cosh^1 *** */
 FLOAT_RETURN_TYPE Math_Cosh(SCRIPT_FLOAT(num)) {
   INIT_SCRIPT_FLOAT(num);
 
@@ -15255,6 +15552,7 @@ FLOAT_RETURN_TYPE Math_Cosh(SCRIPT_FLOAT(num)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Sinh^1 *** */
 FLOAT_RETURN_TYPE Math_Sinh(SCRIPT_FLOAT(num)) {
   INIT_SCRIPT_FLOAT(num);
 
@@ -15263,6 +15561,7 @@ FLOAT_RETURN_TYPE Math_Sinh(SCRIPT_FLOAT(num)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Tanh^1 *** */
 FLOAT_RETURN_TYPE Math_Tanh(SCRIPT_FLOAT(num)) {
   INIT_SCRIPT_FLOAT(num);
 
@@ -15271,6 +15570,7 @@ FLOAT_RETURN_TYPE Math_Tanh(SCRIPT_FLOAT(num)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::RaiseToPower^2 *** */
 FLOAT_RETURN_TYPE Math_RaiseToPower(SCRIPT_FLOAT(base), SCRIPT_FLOAT(exp)) {
   INIT_SCRIPT_FLOAT(base);
   INIT_SCRIPT_FLOAT(exp);
@@ -15280,6 +15580,7 @@ FLOAT_RETURN_TYPE Math_RaiseToPower(SCRIPT_FLOAT(base), SCRIPT_FLOAT(exp)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::DegreesToRadians^1 *** */
 FLOAT_RETURN_TYPE Math_DegreesToRadians(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15288,6 +15589,7 @@ FLOAT_RETURN_TYPE Math_DegreesToRadians(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::RadiansToDegrees^1 *** */
 FLOAT_RETURN_TYPE Math_RadiansToDegrees(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15296,12 +15598,14 @@ FLOAT_RETURN_TYPE Math_RadiansToDegrees(SCRIPT_FLOAT(value)) {
   RETURN_FLOAT(value);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::get_Pi *** */
 FLOAT_RETURN_TYPE Math_GetPi() {
   float pi = M_PI;
 
   RETURN_FLOAT(pi);
 }
 
+/* *** SCRIPT SYMBOL: [Maths] Maths::Sqrt^1 *** */
 FLOAT_RETURN_TYPE Math_Sqrt(SCRIPT_FLOAT(value)) {
   INIT_SCRIPT_FLOAT(value);
 
@@ -15314,16 +15618,20 @@ FLOAT_RETURN_TYPE Math_Sqrt(SCRIPT_FLOAT(value)) {
 }
 
 
+/* *** SCRIPT SYMBOL: [String] String::get_AsInt *** */
+/* *** SCRIPT SYMBOL: [String] StringToInt *** */
 int StringToInt(char*stino) {
   return atoi(stino);
   }
 
+/* *** SCRIPT SYMBOL: [String] StrGetCharAt *** */
 int StrGetCharAt (char *strin, int posn) {
   if ((posn < 0) || (posn >= (int)strlen(strin)))
     return 0;
   return strin[posn];
 }
 
+/* *** SCRIPT SYMBOL: [String] StrSetCharAt *** */
 void StrSetCharAt (char *strin, int posn, int nchar) {
   if ((posn < 0) || (posn > (int)strlen(strin)) || (posn >= MAX_MAXSTRLEN))
     quit("!StrSetCharAt: tried to write past end of string");
@@ -15333,6 +15641,7 @@ void StrSetCharAt (char *strin, int posn, int nchar) {
   strin[posn] = nchar;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::GetDrawingSurfaceForBackground^1 *** */
 ScriptDrawingSurface* Room_GetDrawingSurfaceForBackground(int backgroundNumber)
 {
   if (displayed_room < 0)
@@ -15362,40 +15671,49 @@ ScriptDateTime* DateTime_Now_Core() {
   return sdt;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Now *** */
 ScriptDateTime* DateTime_Now() {
   ScriptDateTime *sdt = DateTime_Now_Core();
   ccRegisterManagedObject(sdt, sdt);
   return sdt;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Year *** */
 int DateTime_GetYear(ScriptDateTime *sdt) {
   return sdt->year;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Month *** */
 int DateTime_GetMonth(ScriptDateTime *sdt) {
   return sdt->month;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_DayOfMonth *** */
 int DateTime_GetDayOfMonth(ScriptDateTime *sdt) {
   return sdt->day;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Hour *** */
 int DateTime_GetHour(ScriptDateTime *sdt) {
   return sdt->hour;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Minute *** */
 int DateTime_GetMinute(ScriptDateTime *sdt) {
   return sdt->minute;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Second *** */
 int DateTime_GetSecond(ScriptDateTime *sdt) {
   return sdt->second;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_RawTime *** */
 int DateTime_GetRawTime(ScriptDateTime *sdt) {
   return sdt->rawUnixTime;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] GetTime *** */
 int sc_GetTime(int whatti) {
   ScriptDateTime *sdt = DateTime_Now_Core();
   int returnVal;
@@ -15413,6 +15731,7 @@ int sc_GetTime(int whatti) {
   return returnVal;
 }
 
+/* *** SCRIPT SYMBOL: [DateTime] GetRawTime *** */
 int GetRawTime () {
   return time(NULL);
 }
@@ -15420,6 +15739,7 @@ int GetRawTime () {
 char gamefilenamebuf[200];
 #define RAGMODE_PRESERVEGLOBALINT 1
 #define RAGMODE_LOADNOW 0x8000000  // just to make sure it's non-zero
+/* *** SCRIPT SYMBOL: [Game] RunAGSGame *** */
 int RunAGSGame (char *newgame, unsigned int mode, int data) {
 
   can_run_delayed_command();
@@ -15532,6 +15852,7 @@ static void display_switch_in() {
   platform->DisplaySwitchIn();
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetMultitaskingMode *** */
 void SetMultitasking (int mode) {
   if ((mode < 0) | (mode > 1))
     quit("!SetMultitasking: invalid mode parameter");
@@ -15602,6 +15923,7 @@ int fli_callback(...) {
   return check_if_user_input_should_cancel_video();
 }
 
+/* *** SCRIPT SYMBOL: [Multimedia] PlayFlic *** */
 void play_flc_file(int numb,int playflags) {
   color oldpal[256];
 
@@ -15862,6 +16184,7 @@ void pause_sound_if_necessary_and_play_video(const char *name, int skip, int fla
   }
 }
 
+/* *** SCRIPT SYMBOL: [Multimedia] PlayVideo *** */
 void scrPlayVideo(const char* name, int skip, int flags) {
   EndSkippingUntilCharStops();
 
@@ -15880,10 +16203,12 @@ void scrPlayVideo(const char* name, int skip, int flags) {
 }
 
 #else
+/* *** SCRIPT SYMBOL: [Multimedia] PlayVideo *** */
 void scrPlayVideo(const char* name, int skip, int flags) {}
 #endif
 
 // returns -1 on failure, channel number on success
+/* *** SCRIPT SYMBOL: [AudioClip] PlaySoundEx *** */
 int PlaySoundEx(int val1, int channel) {
 
   if (debug_flags & DBG_NOSFX)
@@ -15934,6 +16259,7 @@ int PlaySoundEx(int val1, int channel) {
   return channel;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::StopSound^1 *** */
 void StopAllSounds(int evenAmbient) {
   // backwards-compatible hack -- stop Type 3 (default Sound Type)
   Game_StopAudio(3);
@@ -15980,10 +16306,12 @@ int play_sound_priority (int val1, int priority) {
   return -1;
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] PlaySound *** */
 int play_sound(int val1) {
   return play_sound_priority(val1, 10);
 }
 
+/* *** SCRIPT SYMBOL: [Character] AddInventory *** */
 void add_inventory(int inum) {
   if ((inum < 0) || (inum >= MAX_INV))
     quit("!AddInventory: invalid inventory number");
@@ -15993,6 +16321,7 @@ void add_inventory(int inum) {
   play.obsolete_inv_numorder = charextra[game.playercharacter].invorder_count;
 }
 
+/* *** SCRIPT SYMBOL: [Character] LoseInventory *** */
 void lose_inventory(int inum) {
   if ((inum < 0) || (inum >= MAX_INV))
     quit("!LoseInventory: invalid inventory number");
@@ -16002,6 +16331,7 @@ void lose_inventory(int inum) {
   play.obsolete_inv_numorder = charextra[game.playercharacter].invorder_count;
 }
 
+/* *** SCRIPT SYMBOL: [Character] AddInventoryToCharacter *** */
 void AddInventoryToCharacter(int charid, int inum) {
   if (!is_valid_character(charid))
     quit("!AddInventoryToCharacter: invalid character specified");
@@ -16011,6 +16341,7 @@ void AddInventoryToCharacter(int charid, int inum) {
   Character_AddInventory(&game.chars[charid], &scrInv[inum], SCR_NO_VALUE);
 }
 
+/* *** SCRIPT SYMBOL: [Character] LoseInventoryFromCharacter *** */
 void LoseInventoryFromCharacter(int charid, int inum) {
   if (!is_valid_character(charid))
     quit("!LoseInventoryFromCharacter: invalid character specified");
@@ -16020,6 +16351,7 @@ void LoseInventoryFromCharacter(int charid, int inum) {
   Character_LoseInventory(&game.chars[charid], &scrInv[inum]);
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] RunDialog *** */
 void RunDialog(int tum) {
   if ((tum<0) | (tum>=game.numdialog))
     quit("!RunDialog: invalid topic number specified");
@@ -16040,6 +16372,7 @@ void RunDialog(int tum) {
     do_conversation(tum);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GetGUIAt *** */
 int GetGUIAt (int xx,int yy) {
   multiply_up_coordinates(&xx, &yy);
   
@@ -16055,6 +16388,7 @@ int GetGUIAt (int xx,int yy) {
   return -1;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::GetAtScreenXY^2 *** */
 ScriptGUI *GetGUIAtLocation(int xx, int yy) {
   int guiid = GetGUIAt(xx, yy);
   if (guiid < 0)
@@ -16062,6 +16396,7 @@ ScriptGUI *GetGUIAtLocation(int xx, int yy) {
   return &scrGui[guiid];
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::GetAtScreenXY^2 *** */
 GUIObject *GetGUIControlAtLocation(int xx, int yy) {
   int guinum = GetGUIAt(xx, yy);
   if (guinum == -1)
@@ -16081,6 +16416,7 @@ GUIObject *GetGUIControlAtLocation(int xx, int yy) {
   return guis[guinum].objs[toret];
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GetGUIObjectAt *** */
 int GetGUIObjectAt (int xx, int yy) {
   GUIObject *toret = GetGUIControlAtLocation(xx, yy);
   if (toret == NULL)
@@ -16090,6 +16426,7 @@ int GetGUIObjectAt (int xx, int yy) {
 }
 
 
+/* *** SCRIPT SYMBOL: [GUI] IsGUIOn *** */
 int IsGUIOn (int guinum) {
   if ((guinum < 0) || (guinum >= game.numgui))
     quit("!IsGUIOn: invalid GUI number specified");
@@ -16098,6 +16435,7 @@ int IsGUIOn (int guinum) {
 
 // This is an internal script function, and is undocumented.
 // It is used by the editor's automatic macro generation.
+/* *** SCRIPT SYMBOL: [GUI] FindGUIID *** */
 int FindGUIID (const char* GUIName) {
   for (int ii = 0; ii < game.numgui; ii++) {
     if (strcmp(guis[ii].name, GUIName) == 0)
@@ -16156,6 +16494,7 @@ int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww,int sp
 // Used for deciding whether a char or obj was closer
 int char_lowest_yp, obj_lowest_yp;
 
+/* *** SCRIPT SYMBOL: [Object] GetObjectAt *** */
 int GetObjectAt(int xx,int yy) {
   int aa,bestshotyp=-1,bestshotwas=-1;
   // translate screen co-ordinates to room co-ordinates
@@ -16189,6 +16528,7 @@ int GetObjectAt(int xx,int yy) {
   return bestshotwas;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::GetAtScreenXY^2 *** */
 ScriptObject *GetObjectAtLocation(int xx, int yy) {
   int hsnum = GetObjectAt(xx, yy);
   if (hsnum < 0)
@@ -16196,6 +16536,7 @@ ScriptObject *GetObjectAtLocation(int xx, int yy) {
   return &scrObj[hsnum];
 }
 
+/* *** SCRIPT SYMBOL: [Object] RunObjectInteraction *** */
 void RunObjectInteraction (int aa, int mood) {
   if (!is_valid_object(aa))
     quit("!RunObjectInteraction: invalid object number for current room");
@@ -16230,6 +16571,7 @@ void RunObjectInteraction (int aa, int mood) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::RunInteraction^1 *** */
 void Object_RunInteraction(ScriptObject *objj, int mode) {
   RunObjectInteraction(objj->id, mode);
 }
@@ -16283,12 +16625,14 @@ int is_pos_on_character(int xx,int yy) {
   return lowestwas;
 }
 
+/* *** SCRIPT SYMBOL: [Character] GetCharacterAt *** */
 int GetCharacterAt (int xx, int yy) {
   xx += divide_down_coordinate(offsetx);
   yy += divide_down_coordinate(offsety);
   return is_pos_on_character(xx,yy);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::GetAtScreenXY^2 *** */
 CharacterInfo *GetCharacterAtLocation(int xx, int yy) {
   int hsnum = GetCharacterAt(xx, yy);
   if (hsnum < 0)
@@ -16296,6 +16640,7 @@ CharacterInfo *GetCharacterAtLocation(int xx, int yy) {
   return &game.chars[hsnum];
 }
 
+/* *** SCRIPT SYMBOL: [Character] RunCharacterInteraction *** */
 void RunCharacterInteraction (int cc, int mood) {
   if (!is_valid_character(cc))
     quit("!RunCharacterInteraction: invalid character");
@@ -16327,6 +16672,7 @@ void RunCharacterInteraction (int cc, int mood) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::RunInteraction^1 *** */
 void Character_RunInteraction(CharacterInfo *chaa, int mood) {
 
   RunCharacterInteraction(chaa->index_id, mood);
@@ -16343,38 +16689,46 @@ int check_click_on_character(int xx,int yy,int mood) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Object] GetObjectX *** */
 int GetObjectX (int objj) {
   if (!is_valid_object(objj)) quit("!GetObjectX: invalid object number");
   return objs[objj].x;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_X *** */
 int Object_GetX(ScriptObject *objj) {
   return GetObjectX(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Object] GetObjectY *** */
 int GetObjectY (int objj) {
   if (!is_valid_object(objj)) quit("!GetObjectY: invalid object number");
   return objs[objj].y;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Y *** */
 int Object_GetY(ScriptObject *objj) {
   return GetObjectY(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Object] IsObjectAnimating *** */
 int IsObjectAnimating(int objj) {
   if (!is_valid_object(objj)) quit("!IsObjectAnimating: invalid object number");
   return (objs[objj].cycling != 0) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Animating *** */
 int Object_GetAnimating(ScriptObject *objj) {
   return IsObjectAnimating(objj->id);
 }
 
+/* *** SCRIPT SYMBOL: [Object] IsObjectMoving *** */
 int IsObjectMoving(int objj) {
   if (!is_valid_object(objj)) quit("!IsObjectMoving: invalid object number");
   return (objs[objj].moving > 0) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Moving *** */
 int Object_GetMoving(ScriptObject *objj) {
   return IsObjectMoving(objj->id);
 }
@@ -16457,6 +16811,7 @@ block prepare_walkable_areas (int sourceChar) {
   return walkable_areas_temp;
 }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectPosition *** */
 void SetObjectPosition(int objj, int tox, int toy) {
   if (!is_valid_object(objj))
     quit("!SetObjectPosition: invalid object number");
@@ -16468,14 +16823,17 @@ void SetObjectPosition(int objj, int tox, int toy) {
   objs[objj].y = toy;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::SetPosition^2 *** */
 void Object_SetPosition(ScriptObject *objj, int xx, int yy) {
   SetObjectPosition(objj->id, xx, yy);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_X *** */
 void Object_SetX(ScriptObject *objj, int xx) {
   SetObjectPosition(objj->id, xx, objj->obj->y);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_Y *** */
 void Object_SetY(ScriptObject *objj, int yy) {
   SetObjectPosition(objj->id, objj->obj->x, yy);
 }
@@ -16528,6 +16886,7 @@ void move_object(int objj,int tox,int toy,int spee,int ignwal) {
 
 
 
+/* *** SCRIPT SYMBOL: [Region] RunRegionInteraction *** */
 void RunRegionInteraction (int regnum, int mood) {
   if ((regnum < 0) || (regnum >= MAX_REGIONS))
     quit("!RunRegionInteraction: invalid region speicfied");
@@ -16557,10 +16916,12 @@ void RunRegionInteraction (int regnum, int mood) {
   evblocknum = oldblocknum;
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::RunInteraction^1 *** */
 void Region_RunInteraction(ScriptRegion *ssr, int mood) {
   RunRegionInteraction(ssr->id, mood);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] RunHotspotInteraction *** */
 void RunHotspotInteraction (int hotspothere, int mood) {
 
   int passon=-1,cdata=-1;
@@ -16612,10 +16973,12 @@ void RunHotspotInteraction (int hotspothere, int mood) {
   evblocknum = oldblocknum;
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::RunInteraction^1 *** */
 void Hotspot_RunInteraction (ScriptHotspot *hss, int mood) {
   RunHotspotInteraction(hss->id, mood);
 }
 
+/* *** SCRIPT SYMBOL: [Game] ProcessClick *** */
 void ProcessClick(int xx,int yy,int mood) {
   getloctype_throughgui = 1;
   int loctype = GetLocationType (xx, yy);
@@ -16655,31 +17018,38 @@ void ProcessClick(int xx,int yy,int mood) {
 
 // ** GetGameParameter replacement functions
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_InventoryItemCount *** */
 int Game_GetInventoryItemCount() {
   // because of the dummy item 0, this is always one higher than it should be
   return game.numinvitems - 1;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_FontCount *** */
 int Game_GetFontCount() {
   return game.numfonts;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_MouseCursorCount *** */
 int Game_GetMouseCursorCount() {
   return game.numcursors;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_CharacterCount *** */
 int Game_GetCharacterCount() {
   return game.numcharacters;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_GUICount *** */
 int Game_GetGUICount() {
   return game.numgui;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_ViewCount *** */
 int Game_GetViewCount() {
   return game.numviews;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_UseNativeCoordinates *** */
 int Game_GetUseNativeCoordinates()
 {
   if (game.options[OPT_NATIVECOORDINATES] != 0)
@@ -16689,6 +17059,7 @@ int Game_GetUseNativeCoordinates()
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::geti_SpriteWidth *** */
 int Game_GetSpriteWidth(int spriteNum) {
   if ((spriteNum < 0) || (spriteNum >= MAX_SPRITES))
     return 0;
@@ -16699,6 +17070,7 @@ int Game_GetSpriteWidth(int spriteNum) {
   return divide_down_coordinate(spritewidth[spriteNum]);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::geti_SpriteHeight *** */
 int Game_GetSpriteHeight(int spriteNum) {
   if ((spriteNum < 0) || (spriteNum >= MAX_SPRITES))
     return 0;
@@ -16709,6 +17081,7 @@ int Game_GetSpriteHeight(int spriteNum) {
   return divide_down_coordinate(spriteheight[spriteNum]);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetLoopCountForView^1 *** */
 int Game_GetLoopCountForView(int viewNumber) {
   if ((viewNumber < 1) || (viewNumber > game.numviews))
     quit("!GetGameParameter: invalid view specified");
@@ -16716,6 +17089,7 @@ int Game_GetLoopCountForView(int viewNumber) {
   return views[viewNumber - 1].numLoops;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetRunNextSettingForLoop^2 *** */
 int Game_GetRunNextSettingForLoop(int viewNumber, int loopNumber) {
   if ((viewNumber < 1) || (viewNumber > game.numviews))
     quit("!GetGameParameter: invalid view specified");
@@ -16725,6 +17099,7 @@ int Game_GetRunNextSettingForLoop(int viewNumber, int loopNumber) {
   return (views[viewNumber - 1].loops[loopNumber].RunNextLoop()) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetFrameCountForLoop^2 *** */
 int Game_GetFrameCountForLoop(int viewNumber, int loopNumber) {
   if ((viewNumber < 1) || (viewNumber > game.numviews))
     quit("!GetGameParameter: invalid view specified");
@@ -16734,6 +17109,7 @@ int Game_GetFrameCountForLoop(int viewNumber, int loopNumber) {
   return views[viewNumber - 1].loops[loopNumber].numFrames;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetViewFrame^3 *** */
 ScriptViewFrame* Game_GetViewFrame(int viewNumber, int loopNumber, int frame) {
   if ((viewNumber < 1) || (viewNumber > game.numviews))
     quit("!GetGameParameter: invalid view specified");
@@ -16747,6 +17123,7 @@ ScriptViewFrame* Game_GetViewFrame(int viewNumber, int loopNumber, int frame) {
   return sdt;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::DoOnceOnly^1 *** */
 int Game_DoOnceOnly(const char *token) 
 {
   if (strlen(token) > 199)
@@ -16766,56 +17143,69 @@ int Game_DoOnceOnly(const char *token)
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_ObjectCount *** */
 int Room_GetObjectCount() {
   return croom->numobj;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_Width *** */
 int Room_GetWidth() {
   return thisroom.width;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_Height *** */
 int Room_GetHeight() {
   return thisroom.height;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_ColorDepth *** */
 int Room_GetColorDepth() {
   return bitmap_color_depth(thisroom.ebscene[0]);
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_LeftEdge *** */
 int Room_GetLeftEdge() {
   return thisroom.left;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_RightEdge *** */
 int Room_GetRightEdge() {
   return thisroom.right;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_TopEdge *** */
 int Room_GetTopEdge() {
   return thisroom.top;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_BottomEdge *** */
 int Room_GetBottomEdge() {
   return thisroom.bottom;
 }
 
+/* *** SCRIPT SYMBOL: [Room] Room::get_MusicOnLoad *** */
 int Room_GetMusicOnLoad() {
   return thisroom.options[ST_TUNE];
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Flipped *** */
 int ViewFrame_GetFlipped(ScriptViewFrame *svf) {
   if (views[svf->view].loops[svf->loop].frames[svf->frame].flags & VFLG_FLIPSPRITE)
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Graphic *** */
 int ViewFrame_GetGraphic(ScriptViewFrame *svf) {
   return views[svf->view].loops[svf->loop].frames[svf->frame].pic;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::set_Graphic *** */
 void ViewFrame_SetGraphic(ScriptViewFrame *svf, int newPic) {
   views[svf->view].loops[svf->loop].frames[svf->frame].pic = newPic;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_LinkedAudio *** */
 ScriptAudioClip* ViewFrame_GetLinkedAudio(ScriptViewFrame *svf) 
 {
   int soundIndex = views[svf->view].loops[svf->loop].frames[svf->frame].sound;
@@ -16825,6 +17215,7 @@ ScriptAudioClip* ViewFrame_GetLinkedAudio(ScriptViewFrame *svf)
   return &game.audioClips[soundIndex];
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::set_LinkedAudio *** */
 void ViewFrame_SetLinkedAudio(ScriptViewFrame *svf, ScriptAudioClip* clip) 
 {
   int newSoundIndex = -1;
@@ -16834,6 +17225,7 @@ void ViewFrame_SetLinkedAudio(ScriptViewFrame *svf, ScriptAudioClip* clip)
   views[svf->view].loops[svf->loop].frames[svf->frame].sound = newSoundIndex;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Sound *** */
 int ViewFrame_GetSound(ScriptViewFrame *svf) {
   // convert audio clip to old-style sound number
   int soundIndex = views[svf->view].loops[svf->loop].frames[svf->frame].sound;
@@ -16845,6 +17237,7 @@ int ViewFrame_GetSound(ScriptViewFrame *svf) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::set_Sound *** */
 void ViewFrame_SetSound(ScriptViewFrame *svf, int newSound) 
 {
   if (newSound < 1)
@@ -16862,18 +17255,22 @@ void ViewFrame_SetSound(ScriptViewFrame *svf, int newSound)
   }
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Speed *** */
 int ViewFrame_GetSpeed(ScriptViewFrame *svf) {
   return views[svf->view].loops[svf->loop].frames[svf->frame].speed;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_View *** */
 int ViewFrame_GetView(ScriptViewFrame *svf) {
   return svf->view + 1;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Loop *** */
 int ViewFrame_GetLoop(ScriptViewFrame *svf) {
   return svf->loop;
 }
 
+/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Frame *** */
 int ViewFrame_GetFrame(ScriptViewFrame *svf) {
   return svf->frame;
 }
@@ -16892,6 +17289,7 @@ int ViewFrame_GetFrame(ScriptViewFrame *svf) {
 #define GP_NUMINVITEMS   12
 #define GP_ISFRAMEFLIPPED 13
 
+/* *** SCRIPT SYMBOL: [Game] GetGameParameter *** */
 int GetGameParameter (int parm, int data1, int data2, int data3) {
   switch (parm) {
    case GP_SPRITEWIDTH:
@@ -16944,54 +17342,67 @@ int GetGameParameter (int parm, int data1, int data2, int data3) {
 }
 
 
+/* *** SCRIPT SYMBOL: [System] System::get_ColorDepth *** */
 int System_GetColorDepth() {
   return final_col_dep;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_OperatingSystem *** */
 int System_GetOS() {
   return scsystem.os;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_ScreenWidth *** */
 int System_GetScreenWidth() {
   return final_scrn_wid;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_ScreenHeight *** */
 int System_GetScreenHeight() {
   return final_scrn_hit;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_ViewportHeight *** */
 int System_GetViewportHeight() {
   return divide_down_coordinate(scrnhit);
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_ViewportWidth *** */
 int System_GetViewportWidth() {
   return divide_down_coordinate(scrnwid);
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_Version *** */
+/* *** SCRIPT SYMBOL: [SystemInfo] SystemInfo::get_Version *** */
 const char *System_GetVersion() {
   return CreateNewScriptString(ACI_VERSION_TEXT);
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_HardwareAcceleration *** */
 int System_GetHardwareAcceleration() 
 {
   return gfxDriver->HasAcceleratedStretchAndFlip() ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_NumLock *** */
 int System_GetNumLock()
 {
   return (key_shifts & KB_NUMLOCK_FLAG) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_CapsLock *** */
 int System_GetCapsLock()
 {
   return (key_shifts & KB_CAPSLOCK_FLAG) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_ScrollLock *** */
 int System_GetScrollLock()
 {
   return (key_shifts & KB_SCROLOCK_FLAG) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::set_NumLock *** */
 void System_SetNumLock(int newValue)
 {
   // doesn't work ... maybe allegro doesn't implement this on windows
@@ -17003,14 +17414,17 @@ void System_SetNumLock(int newValue)
   set_leds(ledState);
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_VSync *** */
 int System_GetVsync() {
   return scsystem.vsync;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::set_VSync *** */
 void System_SetVsync(int newValue) {
   scsystem.vsync = newValue;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_Windowed *** */
 int System_GetWindowed() {
   if (usetup.windowed)
     return 1;
@@ -17018,14 +17432,17 @@ int System_GetWindowed() {
 }
 
 
+/* *** SCRIPT SYMBOL: [System] System::get_SupportsGammaControl *** */
 int System_GetSupportsGammaControl() {
   return gfxDriver->SupportsGammaControl();
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_Gamma *** */
 int System_GetGamma() {
   return play.gamma_adjustment;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::set_Gamma *** */
 void System_SetGamma(int newValue) {
   if ((newValue < 0) || (newValue > 200))
     quitprintf("!System.Gamma: value must be between 0-200 (not %d)", newValue);
@@ -17039,11 +17456,13 @@ void System_SetGamma(int newValue) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_TextReadingSpeed *** */
 int Game_GetTextReadingSpeed()
 {
   return play.text_speed;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::set_TextReadingSpeed *** */
 void Game_SetTextReadingSpeed(int newTextSpeed)
 {
   if (newTextSpeed < 1)
@@ -17052,34 +17471,41 @@ void Game_SetTextReadingSpeed(int newTextSpeed)
   play.text_speed = newTextSpeed;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_MinimumTextDisplayTimeMs *** */
 int Game_GetMinimumTextDisplayTimeMs()
 {
   return play.text_min_display_time_ms;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::set_MinimumTextDisplayTimeMs *** */
 void Game_SetMinimumTextDisplayTimeMs(int newTextMinTime)
 {
   play.text_min_display_time_ms = newTextMinTime;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_IgnoreUserInputAfterTextTimeoutMs *** */
 int Game_GetIgnoreUserInputAfterTextTimeoutMs()
 {
   return play.ignore_user_input_after_text_timeout_ms;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::set_IgnoreUserInputAfterTextTimeoutMs *** */
 void Game_SetIgnoreUserInputAfterTextTimeoutMs(int newValueMs)
 {
   play.ignore_user_input_after_text_timeout_ms = newValueMs;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_FileName *** */
 const char *Game_GetFileName() {
   return CreateNewScriptString(usetup.main_data_filename);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_Name *** */
 const char *Game_GetName() {
   return CreateNewScriptString(play.game_name);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::set_Name *** */
 void Game_SetName(const char *newName) {
   strncpy(play.game_name, newName, 99);
   play.game_name[99] = 0;
@@ -17142,88 +17568,112 @@ const char* get_text_property_dynamic_string(CustomProperties *cprop, const char
   return CreateNewScriptString(valtemp);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] GetInvProperty *** */
 int GetInvProperty (int item, const char *property) {
   return get_int_property (&game.invProps[item], property);
 }
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::GetProperty^1 *** */
 int InventoryItem_GetProperty(ScriptInvItem *scii, const char *property) {
   return get_int_property (&game.invProps[scii->id], property);
 }
+/* *** SCRIPT SYMBOL: [Character] GetCharacterProperty *** */
 int GetCharacterProperty (int cha, const char *property) {
   if (!is_valid_character(cha))
     quit("!GetCharacterProperty: invalid character");
   return get_int_property (&game.charProps[cha], property);
 }
+/* *** SCRIPT SYMBOL: [Character] Character::GetProperty^1 *** */
 int Character_GetProperty(CharacterInfo *chaa, const char *property) {
 
   return get_int_property(&game.charProps[chaa->index_id], property);
 
 }
+/* *** SCRIPT SYMBOL: [Hotspot] GetHotspotProperty *** */
 int GetHotspotProperty (int hss, const char *property) {
   return get_int_property (&thisroom.hsProps[hss], property);
 }
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::GetProperty^1 *** */
 int Hotspot_GetProperty (ScriptHotspot *hss, const char *property) {
   return get_int_property (&thisroom.hsProps[hss->id], property);
 }
 
+/* *** SCRIPT SYMBOL: [Object] GetObjectProperty *** */
 int GetObjectProperty (int hss, const char *property) {
   if (!is_valid_object(hss))
     quit("!GetObjectProperty: invalid object");
   return get_int_property (&thisroom.objProps[hss], property);
 }
+/* *** SCRIPT SYMBOL: [Object] Object::GetProperty^1 *** */
 int Object_GetProperty (ScriptObject *objj, const char *property) {
   return GetObjectProperty(objj->id, property);
 }
 
+/* *** SCRIPT SYMBOL: [Room] GetRoomProperty *** */
 int GetRoomProperty (const char *property) {
   return get_int_property (&thisroom.roomProps, property);
 }
 
 
+/* *** SCRIPT SYMBOL: [InventoryItem] GetInvPropertyText *** */
 void GetInvPropertyText (int item, const char *property, char *bufer) {
   get_text_property (&game.invProps[item], property, bufer);
 }
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::GetPropertyText^2 *** */
 void InventoryItem_GetPropertyText(ScriptInvItem *scii, const char *property, char *bufer) {
   get_text_property(&game.invProps[scii->id], property, bufer);
 }
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::GetTextProperty^1 *** */
 const char* InventoryItem_GetTextProperty(ScriptInvItem *scii, const char *property) {
   return get_text_property_dynamic_string(&game.invProps[scii->id], property);
 }
+/* *** SCRIPT SYMBOL: [Character] GetCharacterPropertyText *** */
 void GetCharacterPropertyText (int item, const char *property, char *bufer) {
   get_text_property (&game.charProps[item], property, bufer);
 }
+/* *** SCRIPT SYMBOL: [Character] Character::GetPropertyText^2 *** */
 void Character_GetPropertyText(CharacterInfo *chaa, const char *property, char *bufer) {
   get_text_property(&game.charProps[chaa->index_id], property, bufer);
 }
+/* *** SCRIPT SYMBOL: [Character] Character::GetTextProperty^1 *** */
 const char* Character_GetTextProperty(CharacterInfo *chaa, const char *property) {
   return get_text_property_dynamic_string(&game.charProps[chaa->index_id], property);
 }
+/* *** SCRIPT SYMBOL: [Hotspot] GetHotspotPropertyText *** */
 void GetHotspotPropertyText (int item, const char *property, char *bufer) {
   get_text_property (&thisroom.hsProps[item], property, bufer);
 }
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::GetPropertyText^2 *** */
 void Hotspot_GetPropertyText (ScriptHotspot *hss, const char *property, char *bufer) {
   get_text_property (&thisroom.hsProps[hss->id], property, bufer);
 }
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::GetTextProperty^1 *** */
 const char* Hotspot_GetTextProperty(ScriptHotspot *hss, const char *property) {
   return get_text_property_dynamic_string(&thisroom.hsProps[hss->id], property);
 }
+/* *** SCRIPT SYMBOL: [Object] GetObjectPropertyText *** */
 void GetObjectPropertyText (int item, const char *property, char *bufer) {
   get_text_property (&thisroom.objProps[item], property, bufer);
 }
+/* *** SCRIPT SYMBOL: [Object] Object::GetPropertyText^2 *** */
 void Object_GetPropertyText(ScriptObject *objj, const char *property, char *bufer) {
   GetObjectPropertyText(objj->id, property, bufer);
 }
+/* *** SCRIPT SYMBOL: [Object] Object::GetTextProperty^1 *** */
 const char* Object_GetTextProperty(ScriptObject *objj, const char *property) {
   return get_text_property_dynamic_string(&thisroom.objProps[objj->id], property);
 }
+/* *** SCRIPT SYMBOL: [Room] GetRoomPropertyText *** */
 void GetRoomPropertyText (const char *property, char *bufer) {
   get_text_property (&thisroom.roomProps, property, bufer);
 }
+/* *** SCRIPT SYMBOL: [Room] Room::GetTextProperty^1 *** */
 const char* Room_GetTextProperty(const char *property) {
   return get_text_property_dynamic_string(&thisroom.roomProps, property);
 }
 
 // end custom property functions
 
+/* *** SCRIPT SYMBOL: [InventoryItem] IsInventoryInteractionAvailable *** */
 int IsInventoryInteractionAvailable (int item, int mood) {
   if ((item < 0) || (item >= MAX_INV))
     quit("!IsInventoryInteractionAvailable: invalid inventory number");
@@ -17241,10 +17691,12 @@ int IsInventoryInteractionAvailable (int item, int mood) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::IsInteractionAvailable^1 *** */
 int InventoryItem_CheckInteractionAvailable(ScriptInvItem *iitem, int mood) {
   return IsInventoryInteractionAvailable(iitem->id, mood);
 }
 
+/* *** SCRIPT SYMBOL: [Game] IsInteractionAvailable *** */
 int IsInteractionAvailable (int xx,int yy,int mood) {
   getloctype_throughgui = 1;
   int loctype = GetLocationType (xx, yy);
@@ -17394,6 +17846,7 @@ int do_movelist_move(short*mlnum,int*xx,int*yy) {
   return need_to_fix_sprite;
   }
 
+/* *** SCRIPT SYMBOL: [Room] RemoveWalkableArea *** */
 void RemoveWalkableArea(int areanum) {
   if ((areanum<1) | (areanum>15))
     quit("!RemoveWalkableArea: invalid area number specified (1-15).");
@@ -17402,6 +17855,7 @@ void RemoveWalkableArea(int areanum) {
   DEBUG_CONSOLE("Walkable area %d removed", areanum);
 }
 
+/* *** SCRIPT SYMBOL: [Room] RestoreWalkableArea *** */
 void RestoreWalkableArea(int areanum) {
   if ((areanum<1) | (areanum>15))
     quit("!RestoreWalkableArea: invalid area number specified (1-15).");
@@ -17410,6 +17864,7 @@ void RestoreWalkableArea(int areanum) {
   DEBUG_CONSOLE("Walkable area %d restored", areanum);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] DisableHotspot *** */
 void DisableHotspot(int hsnum) {
   if ((hsnum<1) | (hsnum>=MAX_HOTSPOTS))
     quit("!DisableHotspot: invalid hotspot specified");
@@ -17417,6 +17872,7 @@ void DisableHotspot(int hsnum) {
   DEBUG_CONSOLE("Hotspot %d disabled", hsnum);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] EnableHotspot *** */
 void EnableHotspot(int hsnum) {
   if ((hsnum<1) | (hsnum>=MAX_HOTSPOTS))
     quit("!EnableHotspot: invalid hotspot specified");
@@ -17424,6 +17880,7 @@ void EnableHotspot(int hsnum) {
   DEBUG_CONSOLE("Hotspot %d re-enabled", hsnum);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::set_Enabled *** */
 void Hotspot_SetEnabled(ScriptHotspot *hss, int newval) {
   if (newval)
     EnableHotspot(hss->id);
@@ -17431,14 +17888,17 @@ void Hotspot_SetEnabled(ScriptHotspot *hss, int newval) {
     DisableHotspot(hss->id);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::get_Enabled *** */
 int Hotspot_GetEnabled(ScriptHotspot *hss) {
   return croom->hotspot_enabled[hss->id];
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::get_ID *** */
 int Hotspot_GetID(ScriptHotspot *hss) {
   return hss->id;
 }
 
+/* *** SCRIPT SYMBOL: [Region] DisableRegion *** */
 void DisableRegion(int hsnum) {
   if ((hsnum < 0) || (hsnum >= MAX_REGIONS))
     quit("!DisableRegion: invalid region specified");
@@ -17447,6 +17907,7 @@ void DisableRegion(int hsnum) {
   DEBUG_CONSOLE("Region %d disabled", hsnum);
 }
 
+/* *** SCRIPT SYMBOL: [Region] EnableRegion *** */
 void EnableRegion(int hsnum) {
   if ((hsnum < 0) || (hsnum >= MAX_REGIONS))
     quit("!EnableRegion: invalid region specified");
@@ -17455,6 +17916,7 @@ void EnableRegion(int hsnum) {
   DEBUG_CONSOLE("Region %d enabled", hsnum);
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::set_Enabled *** */
 void Region_SetEnabled(ScriptRegion *ssr, int enable) {
   if (enable)
     EnableRegion(ssr->id);
@@ -17462,14 +17924,17 @@ void Region_SetEnabled(ScriptRegion *ssr, int enable) {
     DisableRegion(ssr->id);
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_Enabled *** */
 int Region_GetEnabled(ScriptRegion *ssr) {
   return croom->region_enabled[ssr->id];
 }
 
+/* *** SCRIPT SYMBOL: [Region] Region::get_ID *** */
 int Region_GetID(ScriptRegion *ssr) {
   return ssr->id;
 }
 
+/* *** SCRIPT SYMBOL: [Room] DisableGroundLevelAreas *** */
 void DisableGroundLevelAreas(int alsoEffects) {
   if ((alsoEffects < 0) || (alsoEffects > 1))
     quit("!DisableGroundLevelAreas: invalid parameter: must be 0 or 1");
@@ -17482,12 +17947,14 @@ void DisableGroundLevelAreas(int alsoEffects) {
   DEBUG_CONSOLE("Ground-level areas disabled");
 }
 
+/* *** SCRIPT SYMBOL: [Room] EnableGroundLevelAreas *** */
 void EnableGroundLevelAreas() {
   play.ground_level_areas_disabled = 0;
 
   DEBUG_CONSOLE("Ground-level areas re-enabled");
 }
 
+/* *** SCRIPT SYMBOL: [Room] SetWalkBehindBase *** */
 void SetWalkBehindBase(int wa,int bl) {
   if ((wa < 1) || (wa >= MAX_OBJ))
     quit("!SetWalkBehindBase: invalid walk-behind area specified");
@@ -17500,6 +17967,7 @@ void SetWalkBehindBase(int wa,int bl) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Screen] FlipScreen *** */
 void FlipScreen(int amount) {
   if ((amount<0) | (amount>3)) quit("!FlipScreen: invalid argument (0-3)");
   play.screen_flipped=amount;
@@ -17542,11 +18010,13 @@ void stopmusic() {
   current_music_type = 0;
 }
 
+/* *** SCRIPT SYMBOL: [Multimedia] StopMusic *** */
 void scr_StopMusic() {
   play.music_queue_size = 0;
   stopmusic();
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] SeekMODPattern *** */
 void SeekMODPattern(int patnum) {
   if (current_music_type == MUS_MOD) {
     channels[SCHAN_MUSIC]->seek (patnum);
@@ -17554,6 +18024,7 @@ void SeekMODPattern(int patnum) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetMODPattern^0 *** */
 int Game_GetMODPattern() {
   if (current_music_type == MUS_MOD) {
     return channels[SCHAN_MUSIC]->get_pos();
@@ -17561,6 +18032,7 @@ int Game_GetMODPattern() {
   return -1;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] SeekMP3PosMillis *** */
 void SeekMP3PosMillis (int posn) {
   if (current_music_type) {
     DEBUG_CONSOLE("Seek MP3/OGG to %d ms", posn);
@@ -17571,6 +18043,7 @@ void SeekMP3PosMillis (int posn) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] GetMP3PosMillis *** */
 int GetMP3PosMillis () {
   // in case they have "while (GetMP3PosMillis() < 5000) "
   if (play.fast_forward)
@@ -17631,6 +18104,7 @@ void update_music_volume() {
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] SetMusicVolume *** */
 void SetMusicVolume(int newvol) {
   if ((newvol < -3) || (newvol > 5))
     quit("!SetMusicVolume: invalid volume number. Must be from -3 to 5.");
@@ -17638,6 +18112,7 @@ void SetMusicVolume(int newvol) {
   update_music_volume();
   }
 
+/* *** SCRIPT SYMBOL: [System] SetMusicMasterVolume *** */
 void SetMusicMasterVolume(int newvol) {
   if ((newvol<0) | (newvol>100))
     quit("!SetMusicMasterVolume: invalid volume - must be from 0-100");
@@ -17645,6 +18120,7 @@ void SetMusicMasterVolume(int newvol) {
   update_music_volume();
   }
 
+/* *** SCRIPT SYMBOL: [Multimedia] SetSoundVolume *** */
 void SetSoundVolume(int newvol) {
   if ((newvol<0) | (newvol>255))
     quit("!SetSoundVolume: invalid volume - must be from 0-255");
@@ -17654,6 +18130,7 @@ void SetSoundVolume(int newvol) {
   update_ambient_sound_vol ();
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] SetChannelVolume *** */
 void SetChannelVolume(int chan, int newvol) {
   if ((newvol<0) || (newvol>255))
     quit("!SetChannelVolume: invalid volume - must be from 0-255");
@@ -17670,6 +18147,7 @@ void SetChannelVolume(int chan, int newvol) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [System] SetDigitalMasterVolume *** */
 void SetDigitalMasterVolume (int newvol) {
   if ((newvol<0) | (newvol>100))
     quit("!SetDigitalMasterVolume: invalid volume - must be from 0-100");
@@ -17677,11 +18155,13 @@ void SetDigitalMasterVolume (int newvol) {
   set_volume ((newvol * 255) / 100, -1);
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_Volume *** */
 int System_GetVolume() 
 {
   return play.digital_master_volume;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::set_Volume *** */
 void System_SetVolume(int newvol) 
 {
   if ((newvol < 0) || (newvol > 100))
@@ -17704,10 +18184,12 @@ void System_SetVolume(int newvol)
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] GetCurrentMusic *** */
 int GetCurrentMusic() {
   return play.cur_music_number;
   }
 
+/* *** SCRIPT SYMBOL: [AudioClip] SetMusicRepeat *** */
 void SetMusicRepeat(int loopflag) {
   play.music_repeat=loopflag;
 }
@@ -17772,6 +18254,7 @@ int prepare_for_new_music () {
   return useChannel;
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] PlayMP3File *** */
 void PlayMP3File (char *filename) {
   if (strlen(filename) >= PLAYMP3FILE_MAX_FILENAME_LEN)
     quit("!PlayMP3File: filename too long");
@@ -17808,6 +18291,7 @@ void PlayMP3File (char *filename) {
   update_music_volume();
 }
 
+/* *** SCRIPT SYMBOL: [Multimedia] PlaySilentMIDI *** */
 void PlaySilentMIDI (int mnum) {
   if (current_music_type == MUS_MIDI)
     quit("!PlaySilentMIDI: proper midi music is in progress");
@@ -17905,6 +18389,7 @@ void newmusic(int mnum) {
   play_new_music(mnum, NULL);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetPlayerCharacter *** */
 void SetPlayerCharacter(int newchar) {
   if (!is_valid_character(newchar))
     quit("!SetPlayerCharacter: Invalid character specified");
@@ -17912,6 +18397,7 @@ void SetPlayerCharacter(int newchar) {
   Character_SetAsPlayer(&game.chars[newchar]);
 }
 
+/* *** SCRIPT SYMBOL: [Character] FollowCharacterEx *** */
 void FollowCharacterEx(int who, int tofollow, int distaway, int eagerness) {
   if (!is_valid_character(who))
     quit("!FollowCharacter: Invalid character specified");
@@ -17926,10 +18412,12 @@ void FollowCharacterEx(int who, int tofollow, int distaway, int eagerness) {
   Character_FollowCharacter(&game.chars[who], chtofollow, distaway, eagerness);
 }
 
+/* *** SCRIPT SYMBOL: [Character] FollowCharacter *** */
 void FollowCharacter(int who, int tofollow) {
   FollowCharacterEx(who,tofollow,10,97);
   }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterIgnoreLight *** */
 void SetCharacterIgnoreLight (int who, int yesorno) {
   if (!is_valid_character(who))
     quit("!SetCharacterIgnoreLight: Invalid character specified");
@@ -17937,6 +18425,7 @@ void SetCharacterIgnoreLight (int who, int yesorno) {
   Character_SetIgnoreLighting(&game.chars[who], yesorno);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterProperty *** */
 void SetCharacterProperty (int who, int flag, int yesorno) {
   if (!is_valid_character(who))
     quit("!SetCharacterProperty: Invalid character specified");
@@ -17944,6 +18433,7 @@ void SetCharacterProperty (int who, int flag, int yesorno) {
   Character_SetOption(&game.chars[who], flag, yesorno);
 }
 
+/* *** SCRIPT SYMBOL: [Game] QuitGame *** */
 void QuitGame(int dialog) {
   if (dialog) {
     int rcode;
@@ -17955,6 +18445,7 @@ void QuitGame(int dialog) {
   quit("|You have exited.");
   }
 
+/* *** SCRIPT SYMBOL: [Game] InputBox *** */
 void sc_inputbox(const char*msg,char*bufr) {
   VALIDATE_STRING(bufr);
   setup_for_dialog();
@@ -17962,6 +18453,7 @@ void sc_inputbox(const char*msg,char*bufr) {
   restore_after_dialog();
   }
 
+/* *** SCRIPT SYMBOL: [Game] Game::InputBox^1 *** */
 const char* Game_InputBox(const char *msg) {
   char buffer[STD_BUFFER_SIZE];
   sc_inputbox(msg, buffer);
@@ -17993,6 +18485,7 @@ int find_word_in_dictionary (char *lookfor) {
   return -1;
 }
 
+/* *** SCRIPT SYMBOL: [Parser] SaidUnknownWord *** */
 int SaidUnknownWord (char*buffer) {
   VALIDATE_STRING(buffer);
   strcpy (buffer, play.bad_parsed_word);
@@ -18001,6 +18494,7 @@ int SaidUnknownWord (char*buffer) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Parser] Parser::SaidUnknownWord^0 *** */
 const char* Parser_SaidUnknownWord() {
   if (play.bad_parsed_word[0] == 0)
     return NULL;
@@ -18215,10 +18709,13 @@ int parse_sentence (char*text, int *numwords, short*wordarray, short*compareto, 
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Parser] Parser::ParseText^1 *** */
+/* *** SCRIPT SYMBOL: [Parser] ParseText *** */
 void ParseText (char*text) {
   parse_sentence (text, &play.num_parsed_words, play.parsed_words, NULL, 0);
 }
 
+/* *** SCRIPT SYMBOL: [Parser] Parser::FindWordID^1 *** */
 int Parser_FindWordID(const char *wordToFind)
 {
   return find_word_in_dictionary((char*)wordToFind);
@@ -18227,6 +18724,8 @@ int Parser_FindWordID(const char *wordToFind)
 // Said: call with argument for example "get apple"; we then check
 // word by word if it matches (using dictonary ID equivalence to match
 // synonyms). Returns 1 if it does, 0 if not.
+/* *** SCRIPT SYMBOL: [Parser] Parser::Said^1 *** */
+/* *** SCRIPT SYMBOL: [Parser] Said *** */
 int Said (char*checkwords) {
   int numword = 0;
   short words[MAX_PARSED_WORDS];
@@ -18301,6 +18800,7 @@ bool validate_user_file_path(const char *fnmm, char *output, bool currentDirOnly
   return true;
 }
 
+/* *** SCRIPT SYMBOL: [File] FileOpen *** */
 FILE* FileOpen(const char*fnmm, const char* mode) {
   int useindx = 0;
   char fileToOpen[MAX_PATH];
@@ -18329,21 +18829,25 @@ FILE* FileOpen(const char*fnmm, const char* mode) {
   return valid_handles[useindx];
 }
 
+/* *** SCRIPT SYMBOL: [File] FileClose *** */
 void FileClose(FILE*hha) {
   valid_handles[check_valid_file_handle(hha,"FileClose")] = NULL;
   fclose(hha);
   }
+/* *** SCRIPT SYMBOL: [File] FileWrite *** */
 void FileWrite(FILE*haa, const char *towrite) {
   check_valid_file_handle(haa,"FileWrite");
   putw(strlen(towrite)+1,haa);
   fwrite(towrite,strlen(towrite)+1,1,haa);
   }
+/* *** SCRIPT SYMBOL: [File] FileWriteRawLine *** */
 void FileWriteRawLine(FILE*haa, const char*towrite) {
   check_valid_file_handle(haa,"FileWriteRawLine");
   fwrite(towrite,strlen(towrite),1,haa);
   fputc (13, haa);
   fputc (10, haa);
   }
+/* *** SCRIPT SYMBOL: [File] FileRead *** */
 void FileRead(FILE*haa,char*toread) {
   VALIDATE_STRING(toread);
   check_valid_file_handle(haa,"FileRead");
@@ -18355,6 +18859,7 @@ void FileRead(FILE*haa,char*toread) {
   if ((lle>=200) | (lle<1)) quit("!FileRead: file was not written by FileWrite");
   fread(toread,lle,1,haa);
   }
+/* *** SCRIPT SYMBOL: [File] FileIsEOF *** */
 int FileIsEOF (FILE *haa) {
   check_valid_file_handle(haa,"FileIsEOF");
   if (feof(haa))
@@ -18365,17 +18870,20 @@ int FileIsEOF (FILE *haa) {
     return 1;
   return 0;
 }
+/* *** SCRIPT SYMBOL: [File] FileIsError *** */
 int FileIsError(FILE *haa) {
   check_valid_file_handle(haa,"FileIsError");
   if (ferror(haa))
     return 1;
   return 0;
 }
+/* *** SCRIPT SYMBOL: [File] FileWriteInt *** */
 void FileWriteInt(FILE*haa,int into) {
   check_valid_file_handle(haa,"FileWriteInt");
   fputc('I',haa);
   putw(into,haa);
   }
+/* *** SCRIPT SYMBOL: [File] FileReadInt *** */
 int FileReadInt(FILE*haa) {
   check_valid_file_handle(haa,"FileReadInt");
   if (feof(haa))
@@ -18384,18 +18892,21 @@ int FileReadInt(FILE*haa) {
     quit("!FileReadInt: File read back in wrong order");
   return getw(haa);
   }
+/* *** SCRIPT SYMBOL: [File] FileReadRawChar *** */
 char FileReadRawChar(FILE*haa) {
   check_valid_file_handle(haa,"FileReadRawChar");
   if (feof(haa))
     return -1;
   return fgetc(haa);
   }
+/* *** SCRIPT SYMBOL: [File] FileReadRawInt *** */
 int FileReadRawInt(FILE*haa) {
   check_valid_file_handle(haa,"FileReadRawInt");
   if (feof(haa))
     return -1;
   return getw(haa);
 }
+/* *** SCRIPT SYMBOL: [File] FileWriteRawChar *** */
 void FileWriteRawChar(FILE *haa, int chartoWrite) {
   check_valid_file_handle(haa,"FileWriteRawChar");
   if ((chartoWrite < 0) || (chartoWrite > 255))
@@ -18422,6 +18933,7 @@ void sc_File::Close() {
   }
 }
 
+/* *** SCRIPT SYMBOL: [File] File::Exists^1 *** */
 int File_Exists(const char *fnmm) {
   char fileToCheck[MAX_PATH];
 
@@ -18436,6 +18948,7 @@ int File_Exists(const char *fnmm) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [File] File::Delete^1 *** */
 int File_Delete(const char *fnmm) {
 
   char fileToDelete[MAX_PATH];
@@ -18448,6 +18961,7 @@ int File_Delete(const char *fnmm) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [File] File::Open^2 *** */
 void *sc_OpenFile(const char *fnmm, int mode) {
   if ((mode < scFileRead) || (mode > scFileAppend))
     quit("!OpenFile: invalid file mode");
@@ -18461,26 +18975,32 @@ void *sc_OpenFile(const char *fnmm, int mode) {
   return scf;
 }
 
+/* *** SCRIPT SYMBOL: [File] File::Close^0 *** */
 void File_Close(sc_File *fil) {
   fil->Close();
 }
 
+/* *** SCRIPT SYMBOL: [File] File::WriteString^1 *** */
 void File_WriteString(sc_File *fil, const char *towrite) {
   FileWrite(fil->handle, towrite);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::WriteInt^1 *** */
 void File_WriteInt(sc_File *fil, int towrite) {
   FileWriteInt(fil->handle, towrite);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::WriteRawChar^1 *** */
 void File_WriteRawChar(sc_File *fil, int towrite) {
   FileWriteRawChar(fil->handle, towrite);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::WriteRawLine^1 *** */
 void File_WriteRawLine(sc_File *fil, const char *towrite) {
   FileWriteRawLine(fil->handle, towrite);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::ReadRawLine^1 *** */
 void File_ReadRawLine(sc_File *fil, char* buffer) {
   check_valid_file_handle(fil->handle, "File.ReadRawLine");
   check_strlen(buffer);
@@ -18501,16 +19021,19 @@ void File_ReadRawLine(sc_File *fil, char* buffer) {
   buffer[i] = 0;
 }
 
+/* *** SCRIPT SYMBOL: [File] File::ReadRawLineBack^0 *** */
 const char* File_ReadRawLineBack(sc_File *fil) {
   char readbuffer[MAX_MAXSTRLEN + 1];
   File_ReadRawLine(fil, readbuffer);
   return CreateNewScriptString(readbuffer);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::ReadString^1 *** */
 void File_ReadString(sc_File *fil, char *toread) {
   FileRead(fil->handle, toread);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::ReadStringBack^0 *** */
 const char* File_ReadStringBack(sc_File *fil) {
   check_valid_file_handle(fil->handle, "File.ReadStringBack");
   if (feof(fil->handle)) {
@@ -18527,24 +19050,29 @@ const char* File_ReadStringBack(sc_File *fil) {
   return CreateNewScriptString(retVal, false);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::ReadInt^0 *** */
 int File_ReadInt(sc_File *fil) {
   return FileReadInt(fil->handle);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::ReadRawChar^0 *** */
 int File_ReadRawChar(sc_File *fil) {
   return FileReadRawChar(fil->handle);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::ReadRawInt^0 *** */
 int File_ReadRawInt(sc_File *fil) {
   return FileReadRawInt(fil->handle);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::get_EOF *** */
 int File_GetEOF(sc_File *fil) {
   if (fil->handle == NULL)
     return 1;
   return FileIsEOF(fil->handle);
 }
 
+/* *** SCRIPT SYMBOL: [File] File::get_Error *** */
 int File_GetError(sc_File *fil) {
   if (fil->handle == NULL)
     return 1;
@@ -18552,6 +19080,7 @@ int File_GetError(sc_File *fil) {
 }
 
 
+/* *** SCRIPT SYMBOL: [GUI] InterfaceOn *** */
 void InterfaceOn(int ifn) {
   if ((ifn<0) | (ifn>=game.numgui))
     quit("!GUIOn: invalid GUI specified");
@@ -18573,6 +19102,7 @@ void InterfaceOn(int ifn) {
   guis[ifn].poll();
 }
 
+/* *** SCRIPT SYMBOL: [GUI] InterfaceOff *** */
 void InterfaceOff(int ifn) {
   if ((ifn<0) | (ifn>=game.numgui)) quit("!GUIOff: invalid GUI specified");
   if ((guis[ifn].on==0) && (guis[ifn].popup!=POPUP_MOUSEY)) {
@@ -18593,6 +19123,7 @@ void InterfaceOff(int ifn) {
   else if (guis[ifn].popup==POPUP_MOUSEY) guis[ifn].on=-1;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_Visible *** */
 void GUI_SetVisible(ScriptGUI *tehgui, int isvisible) {
   if (isvisible)
     InterfaceOn(tehgui->id);
@@ -18600,6 +19131,7 @@ void GUI_SetVisible(ScriptGUI *tehgui, int isvisible) {
     InterfaceOff(tehgui->id);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_Visible *** */
 int GUI_GetVisible(ScriptGUI *tehgui) {
   // GUI_GetVisible is slightly different from IsGUIOn, because
   // with a mouse ypos gui it returns 1 if the GUI is enabled,
@@ -18609,10 +19141,12 @@ int GUI_GetVisible(ScriptGUI *tehgui) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_Visible *** */
 int GUIControl_GetVisible(GUIObject *guio) {
   return guio->IsVisible();
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::set_Visible *** */
 void GUIControl_SetVisible(GUIObject *guio, int visible) 
 {
   if (visible != guio->IsVisible()) 
@@ -18627,12 +19161,14 @@ void GUIControl_SetVisible(GUIObject *guio, int visible)
   }
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_Clickable *** */
 int GUIControl_GetClickable(GUIObject *guio) {
   if (guio->IsClickable())
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::set_Clickable *** */
 void GUIControl_SetClickable(GUIObject *guio, int enabled) {
   if (enabled)
     guio->SetClickable(true);
@@ -18643,12 +19179,14 @@ void GUIControl_SetClickable(GUIObject *guio, int enabled) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_Enabled *** */
 int GUIControl_GetEnabled(GUIObject *guio) {
   if (guio->IsDisabled())
     return 0;
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::set_Enabled *** */
 void GUIControl_SetEnabled(GUIObject *guio, int enabled) {
   if (enabled)
     guio->Enable();
@@ -18659,6 +19197,7 @@ void GUIControl_SetEnabled(GUIObject *guio, int enabled) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] SetGUIObjectEnabled *** */
 void SetGUIObjectEnabled(int guin, int objn, int enabled) {
   if ((guin<0) || (guin>=game.numgui))
     quit("!SetGUIObjectEnabled: invalid GUI number");
@@ -18668,14 +19207,17 @@ void SetGUIObjectEnabled(int guin, int objn, int enabled) {
   GUIControl_SetEnabled(guis[guin].objs[objn], enabled);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_ID *** */
 int GUIControl_GetID(GUIObject *guio) {
   return guio->objn;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_OwningGUI *** */
 ScriptGUI* GUIControl_GetOwningGUI(GUIObject *guio) {
   return &scrGui[guio->guin];
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_AsButton *** */
 GUIButton* GUIControl_GetAsButton(GUIObject *guio) {
   if (guis[guio->guin].get_control_type(guio->objn) != GOBJ_BUTTON)
     return NULL;
@@ -18683,6 +19225,7 @@ GUIButton* GUIControl_GetAsButton(GUIObject *guio) {
   return (GUIButton*)guio;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_AsInvWindow *** */
 GUIInv* GUIControl_GetAsInvWindow(GUIObject *guio) {
   if (guis[guio->guin].get_control_type(guio->objn) != GOBJ_INVENTORY)
     return NULL;
@@ -18690,6 +19233,7 @@ GUIInv* GUIControl_GetAsInvWindow(GUIObject *guio) {
   return (GUIInv*)guio;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_AsLabel *** */
 GUILabel* GUIControl_GetAsLabel(GUIObject *guio) {
   if (guis[guio->guin].get_control_type(guio->objn) != GOBJ_LABEL)
     return NULL;
@@ -18697,6 +19241,7 @@ GUILabel* GUIControl_GetAsLabel(GUIObject *guio) {
   return (GUILabel*)guio;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_AsListBox *** */
 GUIListBox* GUIControl_GetAsListBox(GUIObject *guio) {
   if (guis[guio->guin].get_control_type(guio->objn) != GOBJ_LISTBOX)
     return NULL;
@@ -18704,6 +19249,7 @@ GUIListBox* GUIControl_GetAsListBox(GUIObject *guio) {
   return (GUIListBox*)guio;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_AsSlider *** */
 GUISlider* GUIControl_GetAsSlider(GUIObject *guio) {
   if (guis[guio->guin].get_control_type(guio->objn) != GOBJ_SLIDER)
     return NULL;
@@ -18711,6 +19257,7 @@ GUISlider* GUIControl_GetAsSlider(GUIObject *guio) {
   return (GUISlider*)guio;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_AsTextBox *** */
 GUITextBox* GUIControl_GetAsTextBox(GUIObject *guio) {
   if (guis[guio->guin].get_control_type(guio->objn) != GOBJ_TEXTBOX)
     return NULL;
@@ -18718,31 +19265,37 @@ GUITextBox* GUIControl_GetAsTextBox(GUIObject *guio) {
   return (GUITextBox*)guio;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_X *** */
 int GUIControl_GetX(GUIObject *guio) {
   return divide_down_coordinate(guio->x);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::set_X *** */
 void GUIControl_SetX(GUIObject *guio, int xx) {
   guio->x = multiply_up_coordinate(xx);
   guis[guio->guin].control_positions_changed();
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_Y *** */
 int GUIControl_GetY(GUIObject *guio) {
   return divide_down_coordinate(guio->y);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::set_Y *** */
 void GUIControl_SetY(GUIObject *guio, int yy) {
   guio->y = multiply_up_coordinate(yy);
   guis[guio->guin].control_positions_changed();
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::SetPosition^2 *** */
 void GUIControl_SetPosition(GUIObject *guio, int xx, int yy) {
   GUIControl_SetX(guio, xx);
   GUIControl_SetY(guio, yy);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] SetGUIObjectPosition *** */
 void SetGUIObjectPosition(int guin, int objn, int xx, int yy) {
   if ((guin<0) || (guin>=game.numgui))
     quit("!SetGUIObjectPosition: invalid GUI number");
@@ -18752,10 +19305,12 @@ void SetGUIObjectPosition(int guin, int objn, int xx, int yy) {
   GUIControl_SetPosition(guis[guin].objs[objn], xx, yy);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_X *** */
 int GUI_GetX(ScriptGUI *tehgui) {
   return divide_down_coordinate(tehgui->gui->x);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_X *** */
 void GUI_SetX(ScriptGUI *tehgui, int xx) {
   if (xx >= thisroom.width)
     quit("!GUI.X: co-ordinates specified are out of range.");
@@ -18763,10 +19318,12 @@ void GUI_SetX(ScriptGUI *tehgui, int xx) {
   tehgui->gui->x = multiply_up_coordinate(xx);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_Y *** */
 int GUI_GetY(ScriptGUI *tehgui) {
   return divide_down_coordinate(tehgui->gui->y);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_Y *** */
 void GUI_SetY(ScriptGUI *tehgui, int yy) {
   if (yy >= thisroom.height)
     quit("!GUI.Y: co-ordinates specified are out of range.");
@@ -18774,11 +19331,13 @@ void GUI_SetY(ScriptGUI *tehgui, int yy) {
   tehgui->gui->y = multiply_up_coordinate(yy);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::SetPosition^2 *** */
 void GUI_SetPosition(ScriptGUI *tehgui, int xx, int yy) {
   GUI_SetX(tehgui, xx);
   GUI_SetY(tehgui, yy);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] SetGUIPosition *** */
 void SetGUIPosition(int ifn,int xx,int yy) {
   if ((ifn<0) || (ifn>=game.numgui))
     quit("!SetGUIPosition: invalid GUI number");
@@ -18786,10 +19345,12 @@ void SetGUIPosition(int ifn,int xx,int yy) {
   GUI_SetPosition(&scrGui[ifn], xx, yy);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_Width *** */
 int GUIControl_GetWidth(GUIObject *guio) {
   return divide_down_coordinate(guio->wid);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::set_Width *** */
 void GUIControl_SetWidth(GUIObject *guio, int newwid) {
   guio->wid = multiply_up_coordinate(newwid);
   guio->Resized();
@@ -18797,10 +19358,12 @@ void GUIControl_SetWidth(GUIObject *guio, int newwid) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::get_Height *** */
 int GUIControl_GetHeight(GUIObject *guio) {
   return divide_down_coordinate(guio->hit);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::set_Height *** */
 void GUIControl_SetHeight(GUIObject *guio, int newhit) {
   guio->hit = multiply_up_coordinate(newhit);
   guio->Resized();
@@ -18808,6 +19371,7 @@ void GUIControl_SetHeight(GUIObject *guio, int newhit) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::SetSize^2 *** */
 void GUIControl_SetSize(GUIObject *guio, int newwid, int newhit) {
   if ((newwid < 2) || (newhit < 2))
     quit("!SetGUIObjectSize: new size is too small (must be at least 2x2)");
@@ -18817,16 +19381,19 @@ void GUIControl_SetSize(GUIObject *guio, int newwid, int newhit) {
   GUIControl_SetHeight(guio, newhit);
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::SendToBack^0 *** */
 void GUIControl_SendToBack(GUIObject *guio) {
   if (guis[guio->guin].send_to_back(guio->objn))
     guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] GUIControl::BringToFront^0 *** */
 void GUIControl_BringToFront(GUIObject *guio) {
   if (guis[guio->guin].bring_to_front(guio->objn))
     guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUIControl] SetGUIObjectSize *** */
 void SetGUIObjectSize(int ifn, int objn, int newwid, int newhit) {
   if ((ifn<0) || (ifn>=game.numgui))
     quit("!SetGUIObjectSize: invalid GUI number");
@@ -18853,6 +19420,7 @@ void recreate_guibg_image(GUIMain *tehgui)
   }
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::SetSize^2 *** */
 void GUI_SetSize(ScriptGUI *sgui, int widd, int hitt) {
   if ((widd < 1) || (hitt < 1) || (widd > BASEWIDTH) || (hitt > GetMaxScreenHeight()))
     quitprintf("!SetGUISize: invalid dimensions (tried to set to %d x %d)", widd, hitt);
@@ -18871,22 +19439,27 @@ void GUI_SetSize(ScriptGUI *sgui, int widd, int hitt) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_Width *** */
 int GUI_GetWidth(ScriptGUI *sgui) {
   return divide_down_coordinate(sgui->gui->wid);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_Height *** */
 int GUI_GetHeight(ScriptGUI *sgui) {
   return divide_down_coordinate(sgui->gui->hit);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_Width *** */
 void GUI_SetWidth(ScriptGUI *sgui, int newwid) {
   GUI_SetSize(sgui, newwid, GUI_GetHeight(sgui));
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_Height *** */
 void GUI_SetHeight(ScriptGUI *sgui, int newhit) {
   GUI_SetSize(sgui, GUI_GetWidth(sgui), newhit);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] SetGUISize *** */
 void SetGUISize (int ifn, int widd, int hitt) {
   if ((ifn<0) || (ifn>=game.numgui))
     quit("!SetGUISize: invalid GUI number");
@@ -18894,15 +19467,18 @@ void SetGUISize (int ifn, int widd, int hitt) {
   GUI_SetSize(&scrGui[ifn], widd, hitt);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_ZOrder *** */
 void GUI_SetZOrder(ScriptGUI *tehgui, int z) {
   tehgui->gui->zorder = z;
   update_gui_zorder();
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_ZOrder *** */
 int GUI_GetZOrder(ScriptGUI *tehgui) {
   return tehgui->gui->zorder;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] SetGUIZOrder *** */
 void SetGUIZOrder(int guin, int z) {
   if ((guin<0) || (guin>=game.numgui))
     quit("!SetGUIZOrder: invalid GUI number");
@@ -18910,18 +19486,21 @@ void SetGUIZOrder(int guin, int z) {
   GUI_SetZOrder(&scrGui[guin], z);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_Clickable *** */
 void GUI_SetClickable(ScriptGUI *tehgui, int clickable) {
   tehgui->gui->flags &= ~GUIF_NOCLICK;
   if (clickable == 0)
     tehgui->gui->flags |= GUIF_NOCLICK;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_Clickable *** */
 int GUI_GetClickable(ScriptGUI *tehgui) {
   if (tehgui->gui->flags & GUIF_NOCLICK)
     return 0;
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] SetGUIClickable *** */
 void SetGUIClickable(int guin, int clickable) {
   if ((guin<0) || (guin>=game.numgui))
     quit("!SetGUIClickable: invalid GUI number");
@@ -18929,20 +19508,24 @@ void SetGUIClickable(int guin, int clickable) {
   GUI_SetClickable(&scrGui[guin], clickable);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_ID *** */
 int GUI_GetID(ScriptGUI *tehgui) {
   return tehgui->id;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::geti_Controls *** */
 GUIObject* GUI_GetiControls(ScriptGUI *tehgui, int idx) {
   if ((idx < 0) || (idx >= tehgui->gui->numobjs))
     return NULL;
   return tehgui->gui->objs[idx];
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_ControlCount *** */
 int GUI_GetControlCount(ScriptGUI *tehgui) {
   return tehgui->gui->numobjs;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_Transparency *** */
 void GUI_SetTransparency(ScriptGUI *tehgui, int trans) {
   if ((trans < 0) | (trans > 100))
     quit("!SetGUITransparency: transparency value must be between 0 and 100");
@@ -18950,6 +19533,7 @@ void GUI_SetTransparency(ScriptGUI *tehgui, int trans) {
   tehgui->gui->SetTransparencyAsPercentage(trans);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_Transparency *** */
 int GUI_GetTransparency(ScriptGUI *tehgui) {
   if (tehgui->gui->transparency == 0)
     return 0;
@@ -18960,6 +19544,7 @@ int GUI_GetTransparency(ScriptGUI *tehgui) {
 }
 
 // pass trans=0 for fully solid, trans=100 for fully transparent
+/* *** SCRIPT SYMBOL: [GUI] SetGUITransparency *** */
 void SetGUITransparency(int ifn, int trans) {
   if ((ifn < 0) | (ifn >= game.numgui))
     quit("!SetGUITransparency: invalid GUI number");
@@ -18967,12 +19552,14 @@ void SetGUITransparency(int ifn, int trans) {
   GUI_SetTransparency(&scrGui[ifn], trans);
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::Centre^0 *** */
 void GUI_Centre(ScriptGUI *sgui) {
   GUIMain *tehgui = sgui->gui;
   tehgui->x = scrnwid / 2 - tehgui->wid / 2;
   tehgui->y = scrnhit / 2 - tehgui->hit / 2;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] CentreGUI *** */
 void CentreGUI (int ifn) {
   if ((ifn<0) | (ifn>=game.numgui))
     quit("!CentreGUI: invalid GUI number");
@@ -18980,6 +19567,7 @@ void CentreGUI (int ifn) {
   GUI_Centre(&scrGui[ifn]);
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetTextWidth *** */
 int GetTextWidth(char *text, int fontnum) {
   VALIDATE_STRING(text);
   if ((fontnum < 0) || (fontnum >= game.numfonts))
@@ -18988,6 +19576,7 @@ int GetTextWidth(char *text, int fontnum) {
   return divide_down_coordinate(wgettextwidth_compensate(text, fontnum));
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetTextHeight *** */
 int GetTextHeight(char *text, int fontnum, int width) {
   VALIDATE_STRING(text);
   if ((fontnum < 0) || (fontnum >= game.numfonts))
@@ -19003,14 +19592,18 @@ int GetTextHeight(char *text, int fontnum, int width) {
 
 // ** TEXT BOX FUNCTIONS
 
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::get_Text *** */
 const char* TextBox_GetText_New(GUITextBox *texbox) {
   return CreateNewScriptString(texbox->text);
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::GetText^1 *** */
 void TextBox_GetText(GUITextBox *texbox, char *buffer) {
   strcpy(buffer, texbox->text);
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::SetText^1 *** */
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::set_Text *** */
 void TextBox_SetText(GUITextBox *texbox, const char *newtex) {
   if (strlen(newtex) > 190)
     quit("!SetTextBoxText: text too long");
@@ -19021,10 +19614,12 @@ void TextBox_SetText(GUITextBox *texbox, const char *newtex) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::get_TextColor *** */
 int TextBox_GetTextColor(GUITextBox *guit) {
   return guit->textcol;
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::set_TextColor *** */
 void TextBox_SetTextColor(GUITextBox *guit, int colr)
 {
   if (guit->textcol != colr) 
@@ -19034,10 +19629,12 @@ void TextBox_SetTextColor(GUITextBox *guit, int colr)
   }
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::get_Font *** */
 int TextBox_GetFont(GUITextBox *guit) {
   return guit->font;
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] TextBox::set_Font *** */
 void TextBox_SetFont(GUITextBox *guit, int fontnum) {
   if ((fontnum < 0) || (fontnum >= game.numfonts))
     quit("!SetTextBoxFont: invalid font number.");
@@ -19049,6 +19646,7 @@ void TextBox_SetFont(GUITextBox *guit, int fontnum) {
 }
 
 
+/* *** SCRIPT SYMBOL: [TextBox] SetTextBoxFont *** */
 void SetTextBoxFont(int guin,int objn, int fontnum) {
 
   if ((guin<0) | (guin>=game.numgui)) quit("!SetTextBoxFont: invalid GUI number");
@@ -19060,6 +19658,7 @@ void SetTextBoxFont(int guin,int objn, int fontnum) {
   TextBox_SetFont(guit, fontnum);
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] GetTextBoxText *** */
 void GetTextBoxText(int guin, int objn, char*txbuf) {
   VALIDATE_STRING(txbuf);
   if ((guin<0) | (guin>=game.numgui)) quit("!GetTextBoxText: invalid GUI number");
@@ -19071,6 +19670,7 @@ void GetTextBoxText(int guin, int objn, char*txbuf) {
   TextBox_GetText(guisl, txbuf);
 }
 
+/* *** SCRIPT SYMBOL: [TextBox] SetTextBoxText *** */
 void SetTextBoxText(int guin, int objn, char*txbuf) {
   if ((guin<0) | (guin>=game.numgui)) quit("!SetTextBoxText: invalid GUI number");
   if ((objn<0) | (objn>=guis[guin].numobjs)) quit("!SetTextBoxText: invalid object number");
@@ -19084,6 +19684,7 @@ void SetTextBoxText(int guin, int objn, char*txbuf) {
 
 // *** LIST BOX FUNCTIONS
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::AddItem^1 *** */
 int ListBox_AddItem(GUIListBox *lbb, const char *text) {
   if (lbb->AddItem(text) < 0)
     return 0;
@@ -19092,6 +19693,7 @@ int ListBox_AddItem(GUIListBox *lbb, const char *text) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::InsertItemAt^2 *** */
 int ListBox_InsertItemAt(GUIListBox *lbb, int index, const char *text) {
   if (lbb->InsertItem(index, text) < 0)
     return 0;
@@ -19100,11 +19702,13 @@ int ListBox_InsertItemAt(GUIListBox *lbb, int index, const char *text) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::Clear^0 *** */
 void ListBox_Clear(GUIListBox *listbox) {
   listbox->Clear();
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::FillDirList^1 *** */
 void ListBox_FillDirList(GUIListBox *listbox, const char *filemask) {
   char searchPath[MAX_PATH];
   validate_user_file_path(filemask, searchPath, false);
@@ -19120,6 +19724,7 @@ void ListBox_FillDirList(GUIListBox *listbox, const char *filemask) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::geti_SaveGameSlots *** */
 int ListBox_GetSaveGameSlots(GUIListBox *listbox, int index) {
   if ((index < 0) || (index >= listbox->numItems))
     quit("!ListBox.SaveGameSlot: index out of range");
@@ -19127,6 +19732,7 @@ int ListBox_GetSaveGameSlots(GUIListBox *listbox, int index) {
   return listbox->saveGameIndex[index];
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::FillSaveGameList^0 *** */
 int ListBox_FillSaveGameList(GUIListBox *listbox) {
   listbox->Clear();
 
@@ -19190,6 +19796,7 @@ int ListBox_FillSaveGameList(GUIListBox *listbox) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::GetItemAtLocation^2 *** */
 int ListBox_GetItemAtLocation(GUIListBox *listbox, int x, int y) {
 
   if (guis[listbox->guin].on < 1)
@@ -19205,6 +19812,7 @@ int ListBox_GetItemAtLocation(GUIListBox *listbox, int x, int y) {
   return listbox->GetIndexFromCoordinates(x, y);
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::GetItemText^2 *** */
 char *ListBox_GetItemText(GUIListBox *listbox, int index, char *buffer) {
   if ((index < 0) || (index >= listbox->numItems))
     quit("!ListBoxGetItemText: invalid item specified");
@@ -19213,6 +19821,7 @@ char *ListBox_GetItemText(GUIListBox *listbox, int index, char *buffer) {
   return buffer;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::geti_Items *** */
 const char* ListBox_GetItems(GUIListBox *listbox, int index) {
   if ((index < 0) || (index >= listbox->numItems))
     quit("!ListBox.Items: invalid index specified");
@@ -19220,6 +19829,8 @@ const char* ListBox_GetItems(GUIListBox *listbox, int index) {
   return CreateNewScriptString(listbox->items[index]);
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::SetItemText^2 *** */
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::seti_Items *** */
 void ListBox_SetItemText(GUIListBox *listbox, int index, const char *newtext) {
   if ((index < 0) || (index >= listbox->numItems))
     quit("!ListBoxSetItemText: invalid item specified");
@@ -19230,6 +19841,7 @@ void ListBox_SetItemText(GUIListBox *listbox, int index, const char *newtext) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::RemoveItem^1 *** */
 void ListBox_RemoveItem(GUIListBox *listbox, int itemIndex) {
   
   if ((itemIndex < 0) || (itemIndex >= listbox->numItems))
@@ -19239,14 +19851,17 @@ void ListBox_RemoveItem(GUIListBox *listbox, int itemIndex) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::get_ItemCount *** */
 int ListBox_GetItemCount(GUIListBox *listbox) {
   return listbox->numItems;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::get_Font *** */
 int ListBox_GetFont(GUIListBox *listbox) {
   return listbox->font;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::set_Font *** */
 void ListBox_SetFont(GUIListBox *listbox, int newfont) {
 
   if ((newfont < 0) || (newfont >= game.numfonts))
@@ -19259,10 +19874,12 @@ void ListBox_SetFont(GUIListBox *listbox, int newfont) {
 
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::get_HideBorder *** */
 int ListBox_GetHideBorder(GUIListBox *listbox) {
   return (listbox->exflags & GLF_NOBORDER) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::set_HideBorder *** */
 void ListBox_SetHideBorder(GUIListBox *listbox, int newValue) {
   listbox->exflags &= ~GLF_NOBORDER;
   if (newValue)
@@ -19270,10 +19887,12 @@ void ListBox_SetHideBorder(GUIListBox *listbox, int newValue) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::get_HideScrollArrows *** */
 int ListBox_GetHideScrollArrows(GUIListBox *listbox) {
   return (listbox->exflags & GLF_NOARROWS) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::set_HideScrollArrows *** */
 void ListBox_SetHideScrollArrows(GUIListBox *listbox, int newValue) {
   listbox->exflags &= ~GLF_NOARROWS;
   if (newValue)
@@ -19281,12 +19900,14 @@ void ListBox_SetHideScrollArrows(GUIListBox *listbox, int newValue) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::get_SelectedIndex *** */
 int ListBox_GetSelectedIndex(GUIListBox *listbox) {
   if ((listbox->selected < 0) || (listbox->selected >= listbox->numItems))
     return -1;
   return listbox->selected;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::set_SelectedIndex *** */
 void ListBox_SetSelectedIndex(GUIListBox *guisl, int newsel) {
 
   if (newsel >= guisl->numItems)
@@ -19305,10 +19926,12 @@ void ListBox_SetSelectedIndex(GUIListBox *guisl, int newsel) {
 
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::get_TopItem *** */
 int ListBox_GetTopItem(GUIListBox *listbox) {
   return listbox->topItem;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::set_TopItem *** */
 void ListBox_SetTopItem(GUIListBox *guisl, int item) {
   if ((guisl->numItems == 0) && (item == 0))
     ;  // allow resetting an empty box to the top
@@ -19319,10 +19942,12 @@ void ListBox_SetTopItem(GUIListBox *guisl, int item) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::get_RowCount *** */
 int ListBox_GetRowCount(GUIListBox *listbox) {
   return listbox->num_items_fit;
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::ScrollDown^0 *** */
 void ListBox_ScrollDown(GUIListBox *listbox) {
   if (listbox->topItem + listbox->num_items_fit < listbox->numItems) {
     listbox->topItem++;
@@ -19330,6 +19955,7 @@ void ListBox_ScrollDown(GUIListBox *listbox) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBox::ScrollUp^0 *** */
 void ListBox_ScrollUp(GUIListBox *listbox) {
   if (listbox->topItem > 0) {
     listbox->topItem--;
@@ -19347,45 +19973,55 @@ GUIListBox* is_valid_listbox (int guin, int objn) {
   return (GUIListBox*)guis[guin].objs[objn];
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxClear *** */
 void ListBoxClear(int guin, int objn) {
   GUIListBox*guisl=is_valid_listbox(guin,objn);
   ListBox_Clear(guisl);
 }
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxAdd *** */
 void ListBoxAdd(int guin, int objn, const char*newitem) {
   GUIListBox*guisl=is_valid_listbox(guin,objn);
   ListBox_AddItem(guisl, newitem);
 }
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxRemove *** */
 void ListBoxRemove(int guin, int objn, int itemIndex) {
   GUIListBox*guisl = is_valid_listbox(guin,objn);
   ListBox_RemoveItem(guisl, itemIndex);
 }
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxGetSelected *** */
 int ListBoxGetSelected(int guin, int objn) {
   GUIListBox*guisl=is_valid_listbox(guin,objn);
   return ListBox_GetSelectedIndex(guisl);
 }
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxGetNumItems *** */
 int ListBoxGetNumItems(int guin, int objn) {
   GUIListBox*guisl=is_valid_listbox(guin,objn);
   return ListBox_GetItemCount(guisl);
 }
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxGetItemText *** */
 char* ListBoxGetItemText(int guin, int objn, int item, char*buffer) {
   VALIDATE_STRING(buffer);
   GUIListBox*guisl=is_valid_listbox(guin,objn);
   return ListBox_GetItemText(guisl, item, buffer);
 }
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxSetSelected *** */
 void ListBoxSetSelected(int guin, int objn, int newsel) {
   GUIListBox*guisl=is_valid_listbox(guin,objn);
   ListBox_SetSelectedIndex(guisl, newsel);
 }
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxSetTopItem *** */
 void ListBoxSetTopItem (int guin, int objn, int item) {
   GUIListBox*guisl = is_valid_listbox(guin,objn);
   ListBox_SetTopItem(guisl, item);
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxSaveGameList *** */
 int ListBoxSaveGameList (int guin, int objn) {
   GUIListBox*guisl=is_valid_listbox(guin,objn);
   return ListBox_FillSaveGameList(guisl);
 }
 
+/* *** SCRIPT SYMBOL: [ListBox] ListBoxDirList *** */
 void ListBoxDirList (int guin, int objn, const char*filemask) {
   GUIListBox *guisl = is_valid_listbox(guin,objn);
   ListBox_FillDirList(guisl, filemask);
@@ -19395,14 +20031,18 @@ void ListBoxDirList (int guin, int objn, const char*filemask) {
 
 // ** LABEL FUNCTIONS
 
+/* *** SCRIPT SYMBOL: [Label] Label::get_Text *** */
 const char* Label_GetText_New(GUILabel *labl) {
   return CreateNewScriptString(labl->GetText());
 }
 
+/* *** SCRIPT SYMBOL: [Label] Label::GetText^1 *** */
 void Label_GetText(GUILabel *labl, char *buffer) {
   strcpy(buffer, labl->GetText());
 }
 
+/* *** SCRIPT SYMBOL: [Label] Label::SetText^1 *** */
+/* *** SCRIPT SYMBOL: [Label] Label::set_Text *** */
 void Label_SetText(GUILabel *labl, const char *newtx) {
   newtx = get_translation(newtx);
 
@@ -19412,10 +20052,12 @@ void Label_SetText(GUILabel *labl, const char *newtx) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Label] Label::get_TextColor *** */
 int Label_GetColor(GUILabel *labl) {
   return labl->textcol;
 }
 
+/* *** SCRIPT SYMBOL: [Label] Label::set_TextColor *** */
 void Label_SetColor(GUILabel *labl, int colr) {
   if (labl->textcol != colr) {
     labl->textcol = colr;
@@ -19423,10 +20065,12 @@ void Label_SetColor(GUILabel *labl, int colr) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Label] Label::get_Font *** */
 int Label_GetFont(GUILabel *labl) {
   return labl->font;
 }
 
+/* *** SCRIPT SYMBOL: [Label] Label::set_Font *** */
 void Label_SetFont(GUILabel *guil, int fontnum) {
   if ((fontnum < 0) || (fontnum >= game.numfonts))
     quit("!SetLabelFont: invalid font number.");
@@ -19438,6 +20082,7 @@ void Label_SetFont(GUILabel *guil, int fontnum) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Label] SetLabelColor *** */
 void SetLabelColor(int guin,int objn, int colr) {
   if ((guin<0) | (guin>=game.numgui))
     quit("!SetLabelColor: invalid GUI number");
@@ -19450,6 +20095,7 @@ void SetLabelColor(int guin,int objn, int colr) {
   Label_SetColor(guil, colr);
 }
 
+/* *** SCRIPT SYMBOL: [Label] SetLabelText *** */
 void SetLabelText(int guin,int objn,char*newtx) {
   VALIDATE_STRING(newtx);
   if ((guin<0) | (guin>=game.numgui)) quit("!SetLabelText: invalid GUI number");
@@ -19461,6 +20107,7 @@ void SetLabelText(int guin,int objn,char*newtx) {
   Label_SetText(guil, newtx);
 }
 
+/* *** SCRIPT SYMBOL: [Label] SetLabelFont *** */
 void SetLabelFont(int guin,int objn, int fontnum) {
 
   if ((guin<0) | (guin>=game.numgui)) quit("!SetLabelFont: invalid GUI number");
@@ -19475,6 +20122,7 @@ void SetLabelFont(int guin,int objn, int fontnum) {
 
 // *** INV WINDOW FUNCTIONS
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_CharacterToUse *** */
 void InvWindow_SetCharacterToUse(GUIInv *guii, CharacterInfo *chaa) {
   if (chaa == NULL)
     guii->charId = -1;
@@ -19486,6 +20134,7 @@ void InvWindow_SetCharacterToUse(GUIInv *guii, CharacterInfo *chaa) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_CharacterToUse *** */
 CharacterInfo* InvWindow_GetCharacterToUse(GUIInv *guii) {
   if (guii->charId < 0)
     return NULL;
@@ -19493,24 +20142,29 @@ CharacterInfo* InvWindow_GetCharacterToUse(GUIInv *guii) {
   return &game.chars[guii->charId];
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_ItemWidth *** */
 void InvWindow_SetItemWidth(GUIInv *guii, int newwidth) {
   guii->itemWidth = newwidth;
   guii->Resized();
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemWidth *** */
 int InvWindow_GetItemWidth(GUIInv *guii) {
   return guii->itemWidth;
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_ItemHeight *** */
 void InvWindow_SetItemHeight(GUIInv *guii, int newhit) {
   guii->itemHeight = newhit;
   guii->Resized();
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemHeight *** */
 int InvWindow_GetItemHeight(GUIInv *guii) {
   return guii->itemHeight;
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_TopItem *** */
 void InvWindow_SetTopItem(GUIInv *guii, int topitem) {
   if (guii->topIndex != topitem) {
     guii->topIndex = topitem;
@@ -19518,22 +20172,27 @@ void InvWindow_SetTopItem(GUIInv *guii, int topitem) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_TopItem *** */
 int InvWindow_GetTopItem(GUIInv *guii) {
   return guii->topIndex;
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemsPerRow *** */
 int InvWindow_GetItemsPerRow(GUIInv *guii) {
   return guii->itemsPerLine;
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemCount *** */
 int InvWindow_GetItemCount(GUIInv *guii) {
   return charextra[guii->CharToDisplay()].invorder_count;
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_RowCount *** */
 int InvWindow_GetRowCount(GUIInv *guii) {
   return guii->numLines;
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::ScrollDown^0 *** */
 void InvWindow_ScrollDown(GUIInv *guii) {
   if ((charextra[guii->CharToDisplay()].invorder_count) >
       (guii->topIndex + (guii->itemsPerLine * guii->numLines))) { 
@@ -19542,6 +20201,7 @@ void InvWindow_ScrollDown(GUIInv *guii) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::ScrollUp^0 *** */
 void InvWindow_ScrollUp(GUIInv *guii) {
   if (guii->topIndex > 0) {
     guii->topIndex -= guii->itemsPerLine;
@@ -19552,6 +20212,7 @@ void InvWindow_ScrollUp(GUIInv *guii) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::geti_ItemAtIndex *** */
 ScriptInvItem* InvWindow_GetItemAtIndex(GUIInv *guii, int index) {
   if ((index < 0) || (index >= charextra[guii->CharToDisplay()].invorder_count))
     return NULL;
@@ -19561,6 +20222,7 @@ ScriptInvItem* InvWindow_GetItemAtIndex(GUIInv *guii, int index) {
 
 // *** SLIDER FUNCTIONS
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::set_Max *** */
 void Slider_SetMax(GUISlider *guisl, int valn) {
 
   if (valn != guisl->max) {
@@ -19576,10 +20238,12 @@ void Slider_SetMax(GUISlider *guisl, int valn) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::get_Max *** */
 int Slider_GetMax(GUISlider *guisl) {
   return guisl->max;
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::set_Min *** */
 void Slider_SetMin(GUISlider *guisl, int valn) {
 
   if (valn != guisl->min) {
@@ -19595,10 +20259,12 @@ void Slider_SetMin(GUISlider *guisl, int valn) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::get_Min *** */
 int Slider_GetMin(GUISlider *guisl) {
   return guisl->min;
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::set_Value *** */
 void Slider_SetValue(GUISlider *guisl, int valn) {
   if (valn > guisl->max) valn = guisl->max;
   if (valn < guisl->min) valn = guisl->min;
@@ -19609,10 +20275,12 @@ void Slider_SetValue(GUISlider *guisl, int valn) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::get_Value *** */
 int Slider_GetValue(GUISlider *guisl) {
   return guisl->value;
 }
 
+/* *** SCRIPT SYMBOL: [Slider] SetSliderValue *** */
 void SetSliderValue(int guin,int objn, int valn) {
   if ((guin<0) | (guin>=game.numgui)) quit("!SetSliderValue: invalid GUI number");
   if (guis[guin].get_control_type(objn)!=GOBJ_SLIDER)
@@ -19622,6 +20290,7 @@ void SetSliderValue(int guin,int objn, int valn) {
   Slider_SetValue(guisl, valn);
 }
 
+/* *** SCRIPT SYMBOL: [Slider] GetSliderValue *** */
 int GetSliderValue(int guin,int objn) {
   if ((guin<0) | (guin>=game.numgui)) quit("!GetSliderValue: invalid GUI number");
   if (guis[guin].get_control_type(objn)!=GOBJ_SLIDER)
@@ -19631,10 +20300,12 @@ int GetSliderValue(int guin,int objn) {
   return Slider_GetValue(guisl);
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::get_BackgroundGraphic *** */
 int Slider_GetBackgroundGraphic(GUISlider *guisl) {
   return (guisl->bgimage > 0) ? guisl->bgimage : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::set_BackgroundGraphic *** */
 void Slider_SetBackgroundGraphic(GUISlider *guisl, int newImage) 
 {
   if (newImage != guisl->bgimage)
@@ -19644,10 +20315,12 @@ void Slider_SetBackgroundGraphic(GUISlider *guisl, int newImage)
   }
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::get_HandleGraphic *** */
 int Slider_GetHandleGraphic(GUISlider *guisl) {
   return (guisl->handlepic > 0) ? guisl->handlepic : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::set_HandleGraphic *** */
 void Slider_SetHandleGraphic(GUISlider *guisl, int newImage) 
 {
   if (newImage != guisl->handlepic)
@@ -19657,10 +20330,12 @@ void Slider_SetHandleGraphic(GUISlider *guisl, int newImage)
   }
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::get_HandleOffset *** */
 int Slider_GetHandleOffset(GUISlider *guisl) {
   return guisl->handleoffset;
 }
 
+/* *** SCRIPT SYMBOL: [Slider] Slider::set_HandleOffset *** */
 void Slider_SetHandleOffset(GUISlider *guisl, int newOffset) 
 {
   if (newOffset != guisl->handleoffset)
@@ -19670,6 +20345,7 @@ void Slider_SetHandleOffset(GUISlider *guisl, int newOffset)
   }
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::set_BackgroundGraphic *** */
 void GUI_SetBackgroundGraphic(ScriptGUI *tehgui, int slotn) {
   if (tehgui->gui->bgpic != slotn) {
     tehgui->gui->bgpic = slotn;
@@ -19677,12 +20353,14 @@ void GUI_SetBackgroundGraphic(ScriptGUI *tehgui, int slotn) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [GUI] GUI::get_BackgroundGraphic *** */
 int GUI_GetBackgroundGraphic(ScriptGUI *tehgui) {
   if (tehgui->gui->bgpic < 1)
     return 0;
   return tehgui->gui->bgpic;
 }
 
+/* *** SCRIPT SYMBOL: [GUI] SetGUIBackgroundPic *** */
 void SetGUIBackgroundPic (int guin, int slotn) {
   if ((guin<0) | (guin>=game.numgui))
     quit("!SetGUIBackgroundPic: invalid GUI number");
@@ -19694,6 +20372,7 @@ void SetGUIBackgroundPic (int guin, int slotn) {
 // *** BUTTON FUNCTIONS
 
 
+/* *** SCRIPT SYMBOL: [Button] Button::Animate^4 *** */
 void Button_Animate(GUIButton *butt, int view, int loop, int speed, int repeat) {
   int guin = butt->guin;
   int objn = butt->objn;
@@ -19731,14 +20410,18 @@ void Button_Animate(GUIButton *butt, int view, int loop, int speed, int repeat) 
     quit("!AnimateButton: no frames to animate");
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_Text *** */
 const char* Button_GetText_New(GUIButton *butt) {
   return CreateNewScriptString(butt->text);
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::GetText^1 *** */
 void Button_GetText(GUIButton *butt, char *buffer) {
   strcpy(buffer, butt->text);
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::SetText^1 *** */
+/* *** SCRIPT SYMBOL: [Button] Button::set_Text *** */
 void Button_SetText(GUIButton *butt, const char *newtx) {
   newtx = get_translation(newtx);
   if (strlen(newtx) > 49) quit("!SetButtonText: text too long, button has 50 chars max");
@@ -19749,6 +20432,7 @@ void Button_SetText(GUIButton *butt, const char *newtx) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::set_Font *** */
 void Button_SetFont(GUIButton *butt, int newFont) {
   if ((newFont < 0) || (newFont >= game.numfonts))
     quit("!Button.Font: invalid font number.");
@@ -19759,16 +20443,19 @@ void Button_SetFont(GUIButton *butt, int newFont) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_Font *** */
 int Button_GetFont(GUIButton *butt) {
   return butt->font;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_ClipImage *** */
 int Button_GetClipImage(GUIButton *butt) {
   if (butt->flags & GUIF_CLIP)
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::set_ClipImage *** */
 void Button_SetClipImage(GUIButton *butt, int newval) {
   butt->flags &= ~GUIF_CLIP;
   if (newval)
@@ -19777,6 +20464,7 @@ void Button_SetClipImage(GUIButton *butt, int newval) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_Graphic *** */
 int Button_GetGraphic(GUIButton *butt) {
   // return currently displayed pic
   if (butt->usepic < 0)
@@ -19784,10 +20472,12 @@ int Button_GetGraphic(GUIButton *butt) {
   return butt->usepic;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_MouseOverGraphic *** */
 int Button_GetMouseOverGraphic(GUIButton *butt) {
   return butt->overpic;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::set_MouseOverGraphic *** */
 void Button_SetMouseOverGraphic(GUIButton *guil, int slotn) {
   DEBUG_CONSOLE("GUI %d Button %d mouseover set to slot %d", guil->guin, guil->objn, slotn);
 
@@ -19799,10 +20489,12 @@ void Button_SetMouseOverGraphic(GUIButton *guil, int slotn) {
   FindAndRemoveButtonAnimation(guil->guin, guil->objn);
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_NormalGraphic *** */
 int Button_GetNormalGraphic(GUIButton *butt) {
   return butt->pic;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::set_NormalGraphic *** */
 void Button_SetNormalGraphic(GUIButton *guil, int slotn) {
   DEBUG_CONSOLE("GUI %d Button %d normal set to slot %d", guil->guin, guil->objn, slotn);
   // normal pic - update if mouse is not over, or if there's no overpic
@@ -19817,10 +20509,12 @@ void Button_SetNormalGraphic(GUIButton *guil, int slotn) {
   FindAndRemoveButtonAnimation(guil->guin, guil->objn);
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_PushedGraphic *** */
 int Button_GetPushedGraphic(GUIButton *butt) {
   return butt->pushedpic;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::set_PushedGraphic *** */
 void Button_SetPushedGraphic(GUIButton *guil, int slotn) {
   DEBUG_CONSOLE("GUI %d Button %d pushed set to slot %d", guil->guin, guil->objn, slotn);
 
@@ -19832,10 +20526,12 @@ void Button_SetPushedGraphic(GUIButton *guil, int slotn) {
   FindAndRemoveButtonAnimation(guil->guin, guil->objn);
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::get_TextColor *** */
 int Button_GetTextColor(GUIButton *butt) {
   return butt->textcol;
 }
 
+/* *** SCRIPT SYMBOL: [Button] Button::set_TextColor *** */
 void Button_SetTextColor(GUIButton *butt, int newcol) {
   if (butt->textcol != newcol) {
     butt->textcol = newcol;
@@ -19843,6 +20539,7 @@ void Button_SetTextColor(GUIButton *butt, int newcol) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Button] SetButtonText *** */
 void SetButtonText(int guin,int objn,char*newtx) {
   VALIDATE_STRING(newtx);
   if ((guin<0) | (guin>=game.numgui))
@@ -19857,6 +20554,7 @@ void SetButtonText(int guin,int objn,char*newtx) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Button] AnimateButton *** */
 void AnimateButton(int guin, int objn, int view, int loop, int speed, int repeat) {
   if ((guin<0) | (guin>=game.numgui)) quit("!AnimateButton: invalid GUI number");
   if ((objn<0) | (objn>=guis[guin].numobjs)) quit("!AnimateButton: invalid object number");
@@ -19867,6 +20565,7 @@ void AnimateButton(int guin, int objn, int view, int loop, int speed, int repeat
 }
 
 
+/* *** SCRIPT SYMBOL: [Button] GetButtonPic *** */
 int GetButtonPic(int guin, int objn, int ptype) {
   if ((guin<0) | (guin>=game.numgui)) quit("!GetButtonPic: invalid GUI number");
   if ((objn<0) | (objn>=guis[guin].numobjs)) quit("!GetButtonPic: invalid object number");
@@ -19897,6 +20596,7 @@ int GetButtonPic(int guin, int objn, int ptype) {
   quit("internal error in getbuttonpic");
 }
 
+/* *** SCRIPT SYMBOL: [Button] SetButtonPic *** */
 void SetButtonPic(int guin,int objn,int ptype,int slotn) {
   if ((guin<0) | (guin>=game.numgui)) quit("!SetButtonPic: invalid GUI number");
   if ((objn<0) | (objn>=guis[guin].numobjs)) quit("!SetButtonPic: invalid object number");
@@ -19917,11 +20617,13 @@ void SetButtonPic(int guin,int objn,int ptype,int slotn) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Game] DisableInterface *** */
 void DisableInterface() {
   play.disabled_user_interface++;
   guis_need_update = 1;
   set_mouse_cursor(CURS_WAIT);
   }
+/* *** SCRIPT SYMBOL: [Game] EnableInterface *** */
 void EnableInterface() {
   guis_need_update = 1;
   play.disabled_user_interface--;
@@ -19931,10 +20633,12 @@ void EnableInterface() {
     }
   }
 // Returns 1 if user interface is enabled, 0 if disabled
+/* *** SCRIPT SYMBOL: [Game] IsInterfaceEnabled *** */
 int IsInterfaceEnabled() {
   return (play.disabled_user_interface > 0) ? 0 : 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] NewRoom *** */
 void NewRoom(int nrnum) {
   if (nrnum < 0)
     quitprintf("!NewRoom: room change requested to invalid room number %d.", nrnum);
@@ -19991,12 +20695,14 @@ void NewRoom(int nrnum) {
     gs_to_newroom = nrnum;
 }
 
+/* *** SCRIPT SYMBOL: [Character] NewRoomEx *** */
 void NewRoomEx(int nrnum,int newx,int newy) {
 
   Character_ChangeRoom(playerchar, nrnum, newx, newy);
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] NewRoomNPC *** */
 void NewRoomNPC(int charid, int nrnum, int newx, int newy) {
   if (!is_valid_character(charid))
     quit("!NewRoomNPC: invalid character");
@@ -20006,6 +20712,7 @@ void NewRoomNPC(int charid, int nrnum, int newx, int newy) {
   Character_ChangeRoom(&game.chars[charid], nrnum, newx, newy);
 }
 
+/* *** SCRIPT SYMBOL: [Room] ResetRoom *** */
 void ResetRoom(int nrnum) {
   if (nrnum == displayed_room)
     quit("!ResetRoom: cannot reset current room");
@@ -20021,16 +20728,19 @@ void ResetRoom(int nrnum) {
   DEBUG_CONSOLE("Room %d reset to original state", nrnum);
 }
 
+/* *** SCRIPT SYMBOL: [Room] HasPlayerBeenInRoom *** */
 int HasPlayerBeenInRoom(int roomnum) {
   if ((roomnum < 0) || (roomnum >= MAX_ROOMS))
     return 0;
   return roomstats[roomnum].beenhere;
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetRestartPoint *** */
 void SetRestartPoint() {
   save_game(RESTART_POINT_SAVE_GAME_NUMBER, "Restart Game Auto-Save");
 }
 
+/* *** SCRIPT SYMBOL: [Game] CallRoomScript *** */
 void CallRoomScript (int value) {
   can_run_delayed_command();
 
@@ -20041,6 +20751,7 @@ void CallRoomScript (int value) {
   curscript->run_another("$on_call", value, 0);
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetGameSpeed *** */
 void SetGameSpeed(int newspd) {
   // if Ctrl+E has been used to max out frame rate, lock it there
   if ((frames_per_second == 1000) && (display_fps == 2))
@@ -20053,10 +20764,12 @@ void SetGameSpeed(int newspd) {
   DEBUG_CONSOLE("Game speed set to %d", newspd);
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetGameSpeed *** */
 int GetGameSpeed() {
   return frames_per_second - play.game_speed_modifier;
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetGameOption *** */
 int SetGameOption (int opt, int setting) {
   if (((opt < 1) || (opt > OPT_HIGHESTOPTION)) && (opt != OPT_LIPSYNCTEXT))
     quit("!SetGameOption: invalid option specified");
@@ -20094,6 +20807,7 @@ int SetGameOption (int opt, int setting) {
   return oldval;
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetGameOption *** */
 int GetGameOption (int opt) {
   if (((opt < 1) || (opt > OPT_HIGHESTOPTION)) && (opt != OPT_LIPSYNCTEXT))
     quit("!GetGameOption: invalid option specified");
@@ -20101,6 +20815,7 @@ int GetGameOption (int opt) {
   return game.options[opt];
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] StopDialog *** */
 void StopDialog() {
   if (play.stop_dialog_at_end == DIALOG_NONE) {
     debug_log("StopDialog called, but was not in a dialog");
@@ -20110,6 +20825,7 @@ void StopDialog() {
   play.stop_dialog_at_end = DIALOG_STOP;
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] SetDialogOption *** */
 void SetDialogOption(int dlg,int opt,int onoroff) {
   if ((dlg<0) | (dlg>=game.numdialog))
     quit("!SetDialogOption: Invalid topic number specified");
@@ -20124,6 +20840,7 @@ void SetDialogOption(int dlg,int opt,int onoroff) {
     dialog[dlg].optionflags[opt]|=DFLG_OFFPERM;
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] GetDialogOption *** */
 int GetDialogOption (int dlg, int opt) {
   if ((dlg<0) | (dlg>=game.numdialog))
     quit("!GetDialogOption: Invalid topic number specified");
@@ -20138,11 +20855,13 @@ int GetDialogOption (int dlg, int opt) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_DialogCount *** */
 int Game_GetDialogCount()
 {
   return game.numdialog;
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::Start^0 *** */
 void Dialog_Start(ScriptDialog *sd) {
   RunDialog(sd->id);
 }
@@ -20152,6 +20871,7 @@ void Dialog_Start(ScriptDialog *sd) {
 #define SAYCHOSEN_YES 2
 #define SAYCHOSEN_NO  3 
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::DisplayOptions^1 *** */
 int Dialog_DisplayOptions(ScriptDialog *sd, int sayChosenOption) 
 {
   if ((sayChosenOption < 1) || (sayChosenOption > 3))
@@ -20165,14 +20885,17 @@ int Dialog_DisplayOptions(ScriptDialog *sd, int sayChosenOption)
   return chose;
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::SetOptionState^2 *** */
 void Dialog_SetOptionState(ScriptDialog *sd, int option, int newState) {
   SetDialogOption(sd->id, option, newState);
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::GetOptionState^1 *** */
 int Dialog_GetOptionState(ScriptDialog *sd, int option) {
   return GetDialogOption(sd->id, option);
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::HasOptionBeenChosen^1 *** */
 int Dialog_HasOptionBeenChosen(ScriptDialog *sd, int option)
 {
   if ((option < 1) || (option > dialog[sd->id].numoptions))
@@ -20184,16 +20907,19 @@ int Dialog_HasOptionBeenChosen(ScriptDialog *sd, int option)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::get_OptionCount *** */
 int Dialog_GetOptionCount(ScriptDialog *sd)
 {
   return dialog[sd->id].numoptions;
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::get_ShowTextParser *** */
 int Dialog_GetShowTextParser(ScriptDialog *sd)
 {
   return (dialog[sd->id].topicFlags & DTFLG_SHOWPARSER) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::GetOptionText^1 *** */
 const char* Dialog_GetOptionText(ScriptDialog *sd, int option)
 {
   if ((option < 1) || (option > dialog[sd->id].numoptions))
@@ -20204,10 +20930,12 @@ const char* Dialog_GetOptionText(ScriptDialog *sd, int option)
   return CreateNewScriptString(get_translation(dialog[sd->id].optionnames[option]));
 }
 
+/* *** SCRIPT SYMBOL: [Dialog] Dialog::get_ID *** */
 int Dialog_GetID(ScriptDialog *sd) {
   return sd->id;
 }
 
+/* *** SCRIPT SYMBOL: [Screen] ShakeScreen *** */
 void ShakeScreen(int severe) {
   EndSkippingUntilCharStops();
 
@@ -20260,6 +20988,7 @@ void ShakeScreen(int severe) {
   abuf=oldsc;
 }
 
+/* *** SCRIPT SYMBOL: [Screen] ShakeScreenBackground *** */
 void ShakeScreenBackground (int delay, int amount, int length) {
   if (delay < 2) 
     quit("!ShakeScreenBackground: invalid delay parameter");
@@ -20275,6 +21004,7 @@ void ShakeScreenBackground (int delay, int amount, int length) {
   play.shakesc_length = length;
 }
 
+/* *** SCRIPT SYMBOL: [Palette] CyclePalette *** */
 void CyclePalette(int strt,int eend) {
   // hi-color game must invalidate screen since the palette changes
   // the effect of the drawing operations
@@ -20296,6 +21026,7 @@ void CyclePalette(int strt,int eend) {
   }
   
 }
+/* *** SCRIPT SYMBOL: [Palette] SetPalRGB *** */
 void SetPalRGB(int inndx,int rr,int gg,int bb) {
   if (game.color_depth > 1)
     invalidate_screen();
@@ -20309,6 +21040,7 @@ void SetPalRGB(int inndx,int rr,int gg,int bb) {
 void scGetPal(color*pptr) {
   get_palette(pptr);
   }*/
+/* *** SCRIPT SYMBOL: [Screen] FadeIn *** */
 void FadeIn(int sppd) {
   EndSkippingUntilCharStops();
 
@@ -20318,6 +21050,7 @@ void FadeIn(int sppd) {
   my_fade_in(palette,sppd);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Random *** */
 int __Rand(int upto) {
   upto++;
   if (upto < 1)
@@ -20325,12 +21058,16 @@ int __Rand(int upto) {
   return rand()%upto;
   }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::Update^0 *** */
+/* *** SCRIPT SYMBOL: [Mouse] RefreshMouse *** */
 void RefreshMouse() {
   domouse(DOMOUSE_NOCURSOR);
   scmouse.x = divide_down_coordinate(mousex);
   scmouse.y = divide_down_coordinate(mousey);
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::SetPosition^2 *** */
+/* *** SCRIPT SYMBOL: [Mouse] SetMousePosition *** */
 void SetMousePosition (int newx, int newy) {
   if (newx < 0)
     newx = 0;
@@ -20346,6 +21083,8 @@ void SetMousePosition (int newx, int newy) {
   RefreshMouse();
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::get_Mode *** */
+/* *** SCRIPT SYMBOL: [Mouse] GetCursorMode *** */
 int GetCursorMode() {
   return cur_mode;
 }
@@ -20354,6 +21093,7 @@ int GetMouseCursor() {
   return cur_cursor;
 }
 
+/* *** SCRIPT SYMBOL: [Game] GiveScore *** */
 void GiveScore(int amnt) 
 {
   guis_need_update = 1;
@@ -20365,6 +21105,7 @@ void GiveScore(int amnt)
   run_on_event (GE_GOT_SCORE, amnt);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] GetHotspotPointX *** */
 int GetHotspotPointX (int hotspot) {
   if ((hotspot < 0) || (hotspot >= MAX_HOTSPOTS))
     quit("!GetHotspotPointX: invalid hotspot");
@@ -20375,10 +21116,12 @@ int GetHotspotPointX (int hotspot) {
   return thisroom.hswalkto[hotspot].x;
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::get_WalkToX *** */
 int Hotspot_GetWalkToX(ScriptHotspot *hss) {
   return GetHotspotPointX(hss->id);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] GetHotspotPointY *** */
 int GetHotspotPointY (int hotspot) {
   if ((hotspot < 0) || (hotspot >= MAX_HOTSPOTS))
     quit("!GetHotspotPointY: invalid hotspot");
@@ -20389,10 +21132,12 @@ int GetHotspotPointY (int hotspot) {
   return thisroom.hswalkto[hotspot].y;
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::get_WalkToY *** */
 int Hotspot_GetWalkToY(ScriptHotspot *hss) {
   return GetHotspotPointY(hss->id);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] GetHotspotAt *** */
 int GetHotspotAt(int xxx,int yyy) {
   xxx += divide_down_coordinate(offsetx);
   yyy += divide_down_coordinate(offsety);
@@ -20401,6 +21146,7 @@ int GetHotspotAt(int xxx,int yyy) {
   return get_hotspot_at(xxx,yyy);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::GetAtScreenXY^2 *** */
 ScriptHotspot *GetHotspotAtLocation(int xx, int yy) {
   int hsnum = GetHotspotAt(xx, yy);
   if (hsnum <= 0)
@@ -20408,6 +21154,7 @@ ScriptHotspot *GetHotspotAtLocation(int xx, int yy) {
   return &scrHotspot[hsnum];
 }
 
+/* *** SCRIPT SYMBOL: [Room] GetWalkableAreaAt *** */
 int GetWalkableAreaAt(int xxx,int yyy) {
   xxx += divide_down_coordinate(offsetx);
   yyy += divide_down_coordinate(offsety);
@@ -20495,10 +21242,12 @@ int __GetLocationType(int xxx,int yyy, int allowHotspot0) {
 
 // GetLocationType exported function - just call through
 // to the main function with default 0
+/* *** SCRIPT SYMBOL: [Game] GetLocationType *** */
 int GetLocationType(int xxx,int yyy) {
   return __GetLocationType(xxx, yyy, 0);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] GetInvAt *** */
 int GetInvAt (int xxx, int yyy) {
   int ongui = GetGUIAt (xxx, yyy);
   if (ongui >= 0) {
@@ -20518,6 +21267,7 @@ int GetInvAt (int xxx, int yyy) {
   return -1;
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::GetAtScreenXY^2 *** */
 ScriptInvItem *GetInvAtLocation(int xx, int yy) {
   int hsnum = GetInvAt(xx, yy);
   if (hsnum <= 0)
@@ -20525,6 +21275,8 @@ ScriptInvItem *GetInvAtLocation(int xx, int yy) {
   return &scrInv[hsnum];
 }
 
+/* *** SCRIPT SYMBOL: [Mouse] Mouse::SaveCursorUntilItLeaves^0 *** */
+/* *** SCRIPT SYMBOL: [Mouse] SaveCursorForLocationChange *** */
 void SaveCursorForLocationChange() {
   // update the current location name
   char tempo[100];
@@ -20538,6 +21290,7 @@ void SaveCursorForLocationChange() {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Object] GetObjectName *** */
 void GetObjectName(int obj, char *buffer) {
   VALIDATE_STRING(buffer);
   if (!is_valid_object(obj))
@@ -20546,10 +21299,12 @@ void GetObjectName(int obj, char *buffer) {
   strcpy(buffer, get_translation(thisroom.objectnames[obj]));
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::GetName^1 *** */
 void Object_GetName(ScriptObject *objj, char *buffer) {
   GetObjectName(objj->id, buffer);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Name *** */
 const char* Object_GetName_New(ScriptObject *objj) {
   if (!is_valid_object(objj->id))
     quit("!Object.Name: invalid object number");
@@ -20557,6 +21312,7 @@ const char* Object_GetName_New(ScriptObject *objj) {
   return CreateNewScriptString(get_translation(thisroom.objectnames[objj->id]));
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] GetHotspotName *** */
 void GetHotspotName(int hotspot, char *buffer) {
   VALIDATE_STRING(buffer);
   if ((hotspot < 0) || (hotspot >= MAX_HOTSPOTS))
@@ -20565,14 +21321,17 @@ void GetHotspotName(int hotspot, char *buffer) {
   strcpy(buffer, get_translation(thisroom.hotspotnames[hotspot]));
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::GetName^1 *** */
 void Hotspot_GetName(ScriptHotspot *hss, char *buffer) {
   GetHotspotName(hss->id, buffer);
 }
 
+/* *** SCRIPT SYMBOL: [Hotspot] Hotspot::get_Name *** */
 const char* Hotspot_GetName_New(ScriptHotspot *hss) {
   return CreateNewScriptString(get_translation(thisroom.hotspotnames[hss->id]));
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetLocationName *** */
 void GetLocationName(int xxx,int yyy,char*tempo) {
   if (displayed_room < 0)
     quit("!GetLocationName: no room has been loaded");
@@ -20636,42 +21395,51 @@ void GetLocationName(int xxx,int yyy,char*tempo) {
   play.get_loc_name_last_time = onhs;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::GetLocationName^2 *** */
 const char* Game_GetLocationName(int x, int y) {
   char buffer[STD_BUFFER_SIZE];
   GetLocationName(x, y, buffer);
   return CreateNewScriptString(buffer);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] GetInvName *** */
 void GetInvName(int indx,char*buff) {
   VALIDATE_STRING(buff);
   if ((indx<0) | (indx>=game.numinvitems)) quit("!GetInvName: invalid inventory item specified");
   strcpy(buff,get_translation(game.invinfo[indx].name));
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::GetName^1 *** */
 void InventoryItem_GetName(ScriptInvItem *iitem, char *buff) {
   GetInvName(iitem->id, buff);
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::get_Name *** */
 const char* InventoryItem_GetName_New(ScriptInvItem *invitem) {
   return CreateNewScriptString(get_translation(game.invinfo[invitem->id].name));
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] GetInvGraphic *** */
 int GetInvGraphic(int indx) {
   if ((indx<0) | (indx>=game.numinvitems)) quit("!GetInvGraphic: invalid inventory item specified");
 
   return game.invinfo[indx].pic;
 }
 
+/* *** SCRIPT SYMBOL: [InventoryItem] InventoryItem::get_Graphic *** */
 int InventoryItem_GetGraphic(ScriptInvItem *iitem) {
   return game.invinfo[iitem->id].pic;
 }
 
+/* *** SCRIPT SYMBOL: [Character] MoveCharacter *** */
 void MoveCharacter(int cc,int xx,int yy) {
   walk_character(cc,xx,yy,0, true);
 }
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterDirect *** */
 void MoveCharacterDirect(int cc,int xx, int yy) {
   walk_character(cc,xx,yy,1, true);
 }
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterStraight *** */
 void MoveCharacterStraight(int cc,int xx, int yy) {
   if (!is_valid_character(cc))
     quit("!MoveCharacterStraight: invalid character specified");
@@ -20680,6 +21448,7 @@ void MoveCharacterStraight(int cc,int xx, int yy) {
 }
 
 // Append to character path
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterPath *** */
 void MoveCharacterPath (int chac, int tox, int toy) {
   if (!is_valid_character(chac))
     quit("!MoveCharacterPath: invalid character specified");
@@ -20688,13 +21457,16 @@ void MoveCharacterPath (int chac, int tox, int toy) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Object] MoveObject *** */
 void MoveObject(int objj,int xx,int yy,int spp) {
   move_object(objj,xx,yy,spp,0);
   }
+/* *** SCRIPT SYMBOL: [Object] MoveObjectDirect *** */
 void MoveObjectDirect(int objj,int xx,int yy,int spp) {
   move_object(objj,xx,yy,spp,1);
   }
 
+/* *** SCRIPT SYMBOL: [Object] Object::Move^5 *** */
 void Object_Move(ScriptObject *objj, int x, int y, int speed, int blocking, int direct) {
   if ((direct == ANYWHERE) || (direct == 1))
     direct = 1;
@@ -20711,10 +21483,12 @@ void Object_Move(ScriptObject *objj, int x, int y, int speed, int blocking, int 
     quit("Object.Move: invalid BLOCKING paramter");
 }
 
+/* *** SCRIPT SYMBOL: [Room] GetPlayerCharacter *** */
 int GetPlayerCharacter() {
   return game.playercharacter;
   }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterSpeedEx *** */
 void SetCharacterSpeedEx(int chaa, int xspeed, int yspeed) {
   if (!is_valid_character(chaa))
     quit("!SetCharacterSpeedEx: invalid character");
@@ -20723,16 +21497,19 @@ void SetCharacterSpeedEx(int chaa, int xspeed, int yspeed) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterSpeed *** */
 void SetCharacterSpeed(int chaa,int nspeed) {
   SetCharacterSpeedEx(chaa, nspeed, nspeed);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetTalkingColor *** */
 void SetTalkingColor(int chaa,int ncol) {
   if (!is_valid_character(chaa)) quit("!SetTalkingColor: invalid character");
   
   Character_SetSpeechColor(&game.chars[chaa], ncol);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterSpeechView *** */
 void SetCharacterSpeechView (int chaa, int vii) {
   if (!is_valid_character(chaa))
     quit("!SetCharacterSpeechView: invalid character specified");
@@ -20740,6 +21517,7 @@ void SetCharacterSpeechView (int chaa, int vii) {
   Character_SetSpeechView(&game.chars[chaa], vii);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterBlinkView *** */
 void SetCharacterBlinkView (int chaa, int vii, int intrv) {
   if (!is_valid_character(chaa))
     quit("!SetCharacterBlinkView: invalid character specified");
@@ -20748,6 +21526,7 @@ void SetCharacterBlinkView (int chaa, int vii, int intrv) {
   Character_SetBlinkInterval(&game.chars[chaa], intrv);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterView *** */
 void SetCharacterView(int chaa,int vii) {
   if (!is_valid_character(chaa))
     quit("!SetCharacterView: invalid character specified");
@@ -20755,23 +21534,27 @@ void SetCharacterView(int chaa,int vii) {
   Character_LockView(&game.chars[chaa], vii);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterFrame *** */
 void SetCharacterFrame(int chaa, int view, int loop, int frame) {
 
   Character_LockViewFrame(&game.chars[chaa], view, loop, frame);
 }
 
 // similar to SetCharView, but aligns the frame to make it line up
+/* *** SCRIPT SYMBOL: [Character] SetCharacterViewEx *** */
 void SetCharacterViewEx (int chaa, int vii, int loop, int align) {
   
   Character_LockViewAligned(&game.chars[chaa], vii, loop, align);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterViewOffset *** */
 void SetCharacterViewOffset (int chaa, int vii, int xoffs, int yoffs) {
 
   Character_LockViewOffset(&game.chars[chaa], vii, xoffs, yoffs);
 }
 
 
+/* *** SCRIPT SYMBOL: [Character] ChangeCharacterView *** */
 void ChangeCharacterView(int chaa,int vii) {
   if (!is_valid_character(chaa))
     quit("!ChangeCharacterView: invalid character specified");
@@ -20779,6 +21562,7 @@ void ChangeCharacterView(int chaa,int vii) {
   Character_ChangeView(&game.chars[chaa], vii);
 }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterClickable *** */
 void SetCharacterClickable (int cha, int clik) {
   if (!is_valid_character(cha))
     quit("!SetCharacterClickable: Invalid character specified");
@@ -20789,6 +21573,7 @@ void SetCharacterClickable (int cha, int clik) {
     game.chars[cha].flags|=CHF_NOINTERACT;
   }
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterIgnoreWalkbehinds *** */
 void SetCharacterIgnoreWalkbehinds (int cha, int clik) {
   if (!is_valid_character(cha))
     quit("!SetCharacterIgnoreWalkbehinds: Invalid character specified");
@@ -20796,6 +21581,7 @@ void SetCharacterIgnoreWalkbehinds (int cha, int clik) {
   Character_SetIgnoreWalkbehinds(&game.chars[cha], clik);
 }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectClickable *** */
 void SetObjectClickable (int cha, int clik) {
   if (!is_valid_object(cha))
     quit("!SetObjectClickable: Invalid object specified");
@@ -20804,10 +21590,12 @@ void SetObjectClickable (int cha, int clik) {
     objs[cha].flags|=OBJF_NOINTERACT;
   }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_Clickable *** */
 void Object_SetClickable(ScriptObject *objj, int clik) {
   SetObjectClickable(objj->id, clik);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Clickable *** */
 int Object_GetClickable(ScriptObject *objj) {
   if (!is_valid_object(objj->id))
     quit("!Object.Clickable: Invalid object specified");
@@ -20817,6 +21605,7 @@ int Object_GetClickable(ScriptObject *objj) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_IgnoreScaling *** */
 void Object_SetIgnoreScaling(ScriptObject *objj, int newval) {
   if (!is_valid_object(objj->id))
     quit("!Object.IgnoreScaling: Invalid object specified");
@@ -20829,6 +21618,7 @@ void Object_SetIgnoreScaling(ScriptObject *objj, int newval) {
   objcache[objj->id].ywas = -9999;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_IgnoreScaling *** */
 int Object_GetIgnoreScaling(ScriptObject *objj) {
   if (!is_valid_object(objj->id))
     quit("!Object.IgnoreScaling: Invalid object specified");
@@ -20838,34 +21628,41 @@ int Object_GetIgnoreScaling(ScriptObject *objj) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_Solid *** */
 void Object_SetSolid(ScriptObject *objj, int solid) {
   objj->obj->flags &= ~OBJF_SOLID;
   if (solid)
     objj->obj->flags |= OBJF_SOLID;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_Solid *** */
 int Object_GetSolid(ScriptObject *objj) {
   if (objj->obj->flags & OBJF_SOLID)
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_BlockingWidth *** */
 void Object_SetBlockingWidth(ScriptObject *objj, int bwid) {
   objj->obj->blocking_width = bwid;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_BlockingWidth *** */
 int Object_GetBlockingWidth(ScriptObject *objj) {
   return objj->obj->blocking_width;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_BlockingHeight *** */
 void Object_SetBlockingHeight(ScriptObject *objj, int bhit) {
   objj->obj->blocking_height = bhit;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_BlockingHeight *** */
 int Object_GetBlockingHeight(ScriptObject *objj) {
   return objj->obj->blocking_height;
 }
 
+/* *** SCRIPT SYMBOL: [Object] SetObjectIgnoreWalkbehinds *** */
 void SetObjectIgnoreWalkbehinds (int cha, int clik) {
   if (!is_valid_object(cha))
     quit("!SetObjectIgnoreWalkbehinds: Invalid object specified");
@@ -20876,14 +21673,17 @@ void SetObjectIgnoreWalkbehinds (int cha, int clik) {
   objcache[cha].ywas = -9999;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_ID *** */
 int Object_GetID(ScriptObject *objj) {
   return objj->id;
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::set_IgnoreWalkbehinds *** */
 void Object_SetIgnoreWalkbehinds(ScriptObject *chaa, int clik) {
   SetObjectIgnoreWalkbehinds(chaa->id, clik);
 }
 
+/* *** SCRIPT SYMBOL: [Object] Object::get_IgnoreWalkbehinds *** */
 int Object_GetIgnoreWalkbehinds(ScriptObject *chaa) {
   if (!is_valid_object(chaa->id))
     quit("!Object.IgnoreWalkbehinds: Invalid object specified");
@@ -20893,6 +21693,7 @@ int Object_GetIgnoreWalkbehinds(ScriptObject *chaa) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] MoveCharacterToObject *** */
 void MoveCharacterToObject(int chaa,int obbj) {
   // invalid object, do nothing
   // this allows MoveCharacterToObject(EGO, GetObjectAt(...));
@@ -20903,6 +21704,7 @@ void MoveCharacterToObject(int chaa,int obbj) {
   do_main_cycle(UNTIL_MOVEEND,(int)&game.chars[chaa].walking);
 }
 
+/* *** SCRIPT SYMBOL: [Game] MoveCharacterToHotspot *** */
 void MoveCharacterToHotspot(int chaa,int hotsp) {
   if ((hotsp<0) || (hotsp>=MAX_HOTSPOTS))
     quit("!MovecharacterToHotspot: invalid hotspot");
@@ -20911,6 +21713,7 @@ void MoveCharacterToHotspot(int chaa,int hotsp) {
   do_main_cycle(UNTIL_MOVEEND,(int)&game.chars[chaa].walking);
   }
 
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterBlocking *** */
 void MoveCharacterBlocking(int chaa,int xx,int yy,int direct) {
   if (!is_valid_character (chaa))
     quit("!MoveCharacterBlocking: invalid character");
@@ -20936,6 +21739,7 @@ void MoveCharacterBlocking(int chaa,int xx,int yy,int direct) {
   buffr[199]=0;
   }*/
 
+/* *** SCRIPT SYMBOL: [Room] SetViewport *** */
 void SetViewport(int offsx,int offsy) {
   DEBUG_CONSOLE("Viewport locked to %d,%d", offsx, offsy);
   offsetx = multiply_up_coordinate(offsx);
@@ -20943,13 +21747,16 @@ void SetViewport(int offsx,int offsy) {
   check_viewport_coords();
   play.offsets_locked = 1;
 }
+/* *** SCRIPT SYMBOL: [Room] ReleaseViewport *** */
 void ReleaseViewport() {
   play.offsets_locked = 0;
   DEBUG_CONSOLE("Viewport released back to engine control");
 }
+/* *** SCRIPT SYMBOL: [Room] GetViewportX *** */
 int GetViewportX () {
   return divide_down_coordinate(offsetx);
   }
+/* *** SCRIPT SYMBOL: [Room] GetViewportY *** */
 int GetViewportY () {
   return divide_down_coordinate(offsety);
   }
@@ -20981,6 +21788,7 @@ void on_background_frame_change () {
     bg_just_changed = 1;
 }
 
+/* *** SCRIPT SYMBOL: [Room] SetBackgroundFrame *** */
 void SetBackgroundFrame(int frnum) {
   if ((frnum<-1) | (frnum>=thisroom.num_bscenes))
     quit("!SetBackgrondFrame: invalid frame number specified");
@@ -21001,10 +21809,12 @@ void SetBackgroundFrame(int frnum) {
   on_background_frame_change ();
 }
 
+/* *** SCRIPT SYMBOL: [Room] GetBackgroundFrame *** */
 int GetBackgroundFrame() {
   return play.bg_frame;
   }
 
+/* *** SCRIPT SYMBOL: [Game] Debug *** */
 void script_debug(int cmdd,int dataa) {
   if (play.debug_mode==0) return;
   int rr;
@@ -21115,6 +21925,7 @@ int init_cd_player()
   return platform->InitializeCDPlayer();
 }
 
+/* *** SCRIPT SYMBOL: [Multimedia] CDAudio *** */
 int cd_manager(int cmdd,int datt) 
 {
   if (!triedToUseCdAudioCommand)
@@ -21128,12 +21939,14 @@ int cd_manager(int cmdd,int datt)
   return platform->CDPlayerCommand(cmdd, datt);
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetTimer *** */
 void script_SetTimer(int tnum,int timeout) {
   if ((tnum < 1) || (tnum >= MAX_TIMERS))
     quit("!StartTimer: invalid timer number");
   play.script_timers[tnum] = timeout;
   }
 
+/* *** SCRIPT SYMBOL: [Game] IsTimerExpired *** */
 int IsTimerExpired(int tnum) {
   if ((tnum < 1) || (tnum >= MAX_TIMERS))
     quit("!IsTimerExpired: invalid timer number");
@@ -21155,6 +21968,7 @@ void my_strncpy(char *dest, const char *src, int len) {
     strcpy(dest, src);
 }
 
+/* *** SCRIPT SYMBOL: [String] StrCat *** */
 void _sc_strcat(char*s1,char*s2) {
   // make sure they don't try to append a char to the string
   VALIDATE_STRING (s2);
@@ -21164,11 +21978,15 @@ void _sc_strcat(char*s1,char*s2) {
   my_strncpy(&s1[strlen(s1)], s2, mosttocopy);
 }
 
+/* *** SCRIPT SYMBOL: [String] StrCopy *** */
 void _sc_strcpy(char*s1,char*s2) {
   check_strlen(s1);
   my_strncpy(s1, s2, MAXSTRLEN - 1);
 }
 
+/* *** SCRIPT SYMBOL: [String] String::Contains^1 *** */
+/* *** SCRIPT SYMBOL: [String] String::IndexOf^1 *** */
+/* *** SCRIPT SYMBOL: [String] StrContains *** */
 int StrContains (const char *s1, const char *s2) {
   VALIDATE_STRING (s1);
   VALIDATE_STRING (s2);
@@ -21194,12 +22012,14 @@ int StrContains (const char *s1, const char *s2) {
 #define strupr _strupr
 #endif
 
+/* *** SCRIPT SYMBOL: [String] StrToLowerCase *** */
 void _sc_strlower (char *desbuf) {
   VALIDATE_STRING(desbuf);
   check_strlen (desbuf);
   strlwr (desbuf);
 }
 
+/* *** SCRIPT SYMBOL: [String] StrToUpperCase *** */
 void _sc_strupper (char *desbuf) {
   VALIDATE_STRING(desbuf);
   check_strlen (desbuf);
@@ -21308,6 +22128,7 @@ void my_sprintf(char *buffer, const char *fmt, va_list ap) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Game] AbortGame *** */
 void _sc_AbortGame(char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE] = "!?";
   va_list ap;
@@ -21318,6 +22139,7 @@ void _sc_AbortGame(char*texx, ...) {
   quit(displbuf);
 }
 
+/* *** SCRIPT SYMBOL: [String] StrFormat *** */
 void _sc_sprintf(char*destt,char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
   VALIDATE_STRING(destt);
@@ -21365,6 +22187,7 @@ InteractionVariable *FindGraphicalVariable(const char *varName) {
   return NULL;
 }
 
+/* *** SCRIPT SYMBOL: [Game] GetGraphicalVariable *** */
 int GetGraphicalVariable (const char *varName) {
   InteractionVariable *theVar = FindGraphicalVariable(varName);
   if (theVar == NULL) {
@@ -21376,6 +22199,7 @@ int GetGraphicalVariable (const char *varName) {
   return theVar->value;
 }
 
+/* *** SCRIPT SYMBOL: [Game] SetGraphicalVariable *** */
 void SetGraphicalVariable (const char *varName, int p_value) {
   InteractionVariable *theVar = FindGraphicalVariable(varName);
   if (theVar == NULL) {
@@ -22866,6 +23690,7 @@ void convert_guid_from_text_to_binary(const char *guidText, unsigned char *buffe
   temp = buffer[6]; buffer[6] = buffer[7]; buffer[7] = temp;
 }
 
+/* *** SCRIPT SYMBOL: [Game] SaveGameSlot *** */
 void save_game(int slotn, const char*descript) {
   
   // dont allow save in rep_exec_always, because we dont save
@@ -23033,6 +23858,7 @@ int restore_game_data (FILE *ooo, const char *nametouse) {
     gamescrnhit = scrnhit;
 
   if (gamescrnhit != scrnhit) {
+/* *** SCRIPT SYMBOL: [Text] Display *** */
     Display("This game was saved with the interpreter running at a different "
       "resolution. It cannot be restored.");
     fclose(ooo);
@@ -23666,6 +24492,7 @@ void add_dynamic_sprite(int gotSlot, block redin, bool hasAlpha) {
   spriteheight[gotSlot] = BMP_H(redin);
 }
 
+/* *** SCRIPT SYMBOL: [DynamicSprite] DeleteSprite *** */
 void free_dynamic_sprite (int gotSlot) {
   int tt;
 
@@ -24056,10 +24883,12 @@ int invscreen() {
   return selt;
   }
 
+/* *** SCRIPT SYMBOL: [Game] InventoryScreen *** */
 void sc_invscreen() {
   curscript->queue_action(ePSAInvScreen, 0, "InventoryScreen");
 }
 
+/* *** SCRIPT SYMBOL: [InvWindow] SetInvDimensions *** */
 void SetInvDimensions(int ww,int hh) {
   play.inv_item_wid = ww;
   play.inv_item_hit = hh;
@@ -24073,6 +24902,7 @@ void SetInvDimensions(int ww,int hh) {
   guis_need_update = 1;
 }
 
+/* *** SCRIPT SYMBOL: [Palette] UpdatePalette *** */
 void UpdatePalette() {
   if (game.color_depth > 1)
     invalidate_screen();
@@ -24109,6 +24939,7 @@ void stop_fast_forwarding() {
   update_music_volume();
 }
 
+/* *** SCRIPT SYMBOL: [Game] SkipUntilCharacterStops *** */
 void SkipUntilCharacterStops(int cc) {
   if (!is_valid_character(cc))
     quit("!SkipUntilCharacterStops: invalid character specified");
@@ -24142,6 +24973,7 @@ void EndSkippingUntilCharStops() {
 // 3 = mouse button
 // 4 = mouse button or any key
 // 5 = right click or ESC only
+/* *** SCRIPT SYMBOL: [Game] StartCutscene *** */
 void StartCutscene (int skipwith) {
   if (play.in_cutscene)
     quit("!StartCutscene: already in a cutscene");
@@ -24156,6 +24988,7 @@ void StartCutscene (int skipwith) {
   initialize_skippable_cutscene();
 }
 
+/* *** SCRIPT SYMBOL: [Game] EndCutscene *** */
 int EndCutscene () {
   if (play.in_cutscene == 0)
     quit("!EndCutscene: not in a cutscene");
@@ -24172,6 +25005,7 @@ int EndCutscene () {
   return retval;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_SkippingCutscene *** */
 int Game_GetSkippingCutscene()
 {
   if (play.fast_forward)
@@ -24181,6 +25015,7 @@ int Game_GetSkippingCutscene()
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::get_InSkippableCutscene *** */
 int Game_GetInSkippableCutscene()
 {
   if (play.in_cutscene)

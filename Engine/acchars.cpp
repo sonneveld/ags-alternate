@@ -31,11 +31,13 @@ int turnlooporder[8] = {0, 6, 1, 7, 3, 5, 2, 4};
 void fix_player_sprite(MoveList*cmls,CharacterInfo*chinf);
 
 
+/* *** SCRIPT SYMBOL: [Character] StopMoving *** */
 void StopMoving(int chaa) {
 
   Character_StopMoving(&game.chars[chaa]);
 }
 
+/* *** SCRIPT SYMBOL: [Character] ReleaseCharacterView *** */
 void ReleaseCharacterView(int chat) {
   if (!is_valid_character(chat))
     quit("!ReleaseCahracterView: invalid character supplied");
@@ -413,6 +415,7 @@ void find_nearest_walkable_area (int *xx, int *yy) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] MoveToWalkableArea *** */
 void MoveToWalkableArea(int charid) {
   if (!is_valid_character(charid))
     quit("!MoveToWalkableArea: invalid character specified");
@@ -420,6 +423,7 @@ void MoveToWalkableArea(int charid) {
   Character_PlaceOnWalkableArea(&game.chars[charid]);
 }
 
+/* *** SCRIPT SYMBOL: [Character] FaceLocation *** */
 void FaceLocation(int cha, int xx, int yy) {
   if (!is_valid_character(cha))
     quit("!FaceLocation: Invalid character specified");
@@ -427,6 +431,7 @@ void FaceLocation(int cha, int xx, int yy) {
   Character_FaceLocation(&game.chars[cha], xx, yy, BLOCKING);
 }
 
+/* *** SCRIPT SYMBOL: [Character] FaceCharacter *** */
 void FaceCharacter(int cha,int toface) {
   if (!is_valid_character(cha))
     quit("!FaceCharacter: Invalid character specified");
@@ -442,6 +447,7 @@ void FaceCharacter(int cha,int toface) {
 // **** CHARACTER: FUNCTIONS ****
 
 
+/* *** SCRIPT SYMBOL: [Character] Character::AddInventory^2 *** */
 void Character_AddInventory(CharacterInfo *chaa, ScriptInvItem *invi, int addIndex) {
   int ee;
 
@@ -491,6 +497,7 @@ void Character_AddInventory(CharacterInfo *chaa, ScriptInvItem *invi, int addInd
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::AddWaypoint^2 *** */
 void Character_AddWaypoint(CharacterInfo *chaa, int x, int y) {
 
   if (chaa->room != displayed_room)
@@ -516,6 +523,7 @@ void Character_AddWaypoint(CharacterInfo *chaa, int x, int y) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::Animate^5 *** */
 void Character_Animate(CharacterInfo *chaa, int loop, int delay, int repeat, int blocking, int direction) {
 
   if (direction == FORWARDS)
@@ -533,6 +541,7 @@ void Character_Animate(CharacterInfo *chaa, int loop, int delay, int repeat, int
     quit("!Character.Animate: Invalid BLOCKING parameter");
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::ChangeRoomAutoPosition^2 *** */
 void Character_ChangeRoomAutoPosition(CharacterInfo *chaa, int room, int newPos) 
 {
   if (chaa->index_id != game.playercharacter) 
@@ -561,6 +570,7 @@ void Character_ChangeRoomAutoPosition(CharacterInfo *chaa, int room, int newPos)
   NewRoom(room);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::ChangeRoom^3 *** */
 void Character_ChangeRoom(CharacterInfo *chaa, int room, int x, int y) {
 
   if (chaa->index_id != game.playercharacter) {
@@ -610,6 +620,7 @@ void FindReasonableLoopForCharacter(CharacterInfo *chap) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::ChangeView^1 *** */
 void Character_ChangeView(CharacterInfo *chap, int vii) {
   vii--;
 
@@ -631,6 +642,7 @@ void Character_ChangeView(CharacterInfo *chap, int vii) {
   FindReasonableLoopForCharacter(chap);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::FaceCharacter^2 *** */
 void Character_FaceCharacter(CharacterInfo *char1, CharacterInfo *char2, int blockingStyle) {
   if (char2 == NULL) 
     quit("!FaceCharacter: invalid character specified");
@@ -641,6 +653,7 @@ void Character_FaceCharacter(CharacterInfo *char1, CharacterInfo *char2, int blo
   Character_FaceLocation(char1, char2->x, char2->y, blockingStyle);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::FaceLocation^3 *** */
 void Character_FaceLocation(CharacterInfo *char1, int xx, int yy, int blockingStyle) {
   DEBUG_CONSOLE("%s: Face location %d,%d", char1->scrname, xx, yy);
 
@@ -706,6 +719,7 @@ void Character_FaceLocation(CharacterInfo *char1, int xx, int yy, int blockingSt
   char1->frame=0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::FaceObject^2 *** */
 void Character_FaceObject(CharacterInfo *char1, ScriptObject *obj, int blockingStyle) {
   if (obj == NULL) 
     quit("!FaceObject: invalid object specified");
@@ -714,6 +728,7 @@ void Character_FaceObject(CharacterInfo *char1, ScriptObject *obj, int blockingS
   Character_FaceLocation(char1, obj->obj->x, obj->obj->y, blockingStyle);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::FollowCharacter^3 *** */
 void Character_FollowCharacter(CharacterInfo *chaa, CharacterInfo *tofollow, int distaway, int eagerness) {
 
   if ((eagerness < 0) || (eagerness > 250))
@@ -758,6 +773,7 @@ void Character_FollowCharacter(CharacterInfo *chaa, CharacterInfo *tofollow, int
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::IsCollidingWithChar^1 *** */
 int Character_IsCollidingWithChar(CharacterInfo *char1, CharacterInfo *char2) {
   if (char2 == NULL)
     quit("!AreCharactersColliding: invalid char2");
@@ -777,6 +793,7 @@ int Character_IsCollidingWithChar(CharacterInfo *char1, CharacterInfo *char2) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::IsCollidingWithObject^1 *** */
 int Character_IsCollidingWithObject(CharacterInfo *chin, ScriptObject *objid) {
   if (objid == NULL)
     quit("!AreCharObjColliding: invalid object number");
@@ -828,6 +845,7 @@ int Character_IsCollidingWithObject(CharacterInfo *chin, ScriptObject *objid) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::LockView^1 *** */
 void Character_LockView(CharacterInfo *chap, int vii) {
 
   if ((vii < 1) || (vii > game.numviews)) {
@@ -854,6 +872,7 @@ void Character_LockView(CharacterInfo *chap, int vii) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Character] Character::LockViewAligned^3 *** */
 void Character_LockViewAligned(CharacterInfo *chap, int vii, int loop, int align) {
   if (chap->view < 0)
     quit("!SetCharacterLoop: character has invalid old view number");
@@ -885,6 +904,7 @@ void Character_LockViewAligned(CharacterInfo *chap, int vii, int loop, int align
   chap->pic_yoffs = 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::LockViewFrame^3 *** */
 void Character_LockViewFrame(CharacterInfo *chaa, int view, int loop, int frame) {
 
   Character_LockView(chaa, view);
@@ -899,6 +919,7 @@ void Character_LockViewFrame(CharacterInfo *chaa, int view, int loop, int frame)
   chaa->frame = frame;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::LockViewOffset^3 *** */
 void Character_LockViewOffset(CharacterInfo *chap, int vii, int xoffs, int yoffs) {
   Character_LockView(chap, vii);
 
@@ -917,6 +938,7 @@ void Character_LockViewOffset(CharacterInfo *chap, int vii, int xoffs, int yoffs
   chap->pic_yoffs = yoffs;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::LoseInventory^1 *** */
 void Character_LoseInventory(CharacterInfo *chap, ScriptInvItem *invi) {
 
   if (invi == NULL)
@@ -952,6 +974,7 @@ void Character_LoseInventory(CharacterInfo *chap, ScriptInvItem *invi) {
     run_on_event (GE_LOSE_INV, inum);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::PlaceOnWalkableArea^0 *** */
 void Character_PlaceOnWalkableArea(CharacterInfo *chap) 
 {
   if (displayed_room < 0)
@@ -960,6 +983,7 @@ void Character_PlaceOnWalkableArea(CharacterInfo *chap)
   find_nearest_walkable_area(&chap->x, &chap->y);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::RemoveTint^0 *** */
 void Character_RemoveTint(CharacterInfo *chaa) {
   
   if (chaa->flags & CHF_HASTINT) {
@@ -971,6 +995,7 @@ void Character_RemoveTint(CharacterInfo *chaa) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_HasExplicitTint *** */
 int Character_GetHasExplicitTint(CharacterInfo *chaa) {
   
   if (chaa->flags & CHF_HASTINT)
@@ -979,6 +1004,7 @@ int Character_GetHasExplicitTint(CharacterInfo *chaa) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::Say^101 *** */
 void Character_Say(CharacterInfo *chaa, const char *texx, ...) {
   
   char displbuf[STD_BUFFER_SIZE];
@@ -991,11 +1017,13 @@ void Character_Say(CharacterInfo *chaa, const char *texx, ...) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::SayAt^4 *** */
 void Character_SayAt(CharacterInfo *chaa, int x, int y, int width, const char *texx) {
 
   DisplaySpeechAt(x, y, width, chaa->index_id, (char*)texx);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::SayBackground^1 *** */
 ScriptOverlay* Character_SayBackground(CharacterInfo *chaa, const char *texx) {
 
   int ovltype = DisplaySpeechBackground(chaa->index_id, (char*)texx);
@@ -1015,6 +1043,7 @@ ScriptOverlay* Character_SayBackground(CharacterInfo *chaa, const char *texx) {
   return scOver;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::SetAsPlayer^0 *** */
 void Character_SetAsPlayer(CharacterInfo *chaa) {
 
     // set to same character, so ignore
@@ -1050,6 +1079,7 @@ void Character_SetAsPlayer(CharacterInfo *chaa) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Character] Character::SetIdleView^2 *** */
 void Character_SetIdleView(CharacterInfo *chaa, int iview, int itime) {
 
   if (iview == 1) 
@@ -1103,6 +1133,7 @@ void Character_SetOption(CharacterInfo *chaa, int flag, int yesorno) {
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::SetWalkSpeed^2 *** */
 void Character_SetSpeed(CharacterInfo *chaa, int xspeed, int yspeed) {
 
   if ((xspeed == 0) || (xspeed > 50) || (yspeed == 0) || (yspeed > 50))
@@ -1119,6 +1150,7 @@ void Character_SetSpeed(CharacterInfo *chaa, int xspeed, int yspeed) {
 }
 
 
+/* *** SCRIPT SYMBOL: [Character] Character::StopMoving^0 *** */
 void Character_StopMoving(CharacterInfo *charp) {
 
   int chaa = charp->index_id;
@@ -1149,6 +1181,7 @@ void Character_StopMoving(CharacterInfo *charp) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::Tint^5 *** */
 void Character_Tint(CharacterInfo *chaa, int red, int green, int blue, int opacity, int luminance) {
   if ((red < 0) || (green < 0) || (blue < 0) ||
       (red > 255) || (green > 255) || (blue > 255) ||
@@ -1166,6 +1199,7 @@ void Character_Tint(CharacterInfo *chaa, int red, int green, int blue, int opaci
   chaa->flags |= CHF_HASTINT;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::Think^101 *** */
 void Character_Think(CharacterInfo *chaa, const char *texx, ...) {
 
   char displbuf[STD_BUFFER_SIZE];
@@ -1177,6 +1211,7 @@ void Character_Think(CharacterInfo *chaa, const char *texx, ...) {
   _DisplayThoughtCore(chaa->index_id, displbuf);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::UnlockView^0 *** */
 void Character_UnlockView(CharacterInfo *chaa) {
   if (chaa->flags & CHF_FIXVIEW) {
     DEBUG_CONSOLE("%s: Released view back to default", chaa->scrname);
@@ -1219,16 +1254,19 @@ void walk_or_move_character(CharacterInfo *chaa, int x, int y, int blocking, int
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::Walk^4 *** */
 void Character_Walk(CharacterInfo *chaa, int x, int y, int blocking, int direct) 
 {
   walk_or_move_character(chaa, x, y, blocking, direct, true);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::Move^4 *** */
 void Character_Move(CharacterInfo *chaa, int x, int y, int blocking, int direct) 
 {
   walk_or_move_character(chaa, x, y, blocking, direct, false);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::WalkStraight^3 *** */
 void Character_WalkStraight(CharacterInfo *chaa, int xx, int yy, int blocking) {
 
   if (chaa->room != displayed_room)
@@ -1262,6 +1300,7 @@ void Character_WalkStraight(CharacterInfo *chaa, int xx, int yy, int blocking) {
 // **** CHARACTER: PROPERTIES ****
 
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_ActiveInventory *** */
 ScriptInvItem* Character_GetActiveInventory(CharacterInfo *chaa) {
 
   if (chaa->activeinv <= 0)
@@ -1270,6 +1309,7 @@ ScriptInvItem* Character_GetActiveInventory(CharacterInfo *chaa) {
   return &scrInv[chaa->activeinv];
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_ActiveInventory *** */
 void Character_SetActiveInventory(CharacterInfo *chaa, ScriptInvItem* iit) {
   guis_need_update = 1;
 
@@ -1296,21 +1336,25 @@ void Character_SetActiveInventory(CharacterInfo *chaa, ScriptInvItem* iit) {
   }
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Animating *** */
 int Character_GetAnimating(CharacterInfo *chaa) {
   if (chaa->animating)
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_AnimationSpeed *** */
 int Character_GetAnimationSpeed(CharacterInfo *chaa) {
   return chaa->animspeed;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_AnimationSpeed *** */
 void Character_SetAnimationSpeed(CharacterInfo *chaa, int newval) {
 
   chaa->animspeed = newval;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Baseline *** */
 int Character_GetBaseline(CharacterInfo *chaa) {
 
   if (chaa->baseline < 1)
@@ -1319,16 +1363,19 @@ int Character_GetBaseline(CharacterInfo *chaa) {
   return chaa->baseline;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Baseline *** */
 void Character_SetBaseline(CharacterInfo *chaa, int basel) {
 
   chaa->baseline = basel;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_BlinkInterval *** */
 int Character_GetBlinkInterval(CharacterInfo *chaa) {
 
   return chaa->blinkinterval;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_BlinkInterval *** */
 void Character_SetBlinkInterval(CharacterInfo *chaa, int interval) {
 
   if (interval < 0)
@@ -1340,11 +1387,13 @@ void Character_SetBlinkInterval(CharacterInfo *chaa, int interval) {
     chaa->blinktimer = chaa->blinkinterval;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_BlinkView *** */
 int Character_GetBlinkView(CharacterInfo *chaa) {
 
   return chaa->blinkview + 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_BlinkView *** */
 void Character_SetBlinkView(CharacterInfo *chaa, int vii) {
   
   if (((vii < 2) || (vii > game.numviews)) && (vii != -1))
@@ -1353,38 +1402,45 @@ void Character_SetBlinkView(CharacterInfo *chaa, int vii) {
   chaa->blinkview = vii - 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_BlinkWhileThinking *** */
 int Character_GetBlinkWhileThinking(CharacterInfo *chaa) {
   if (chaa->flags & CHF_NOBLINKANDTHINK)
     return 0;
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_BlinkWhileThinking *** */
 void Character_SetBlinkWhileThinking(CharacterInfo *chaa, int yesOrNo) {
   chaa->flags &= ~CHF_NOBLINKANDTHINK;
   if (yesOrNo == 0)
     chaa->flags |= CHF_NOBLINKANDTHINK;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_BlockingHeight *** */
 int Character_GetBlockingHeight(CharacterInfo *chaa) {
 
   return chaa->blocking_height;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_BlockingHeight *** */
 void Character_SetBlockingHeight(CharacterInfo *chaa, int hit) {
 
   chaa->blocking_height = hit;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_BlockingWidth *** */
 int Character_GetBlockingWidth(CharacterInfo *chaa) {
 
   return chaa->blocking_width;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_BlockingWidth *** */
 void Character_SetBlockingWidth(CharacterInfo *chaa, int wid) {
 
   chaa->blocking_width = wid;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_DiagonalLoops *** */
 int Character_GetDiagonalWalking(CharacterInfo *chaa) {
 
   if (chaa->flags & CHF_NODIAGONAL)
@@ -1392,6 +1448,7 @@ int Character_GetDiagonalWalking(CharacterInfo *chaa) {
   return 1;  
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_DiagonalLoops *** */
 void Character_SetDiagonalWalking(CharacterInfo *chaa, int yesorno) {
 
   chaa->flags &= ~CHF_NODIAGONAL;
@@ -1399,6 +1456,7 @@ void Character_SetDiagonalWalking(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_NODIAGONAL;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Clickable *** */
 int Character_GetClickable(CharacterInfo *chaa) {
   
   if (chaa->flags & CHF_NOINTERACT)
@@ -1406,6 +1464,7 @@ int Character_GetClickable(CharacterInfo *chaa) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Clickable *** */
 void Character_SetClickable(CharacterInfo *chaa, int clik) {
   
   chaa->flags &= ~CHF_NOINTERACT;
@@ -1414,20 +1473,24 @@ void Character_SetClickable(CharacterInfo *chaa, int clik) {
     chaa->flags |= CHF_NOINTERACT;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_ID *** */
 int Character_GetID(CharacterInfo *chaa) {
 
   return chaa->index_id;
 
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Frame *** */
 int Character_GetFrame(CharacterInfo *chaa) {
   return chaa->frame;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Frame *** */
 void Character_SetFrame(CharacterInfo *chaa, int newval) {
   chaa->frame = newval;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_IdleView *** */
 int Character_GetIdleView(CharacterInfo *chaa) {
 
   if (chaa->idleview < 1)
@@ -1436,6 +1499,7 @@ int Character_GetIdleView(CharacterInfo *chaa) {
   return chaa->idleview + 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::geti_InventoryQuantity *** */
 int Character_GetIInventoryQuantity(CharacterInfo *chaa, int index) {
   if ((index < 1) || (index >= game.numinvitems))
     quitprintf("!Character.InventoryQuantity: invalid inventory index %d", index);
@@ -1443,6 +1507,7 @@ int Character_GetIInventoryQuantity(CharacterInfo *chaa, int index) {
   return chaa->inv[index];
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::HasInventory^1 *** */
 int Character_HasInventory(CharacterInfo *chaa, ScriptInvItem *invi)
 {
   if (invi == NULL)
@@ -1451,6 +1516,7 @@ int Character_HasInventory(CharacterInfo *chaa, ScriptInvItem *invi)
   return (chaa->inv[invi->id] > 0) ? 1 : 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::seti_InventoryQuantity *** */
 void Character_SetIInventoryQuantity(CharacterInfo *chaa, int index, int quant) {
   if ((index < 1) || (index >= game.numinvitems))
     quitprintf("!Character.InventoryQuantity: invalid inventory index %d", index);
@@ -1461,6 +1527,7 @@ void Character_SetIInventoryQuantity(CharacterInfo *chaa, int index, int quant) 
   chaa->inv[index] = quant;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_IgnoreLighting *** */
 int Character_GetIgnoreLighting(CharacterInfo *chaa) {
   
   if (chaa->flags & CHF_NOLIGHTING)
@@ -1468,6 +1535,7 @@ int Character_GetIgnoreLighting(CharacterInfo *chaa) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_IgnoreLighting *** */
 void Character_SetIgnoreLighting(CharacterInfo *chaa, int yesorno) {
   
   chaa->flags &= ~CHF_NOLIGHTING;
@@ -1475,6 +1543,8 @@ void Character_SetIgnoreLighting(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_NOLIGHTING;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_IgnoreScaling *** */
+/* *** SCRIPT SYMBOL: [Character] Character::get_ManualScaling *** */
 int Character_GetIgnoreScaling(CharacterInfo *chaa) {
 
   if (chaa->flags & CHF_MANUALSCALING)
@@ -1482,6 +1552,7 @@ int Character_GetIgnoreScaling(CharacterInfo *chaa) {
   return 0;  
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_IgnoreScaling *** */
 void Character_SetIgnoreScaling(CharacterInfo *chaa, int yesorno) {
 
   if (yesorno) {
@@ -1492,6 +1563,7 @@ void Character_SetIgnoreScaling(CharacterInfo *chaa, int yesorno) {
   Character_SetManualScaling(chaa, yesorno);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_ManualScaling *** */
 void Character_SetManualScaling(CharacterInfo *chaa, int yesorno) {
 
   chaa->flags &= ~CHF_MANUALSCALING;
@@ -1499,6 +1571,7 @@ void Character_SetManualScaling(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_MANUALSCALING;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_IgnoreWalkbehinds *** */
 int Character_GetIgnoreWalkbehinds(CharacterInfo *chaa) {
   
   if (chaa->flags & CHF_NOWALKBEHINDS)
@@ -1506,6 +1579,7 @@ int Character_GetIgnoreWalkbehinds(CharacterInfo *chaa) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_IgnoreWalkbehinds *** */
 void Character_SetIgnoreWalkbehinds(CharacterInfo *chaa, int yesorno) {
   
   chaa->flags &= ~CHF_NOWALKBEHINDS;
@@ -1513,6 +1587,7 @@ void Character_SetIgnoreWalkbehinds(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_NOWALKBEHINDS;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_MovementLinkedToAnimation *** */
 int Character_GetMovementLinkedToAnimation(CharacterInfo *chaa) {
   
   if (chaa->flags & CHF_ANTIGLIDE)
@@ -1520,6 +1595,7 @@ int Character_GetMovementLinkedToAnimation(CharacterInfo *chaa) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_MovementLinkedToAnimation *** */
 void Character_SetMovementLinkedToAnimation(CharacterInfo *chaa, int yesorno) {
   
   chaa->flags &= ~CHF_ANTIGLIDE;
@@ -1527,10 +1603,12 @@ void Character_SetMovementLinkedToAnimation(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_ANTIGLIDE;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Loop *** */
 int Character_GetLoop(CharacterInfo *chaa) {
   return chaa->loop;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Loop *** */
 void Character_SetLoop(CharacterInfo *chaa, int newval) {
   if ((newval < 0) || (newval >= views[chaa->view].numLoops))
     quit("!Character.Loop: invalid loop number for this view");
@@ -1541,34 +1619,41 @@ void Character_SetLoop(CharacterInfo *chaa, int newval) {
     chaa->frame = 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Moving *** */
 int Character_GetMoving(CharacterInfo *chaa) {
   if (chaa->walking)
     return 1;
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Name *** */
 const char* Character_GetName(CharacterInfo *chaa) {
   return CreateNewScriptString(chaa->name);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Name *** */
 void Character_SetName(CharacterInfo *chaa, const char *newName) {
   strncpy(chaa->name, newName, 40);
   chaa->name[39] = 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_NormalView *** */
 int Character_GetNormalView(CharacterInfo *chaa) {
   return chaa->defview + 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_PreviousRoom *** */
 int Character_GetPreviousRoom(CharacterInfo *chaa) {
   return chaa->prevroom;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Room *** */
 int Character_GetRoom(CharacterInfo *chaa) {
   return chaa->room;
 }
 
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_ScaleMoveSpeed *** */
 int Character_GetScaleMoveSpeed(CharacterInfo *chaa) {
 
   if (chaa->flags & CHF_SCALEMOVESPEED)
@@ -1576,6 +1661,7 @@ int Character_GetScaleMoveSpeed(CharacterInfo *chaa) {
   return 0;  
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_ScaleMoveSpeed *** */
 void Character_SetScaleMoveSpeed(CharacterInfo *chaa, int yesorno) {
 
   if ((yesorno < 0) || (yesorno > 1))
@@ -1586,6 +1672,7 @@ void Character_SetScaleMoveSpeed(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_SCALEMOVESPEED;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_ScaleVolume *** */
 int Character_GetScaleVolume(CharacterInfo *chaa) {
 
   if (chaa->flags & CHF_SCALEVOLUME)
@@ -1593,6 +1680,7 @@ int Character_GetScaleVolume(CharacterInfo *chaa) {
   return 0;  
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_ScaleVolume *** */
 void Character_SetScaleVolume(CharacterInfo *chaa, int yesorno) {
 
   if ((yesorno < 0) || (yesorno > 1))
@@ -1603,10 +1691,12 @@ void Character_SetScaleVolume(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_SCALEVOLUME;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Scaling *** */
 int Character_GetScaling(CharacterInfo *chaa) {
   return charextra[chaa->index_id].zoom;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Scaling *** */
 void Character_SetScaling(CharacterInfo *chaa, int zoomlevel) {
 
   if ((chaa->flags & CHF_MANUALSCALING) == 0)
@@ -1617,6 +1707,7 @@ void Character_SetScaling(CharacterInfo *chaa, int zoomlevel) {
   charextra[chaa->index_id].zoom = zoomlevel;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Solid *** */
 int Character_GetSolid(CharacterInfo *chaa) {
 
   if (chaa->flags & CHF_NOBLOCKING)
@@ -1624,6 +1715,7 @@ int Character_GetSolid(CharacterInfo *chaa) {
   return 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Solid *** */
 void Character_SetSolid(CharacterInfo *chaa, int yesorno) {
 
   chaa->flags &= ~CHF_NOBLOCKING;
@@ -1631,6 +1723,7 @@ void Character_SetSolid(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_NOBLOCKING;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Speaking *** */
 int Character_GetSpeaking(CharacterInfo *chaa) {
   if (get_character_currently_talking() == chaa->index_id)
     return 1;
@@ -1638,16 +1731,19 @@ int Character_GetSpeaking(CharacterInfo *chaa) {
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_SpeechColor *** */
 int Character_GetSpeechColor(CharacterInfo *chaa) {
   
   return chaa->talkcolor;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_SpeechColor *** */
 void Character_SetSpeechColor(CharacterInfo *chaa, int ncol) {
   
   chaa->talkcolor = ncol;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_SpeechAnimationDelay *** */
 int GetCharacterSpeechAnimationDelay(CharacterInfo *cha)
 {
   if (game.options[OPT_OLDTALKANIMSPD])
@@ -1656,6 +1752,7 @@ int GetCharacterSpeechAnimationDelay(CharacterInfo *cha)
     return cha->speech_anim_speed;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_SpeechAnimationDelay *** */
 void Character_SetSpeechAnimationDelay(CharacterInfo *chaa, int newDelay) 
 {
   if (game.options[OPT_OLDTALKANIMSPD])
@@ -1664,11 +1761,13 @@ void Character_SetSpeechAnimationDelay(CharacterInfo *chaa, int newDelay)
   chaa->speech_anim_speed = newDelay;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_SpeechView *** */
 int Character_GetSpeechView(CharacterInfo *chaa) {
   
   return chaa->talkview + 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_SpeechView *** */
 void Character_SetSpeechView(CharacterInfo *chaa, int vii) {
   if (vii == -1) {
     chaa->talkview = -1;
@@ -1681,11 +1780,13 @@ void Character_SetSpeechView(CharacterInfo *chaa, int vii) {
   chaa->talkview = vii - 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_ThinkView *** */
 int Character_GetThinkView(CharacterInfo *chaa) {
   
   return chaa->thinkview + 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_ThinkView *** */
 void Character_SetThinkView(CharacterInfo *chaa, int vii) {
   if (((vii < 2) || (vii > game.numviews)) && (vii != -1))
     quit("!SetCharacterThinkView: invalid view number");
@@ -1693,6 +1794,7 @@ void Character_SetThinkView(CharacterInfo *chaa, int vii) {
   chaa->thinkview = vii - 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Transparency *** */
 int Character_GetTransparency(CharacterInfo *chaa) {
   
   if (chaa->transparency == 0)
@@ -1703,6 +1805,7 @@ int Character_GetTransparency(CharacterInfo *chaa) {
   return 100 - ((chaa->transparency * 10) / 25);
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Transparency *** */
 void Character_SetTransparency(CharacterInfo *chaa, int trans) {
   
   if ((trans < 0) || (trans > 100))
@@ -1716,6 +1819,7 @@ void Character_SetTransparency(CharacterInfo *chaa, int trans) {
     chaa->transparency = ((100-trans) * 25) / 10;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_TurnBeforeWalking *** */
 int Character_GetTurnBeforeWalking(CharacterInfo *chaa) {
 
   if (chaa->flags & CHF_NOTURNING)
@@ -1723,6 +1827,7 @@ int Character_GetTurnBeforeWalking(CharacterInfo *chaa) {
   return 1;  
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_TurnBeforeWalking *** */
 void Character_SetTurnBeforeWalking(CharacterInfo *chaa, int yesorno) {
 
   chaa->flags &= ~CHF_NOTURNING;
@@ -1730,14 +1835,17 @@ void Character_SetTurnBeforeWalking(CharacterInfo *chaa, int yesorno) {
     chaa->flags |= CHF_NOTURNING;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_View *** */
 int Character_GetView(CharacterInfo *chaa) {
   return chaa->view + 1;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_WalkSpeedX *** */
 int Character_GetWalkSpeedX(CharacterInfo *chaa) {
   return chaa->walkspeed;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_WalkSpeedY *** */
 int Character_GetWalkSpeedY(CharacterInfo *chaa) {
   if (chaa->walkspeed_y != UNIFORM_WALK_SPEED)
     return chaa->walkspeed_y;
@@ -1745,26 +1853,38 @@ int Character_GetWalkSpeedY(CharacterInfo *chaa) {
   return chaa->walkspeed;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_X *** */
+/* *** SCRIPT SYMBOL: [Character] Character::get_x *** */
 int Character_GetX(CharacterInfo *chaa) {
   return chaa->x;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_X *** */
+/* *** SCRIPT SYMBOL: [Character] Character::set_x *** */
 void Character_SetX(CharacterInfo *chaa, int newval) {
   chaa->x = newval;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Y *** */
+/* *** SCRIPT SYMBOL: [Character] Character::get_y *** */
 int Character_GetY(CharacterInfo *chaa) {
   return chaa->y;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Y *** */
+/* *** SCRIPT SYMBOL: [Character] Character::set_y *** */
 void Character_SetY(CharacterInfo *chaa, int newval) {
   chaa->y = newval;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::get_Z *** */
+/* *** SCRIPT SYMBOL: [Character] Character::get_z *** */
 int Character_GetZ(CharacterInfo *chaa) {
   return chaa->z;
 }
 
+/* *** SCRIPT SYMBOL: [Character] Character::set_Z *** */
+/* *** SCRIPT SYMBOL: [Character] Character::set_z *** */
 void Character_SetZ(CharacterInfo *chaa, int newval) {
   chaa->z = newval;
 }

@@ -52,11 +52,13 @@ void register_audio_script_objects()
   calculate_reserved_channel_count();
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_ID *** */
 int AudioChannel_GetID(ScriptAudioChannel *channel)
 {
   return channel->id;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_IsPlaying *** */
 int AudioChannel_GetIsPlaying(ScriptAudioChannel *channel)
 {
   if (play.fast_forward)
@@ -72,6 +74,7 @@ int AudioChannel_GetIsPlaying(ScriptAudioChannel *channel)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_Panning *** */
 int AudioChannel_GetPanning(ScriptAudioChannel *channel)
 {
   if ((channels[channel->id] != NULL) &&
@@ -82,6 +85,7 @@ int AudioChannel_GetPanning(ScriptAudioChannel *channel)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::set_Panning *** */
 void AudioChannel_SetPanning(ScriptAudioChannel *channel, int newPanning)
 {
   if ((newPanning < -100) || (newPanning > 100))
@@ -95,6 +99,7 @@ void AudioChannel_SetPanning(ScriptAudioChannel *channel, int newPanning)
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_PlayingClip *** */
 ScriptAudioClip* AudioChannel_GetPlayingClip(ScriptAudioChannel *channel)
 {
   if ((channels[channel->id] != NULL) &&
@@ -105,6 +110,7 @@ ScriptAudioClip* AudioChannel_GetPlayingClip(ScriptAudioChannel *channel)
   return NULL;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_Position *** */
 int AudioChannel_GetPosition(ScriptAudioChannel *channel)
 {
   if ((channels[channel->id] != NULL) &&
@@ -118,6 +124,7 @@ int AudioChannel_GetPosition(ScriptAudioChannel *channel)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_PositionMs *** */
 int AudioChannel_GetPositionMs(ScriptAudioChannel *channel)
 {
   if ((channels[channel->id] != NULL) &&
@@ -131,6 +138,7 @@ int AudioChannel_GetPositionMs(ScriptAudioChannel *channel)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_LengthMs *** */
 int AudioChannel_GetLengthMs(ScriptAudioChannel *channel)
 {
   if ((channels[channel->id] != NULL) &&
@@ -141,6 +149,7 @@ int AudioChannel_GetLengthMs(ScriptAudioChannel *channel)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::get_Volume *** */
 int AudioChannel_GetVolume(ScriptAudioChannel *channel)
 {
   if ((channels[channel->id] != NULL) &&
@@ -151,6 +160,7 @@ int AudioChannel_GetVolume(ScriptAudioChannel *channel)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::set_Volume *** */
 int AudioChannel_SetVolume(ScriptAudioChannel *channel, int newVolume)
 {
   if ((newVolume < 0) || (newVolume > 100))
@@ -216,11 +226,13 @@ void stop_or_fade_out_channel(int fadeOutChannel, int fadeInChannel = -1, Script
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::Stop^0 *** */
 void AudioChannel_Stop(ScriptAudioChannel *channel)
 {
   stop_or_fade_out_channel(channel->id, -1, NULL);
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::Seek^1 *** */
 void AudioChannel_Seek(ScriptAudioChannel *channel, int newPosition)
 {
   if (newPosition < 0)
@@ -233,6 +245,7 @@ void AudioChannel_Seek(ScriptAudioChannel *channel, int newPosition)
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioChannel] AudioChannel::SetRoomLocation^2 *** */
 void AudioChannel_SetRoomLocation(ScriptAudioChannel *channel, int xPos, int yPos)
 {
   if ((channels[channel->id] != NULL) &&
@@ -254,11 +267,13 @@ void AudioChannel_SetRoomLocation(ScriptAudioChannel *channel, int xPos, int yPo
   }
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] AudioClip::get_FileType *** */
 int AudioClip_GetFileType(ScriptAudioClip *clip)
 {
   return game.audioClips[clip->id].fileType;
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] AudioClip::get_Type *** */
 int AudioClip_GetType(ScriptAudioClip *clip)
 {
   return game.audioClips[clip->id].type;
@@ -294,6 +309,7 @@ const char* get_audio_clip_file_name(ScriptAudioClip *clip)
   return NULL;
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] AudioClip::get_IsAvailable *** */
 int AudioClip_GetIsAvailable(ScriptAudioClip *clip)
 {
   if (get_audio_clip_file_name(clip) != NULL)
@@ -396,6 +412,7 @@ SOUNDCLIP *load_sound_clip(ScriptAudioClip *audioClip, bool repeat)
   return soundClip;
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] AudioClip::Stop^0 *** */
 void AudioClip_Stop(ScriptAudioClip *clip)
 {
   for (int i = 0; i < MAX_SOUND_CHANNELS; i++)
@@ -577,16 +594,19 @@ ScriptAudioChannel* play_audio_clip(ScriptAudioClip *clip, int priority, int rep
   return play_audio_clip_on_channel(channel, clip, priority, repeat, fromOffset);
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] AudioClip::Play^2 *** */
 ScriptAudioChannel* AudioClip_Play(ScriptAudioClip *clip, int priority, int repeat)
 {
   return play_audio_clip(clip, priority, repeat, 0, false);
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] AudioClip::PlayFrom^3 *** */
 ScriptAudioChannel* AudioClip_PlayFrom(ScriptAudioClip *clip, int position, int priority, int repeat)
 {
   return play_audio_clip(clip, priority, repeat, position, false);
 }
 
+/* *** SCRIPT SYMBOL: [AudioClip] AudioClip::PlayQueued^2 *** */
 ScriptAudioChannel* AudioClip_PlayQueued(ScriptAudioClip *clip, int priority, int repeat)
 {
   return play_audio_clip(clip, priority, repeat, 0, true);
@@ -598,11 +618,13 @@ void play_audio_clip_by_index(int audioClipIndex)
     AudioClip_Play(&game.audioClips[audioClipIndex], SCR_NO_VALUE, SCR_NO_VALUE);
 }
 
+/* *** SCRIPT SYMBOL: [System] System::get_AudioChannelCount *** */
 int System_GetAudioChannelCount()
 {
   return MAX_SOUND_CHANNELS;
 }
 
+/* *** SCRIPT SYMBOL: [System] System::geti_AudioChannels *** */
 ScriptAudioChannel* System_GetAudioChannels(int index)
 {
   if ((index < 0) || (index >= MAX_SOUND_CHANNELS))
@@ -611,6 +633,7 @@ ScriptAudioChannel* System_GetAudioChannels(int index)
   return &scrAudioChannel[index];
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::StopAudio^1 *** */
 void Game_StopAudio(int audioType)
 {
   if (((audioType < 0) || (audioType >= game.audioClipTypeCount)) && (audioType != SCR_NO_VALUE))
@@ -634,6 +657,7 @@ void Game_StopAudio(int audioType)
   remove_clips_of_type_from_queue(audioType);
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::IsAudioPlaying^1 *** */
 int Game_IsAudioPlaying(int audioType)
 {
   if (((audioType < 0) || (audioType >= game.audioClipTypeCount)) && (audioType != SCR_NO_VALUE))
@@ -656,6 +680,7 @@ int Game_IsAudioPlaying(int audioType)
   return 0;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::SetAudioTypeSpeechVolumeDrop^2 *** */
 void Game_SetAudioTypeSpeechVolumeDrop(int audioType, int volumeDrop) 
 {
   if ((audioType < 0) || (audioType >= game.audioClipTypeCount))
@@ -664,6 +689,7 @@ void Game_SetAudioTypeSpeechVolumeDrop(int audioType, int volumeDrop)
   game.audioClipTypes[audioType].volume_reduction_while_speech_playing = volumeDrop;
 }
 
+/* *** SCRIPT SYMBOL: [Game] Game::SetAudioTypeVolume^3 *** */
 void Game_SetAudioTypeVolume(int audioType, int volume, int changeType)
 {
   if ((volume < 0) || (volume > 100))
