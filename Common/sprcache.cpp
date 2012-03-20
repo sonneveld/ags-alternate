@@ -20,7 +20,6 @@
 #pragma warning (disable: 4996 4312)  // disable deprecation warnings
 #endif
 
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "sprcache.h"

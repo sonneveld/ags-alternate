@@ -13,7 +13,6 @@
 #include "bmp.h"
 
 #pragma unmanaged
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "acruntim.h"

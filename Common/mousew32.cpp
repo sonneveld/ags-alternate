@@ -22,7 +22,6 @@
 
 #include <stdio.h>
 
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #if !defined(WINDOWS_VERSION) && !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #error This is the Windows 32-bit version

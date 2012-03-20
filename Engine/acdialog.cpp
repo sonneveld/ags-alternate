@@ -13,7 +13,6 @@
 #include "ac.h"
 
 // DIALOG SYSTEM STUFF below
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include <string.h>
 #include "ali3d.h"

@@ -20,7 +20,6 @@
 #include "agsio.h"
 #include "routefnd.h"
 
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "bigend.h"

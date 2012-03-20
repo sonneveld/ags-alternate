@@ -9,7 +9,6 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "acruntim.h"

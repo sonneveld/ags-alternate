@@ -1,8 +1,6 @@
 
 
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
-#undef WGT2ALLEGRO_NOFUNCTIONS
 
 #include "clib32.h"
 #include "compress.h"

@@ -13,7 +13,6 @@
 #pragma unmanaged
 #endif
 
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 
 #include "misc.h"

@@ -1,17 +1,10 @@
-
 #ifndef _AC_H_HEADER
 #define _AC_H_HEADER
 
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
-#undef WGT2ALLEGRO_NOFUNCTIONS
-
 #include "ali3d.h"
-
 #include "acroom.h"
-
 #include "acruntim.h"
-
 #include "sprcache.h"
 
 // Check that a supplied buffer from a text script function was not null

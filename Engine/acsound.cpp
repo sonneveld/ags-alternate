@@ -13,7 +13,6 @@
 
 #include "ac.h"
 
-#define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acsound.h"
 #include "alogg.h"

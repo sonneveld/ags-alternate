@@ -1030,6 +1030,10 @@
 				RelativePath="..\Common\sprcache.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\Common\wgt2allg.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
