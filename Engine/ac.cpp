@@ -74,6 +74,7 @@ extern int our_eip;
 //#include "mousew32.h"
 #include "routefnd.h"
 #include "ac_scr_obj.h"
+#include "ac_datetime.h"
 
 // Allegro 4 has switched 15-bit colour to BGR instead of RGB, so
 // in this case we need to convert the graphics on load
@@ -9579,42 +9580,6 @@ void setup_player_character(int charid) {
 
 // *** The script serialization routines for built-in types
 
-int AGSCCDynamicObject::Dispose(const char *address, bool force) {
-  // cannot be removed from memory
-  return 0;
-}
-
-void AGSCCDynamicObject::StartSerialize(char *sbuffer) {
-  bytesSoFar = 0;
-  serbuffer = sbuffer;
-}
-
-void AGSCCDynamicObject::SerializeInt(int val) {
-  char *chptr = &serbuffer[bytesSoFar];
-  int *iptr = (int*)chptr;
-  *iptr = val;
-  bytesSoFar += 4;
-}
-
-int AGSCCDynamicObject::EndSerialize() {
-  return bytesSoFar;
-}
-
-void AGSCCDynamicObject::StartUnserialize(const char *sbuffer, int pTotalBytes) {
-  bytesSoFar = 0;
-  totalBytes = pTotalBytes;
-  serbuffer = (char*)sbuffer;
-}
-
-int AGSCCDynamicObject::UnserializeInt() {
-  if (bytesSoFar >= totalBytes)
-    quit("Unserialise: internal error: read past EOF");
-
-  char *chptr = &serbuffer[bytesSoFar];
-  bytesSoFar += 4;
-  int *iptr = (int*)chptr;
-  return *iptr;
-}
 
 struct ScriptDialogOptionsRendering : AGSCCDynamicObject {
   int x, y, width, height;
@@ -10544,49 +10509,6 @@ void DialogOptionsRendering_SetActiveOptionID(ScriptDialogOptionsRendering *dlgO
     quitprintf("DialogOptionsRenderingInfo.ActiveOptionID: invalid ID specified for this dialog (specified %d, valid range: 1..%d)", activeOptionID, optionCount);
 
   dlgOptRender->activeOptionID = activeOptionID - 1;
-}
-
-
-// ** SCRIPT DATETIME OBJECT
-
-int ScriptDateTime::Dispose(const char *address, bool force) {
-  // always dispose a DateTime
-  delete this;
-  return 1;
-}
-
-const char *ScriptDateTime::GetType() {
-  return "DateTime";
-}
-
-int ScriptDateTime::Serialize(const char *address, char *buffer, int bufsize) {
-  StartSerialize(buffer);
-  SerializeInt(year);
-  SerializeInt(month);
-  SerializeInt(day);
-  SerializeInt(hour);
-  SerializeInt(minute);
-  SerializeInt(second);
-  SerializeInt(rawUnixTime);
-  return EndSerialize();
-}
-
-void ScriptDateTime::Unserialize(int index, const char *serializedData, int dataSize) {
-  StartUnserialize(serializedData, dataSize);
-  year = UnserializeInt();
-  month = UnserializeInt();
-  day = UnserializeInt();
-  hour = UnserializeInt();
-  minute = UnserializeInt();
-  second = UnserializeInt();
-  rawUnixTime = UnserializeInt();
-  ccRegisterUnserializedObject(index, this, this);
-}
-
-ScriptDateTime::ScriptDateTime() {
-  year = month = day = 0;
-  hour = minute = second = 0;
-  rawUnixTime = 0;
 }
 
 
@@ -15662,79 +15584,6 @@ ScriptDrawingSurface* Room_GetDrawingSurfaceForBackground(int backgroundNumber)
   return surface;
 }
 
-ScriptDateTime* DateTime_Now_Core() {
-  ScriptDateTime *sdt = new ScriptDateTime();
-  sdt->rawUnixTime = time(NULL);
-
-  platform->GetSystemTime(sdt);
-
-  return sdt;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Now *** */
-ScriptDateTime* DateTime_Now() {
-  ScriptDateTime *sdt = DateTime_Now_Core();
-  ccRegisterManagedObject(sdt, sdt);
-  return sdt;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Year *** */
-int DateTime_GetYear(ScriptDateTime *sdt) {
-  return sdt->year;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Month *** */
-int DateTime_GetMonth(ScriptDateTime *sdt) {
-  return sdt->month;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_DayOfMonth *** */
-int DateTime_GetDayOfMonth(ScriptDateTime *sdt) {
-  return sdt->day;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Hour *** */
-int DateTime_GetHour(ScriptDateTime *sdt) {
-  return sdt->hour;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Minute *** */
-int DateTime_GetMinute(ScriptDateTime *sdt) {
-  return sdt->minute;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_Second *** */
-int DateTime_GetSecond(ScriptDateTime *sdt) {
-  return sdt->second;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] DateTime::get_RawTime *** */
-int DateTime_GetRawTime(ScriptDateTime *sdt) {
-  return sdt->rawUnixTime;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] GetTime *** */
-int sc_GetTime(int whatti) {
-  ScriptDateTime *sdt = DateTime_Now_Core();
-  int returnVal;
-
-  if (whatti == 1) returnVal = sdt->hour;
-  else if (whatti == 2) returnVal = sdt->minute;
-  else if (whatti == 3) returnVal = sdt->second;
-  else if (whatti == 4) returnVal = sdt->day;
-  else if (whatti == 5) returnVal = sdt->month;
-  else if (whatti == 6) returnVal = sdt->year;
-  else quit("!GetTime: invalid parameter passed");
-
-  delete sdt;
-
-  return returnVal;
-}
-
-/* *** SCRIPT SYMBOL: [DateTime] GetRawTime *** */
-int GetRawTime () {
-  return time(NULL);
-}
 
 char gamefilenamebuf[200];
 #define RAGMODE_PRESERVEGLOBALINT 1
@@ -25037,7 +24886,7 @@ void setup_script_exports() {
   register_audio_script_functions();
   register_character_script_functions();
   register_object_script_functions();
-  
+
 
   scAdd_External_Symbol("Object::Animate^5", (void *)Object_Animate);
   scAdd_External_Symbol("Object::IsCollidingWithObject^1", (void *)Object_IsCollidingWithObject);
@@ -25374,14 +25223,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("Region::get_TintRed", (void*)Region_GetTintRed);
   scAdd_External_Symbol("Region::get_TintSaturation", (void*)Region_GetTintSaturation);
 
-  scAdd_External_Symbol("DateTime::get_Now", (void*)DateTime_Now);
-  scAdd_External_Symbol("DateTime::get_DayOfMonth", (void*)DateTime_GetDayOfMonth);
-  scAdd_External_Symbol("DateTime::get_Hour", (void*)DateTime_GetHour);
-  scAdd_External_Symbol("DateTime::get_Minute", (void*)DateTime_GetMinute);
-  scAdd_External_Symbol("DateTime::get_Month", (void*)DateTime_GetMonth);
-  scAdd_External_Symbol("DateTime::get_RawTime", (void*)DateTime_GetRawTime);
-  scAdd_External_Symbol("DateTime::get_Second", (void*)DateTime_GetSecond);
-  scAdd_External_Symbol("DateTime::get_Year", (void*)DateTime_GetYear);
+  register_datetime_script_functions();
 
   scAdd_External_Symbol("DrawingSurface::Clear^1", (void *)DrawingSurface_Clear);
   scAdd_External_Symbol("DrawingSurface::CreateCopy^0", (void *)DrawingSurface_CreateCopy);
@@ -25655,7 +25497,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetObjectY",(void *)GetObjectY);
 //  scAdd_External_Symbol("GetPalette",(void *)scGetPal);
   scAdd_External_Symbol("GetPlayerCharacter",(void *)GetPlayerCharacter);
-  scAdd_External_Symbol("GetRawTime",(void *)GetRawTime);
   scAdd_External_Symbol("GetRegionAt",(void *)GetRegionAt);
   scAdd_External_Symbol("GetRoomProperty",(void *)GetRoomProperty);
   scAdd_External_Symbol("GetRoomPropertyText",(void *)GetRoomPropertyText);

@@ -13,8 +13,8 @@
 #include "sprcache.h"
 #include "acsound.h"
 #include "acgfx.h"
-
 #include "ali3d.h"
+#include "ac_datetime.h"
 
 // Max script string length
 #define MAX_MAXSTRLEN 200
@@ -284,26 +284,6 @@ struct ScriptObject {
   RoomObject *obj;
 };
 
-struct AGSCCDynamicObject : ICCDynamicObject {
-public:
-  // default implementation
-  virtual int Dispose(const char *address, bool force);
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) = 0;
-
-protected:
-  int bytesSoFar;
-  int totalBytes;
-  char *serbuffer;
-
-  void StartSerialize(char *sbuffer);
-  void SerializeInt(int val);
-  int  EndSerialize();
-  void StartUnserialize(const char *sbuffer, int pTotalBytes);
-  int  UnserializeInt();
-
-};
-
 
 struct ScriptOverlay : AGSCCDynamicObject {
   int overlayId;
@@ -319,18 +299,7 @@ struct ScriptOverlay : AGSCCDynamicObject {
   ScriptOverlay();
 };
 
-struct ScriptDateTime : AGSCCDynamicObject {
-  int year, month, day;
-  int hour, minute, second;
-  int rawUnixTime;
 
-  virtual int Dispose(const char *address, bool force);
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-
-  ScriptDateTime();
-};
 
 struct ScriptDrawingSurface : AGSCCDynamicObject {
   int roomBackgroundNumber;

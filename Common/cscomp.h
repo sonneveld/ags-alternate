@@ -13,6 +13,7 @@
 #ifndef __CSCOMP_H
 #define __CSCOMP_H
 #include <stdio.h>
+#include <string.h>
 #include "fmem.h"
 
 #define SCOM_VERSION 89

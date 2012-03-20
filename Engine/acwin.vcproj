@@ -367,6 +367,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ac_datetime.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_dynobj.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_scr_obj.cpp"
 				>
 			</File>
@@ -1021,6 +1029,14 @@
 			>
 			<File
 				RelativePath=".\ac.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_datetime.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_dynobj.h"
 				>
 			</File>
 			<File
