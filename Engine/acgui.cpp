@@ -37,12 +37,7 @@ int guis_need_update = 1;
 int all_buttons_disabled = 0, gui_inv_pic = -1;
 int gui_disabled_style = 0;
 
-extern SpriteCache spriteset;
-extern void draw_sprite_compensate(int spr, int x, int y, int xray);
-extern inline int divide_down_coordinate(int coord);
-extern inline int multiply_up_coordinate(int coord);
-extern inline void multiply_up_coordinates(int *x, int *y);
-extern inline int get_fixed_pixel_size(int pixels);
+#include "ac.h"
 
 char lines[MAXLINE][200];
 int  numlines;

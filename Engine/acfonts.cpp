@@ -58,8 +58,8 @@ public:
   virtual void EnsureTextValidForFont(char *text, int fontNumber);
 };
 
-extern bool ShouldAntiAliasText();
-extern int our_eip;
+#include "ac.h"
+
 int texttrans = 0;
 int textcol;
 int wtext_multiply = 1;
@@ -76,16 +76,6 @@ ALFONT_FONT *get_ttf_block(wgtfont fontptr)
   return tempttffnt;
 }
 #endif // USE_ALFONT
-
-#ifndef THIS_IS_THE_ENGINE
-extern GameSetupStruct thisgame;
-void check_font(int *fontnum)
-{
-  // Stop roomedit crashing if they specify an invalid font number
-  if (fontnum[0] >= thisgame.numfonts)
-    fontnum[0] = 0;
-}
-#endif
 
 void init_font_renderer()
 {

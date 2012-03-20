@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "ac.h"
+
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL
 #pragma unmanaged
@@ -22,8 +24,6 @@
 #endif
 
 #include "bigend.h"
-
-extern void quit(char *);
 
 int insert(int, int);
 void _delete(int);

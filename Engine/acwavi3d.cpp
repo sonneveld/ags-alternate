@@ -74,14 +74,9 @@ inline LPWSTR WINAPI AtlA2WHelper(LPWSTR lpw, LPCSTR lpa, int nChars)
 
 // Interface from main game
 
-extern int rec_mgetbutton();
-extern int rec_kbhit();
-extern int rec_getch();
-extern void update_polled_stuff_and_crossfade();
-extern volatile char want_exit;
-extern volatile int timerloop;
-extern char lastError[300];
-extern void next_iteration();
+#include "ac.h"
+#include "acwavi.h"
+
 CVMR9Graph *graph = NULL;
 
 void dxmedia_shutdown_3d()

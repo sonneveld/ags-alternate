@@ -19,9 +19,8 @@
 #include <allegro/platform/aintwin.h>
 #include <d3d9.h>
 #include <ali3d.h>
+#include "acwavi3d.h"
 
-extern int dxmedia_play_video_3d(const char*filename, IDirect3DDevice9 *device, bool useAVISound, int canskip, int stretch);
-extern void dxmedia_shutdown_3d();
 void dummy_vsync() { }
 
 #define MAX_DRAW_LIST_SIZE 200

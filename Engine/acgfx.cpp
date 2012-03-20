@@ -24,10 +24,7 @@
 
 #define BYTES_PER_PIXEL(bpp)     (((int)(bpp) + 7) / 8)
 
-extern void mgraphconfine(int,int,int,int);
-extern void msetcallback(IMouseGetPosCallback *gpCallback);
-extern void msetgraphpos(int,int);
-extern void msetcursorlimit (int,int,int,int);
+#include "mousew32.h"
 
 extern "C" {
 unsigned long _blender_trans16(unsigned long x, unsigned long y, unsigned long n);
@@ -225,8 +222,7 @@ public:
 
 GFXFilter *filter;
 
-extern "C" int Init_2xSaI(int d);
-extern "C" void Super2xSaI(BITMAP * src, BITMAP * dest, int s_x, int s_y, int d_x, int d_y, int w, int h);
+//#include "sai.h"
 #include "hq2x3x.h"
 
 

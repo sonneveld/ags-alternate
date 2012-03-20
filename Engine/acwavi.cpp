@@ -19,17 +19,14 @@
 //link with the following libraries under project/settings/link...
 //amstrmid.lib quartz.lib strmbase.lib ddraw.lib 
 
-extern void update_polled_stuff_and_crossfade();
-extern void update_polled_stuff();
-extern int rec_mgetbutton();
-extern int rec_kbhit();
-extern int rec_getch();
-extern void next_iteration();
-extern void update_music_volume();
-extern void render_to_screen(BITMAP *toRender, int atx, int aty);
-extern int crossFading, crossFadeStep;
-extern volatile char want_exit;
-extern IGraphicsDriver *gfxDriver;
+#include "ac.h"
+
+//DirectDrawEx Global interfaces
+// I'm not sure where these are defined... allegro somewhere?
+extern "C" extern LPDIRECTDRAW2 directdraw;
+//extern "C" extern IUnknown* directsound;
+extern "C" extern BITMAP *gfx_directx_create_system_bitmap(int width, int height);
+
 //int errno;
 char lastError[300];
 
@@ -40,10 +37,6 @@ bool useSound = true;
 volatile bool currentlyPlaying = false;
 volatile bool currentlyPaused = false;
 
-//DirectDrawEx Global interfaces
-extern "C" extern LPDIRECTDRAW2 directdraw;
-//extern "C" extern IUnknown* directsound;
-extern "C" extern BITMAP *gfx_directx_create_system_bitmap(int width, int height);
 
 //Global MultiMedia streaming interfaces
 IMultiMediaStream		*g_pMMStream=NULL;

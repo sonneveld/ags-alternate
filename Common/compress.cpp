@@ -30,21 +30,13 @@ typedef unsigned char *__myblock;
 
 #include "clib32.h"
 
-extern void domouse(int);
-extern "C"
-{
-  extern block wnewblock(int, int, int, int);
-}
 
 #ifndef ALLEGRO_BIG_ENDIAN
-extern "C"
-{
-  extern void putshort(short, FILE *);
-  extern short getshort(FILE *);
-}
+#define compress_putshort putshort
+#define compress_getshort getshort
 #else
-#define putshort __putshort__lilendian
-#define getshort __getshort__bigendian
+#define compress_putshort __putshort__lilendian
+#define compress_getshort __getshort__bigendian
 #endif
 
 #ifndef __WGT4_H
@@ -108,7 +100,7 @@ void cpackbitl16(unsigned short *line, int size, FILE * outfile)
 
     if (i == size - 1) {        //................last byte alone
       fputc(0, outfile);
-      putshort(line[i], outfile);
+      compress_putshort(line[i], outfile);
       cnt++;
 
     } else if (line[i] == line[j]) {    //....run
@@ -116,7 +108,7 @@ void cpackbitl16(unsigned short *line, int size, FILE * outfile)
         j++;
      
       fputc(i - j, outfile);
-      putshort(line[i], outfile);
+      compress_putshort(line[i], outfile);
       cnt += j - i + 1;
 
     } else {                    //.............................sequence
@@ -264,7 +256,7 @@ int cunpackbitl16(unsigned short *line, int size, FILE * infile)
 
     if (cx < 0) {                //.............run
       int i = 1 - cx;
-      unsigned short ch = getshort(infile);
+      unsigned short ch = compress_getshort(infile);
       while (i--) {
         // test for buffer overflow
         if (n >= size)
@@ -279,7 +271,7 @@ int cunpackbitl16(unsigned short *line, int size, FILE * infile)
         if (n >= size)
           return -1;
 
-        line[n++] = getshort(infile);
+        line[n++] = compress_getshort(infile);
       }
     }
   }

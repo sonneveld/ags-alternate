@@ -1478,10 +1478,7 @@ long loadcompressed_allegro(FILE *fpp, BITMAP **bimpp, color *pall, long ooo) {
 #define BLOCKTYPE_OBJECTSCRIPTNAMES 9
 #define BLOCKTYPE_EOF         0xff
 
-extern void load_script_configuration(FILE *);
-extern void save_script_configuration(FILE *);
-extern void load_graphical_scripts(FILE *, roomstruct *);
-extern void save_graphical_scripts(FILE *, roomstruct *);
+#include "scrptrt.h"
 static char *passwencstring = "Avis Durgan";
 
 void decrypt_text(char*toenc) {

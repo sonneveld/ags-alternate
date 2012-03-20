@@ -15,8 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stdint.h"
-
+#include <stdint.h>
 #include "clib32.h"
 
 #define NATIVESTATIC
@@ -43,6 +42,8 @@
 #endif
 
 #include "bigend.h"
+
+#include "agsio.h"
 
 //#define CLIB_IS_INSTALLED
 //static char clib32copyright[] = "CLIB32 v1.21 (c) 1995,1996,1998,2001,2007 Chris Jones";
@@ -153,42 +154,11 @@ extern "C"
     return numberRead;
   }
 
-
-
-    // read little endian 32 bit from file
-    uint32_t fget_le32(FILE* fp)
-    {
-        uint8_t buf[4];
-        size_t count = fread(buf, 4, 1, fp);
-        if (count != 1)
-            abort();
-
-        uint32_t result;
-        result  = buf[0];
-        result |= buf[1] <<  8;
-        result |= buf[2] << 16;
-        result |= buf[3] << 24;
-        return result;
-    }
-
-
-    // read little endian 16 bit from file
-    uint16_t fget_le16(FILE* fp)
-    {
-        uint8_t buf[2];
-        size_t count = fread(buf, 2, 1, fp);
-        if (count != 1)
-            abort();
-
-        uint16_t result;
-        result  = buf[0];
-        result |= buf[1] <<  8;
-        return result;
-    }
-
   static int read_new_new_enc_format_clib(MultiFileLibNew * mfl, FILE * wout, int libver)
   {
-    int randSeed = fget_le32(wout);
+    int randSeed;
+    if (fread_le_s32(&randSeed, wout))
+        return -1;
 
     init_pseudo_rand_gen(randSeed + RAND_SEED_SALT);
     mfl->num_data_files = getw_enc(wout);
@@ -213,18 +183,20 @@ extern "C"
 
   static int read_new_new_format_clib(MultiFileLibNew * mfl, FILE * wout, int libver)
   {
-    int aa;
-    mfl->num_data_files = fget_le32(wout);
-    for (aa = 0; aa < mfl->num_data_files; aa++)
+    if (fread_le_s32(&mfl->num_data_files, wout))
+        return -1;
+
+    for (int aa = 0; aa < mfl->num_data_files; aa++)
     {
       fgetnulltermstring(mfl->data_filenames[aa], wout, 50);
     }
-    mfl->num_files = fget_le32(wout);
+    if (fread_le_s32(&mfl->num_files, wout))
+        return -1;
 
     if (mfl->num_files > MAX_FILES)
       return -1;
 
-    for (aa = 0; aa < mfl->num_files; aa++)
+    for (int aa = 0; aa < mfl->num_files; aa++)
     {
       short nameLength;
       fread(&nameLength, 2, 1, wout);
@@ -240,9 +212,11 @@ extern "C"
 
   static int read_new_format_clib(MultiFileLib * mfl, FILE * wout, int libver)
   {
-    mfl->num_data_files = fget_le32(wout);
+    if (fread_le_s32(&mfl->num_data_files, wout))
+        return -1;
     fread(&mfl->data_filenames[0][0], 20, mfl->num_data_files, wout);
-    mfl->num_files = fget_le32(wout);
+    if (fread_le_s32(&mfl->num_files, wout))
+        return -1;
 
     if (mfl->num_files > MAX_FILES)
       return -1;

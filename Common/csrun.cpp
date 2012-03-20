@@ -21,6 +21,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include "ac.h"
+
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL
 #pragma unmanaged
@@ -104,18 +106,16 @@ bool const Spans::IsInSpan(char *value) const
 // 256 because we use 8 bits to hold instance number
 #define MAX_LOADED_INSTANCES 256
 
-ccInstance *loadedInstances[MAX_LOADED_INSTANCES] = {NULL,
+static ccInstance *loadedInstances[MAX_LOADED_INSTANCES] = {NULL,
    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 
    NULL, NULL, NULL, NULL, NULL, NULL};
 
-char ccRunnerCopyright[] = "ScriptExecuter32 v" SCOM_VERSIONSTR " (c) 2001 Chris Jones";
+static char ccRunnerCopyright[] = "ScriptExecuter32 v" SCOM_VERSIONSTR " (c) 2001 Chris Jones";
 static ccInstance *current_instance;
 static ICCStringClass *stringClassImpl = NULL;
 static int maxWhileLoops = 0;
-extern void quit(char *);
-extern void write_log(char *);
 
-void dump_instruction(unsigned long *codeptr, int cps, int spp)
+static void dump_instruction(unsigned long *codeptr, int cps, int spp)
 {
   static int line_num = 0;
 
@@ -162,7 +162,7 @@ struct CompareStringsPartial : ICompareStrings {
     return strncmp(left, right, strlen(left));
   }
 };
-CompareStringsPartial ccCompareStringsPartial;
+static CompareStringsPartial ccCompareStringsPartial;
 
 // *** IMPL FOR DYNAMIC ARRAYS **
 
@@ -733,7 +733,7 @@ void SystemImports::remove_range(char *from, unsigned long dist)
   }
 }
 
-void nullfree(void *data)
+static void nullfree(void *data)
 {
   if (data != NULL)
     free(data);
@@ -784,7 +784,7 @@ void ccNotifyScriptStillAlive () {
     current_instance->flags |= INSTF_RUNNING;
 }
 
-ccInstance *ccCreateInstanceEx(ccScript * scri, ccInstance * joined)
+static ccInstance *ccCreateInstanceEx(ccScript * scri, ccInstance * joined)
 {
   int i;
 
@@ -1185,7 +1185,7 @@ int ccReleaseObjectReference(long handle) {
   return pool.SubRef(handle);
 }
 
-new_line_hook_type new_line_hook = NULL;
+static new_line_hook_type new_line_hook = NULL;
 
 void ccSetDebugHook(new_line_hook_type jibble)
 {
@@ -1214,7 +1214,7 @@ void ccSetDebugHook(new_line_hook_type jibble)
 
 
 // parm list is backwards (last arg is parms[0])
-int call_function(long addr, int numparm, long *parms, int offset)
+static int call_function(long addr, int numparm, long *parms, int offset)
 {
   parms += offset;
 
@@ -1284,7 +1284,7 @@ if ((inst->registers[SREG_SP] - ((long)&inst->stack[0])) >= CC_STACK_SIZE) { \
 }
 
 #define MAXNEST 50  // number of recursive function calls allowed
-int cc_run_code(ccInstance * inst, long curpc)
+static int cc_run_code(ccInstance * inst, long curpc)
 {
   inst->pc = curpc;
   inst->returnValue = -1;
@@ -2002,7 +2002,7 @@ void ccAbortAndDestroyInstance(ccInstance * inst)
   }
 }
 
-void freadstring(char **strptr, FILE * iii)
+static void freadstring(char **strptr, FILE * iii)
 {
   static char ibuffer[300];
   int idxx = 0;
@@ -2019,7 +2019,7 @@ void freadstring(char **strptr, FILE * iii)
   strcpy(strptr[0], ibuffer);
 }
 
-long fget_long(FILE * iii)
+static long fget_long(FILE * iii)
 {
   long tmpp;
   fread(&tmpp, 4, 1, iii);

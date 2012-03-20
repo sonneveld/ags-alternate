@@ -29,10 +29,7 @@ int routex1, routey1;
 int suggestx, suggesty;
 fixed move_speed_x, move_speed_y;
 
-extern char ac_engine_copyright[];
-extern void Display(char *, ...);
-extern void write_log(char *);
-extern void update_polled_stuff();
+#include "ac.h"
 
 #define COPYRIGHT_CRC 172668
 // stupid name, to deter hackers
@@ -56,7 +53,6 @@ int route_script_link()
 
 #define get_copyright_crc get_route_composition
 
-extern MoveList *mls;
 extern "C"
 {
   int _stklen = 2048000;
@@ -280,7 +276,7 @@ int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
   return 1;
 }
 
-extern block mousecurs[10];
+#include "mousew32.h"
 int leftorright = 0;
 int nesting = 0;
 int pathbackstage = 0;

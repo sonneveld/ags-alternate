@@ -10,6 +10,9 @@
   You MAY NOT compile your own builds of the engine without making it EXPLICITLY
   CLEAR that the code has been altered from the Standard Version.
 */
+
+#include "ac.h"
+
 #define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acsound.h"
@@ -42,11 +45,6 @@ extern "C" {
 }
 
 PACKFILE *mp3in;
-extern int use_extra_sound_offset;
-extern int our_eip;
-extern void quit(char *);
-extern void write_log(char*msg) ;
-//extern void sample_update_callback(SAMPLE *sample, int voice);
 
 // My new MP3STREAM wrapper
 struct MYWAVE:public SOUNDCLIP

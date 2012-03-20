@@ -10,6 +10,8 @@
 
 */
 
+#include "ac.h"
+
 // DIALOG SYSTEM STUFF below
 #define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
@@ -30,18 +32,11 @@
 #endif
 
 #undef kbhit
-extern int rec_getch();
-extern int rec_kbhit();
 #define kbhit rec_kbhit
 #define getch() rec_getch()
 
-extern int load_game(int,char*, int*);
-extern void break_up_text_into_lines(int wii,int fonnt,char*todis);
-extern char lines[][200];
-extern int numlines;
-extern void wouttext_outline(int xxp,int yyp,int usingfont,char*texx);
-extern IGraphicsDriver *gfxDriver;
-extern inline int get_fixed_pixel_size(int pixels);
+#include "acgui.h"
+#include "mousew32.h"
 
 #define MSG_RESTORE      984
 #define MSG_CANCEL       985    // "Cancel"
@@ -56,33 +51,14 @@ extern inline int get_fixed_pixel_size(int pixels);
 #define MSG_PLAYBUTTON   994    // "Play"
 #define MSG_QUITDIALOG   995    // "Do you want to quit?"
 
-struct GameSetup
-{
-  int digicard, midicard;
-  int mod_player;
-  int textheight;
-};
+//struct GameSetup
+//{
+//  int digicard, midicard;
+//  int mod_player;
+//  int textheight;
+//};
 
-extern void quit(char *);
-extern int mousex, mousey;
-extern void rec_domouse(int);
-extern int rec_misbuttondown(int);
-extern int rec_mgetbutton();
-extern void next_iteration();
-extern void render_graphics(IDriverDependantBitmap *extraBitmap, int extraX, int extraY);
-extern void update_polled_stuff();
-extern char *get_language_text(int);
-extern int sgsiglen;
-extern void update_polled_stuff_and_crossfade();
-extern char *get_global_message(int);
-extern int GetBaseWidth();
-extern GameSetup usetup;
-extern char ignore_bounds;      // Ignore mouse bounding rectangle while in dialog
-extern volatile int timerloop;
 
-extern char saveGameSuffix[21];
-
-const int NONE = -1, LEFT = 0, RIGHT = 1;
 char buff[200];
 int myscrnwid = 320, myscrnhit = 200;
 IDriverDependantBitmap *dialogBmp = NULL;
@@ -879,8 +855,7 @@ char bufTemp[260], buffer2[260];
 int numsaves = 0, toomanygames;
 int filenumbers[MAXSAVEGAMES];
 unsigned long filedates[MAXSAVEGAMES];
-extern void get_save_game_path(int slotNum, char *buffer);
-extern char saveGameDirectory[260];
+
 
 void preparesavegamelist(int ctrllist)
 {

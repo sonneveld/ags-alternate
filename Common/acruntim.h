@@ -916,12 +916,7 @@ extern ExecutingScript *curscript;
 extern PluginObjectReader pluginReaders[MAX_PLUGIN_OBJECT_READERS];
 
 #define DOMOUSE_NOCURSOR 5
-#define NONE -1
-#define LEFT  0
-#define RIGHT 1
-extern int  mousex,mousey;
-extern void domouse(int);
-extern int  mgetbutton();
+#include "mousew32.h"
 
 extern const char *get_engine_version();
 extern void quitprintf(char*texx, ...) ;
@@ -944,7 +939,7 @@ extern int  is_valid_character(int newchar);
 extern int  is_valid_object(int obtest);
 extern void debug_write_console (char *msg, ...);
 extern int  is_route_possible(int,int,int,int,block);
-extern int  find_route(short,short,short,short,block,int,int=0,int=0);
+//extern int  find_route(short,short,short,short,block,int,int=0,int=0);
 extern void set_route_move_speed(int x, int y);
 extern void init_pathfinder();
 extern block prepare_walkable_areas (int sourceChar);

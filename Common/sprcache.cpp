@@ -12,6 +12,8 @@
 
 #include "bmp.h"
 
+#include "ac.h"
+
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL
 #pragma unmanaged
@@ -29,20 +31,18 @@
 #include "clib32.h"
 
 //#define DEBUG_SPRITECACHE
-extern void write_log(char *);
-extern void initialize_sprite(int);
-extern void pre_save_sprite(int);
-extern void quit(char *);
 
 #ifdef THIS_IS_THE_ENGINE
-extern void get_new_size_for_sprite(int, int, int, int &, int &);
-extern int spritewidth[], spriteheight[];
+#define _get_new_size_for_sprite get_new_size_for_sprite
+#define _spritewidth spritewidth
+#define _spriteheight spriteheight
+
 #else
-void get_new_size_for_sprite(int ee, int ww, int hh, int &newwid, int &newhit) {
+void _get_new_size_for_sprite(int ee, int ww, int hh, int &newwid, int &newhit) {
   newwid = ww;
   newhit = hh;
 }
-int spritewidth[MAX_SPRITES + 5], spriteheight[MAX_SPRITES + 5];
+int _spritewidth[MAX_SPRITES + 5], _spriteheight[MAX_SPRITES + 5];
 #endif
 
 #define SPRITE_LOCKED -1
@@ -394,8 +394,8 @@ int SpriteCache::loadSprite(int index)
   int wdd = getshort(ff);
   int htt = getshort(ff);
   // update the stored width/height
-  spritewidth[index] = wdd;
-  spriteheight[index] = htt;
+  _spritewidth[index] = wdd;
+  _spriteheight[index] = htt;
 
   images[index] = create_bitmap_ex(coldep * 8, wdd, htt);
   if (images[index] == NULL) {
@@ -437,8 +437,8 @@ int SpriteCache::loadSprite(int index)
     offsets[index] = offs;
 
   // we need to store this because the main program might
-  // alter spritewidth/height if it resizes stuff
-  sizes[index] = spritewidth[index] * spriteheight[index] * coldep;
+  // alter _spritewidth/height if it resizes stuff
+  sizes[index] = _spritewidth[index] * _spriteheight[index] * coldep;
   cachesize += sizes[index];
 
 #ifdef DEBUG_SPRITECACHE
@@ -724,14 +724,14 @@ int SpriteCache::initFile(const char *filnam)
 
 #ifdef THIS_IS_THE_ENGINE
       // make it a blue cup, to avoid crashes
-      spritewidth[vv] = spritewidth[0];
-      spriteheight[vv] = spriteheight[0];
+      _spritewidth[vv] = _spritewidth[0];
+      _spriteheight[vv] = _spriteheight[0];
       offsets[vv] = offsets[0];
       flags[vv] = SPRCACHEFLAG_DOESNOTEXIST;
 #else
       // no sprite ... blank it out
-      spritewidth[vv] = 0;
-      spriteheight[vv] = 0;
+      _spritewidth[vv] = 0;
+      _spriteheight[vv] = 0;
       offsets[vv] = 0;
 #endif
 
@@ -752,9 +752,9 @@ int SpriteCache::initFile(const char *filnam)
     wdd = getshort(ff);
     htt = getshort(ff);
 
-    spritewidth[vv] = wdd;
-    spriteheight[vv] = htt;
-    get_new_size_for_sprite(vv, wdd, htt, spritewidth[vv], spriteheight[vv]);
+    _spritewidth[vv] = wdd;
+    _spriteheight[vv] = htt;
+    _get_new_size_for_sprite(vv, wdd, htt, _spritewidth[vv], _spriteheight[vv]);
 
     long spriteDataSize;
     if (vers == 5) {
@@ -828,19 +828,19 @@ bool SpriteCache::loadSpriteIndexFile(int expectedFileID, long spr_initial_offs,
     flags[vv] = 0;
     if (offsets[vv] != 0) {
       offsets[vv] += spr_initial_offs;
-      get_new_size_for_sprite(vv, rspritewidths[vv], rspriteheights[vv], spritewidth[vv], spriteheight[vv]);
+      _get_new_size_for_sprite(vv, rspritewidths[vv], rspriteheights[vv], _spritewidth[vv], _spriteheight[vv]);
     }
     else if (vv > 0) {
 #ifdef THIS_IS_THE_ENGINE
       // no sprite ... convert it to the blue cup
-      spritewidth[vv] = spritewidth[0];
-      spriteheight[vv] = spriteheight[0];
+      _spritewidth[vv] = _spritewidth[0];
+      _spriteheight[vv] = _spriteheight[0];
       offsets[vv] = offsets[0];
       flags[vv] = SPRCACHEFLAG_DOESNOTEXIST;
 #else
       // no sprite ... blank it out
-      spritewidth[vv] = 0;
-      spriteheight[vv] = 0;
+      _spritewidth[vv] = 0;
+      _spriteheight[vv] = 0;
       offsets[vv] = 0;
 #endif
     }

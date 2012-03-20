@@ -2,3 +2,5 @@
 *.user
 *.suo
 *.log
+_ReSharper.*
+*__Win32_DebugWorking

@@ -49,13 +49,9 @@ char win32SavedGamesDirectory[MAX_PATH] = "\0";
 char win32AppDataDirectory[MAX_PATH] = "\0";
 
 extern "C" HWND allegro_wnd;
-extern void dxmedia_abort_video();
-extern void dxmedia_pause_video();
-extern void dxmedia_resume_video();
-extern char lastError[200];
-extern int acwsetup(const char*, const char*);
-extern void set_icon();
-extern char* game_file_name;
+#include "acwavi.h"
+#include "acwsetup.h"
+#include "ac.h"
 
 struct AGSWin32 : AGS32BitOSDriver {
   AGSWin32();
@@ -767,7 +763,7 @@ int AGSWin32::RunPluginDebugHooks(const char *scriptfile, int linenum) {
   return pl_run_plugin_debug_hooks(scriptfile, linenum);
 }
 
-extern "C" const unsigned char hw_to_mycode[256];
+extern "C" const unsigned char hw_to_mycode[256]; // allegro
 #ifndef VS2005
 #define MAPVK_VK_TO_VSC 0
 #endif

@@ -367,6 +367,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ac_scr_obj.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\acaudio.cpp"
 				>
 			</File>
@@ -660,6 +664,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\agsio.cpp"
+				>
 			</File>
 			<File
 				RelativePath="ali3dd3d.cpp"
@@ -1012,6 +1020,38 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath=".\ac.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_scr_obj.h"
+				>
+			</File>
+			<File
+				RelativePath=".\acchars.h"
+				>
+			</File>
+			<File
+				RelativePath=".\acdialog.h"
+				>
+			</File>
+			<File
+				RelativePath=".\acwavi.h"
+				>
+			</File>
+			<File
+				RelativePath=".\acwavi3d.h"
+				>
+			</File>
+			<File
+				RelativePath=".\acwsetup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\agsio.h"
+				>
+			</File>
+			<File
 				RelativePath="ali3d.h"
 				>
 			</File>
@@ -1020,7 +1060,27 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cdplaylib.h"
+				>
+			</File>
+			<File
+				RelativePath=".\csrun.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mousew32.h"
+				>
+			</File>
+			<File
 				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\routefnd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\scrptrt.h"
 				>
 			</File>
 		</Filter>

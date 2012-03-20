@@ -17,79 +17,78 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include "agsio.h"
+#include "routefnd.h"
+
 #define CROOM_NOFUNCTIONS
 #define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "bigend.h"
 
-char *scripteditruntimecopr = "Script Editor v1.2 run-time component. (c) 1998 Chris Jones";
+static char *scripteditruntimecopr = "Script Editor v1.2 run-time component. (c) 1998 Chris Jones";
 
 #define SCRIPT_CONFIG_VERSION 1
-extern void quit(char *);
 
-long getlong(FILE * iii)
-{
-  long tmm;
-  fread(&tmm, 4, 1, iii);
-  return tmm;
-}
-
-void save_script_configuration(FILE * iii)
+void save_script_configuration(FILE * config_file)
 {
   quit("ScriptEdit: run-time version can't save");
 }
 
-void load_script_configuration(FILE * iii)
+void load_script_configuration(FILE * config_file)
 {
-  int aa;
-  if (getlong(iii) != SCRIPT_CONFIG_VERSION)
-    quit("ScriptEdit: invliad config version");
+    int script_ver;
+    if(fread_le_s32(&script_ver, config_file))
+        quit("ScriptEdit: file read error");
+    if (script_ver != SCRIPT_CONFIG_VERSION)
+        quit("ScriptEdit: invalid config version");
 
-  int numvarnames = getlong(iii);
-  for (aa = 0; aa < numvarnames; aa++) {
-    int lenoft = getc(iii);
-    fseek(iii, lenoft, SEEK_CUR);
-  }
+    int numvarnames;
+    if(fread_le_s32(&numvarnames, config_file))
+        quit("ScriptEdit: file read error");
+    for (int aa = 0; aa < numvarnames; aa++) {
+        int lenoft = getc(config_file);
+        fseek(config_file, lenoft, SEEK_CUR);
+    }
 }
 
-void save_graphical_scripts(FILE * fff, roomstruct * rss)
+void save_graphical_scripts(FILE * script_file, roomstruct * room)
 {
   quit("ScriptEdit: run-time version can't save");
 }
 
 char *scripttempn = "~acsc%d.tmp";
-extern int route_script_link();
 
-void load_graphical_scripts(FILE * iii, roomstruct * rst)
+void load_graphical_scripts(FILE * script_file, roomstruct * room)
 {
-  long ct;
-  FILE *te;
+    if (route_script_link()) {
+        quit("STOP IT.");
+        exit(767);
+        abort();
+    }
 
-  if (route_script_link()) {
-    quit("STOP IT.");
-    exit(767);
-    abort();
-  }
+    while (1) {
+        int ct;
+        if(fread_le_s32(&ct, script_file))
+            quit("ScriptEdit: file read error");
 
-  while (1) {
-    fread(&ct, 4, 1, iii);
-    if ((ct == -1) | (feof(iii) != 0))
-      break;
+        if ((ct == -1) || (feof(script_file) != 0))
+            break;
 
-    long lee;
-    fread(&lee, 4, 1, iii);
+        int lee;
+        if(fread_le_s32(&lee, script_file))
+            quit("ScriptEdit: file read error");
 
-    char thisscn[20];
-    sprintf(thisscn, scripttempn, ct);
-    te = fopen(thisscn, "wb");
+        char thisscn[20];
+        sprintf(thisscn, scripttempn, ct);
+        FILE *te = fopen(thisscn, "wb");
 
-    char *scnf = (char *)malloc(lee);
-    // MACPORT FIX: swap size and nmemb
-    fread(scnf, sizeof(char), lee, iii);
-    fwrite(scnf, sizeof(char), lee, te);
-    fclose(te);
+        char *scnf = (char *)malloc(lee);
+        // MACPORT FIX: swap size and nmemb
+        fread(scnf, sizeof(char), lee, script_file);
+        fwrite(scnf, sizeof(char), lee, te);
+        fclose(te);
 
-    free(scnf);
-  }
+        free(scnf);
+    }
 }

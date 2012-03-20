@@ -34,47 +34,29 @@
 #endif
 
 #define MAXCURSORS 20
-/*
-int  minstalled();    // this returns number of buttons (or 0)
-void minst();   // this exits if not installed
-void mshow();
-void mhide();
-int  mgetbutton();
-void mchangestyle(int,int);
-void mgetpos();
-void mgetgraphpos();
-void msetpos(int,int);
-void mconfine(int,int,int,int); // left top right bottom
-void mgraphconfine(int,int,int,int);
-int  mbutrelease(int);
-void domouse(int=0);   // graphics mode cursor
-void mfreemem();
-void mloadcursor(char*);  // load from file
-void mloadwcursor(char*);
-void mnewcursor(char);
-int  ismouseinbox(int,int,int,int);
-void msethotspot(int,int);   // Graphics mode only. Useful for crosshair.
-*/
+
 void msetgraphpos(int,int);
 
 #include "clib32.h"
-extern void put_sprite_256(int, int, block);
+#include "ac.h"
 
-char *mouselibcopyr = "MouseLib32 (c) 1994, 1998 Chris Jones";
-const int NONE = -1, LEFT = 0, RIGHT = 1, MIDDLE = 2;
-int aa;
-char mouseturnedon = FALSE, currentcursor = 0;
-int mousex = 0, mousey = 0, numcurso = -1, hotx = 0, hoty = 0;
-int boundx1 = 0, boundx2 = 99999, boundy1 = 0, boundy2 = 99999;
+char currentcursor = 0;
+int mousex = 0;
+int mousey = 0;
+int hotx = 0;
+int hoty = 0;
 int disable_mgetgraphpos = 0;
 char ignore_bounds = 0;
-extern char alpha_blend_cursor ;
-block savebk = NULL, mousecurs[MAXCURSORS];
-extern int vesa_xres, vesa_yres;
-extern color palette[256];
+block mousecurs[MAXCURSORS];
 
+static char *mouselibcopyr = "MouseLib32 (c) 1994, 1998 Chris Jones";
 
-IMouseGetPosCallback *callback = NULL;
+static int aa;
+static int boundx1 = 0, boundx2 = 99999, boundy1 = 0, boundy2 = 99999;
+static char mouseturnedon = FALSE;
+static int numcurso = -1;
+static block savebk = NULL;
+static IMouseGetPosCallback *callback = NULL;
 
 void msetcallback(IMouseGetPosCallback *gpCallback) {
   callback = gpCallback;
@@ -128,7 +110,7 @@ void msetcursorlimit(int x1, int y1, int x2, int y2)
   boundy2 = y2;
 }
 
-void drawCursor() {
+static void drawCursor() {
   if (alpha_blend_cursor) {
     set_alpha_blender();
     draw_trans_sprite(abuf, mousecurs[currentcursor], mousex, mousey);
@@ -137,7 +119,8 @@ void drawCursor() {
     put_sprite_256(mousex, mousey, mousecurs[currentcursor]);
 }
 
-int hotxwas = 0, hotywas = 0;
+static int hotxwas = 0, hotywas = 0;
+// graphics mode cursor
 void domouse(int str)
 {
   /*
@@ -189,7 +172,7 @@ void domouse(int str)
   hotywas = hoty;
 }
 
-int ismouseinbox(int lf, int tp, int rt, int bt)
+static int ismouseinbox(int lf, int tp, int rt, int bt)
 {
   if ((mousex >= lf) & (mousex <= rt) & (mousey >= tp) & (mousey <= bt))
     return TRUE;
@@ -197,7 +180,7 @@ int ismouseinbox(int lf, int tp, int rt, int bt)
     return FALSE;
 }
 
-void mfreemem()
+static void mfreemem()
 {
   for (int re = 0; re < numcurso; re++) {
     if (mousecurs[re] != NULL)
@@ -205,7 +188,7 @@ void mfreemem()
   }
 }
 
-void mnewcursor(char cursno)
+static void mnewcursor(char cursno)
 {
   domouse(2);
   currentcursor = cursno;
@@ -213,7 +196,7 @@ void mnewcursor(char cursno)
 }
 
 
-void mloadwcursor(char *namm)
+static void mloadwcursor(char *namm)
 {
   color dummypal[256];
   if (wloadsprites(&dummypal[0], namm, mousecurs, 0, MAXCURSORS)) {
@@ -222,7 +205,7 @@ void mloadwcursor(char *namm)
   }
 }
 
-int butwas = 0;
+static int butwas = 0;
 int mgetbutton()
 {
   int toret = NONE;
@@ -243,7 +226,7 @@ int mgetbutton()
   return toret;
 }
 
-const int MB_ARRAY[3] = { 1, 2, 4 };
+static const int MB_ARRAY[3] = { 1, 2, 4 };
 int misbuttondown(int buno)
 {
   poll_mouse();
@@ -252,17 +235,19 @@ int misbuttondown(int buno)
   return FALSE;
 }
 
-void msetgraphpos(int xa, int ya)
+ void msetgraphpos(int xa, int ya)
 { 
   position_mouse(xa, ya); // xa -= hotx; ya -= hoty;
 }
 
+// Graphics mode only. Useful for crosshair.
 void msethotspot(int xx, int yy)
 {
   hotx = xx;  // mousex -= hotx; mousey -= hoty;
   hoty = yy;  // mousex += hotx; mousey += hoty;
 }
 
+// this returns number of buttons (or 0)
 int minstalled()
 {
   int nbuts;

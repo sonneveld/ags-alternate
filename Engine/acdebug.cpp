@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <io.h>
 
-extern int exists(const char *filename);
+#include "allegro/file.h"
 
 struct DummyAGSDebugger : IAGSEditorDebugger
 {
