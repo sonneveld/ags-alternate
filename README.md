@@ -45,9 +45,22 @@ The forum post http://www.allegro.cc/forums/thread/600266 hinted where to find t
 
 ## Links
 
-
 AGS Source Release
 http://www.bigbluecup.com/yabb/index.php?topic=43383.0
+
+svn 
+https://svn.bigbluecup.com:7743/svn/ags/trunk
+u: guest
+p:
+
+ScummVM AGS Rewrite
+https://github.com/fuzzie/scummvm/tree/ags/engines/ags
+https://github.com/fuzzie/scummvm/commits/ags
+http://logs.scummvm.org/log.php?log=scummvm.log.12Feb2012&format=html
+
+AGS forks
+https://gitorious.org/ags
+https://gitorious.org/~jjs/ags/ags-for-psp
 
 AGS Linux port
 http://www.bigbluecup.com/yabb/index.php?topic=37968.0
@@ -56,28 +69,24 @@ AGS Mac port
 http://www.bigbluecup.com/yabb/index.php?topic=43590.0
 (no source)
 
-svn 
-https://svn.bigbluecup.com:7743/svn/ags/trunk
-u: guest
-p:
-
-AGS forks
-https://gitorious.org/ags
-https://gitorious.org/~jjs/ags/ags-for-psp
-
 re AGS for psp
 http://www.bigbluecup.com/yabb/index.php?topic=44768.msg610523
 
-AG source refactoring
+AGS source refactoring
 http://www.bigbluecup.com/yabb/index.php?topic=45372.0
 https://github.com/AlanDrake/Adventure-Game-Studio
 
-AG future  stalemate
+AGS future  stalemate
 http://www.bigbluecup.com/yabb/index.php?topic=44047.0
 
-scummvm ags port
-https://github.com/fuzzie/scummvm/commits/ags
-http://logs.scummvm.org/log.php?log=scummvm.log.12Feb2012&format=html
-https://github.com/fuzzie/scummvm/tree/3211375fb8caae03c3b23e7bf738ea6a08d7c723/engines/ags
+the future of AGS #2
+http://www.bigbluecup.com/yabb/index.php?topic=45149
 
+.. future after CJ
+http://www.bigbluecup.com/yabb/index.php?topic=45545.0
 
+future #3
+http://www.bigbluecup.com/yabb/index.php?topic=45572.0
+
+Wyz's Plan
+https://docs.google.com/document/pub?id=1ZqcDdhvAXPjar60sL77xyYSLPE7r-Be9DzOBr9l_iNo&pli=1
