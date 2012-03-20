@@ -610,7 +610,6 @@ int current_music_type = 0;
 #define LOCTYPE_OBJ  3
 
 #define MAX_DYNAMIC_SURFACES 20
-
 #define REP_EXEC_ALWAYS_NAME "repeatedly_execute_always"
 #define REP_EXEC_NAME "repeatedly_execute"
 

@@ -15,12 +15,9 @@
 #pragma unmanaged
 #define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
-#define CROOM_NOFUNCTIONS
 #include "acroom.h"
 #include "acruntim.h"
 #include "acgui.h"
-
-#undef CROOM_NOFUNCTIONS
 
 #ifdef THIS_IS_THE_ENGINE
 #define get_adjusted_spritewidth(x) wgetblockwidth(spriteset[x])

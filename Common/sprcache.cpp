@@ -21,7 +21,6 @@
 #endif
 
 #define WGT2ALLEGRO_NOFUNCTIONS
-#define CROOM_NOFUNCTIONS
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "sprcache.h"

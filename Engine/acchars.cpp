@@ -16,7 +16,6 @@
 
 #define WGT2ALLEGRO_NOFUNCTIONS
 #include "wgt2allg.h"
-#define CROOM_NOFUNCTIONS
 #include "acroom.h"
 #include "acruntim.h"
 #include <math.h>

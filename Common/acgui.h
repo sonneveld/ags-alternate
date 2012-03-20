@@ -16,9 +16,6 @@
 #include "bigend.h"
 
 #ifndef __WGT4_H
-#ifndef CROOM_NOFUNCTIONS
-#error Must include wgt2allg.h first
-#endif
 #endif
 
 #ifndef WOUTTEXT_REVERSE

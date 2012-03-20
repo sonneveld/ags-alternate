@@ -8,9 +8,7 @@
 
 #include "ali3d.h"
 
-#define CROOM_NOFUNCTIONS
 #include "acroom.h"
-#undef CROOM_NOFUNCTIONS
 
 #include "acruntim.h"
 

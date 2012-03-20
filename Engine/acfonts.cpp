@@ -10,7 +10,6 @@
 
 */
 #pragma unmanaged
-#define CROOM_NOFUNCTIONS
 #ifndef USE_ALFONT
 #define USE_ALFONT
 #endif
