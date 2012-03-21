@@ -22,6 +22,7 @@
 #include "ac.h"
 #include "ac_string.h"
 #include "ac_mouse.h"
+#include "ac_obj.h"
 
 
 // order of loops to turn character in circle from down to down

@@ -126,7 +126,6 @@ extern GUIMain*guis;
 
 // for ac_room.cpp
 extern int get_walkable_area_pixel(int x, int y);
-extern int get_area_scaling (int onarea, int xx, int yy);
 extern void get_message_text (int msnum, char *buffer, char giveErr);
 extern void replace_tokens(char*srcmes,char*destm, int maxlen = 99999);
 extern int GetCharacterHeight(int charid);
@@ -141,5 +140,32 @@ extern void setpal();
 extern RoomStatus *roomstats;
 extern int walk_behind_baselines_changed ;
 extern int bg_just_changed;
+
+// for ac_obj.cpp
+extern void scAnimateCharacter (int chh, int loopn, int sppd, int rept);
+extern block *actsps;
+extern void tint_image (block srcimg, block destimg, int red, int grn, int blu, int light_level, int luminance);
+extern block recycle_bitmap(block bimp, int coldep, int wid, int hit);
+#define IS_ANTIALIAS_SPRITES usetup.enable_antialiasing && (play.disable_antialiasing == 0)
+extern IDriverDependantBitmap* *actspsbmp;
+extern int in_new_room;
+extern int get_walkable_area_at_location(int xx, int yy);
+extern int  run_interaction_event (NewInteraction *nint, int evnt, int chkAny = -1, int isInv = 0);
+extern int  run_interaction_script(InteractionScripts *nint, int evnt, int chkAny = -1, int isInv = 0);
+enum WalkBehindMethodEnum
+{
+  DrawOverCharSprite,
+  DrawAsSeparateSprite,
+  DrawAsSeparateCharSprite
+};
+extern WalkBehindMethodEnum walkBehindMethod;
+extern void sort_out_char_sprite_walk_behind(int actspsIndex, int xx, int yy, int basel, int zoom, int width, int height);
+extern int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsFrom = NULL, block checkPixelsFrom = NULL, int zoom=100);
+extern void add_to_sprite_list(IDriverDependantBitmap* spp, int xx, int yy, int baseline, int trans, int sprNum, bool isWalkBehind = false);
+extern int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww,int sphh, int flipped = 0);
+extern int char_lowest_yp, obj_lowest_yp;
+extern ScriptObject scrObj[MAX_INIT_SPR];
+extern char*evblockbasename;
+extern int evblocknum;
 
 #endif

@@ -936,7 +936,6 @@ extern void* ccGetSymbolAddress (char*);
 extern int wgettextwidth_compensate(const char *tex, int font) ;
 extern void add_dynamic_sprite (int gotSlot, block redin, bool hasAlpha = false);
 extern void free_dynamic_sprite (int gotSlot);
-extern void convert_move_path_to_high_res(MoveList *ml);
 extern void register_audio_script_objects();
 extern void register_audio_script_functions();
 extern bool unserialize_audio_script_object(int index, const char *objectType, const char *serializedData, int dataSize);
