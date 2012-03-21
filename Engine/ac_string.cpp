@@ -1,9 +1,6 @@
 #include "ac.h"
 #include "ac_string.h"
-
-// temporary!  (should be from ac_math.h when it exists)
-#define FLOAT_RETURN_TYPE long
-#define RETURN_FLOAT(x) return *((long*)&x)
+#include "ac_maths.h"
 
 // ** SCRIPT STRING
 
