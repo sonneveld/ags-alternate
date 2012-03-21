@@ -379,6 +379,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_mouse.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_parser.cpp"
 				>
 			</File>
@@ -1061,6 +1065,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_maths.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_mouse.h"
 				>
 			</File>
 			<File

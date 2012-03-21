@@ -6,6 +6,8 @@
 #include "acroom.h"
 #include "acruntim.h"
 #include "sprcache.h"
+#include "acgui.h"
+#include "ac_mouse.h"
 
 // Check that a supplied buffer from a text script function was not null
 #define VALIDATE_STRING(strin) if ((unsigned long)strin <= 4096) quit("!String argument was null: make sure you pass a string, not an int, as a buffer")
@@ -109,6 +111,17 @@ extern int Character_GetSpeakingFrame(CharacterInfo *chaa);
 extern void ccAddExternalSymbol(char *namof, void *addrof);
 #define scAdd_External_Symbol ccAddExternalSymbol
 
+// for ac_mouse.cpp
+extern void multiply_up_coordinates_round_up(int *x, int *y);
+extern void draw_sprite_support_alpha(int xpos, int ypos, block image, int slot);
+extern void precache_view(int view) ;
+extern int GetMaxScreenHeight ();
+extern void GetLocationName(int xxx,int yyy,char*tempo);
+extern int  GetLocationType(int,int);
+extern void CheckViewFrame (int view, int loop, int frame);
+extern void invalidate_sprite(int x1, int y1, IDriverDependantBitmap *pic);
 
+extern struct GlobalMouseState global_mouse_state;
+extern GUIMain*guis;
 
 #endif

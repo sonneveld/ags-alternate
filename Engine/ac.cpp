@@ -71,12 +71,12 @@ extern void * memcpy_amd(void *dest, const void *src, size_t n);
 extern int our_eip;
 #include "wgt2allg.h"
 #include "sprcache.h"
-//#include "mousew32.h"
 #include "routefnd.h"
 #include "ac_scr_obj.h"
 #include "ac_datetime.h"
 #include "ac_string.h"
 #include "ac_maths.h"
+#include "ac_mouse.h"
 
 // Allegro 4 has switched 15-bit colour to BGR instead of RGB, so
 // in this case we need to convert the graphics on load
@@ -370,6 +370,7 @@ struct NonBlockingScriptFunction
 
 
 // **** GLOBALS ****
+struct GlobalMouseState global_mouse_state;
 char *music_file;
 char *speech_file;
 WCHAR directoryPathBuffer[MAX_PATH];
@@ -487,12 +488,11 @@ ccInstance *gameinst = NULL, *roominst = NULL;
 ccInstance *dialogScriptsInst = NULL;
 ccInstance *gameinstFork = NULL, *roominstFork = NULL;
 IGraphicsDriver *gfxDriver;
-IDriverDependantBitmap *mouseCursor = NULL;
 IDriverDependantBitmap *blankImage = NULL;
 IDriverDependantBitmap *blankSidebarImage = NULL;
 IDriverDependantBitmap *debugConsole = NULL;
 block debugConsoleBuffer = NULL;
-block blank_mouse_cursor = NULL;
+
 bool current_background_is_dirty = false;
 int longestline = 0;
 
@@ -506,7 +506,6 @@ char *moduleRepExecAddr[MAX_SCRIPT_MODULES];
 int numScriptModules = 0;
 
 ViewStruct*views=NULL;
-ScriptMouse scmouse;
 COLOR_MAP maincoltable;
 ScriptSystem scsystem;
 block _old_screen=NULL;
@@ -626,8 +625,6 @@ int load_new_game_restore = -1;
 int inside_script=0,in_graph_script=0;
 int no_blocking_functions = 0; // set to 1 while in rep_Exec_always
 int in_inv_screen = 0, inv_screen_newroom = -1;
-int mouse_frame=0,mouse_delay=0;
-int lastmx=-1,lastmy=-1;
 int new_room_flags=0;
 #define MAX_SPRITES_ON_SCREEN 76
 SpriteListEntry sprlist[MAX_SPRITES_ON_SCREEN];
@@ -663,7 +660,6 @@ RGB_MAP rgb_table;  // for 256-col antialiasing
 char* game_file_name=NULL;
 int want_quit = 0, screen_reset = 0;
 block raw_saved_screen = NULL;
-block dotted_mouse_cursor = NULL;
 block dynamicallyCreatedSurfaces[MAX_DYNAMIC_SURFACES];
 int scrlockWasDown = 0;
 // whether there are currently remnants of a DisplaySpeech
@@ -694,7 +690,6 @@ bool AmbientSound::IsPlaying () {
 
 int  Overlay_GetValid(ScriptOverlay *scover);
 void mainloop(bool checkControls = false, IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
-void set_mouse_cursor(int);
 void set_default_cursor();
 int  run_text_script(ccInstance*,char*);
 int  run_text_script_2iparam(ccInstance*,char*,int,int);
@@ -2227,12 +2222,12 @@ block convert_16_to_16bgr(block tempbl) {
 
 // Multiplies up the number of pixels depending on the current 
 // resolution, to give a relatively fixed size at any game res
-AGS_INLINE int get_fixed_pixel_size(int pixels)
+int get_fixed_pixel_size(int pixels)
 {
   return pixels * current_screen_resolution_multiplier;
 }
 
-AGS_INLINE int convert_to_low_res(int coord)
+int convert_to_low_res(int coord)
 {
   if (game.options[OPT_NATIVECOORDINATES] == 0)
     return coord;
@@ -2240,7 +2235,7 @@ AGS_INLINE int convert_to_low_res(int coord)
     return coord / current_screen_resolution_multiplier;
 }
 
-AGS_INLINE int convert_back_to_high_res(int coord)
+int convert_back_to_high_res(int coord)
 {
   if (game.options[OPT_NATIVECOORDINATES] == 0)
     return coord;
@@ -2248,7 +2243,7 @@ AGS_INLINE int convert_back_to_high_res(int coord)
     return coord * current_screen_resolution_multiplier;
 }
 
-AGS_INLINE int multiply_up_coordinate(int coord)
+int multiply_up_coordinate(int coord)
 {
   if (game.options[OPT_NATIVECOORDINATES] == 0)
     return coord * current_screen_resolution_multiplier;
@@ -2256,7 +2251,7 @@ AGS_INLINE int multiply_up_coordinate(int coord)
     return coord;
 }
 
-AGS_INLINE void multiply_up_coordinates(int *x, int *y)
+void multiply_up_coordinates(int *x, int *y)
 {
   if (game.options[OPT_NATIVECOORDINATES] == 0)
   {
@@ -2265,7 +2260,7 @@ AGS_INLINE void multiply_up_coordinates(int *x, int *y)
   }
 }
 
-AGS_INLINE void multiply_up_coordinates_round_up(int *x, int *y)
+void multiply_up_coordinates_round_up(int *x, int *y)
 {
   if (game.options[OPT_NATIVECOORDINATES] == 0)
   {
@@ -2274,7 +2269,7 @@ AGS_INLINE void multiply_up_coordinates_round_up(int *x, int *y)
   }
 }
 
-AGS_INLINE int divide_down_coordinate(int coord)
+int divide_down_coordinate(int coord)
 {
   if (game.options[OPT_NATIVECOORDINATES] == 0)
     return coord / current_screen_resolution_multiplier;
@@ -2282,7 +2277,7 @@ AGS_INLINE int divide_down_coordinate(int coord)
     return coord;
 }
 
-AGS_INLINE int divide_down_coordinate_round_up(int coord)
+int divide_down_coordinate_round_up(int coord)
 {
   if (game.options[OPT_NATIVECOORDINATES] == 0)
     return (coord / current_screen_resolution_multiplier) + (current_screen_resolution_multiplier - 1);
@@ -3008,11 +3003,6 @@ void save_game_dialog() {
   if (toload>=0)
     save_game(toload,buffer2);
   }
-
-void update_script_mouse_coords() {
-  scmouse.x = divide_down_coordinate(mousex);
-  scmouse.y = divide_down_coordinate(mousey);
-}
 
 char scfunctionname[30];
 int prepare_text_script(ccInstance*sci,char**tsname) {
@@ -3824,56 +3814,6 @@ int GetBaseWidth () {
   return BASEWIDTH;
 }
 
-/* *** SCRIPT SYMBOL: [Mouse] HideMouseCursor *** */
-void HideMouseCursor () {
-  play.mouse_cursor_hidden = 1;
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] ShowMouseCursor *** */
-void ShowMouseCursor () {
-  play.mouse_cursor_hidden = 0;
-}
-
-// The Mouse:: functions are static so the script doesn't pass
-// in an object parameter
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::set_Visible *** */
-void Mouse_SetVisible(int isOn) {
-  if (isOn)
-    ShowMouseCursor();
-  else
-    HideMouseCursor();
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::get_Visible *** */
-int Mouse_GetVisible() {
-  if (play.mouse_cursor_hidden)
-    return 0;
-  return 1;
-}
-
-#define MOUSE_MAX_Y divide_down_coordinate(vesa_yres)
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::SetBounds^4 *** */
-/* *** SCRIPT SYMBOL: [Mouse] SetMouseBounds *** */
-void SetMouseBounds (int x1, int y1, int x2, int y2) {
-  if ((x1 == 0) && (y1 == 0) && (x2 == 0) && (y2 == 0)) {
-    x2 = BASEWIDTH-1;
-    y2 = MOUSE_MAX_Y - 1;
-  }
-  if (x2 == BASEWIDTH) x2 = BASEWIDTH-1;
-  if (y2 == MOUSE_MAX_Y) y2 = MOUSE_MAX_Y - 1;
-  if ((x1 > x2) || (y1 > y2) || (x1 < 0) || (x2 >= BASEWIDTH) ||
-      (y1 < 0) || (y2 >= MOUSE_MAX_Y))
-    quit("!SetMouseBounds: invalid co-ordinates, must be within (0,0) - (320,200)");
-  DEBUG_CONSOLE("Mouse bounds constrained to (%d,%d)-(%d,%d)", x1, y1, x2, y2);
-  multiply_up_coordinates(&x1, &y1);
-  multiply_up_coordinates_round_up(&x2, &y2);
- 
-  play.mboundx1 = x1;
-  play.mboundx2 = x2;
-  play.mboundy1 = y1;
-  play.mboundy2 = y2;
-  filter->SetMouseLimit(x1,y1,x2,y2);
-}
 
 void update_walk_behind_images()
 {
@@ -5011,42 +4951,6 @@ void update_inv_cursor(int invnum) {
     }
   }
 
-void putpixel_compensate (block onto, int xx,int yy, int col) {
-  if ((bitmap_color_depth(onto) == 32) && (col != 0)) {
-    // ensure the alpha channel is preserved if it has one
-    int alphaval = geta32(getpixel(onto, xx, yy));
-    col = makeacol32(getr32(col), getg32(col), getb32(col), alphaval);
-  }
-  rectfill(onto, xx, yy, xx + get_fixed_pixel_size(1) - 1, yy + get_fixed_pixel_size(1) - 1, col);
-}
-
-void update_cached_mouse_cursor() 
-{
-  if (mouseCursor != NULL)
-    gfxDriver->DestroyDDB(mouseCursor);
-  mouseCursor = gfxDriver->CreateDDBFromBitmap(mousecurs[0], alpha_blend_cursor != 0);
-}
-
-void set_new_cursor_graphic (int spriteslot) {
-  mousecurs[0] = spriteset[spriteslot];
-
-  if ((spriteslot < 1) || (mousecurs[0] == NULL))
-  {
-    if (blank_mouse_cursor == NULL)
-    {
-      blank_mouse_cursor = create_bitmap_ex(final_col_dep, 1, 1);
-      clear_to_color(blank_mouse_cursor, bitmap_mask_color(blank_mouse_cursor));
-    }
-    mousecurs[0] = blank_mouse_cursor;
-  }
-
-  if (game.spriteflags[spriteslot] & SPF_ALPHACHANNEL)
-    alpha_blend_cursor = 1;
-  else
-    alpha_blend_cursor = 0;
-
-  update_cached_mouse_cursor();
-}
 
 void draw_sprite_support_alpha(int xpos, int ypos, block image, int slot) {
 
@@ -5061,64 +4965,6 @@ void draw_sprite_support_alpha(int xpos, int ypos, block image, int slot) {
 
 }
 
-// mouse cursor functions:
-// set_mouse_cursor: changes visual appearance to specified cursor
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::UseModeGraphic^1 *** */
-/* *** SCRIPT SYMBOL: [Mouse] SetMouseCursor *** */
-void set_mouse_cursor(int newcurs) {
-  int hotspotx = game.mcurs[newcurs].hotx, hotspoty = game.mcurs[newcurs].hoty;
-
-  set_new_cursor_graphic(game.mcurs[newcurs].pic);
-  if (dotted_mouse_cursor) {
-    wfreeblock (dotted_mouse_cursor);
-    dotted_mouse_cursor = NULL;
-  }
-
-  if ((newcurs == MODE_USE) && (game.mcurs[newcurs].pic > 0) &&
-      ((game.hotdot > 0) || (game.invhotdotsprite > 0)) ) {
-    // If necessary, create a copy of the cursor and put the hotspot
-    // dot onto it
-    dotted_mouse_cursor = create_bitmap_ex (bitmap_color_depth(mousecurs[0]), BMP_W(mousecurs[0]),BMP_H(mousecurs[0]));
-    blit (mousecurs[0], dotted_mouse_cursor, 0, 0, 0, 0, BMP_W(mousecurs[0]), BMP_H(mousecurs[0]));
-
-    if (game.invhotdotsprite > 0) {
-      block abufWas = abuf;
-      abuf = dotted_mouse_cursor;
-
-      draw_sprite_support_alpha(
-        hotspotx - spritewidth[game.invhotdotsprite] / 2,
-        hotspoty - spriteheight[game.invhotdotsprite] / 2,
-        spriteset[game.invhotdotsprite],
-        game.invhotdotsprite);
-
-      abuf = abufWas;
-    }
-    else {
-      putpixel_compensate (dotted_mouse_cursor, hotspotx, hotspoty,
-        (bitmap_color_depth(dotted_mouse_cursor) > 8) ? get_col8_lookup (game.hotdot) : game.hotdot);
-
-      if (game.hotdotouter > 0) {
-        int outercol = game.hotdotouter;
-        if (bitmap_color_depth (dotted_mouse_cursor) > 8)
-          outercol = get_col8_lookup(game.hotdotouter);
-
-        putpixel_compensate (dotted_mouse_cursor, hotspotx + get_fixed_pixel_size(1), hotspoty, outercol);
-        putpixel_compensate (dotted_mouse_cursor, hotspotx, hotspoty + get_fixed_pixel_size(1), outercol);
-        putpixel_compensate (dotted_mouse_cursor, hotspotx - get_fixed_pixel_size(1), hotspoty, outercol);
-        putpixel_compensate (dotted_mouse_cursor, hotspotx, hotspoty - get_fixed_pixel_size(1), outercol);
-      }
-    }
-    mousecurs[0] = dotted_mouse_cursor;
-    update_cached_mouse_cursor();
-  }
-  msethotspot(hotspotx, hotspoty);
-  if (newcurs != cur_cursor)
-  {
-    cur_cursor = newcurs;
-    mouse_frame=0;
-    mouse_delay=0;
-  }
-}
 
 void precache_view(int view) 
 {
@@ -5131,122 +4977,6 @@ void precache_view(int view)
   }
 }
 
-// set_default_cursor: resets visual appearance to current mode (walk, look, etc)
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::UseDefaultGraphic^0 *** */
-/* *** SCRIPT SYMBOL: [Mouse] SetDefaultCursor *** */
-void set_default_cursor() {
-  set_mouse_cursor(cur_mode);
-  }
-
-// permanently change cursor graphic
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::ChangeModeGraphic^2 *** */
-/* *** SCRIPT SYMBOL: [Mouse] ChangeCursorGraphic *** */
-void ChangeCursorGraphic (int curs, int newslot) {
-  if ((curs < 0) || (curs >= game.numcursors))
-    quit("!ChangeCursorGraphic: invalid mouse cursor");
-
-  if ((curs == MODE_USE) && (game.options[OPT_FIXEDINVCURSOR] == 0))
-    debug_log("Mouse.ChangeModeGraphic should not be used on the Inventory cursor when the cursor is linked to the active inventory item");
-
-  game.mcurs[curs].pic = newslot;
-  spriteset.precache (newslot);
-  if (curs == cur_mode)
-    set_mouse_cursor (curs);
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::GetModeGraphic^1 *** */
-int Mouse_GetModeGraphic(int curs) {
-  if ((curs < 0) || (curs >= game.numcursors))
-    quit("!Mouse.GetModeGraphic: invalid mouse cursor");
-
-  return game.mcurs[curs].pic;
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::ChangeModeHotspot^3 *** */
-/* *** SCRIPT SYMBOL: [Mouse] ChangeCursorHotspot *** */
-void ChangeCursorHotspot (int curs, int x, int y) {
-  if ((curs < 0) || (curs >= game.numcursors))
-    quit("!ChangeCursorHotspot: invalid mouse cursor");
-  game.mcurs[curs].hotx = multiply_up_coordinate(x);
-  game.mcurs[curs].hoty = multiply_up_coordinate(y);
-  if (curs == cur_cursor)
-    set_mouse_cursor (cur_cursor);
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::ChangeModeView^2 *** */
-void Mouse_ChangeModeView(int curs, int newview) {
-  if ((curs < 0) || (curs >= game.numcursors))
-    quit("!Mouse.ChangeModeView: invalid mouse cursor");
-
-  newview--;
-
-  game.mcurs[curs].view = newview;
-
-  if (newview >= 0)
-  {
-    precache_view(newview);
-  }
-
-  if (curs == cur_cursor)
-    mouse_delay = 0;  // force update
-}
-
-int find_next_enabled_cursor(int startwith) {
-  if (startwith >= game.numcursors)
-    startwith = 0;
-  int testing=startwith;
-  do {
-    if ((game.mcurs[testing].flags & MCF_DISABLED)==0) {
-      // inventory cursor, and they have an active item
-      if (testing == MODE_USE) 
-      {
-        if (playerchar->activeinv > 0)
-          break;
-      }
-      // standard cursor that's not disabled, go with it
-      else if (game.mcurs[testing].flags & MCF_STANDARD)
-        break;
-    }
-
-    testing++;
-    if (testing >= game.numcursors) testing=0;
-  } while (testing!=startwith);
-
-  if (testing!=startwith)
-    set_cursor_mode(testing);
-
-  return testing;
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::SelectNextMode^0 *** */
-/* *** SCRIPT SYMBOL: [Mouse] SetNextCursorMode *** */
-void SetNextCursor () {
-  set_cursor_mode (find_next_enabled_cursor(cur_mode + 1));
-}
-
-// set_cursor_mode: changes mode and appearance
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::set_Mode *** */
-/* *** SCRIPT SYMBOL: [Mouse] SetCursorMode *** */
-void set_cursor_mode(int newmode) {
-  if ((newmode < 0) || (newmode >= game.numcursors))
-    quit("!SetCursorMode: invalid cursor mode specified");
-
-  guis_need_update = 1;
-  if (game.mcurs[newmode].flags & MCF_DISABLED) {
-    find_next_enabled_cursor(newmode);
-    return; }
-  if (newmode == MODE_USE) {
-    if (playerchar->activeinv == -1) {
-      find_next_enabled_cursor(0);
-      return;
-      }
-    update_inv_cursor(playerchar->activeinv);
-    }
-  cur_mode=newmode;
-  set_default_cursor();
-
-  DEBUG_CONSOLE("Cursor mode set to %d", newmode);
-}
 
 void set_inv_item_cursorpic(int invItemId, int piccy) 
 {
@@ -5319,44 +5049,6 @@ int InventoryItem_GetID(ScriptInvItem *scii) {
   return scii->id;
 }
 
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::EnableMode^1 *** */
-/* *** SCRIPT SYMBOL: [Mouse] EnableCursorMode *** */
-void enable_cursor_mode(int modd) {
-  game.mcurs[modd].flags&=~MCF_DISABLED;
-  // now search the interfaces for related buttons to re-enable
-  int uu,ww;
-
-  for (uu=0;uu<game.numgui;uu++) {
-    for (ww=0;ww<guis[uu].numobjs;ww++) {
-      if ((guis[uu].objrefptr[ww] >> 16)!=GOBJ_BUTTON) continue;
-      GUIButton*gbpt=(GUIButton*)guis[uu].objs[ww];
-      if (gbpt->leftclick!=IBACT_SETMODE) continue;
-      if (gbpt->lclickdata!=modd) continue;
-      gbpt->Enable();
-      }
-    }
-  guis_need_update = 1;
-  }
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::DisableMode^1 *** */
-/* *** SCRIPT SYMBOL: [Mouse] DisableCursorMode *** */
-void disable_cursor_mode(int modd) {
-  game.mcurs[modd].flags|=MCF_DISABLED;
-  // now search the interfaces for related buttons to kill
-  int uu,ww;
-
-  for (uu=0;uu<game.numgui;uu++) {
-    for (ww=0;ww<guis[uu].numobjs;ww++) {
-      if ((guis[uu].objrefptr[ww] >> 16)!=GOBJ_BUTTON) continue;
-      GUIButton*gbpt=(GUIButton*)guis[uu].objs[ww];
-      if (gbpt->leftclick!=IBACT_SETMODE) continue;
-      if (gbpt->lclickdata!=modd) continue;
-      gbpt->Disable();
-      }
-    }
-  if (cur_mode==modd) find_next_enabled_cursor(modd);
-  guis_need_update = 1;
-  }
 
 void remove_popup_interface(int ifacenum) {
   if (ifacepopped != ifacenum) return;
@@ -5460,16 +5152,6 @@ int IsGamePaused() {
   if (game_paused>0) return 1;
   return 0;
   }
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::IsButtonDown^1 *** */
-/* *** SCRIPT SYMBOL: [Mouse] IsButtonDown *** */
-int IsButtonDown(int which) {
-  if ((which < 1) || (which > 3))
-    quit("!IsButtonDown: only works with eMouseLeft, eMouseRight, eMouseMiddle");
-  if (misbuttondown(which-1))
-    return 1;
-  return 0;
-}
 
 /* *** SCRIPT SYMBOL: [Character] SetCharacterIdle *** */
 void SetCharacterIdle(int who, int iview, int itime) {
@@ -9008,34 +8690,7 @@ void update_screen() {
     return;
   gfxDriver->DrawSprite(AGSE_POSTSCREENDRAW, 0, NULL);
 
-  // update animating mouse cursor
-  if (game.mcurs[cur_cursor].view>=0) {
-    domouse (DOMOUSE_NOCURSOR);
-    // only on mousemove, and it's not moving
-    if (((game.mcurs[cur_cursor].flags & MCF_ANIMMOVE)!=0) &&
-      (mousex==lastmx) && (mousey==lastmy)) ;
-    // only on hotspot, and it's not on one
-    else if (((game.mcurs[cur_cursor].flags & MCF_HOTSPOT)!=0) &&
-        (GetLocationType(divide_down_coordinate(mousex), divide_down_coordinate(mousey)) == 0))
-      set_new_cursor_graphic(game.mcurs[cur_cursor].pic);
-    else if (mouse_delay>0) mouse_delay--;
-    else {
-      int viewnum=game.mcurs[cur_cursor].view;
-      int loopnum=0;
-      if (loopnum >= views[viewnum].numLoops)
-        quitprintf("An animating mouse cursor is using view %d which has no loops", viewnum + 1);
-      if (views[viewnum].loops[loopnum].numFrames < 1)
-        quitprintf("An animating mouse cursor is using view %d which has no frames in loop %d", viewnum + 1, loopnum);
-
-      mouse_frame++;
-      if (mouse_frame >= views[viewnum].loops[loopnum].numFrames)
-        mouse_frame=0;
-      set_new_cursor_graphic(views[viewnum].loops[loopnum].frames[mouse_frame].pic);
-      mouse_delay = views[viewnum].loops[loopnum].frames[mouse_frame].speed + 5;
-      CheckViewFrame (viewnum, loopnum, mouse_frame);
-    }
-    lastmx=mousex; lastmy=mousey;
-  }
+  update_animating_cursor();
 
   // draw the debug console, if appropriate
   if ((play.debug_mode > 0) && (display_console != 0)) 
@@ -9069,20 +8724,7 @@ void update_screen() {
     invalidate_sprite(0, 0, debugConsole);
   }
 
-  domouse(DOMOUSE_NOCURSOR);
-
-  if (!play.mouse_cursor_hidden)
-  {
-    gfxDriver->DrawSprite(mousex - hotx, mousey - hoty, mouseCursor);
-    invalidate_sprite(mousex - hotx, mousey - hoty, mouseCursor);
-  }
-
-  /*
-  domouse(1);
-  // if the cursor is hidden, remove it again. However, it needs
-  // to go on-off in order to update the stored mouse coordinates
-  if (play.mouse_cursor_hidden)
-    domouse(2);*/
+  update_and_draw_mouse_on_screen();
 
   write_screen();
 
@@ -9096,9 +8738,6 @@ void update_screen() {
       bg_just_changed = 0;
     }
   }
-
-  //if (!play.mouse_cursor_hidden)
-//    domouse(2);
 
   screen_is_dirty = 0;
 }
@@ -20154,40 +19793,6 @@ int __Rand(int upto) {
   return rand()%upto;
   }
 
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::Update^0 *** */
-/* *** SCRIPT SYMBOL: [Mouse] RefreshMouse *** */
-void RefreshMouse() {
-  domouse(DOMOUSE_NOCURSOR);
-  scmouse.x = divide_down_coordinate(mousex);
-  scmouse.y = divide_down_coordinate(mousey);
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::SetPosition^2 *** */
-/* *** SCRIPT SYMBOL: [Mouse] SetMousePosition *** */
-void SetMousePosition (int newx, int newy) {
-  if (newx < 0)
-    newx = 0;
-  if (newy < 0)
-    newy = 0;
-  if (newx >= BASEWIDTH)
-    newx = BASEWIDTH - 1;
-  if (newy >= GetMaxScreenHeight())
-    newy = GetMaxScreenHeight() - 1;
-
-  multiply_up_coordinates(&newx, &newy);
-  filter->SetMousePosition(newx, newy);
-  RefreshMouse();
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::get_Mode *** */
-/* *** SCRIPT SYMBOL: [Mouse] GetCursorMode *** */
-int GetCursorMode() {
-  return cur_mode;
-}
-
-int GetMouseCursor() {
-  return cur_cursor;
-}
 
 /* *** SCRIPT SYMBOL: [Game] GiveScore *** */
 void GiveScore(int amnt) 
@@ -20369,21 +19974,6 @@ ScriptInvItem *GetInvAtLocation(int xx, int yy) {
   if (hsnum <= 0)
     return NULL;
   return &scrInv[hsnum];
-}
-
-/* *** SCRIPT SYMBOL: [Mouse] Mouse::SaveCursorUntilItLeaves^0 *** */
-/* *** SCRIPT SYMBOL: [Mouse] SaveCursorForLocationChange *** */
-void SaveCursorForLocationChange() {
-  // update the current location name
-  char tempo[100];
-  GetLocationName(divide_down_coordinate(mousex), divide_down_coordinate(mousey), tempo);
-
-  if (play.get_loc_name_save_cursor != play.get_loc_name_last_time) {
-    play.get_loc_name_save_cursor = play.get_loc_name_last_time;
-    play.restore_cursor_mode_to = GetCursorMode();
-    play.restore_cursor_image_to = GetMouseCursor();
-    DEBUG_CONSOLE("Saving mouse: mode %d cursor %d", play.restore_cursor_mode_to, play.restore_cursor_image_to);
-  }
 }
 
 /* *** SCRIPT SYMBOL: [Object] GetObjectName *** */
@@ -24221,25 +23811,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("ListBox::get_TopItem", (void *)ListBox_GetTopItem);
   scAdd_External_Symbol("ListBox::set_TopItem", (void *)ListBox_SetTopItem);
 
-  scAdd_External_Symbol("Mouse::ChangeModeGraphic^2",(void *)ChangeCursorGraphic);
-  scAdd_External_Symbol("Mouse::ChangeModeHotspot^3",(void *)ChangeCursorHotspot);
-  scAdd_External_Symbol("Mouse::ChangeModeView^2",(void *)Mouse_ChangeModeView);
-  scAdd_External_Symbol("Mouse::DisableMode^1",(void *)disable_cursor_mode);
-  scAdd_External_Symbol("Mouse::EnableMode^1",(void *)enable_cursor_mode);
-  scAdd_External_Symbol("Mouse::GetModeGraphic^1",(void *)Mouse_GetModeGraphic);
-  scAdd_External_Symbol("Mouse::IsButtonDown^1",(void *)IsButtonDown);
-  scAdd_External_Symbol("Mouse::SaveCursorUntilItLeaves^0",(void *)SaveCursorForLocationChange);
-  scAdd_External_Symbol("Mouse::SelectNextMode^0", (void *)SetNextCursor);
-  scAdd_External_Symbol("Mouse::SetBounds^4",(void *)SetMouseBounds);
-  scAdd_External_Symbol("Mouse::SetPosition^2",(void *)SetMousePosition);
-  scAdd_External_Symbol("Mouse::Update^0",(void *)RefreshMouse);
-  scAdd_External_Symbol("Mouse::UseDefaultGraphic^0",(void *)set_default_cursor);
-  scAdd_External_Symbol("Mouse::UseModeGraphic^1",(void *)set_mouse_cursor);
-  scAdd_External_Symbol("Mouse::get_Mode",(void *)GetCursorMode);
-  scAdd_External_Symbol("Mouse::set_Mode",(void *)set_cursor_mode);
-  scAdd_External_Symbol("Mouse::get_Visible", (void *)Mouse_GetVisible);
-  scAdd_External_Symbol("Mouse::set_Visible", (void *)Mouse_SetVisible);
-
+  register_mouse_script_functions();
   register_maths_script_functions();
 
   scAdd_External_Symbol("Hotspot::GetAtScreenXY^2",(void *)GetHotspotAtLocation);
@@ -24426,8 +23998,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("CDAudio",(void *)cd_manager);
   scAdd_External_Symbol("CentreGUI",(void *)CentreGUI);
   scAdd_External_Symbol("ChangeCharacterView",(void *)ChangeCharacterView);
-  scAdd_External_Symbol("ChangeCursorGraphic",(void *)ChangeCursorGraphic);
-  scAdd_External_Symbol("ChangeCursorHotspot",(void *)ChangeCursorHotspot);
   scAdd_External_Symbol("ClaimEvent",(void *)ClaimEvent);
   scAdd_External_Symbol("CreateGraphicOverlay",(void *)CreateGraphicOverlay);
   scAdd_External_Symbol("CreateTextOverlay",(void *)CreateTextOverlay);
@@ -24537,12 +24107,11 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetWalkableAreaAt",(void *)GetWalkableAreaAt);
   scAdd_External_Symbol("GiveScore",(void *)GiveScore);
   scAdd_External_Symbol("HasPlayerBeenInRoom",(void *)HasPlayerBeenInRoom);
-  scAdd_External_Symbol("HideMouseCursor",(void *)HideMouseCursor);
   scAdd_External_Symbol("InputBox",(void *)sc_inputbox);
   scAdd_External_Symbol("InterfaceOff",(void *)InterfaceOff);
   scAdd_External_Symbol("InterfaceOn",(void *)InterfaceOn);
   scAdd_External_Symbol("InventoryScreen",(void *)sc_invscreen);
-  scAdd_External_Symbol("IsButtonDown",(void *)IsButtonDown);
+
   scAdd_External_Symbol("IsChannelPlaying",(void *)IsChannelPlaying);
   scAdd_External_Symbol("IsGamePaused",(void *)IsGamePaused);
   scAdd_External_Symbol("IsGUIOn", (void *)IsGUIOn);
@@ -24623,7 +24192,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("RawSaveScreen", (void *)RawSaveScreen);
   scAdd_External_Symbol("RawSetColor", (void *)RawSetColor);
   scAdd_External_Symbol("RawSetColorRGB", (void *)RawSetColorRGB);
-  scAdd_External_Symbol("RefreshMouse",(void *)RefreshMouse);
   scAdd_External_Symbol("ReleaseCharacterView",(void *)ReleaseCharacterView);
   scAdd_External_Symbol("ReleaseViewport",(void *)ReleaseViewport);
   scAdd_External_Symbol("RemoveObjectTint",(void *)RemoveObjectTint);
@@ -24642,7 +24210,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("RunObjectInteraction", (void *)RunObjectInteraction);
   scAdd_External_Symbol("RunRegionInteraction", (void *)RunRegionInteraction);
 
-  scAdd_External_Symbol("SaveCursorForLocationChange",(void *)SaveCursorForLocationChange);
+
   scAdd_External_Symbol("SaveGameDialog",(void *)save_game_dialog);
   scAdd_External_Symbol("SaveGameSlot",(void *)save_game);
   scAdd_External_Symbol("SaveScreenShot",(void *)SaveScreenShot);
@@ -24698,9 +24266,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetLabelColor",(void *)SetLabelColor);
   scAdd_External_Symbol("SetLabelFont",(void *)SetLabelFont);
   scAdd_External_Symbol("SetLabelText",(void *)SetLabelText);
-  scAdd_External_Symbol("SetMouseBounds",(void *)SetMouseBounds);
-  scAdd_External_Symbol("SetMouseCursor",(void *)set_mouse_cursor);
-  scAdd_External_Symbol("SetMousePosition",(void *)SetMousePosition);
+
   scAdd_External_Symbol("SetMultitaskingMode",(void *)SetMultitasking);
   scAdd_External_Symbol("SetMusicMasterVolume",(void *)SetMusicMasterVolume);
   scAdd_External_Symbol("SetMusicRepeat",(void *)SetMusicRepeat);
@@ -24740,7 +24306,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetWalkBehindBase",(void *)SetWalkBehindBase);
   scAdd_External_Symbol("ShakeScreen",(void *)ShakeScreen);
   scAdd_External_Symbol("ShakeScreenBackground",(void *)ShakeScreenBackground);
-  scAdd_External_Symbol("ShowMouseCursor",(void *)ShowMouseCursor);
   scAdd_External_Symbol("SkipUntilCharacterStops",(void *)SkipUntilCharacterStops);
   scAdd_External_Symbol("StartCutscene", (void *)StartCutscene);
   scAdd_External_Symbol("StartRecording", (void *)scStartRecording);
@@ -24759,7 +24324,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("WaitMouseKey",(void *)WaitMouseKey);
   scAdd_External_Symbol("game",&play);
   scAdd_External_Symbol("gs_globals",&play.globalvars[0]);
-  scAdd_External_Symbol("mouse",&scmouse);
   scAdd_External_Symbol("palette",&palette[0]);
   scAdd_External_Symbol("system",&scsystem);
   scAdd_External_Symbol("savegameindex",&play.filenumbers[0]);

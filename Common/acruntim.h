@@ -181,10 +181,6 @@ struct RoomStatus {
 #endif
 };
 
-// The text script's "mouse" struct
-struct ScriptMouse {
-  int x,y;
-};
 
 // The text script's "system" struct
 struct ScriptSystem {
@@ -872,12 +868,10 @@ extern ObjectCache objcache[MAX_INIT_SPR];
 extern ExecutingScript *curscript;
 extern PluginObjectReader pluginReaders[MAX_PLUGIN_OBJECT_READERS];
 
-#define DOMOUSE_NOCURSOR 5
 #include "mousew32.h"
 
 extern const char *get_engine_version();
 extern void quitprintf(char*texx, ...) ;
-extern void RefreshMouse();
 extern void PluginSimulateMouseClick(int pluginButtonID);
 extern int  run_script_function_if_exist(ccInstance*sci,char*tsname,int numParam, int iparam, int iparam2, int iparam3 = 0) ;
 extern int  IsChannelPlaying(int chan) ;
@@ -922,7 +916,6 @@ extern block GetCharacterImage(int charid, int *isFlipped);
 extern int  my_getpixel(BITMAP *blk, int x, int y);
 extern void update_invorder();
 extern int  GetRegionAt (int xxx, int yyy);
-extern void SetNextCursor();
 extern void SetActiveInventory(int iit);
 extern void _DisplaySpeechCore(int chid, char *displbuf);
 extern void _DisplayThoughtCore(int chid, const char *displbuf);
@@ -930,10 +923,6 @@ extern int  DisplaySpeechBackground(int charid,char*speel);
 extern void DisplaySpeechAt (int xx, int yy, int wii, int aschar, char*spch);
 extern char *get_translation(const char*);
 extern int  can_see_from(int,int,int,int);
-extern int  GetCursorMode();
-extern void disable_cursor_mode(int);
-extern void enable_cursor_mode(int);
-extern void set_cursor_mode(int);
 extern void update_inv_cursor(int invnum);
 extern void setup_player_character(int charid);
 extern int  find_overlay_of_type(int typ);

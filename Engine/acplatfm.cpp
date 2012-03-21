@@ -15,6 +15,7 @@
 #include "bmp.h"
 #include "acplatfm.h"
 #include "ac_string.h"
+#include "ac_mouse.h"
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;
 

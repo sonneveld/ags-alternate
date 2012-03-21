@@ -1,6 +1,8 @@
 #ifndef _MOUSEW32_H_HEADER
 #define _MOUSEW32_H_HEADER
 
+#define DOMOUSE_NOCURSOR 5
+
 enum {NONE=-1, LEFT=0, RIGHT=1, MIDDLE=2};
 
 extern char currentcursor;
