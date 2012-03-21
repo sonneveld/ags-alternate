@@ -13,8 +13,8 @@
 */
 
 #include "bmp.h"
-
 #include "acplatfm.h"
+#include "ac_string.h"
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;
 

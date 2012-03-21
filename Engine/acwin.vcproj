@@ -383,6 +383,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_string.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\acaudio.cpp"
 				>
 			</File>
@@ -1057,6 +1061,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_scr_obj.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_string.h"
 				>
 			</File>
 			<File

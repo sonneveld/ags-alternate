@@ -20,6 +20,7 @@
 #include <math.h>
 #include "routefnd.h"
 #include "ac.h"
+#include "ac_string.h"
 
 
 // order of loops to turn character in circle from down to down

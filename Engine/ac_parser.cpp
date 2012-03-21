@@ -1,6 +1,7 @@
 
 
 #include "ac.h"
+#include "ac_string.h"
 
 /* *** SCRIPT SYMBOL: [Parser] SaidUnknownWord *** */
 int SaidUnknownWord (char*buffer) {

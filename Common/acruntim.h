@@ -371,19 +371,7 @@ struct CCAudioClip : AGSCCDynamicObject {
   virtual void Unserialize(int index, const char *serializedData, int dataSize);
 };
 
-struct ScriptString : AGSCCDynamicObject, ICCStringClass {
-  char *text;
 
-  virtual int Dispose(const char *address, bool force);
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-
-  virtual void* CreateString(const char *fromText);
-
-  ScriptString();
-  ScriptString(const char *fromText);
-};
 
 #define INVALID_X  30000
 #define MAXGSVALUES 500
@@ -948,7 +936,6 @@ extern void enable_cursor_mode(int);
 extern void set_cursor_mode(int);
 extern void update_inv_cursor(int invnum);
 extern void setup_player_character(int charid);
-extern void my_sprintf(char *buffer, const char *fmt, va_list ap);
 extern int  find_overlay_of_type(int typ);
 extern void run_on_event (int evtype, int wparam);
 extern int  get_character_currently_talking();
@@ -961,7 +948,6 @@ extern int GetScalingAt (int x, int y) ;
 extern int wgettextwidth_compensate(const char *tex, int font) ;
 extern void add_dynamic_sprite (int gotSlot, block redin, bool hasAlpha = false);
 extern void free_dynamic_sprite (int gotSlot);
-const char* CreateNewScriptString(const char *fromText, bool reAllocate = true);
 extern void convert_move_path_to_high_res(MoveList *ml);
 extern void register_audio_script_objects();
 extern void register_audio_script_functions();

@@ -1,0 +1,1 @@
+This seems to mostly be from DirectX SDK April 2007 Lib/x86/*.lib except for dxguid.lib.
