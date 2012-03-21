@@ -16,6 +16,7 @@
 #include "acplatfm.h"
 #include "ac_string.h"
 #include "ac_mouse.h"
+#include "ac_room.h"
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;
 

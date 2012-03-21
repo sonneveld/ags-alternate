@@ -387,6 +387,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_room.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_scr_obj.cpp"
 				>
 			</File>
@@ -1073,6 +1077,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_parser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_room.h"
 				>
 			</File>
 			<File

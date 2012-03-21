@@ -933,7 +933,6 @@ extern void update_music_volume();
 extern void newmusic(int);
 extern void PlayAmbientSound (int channel, int sndnum, int vol, int x, int y);
 extern void* ccGetSymbolAddress (char*);
-extern int GetScalingAt (int x, int y) ;
 extern int wgettextwidth_compensate(const char *tex, int font) ;
 extern void add_dynamic_sprite (int gotSlot, block redin, bool hasAlpha = false);
 extern void free_dynamic_sprite (int gotSlot);

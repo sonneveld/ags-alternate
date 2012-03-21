@@ -77,6 +77,7 @@ extern int our_eip;
 #include "ac_string.h"
 #include "ac_maths.h"
 #include "ac_mouse.h"
+#include "ac_room.h"
 
 // Allegro 4 has switched 15-bit colour to BGR instead of RGB, so
 // in this case we need to convert the graphics on load
@@ -371,6 +372,7 @@ struct NonBlockingScriptFunction
 
 // **** GLOBALS ****
 struct GlobalMouseState global_mouse_state;
+struct GlobalRoomState global_room_state;
 char *music_file;
 char *speech_file;
 WCHAR directoryPathBuffer[MAX_PATH];
@@ -7825,40 +7827,6 @@ int construct_object_gfx(int aa, int *drawnWidth, int *drawnHeight, bool alwaysU
   return 0;
 }
 
-/* *** SCRIPT SYMBOL: [Room] GetScalingAt *** */
-int GetScalingAt (int x, int y) {
-  int onarea = get_walkable_area_pixel(x, y);
-  if (onarea < 0)
-    return 100;
-
-  return get_area_scaling (onarea, x, y);
-}
-
-/* *** SCRIPT SYMBOL: [Room] SetAreaScaling *** */
-void SetAreaScaling(int area, int min, int max) {
-  if ((area < 0) || (area > MAX_WALK_AREAS))
-    quit("!SetAreaScaling: invalid walkalbe area");
-
-  if (min > max)
-    quit("!SetAreaScaling: min > max");
-
-  if ((min < 5) || (max < 5) || (min > 200) || (max > 200))
-    quit("!SetAreaScaling: min and max must be in range 5-200");
-
-  // the values are stored differently
-  min -= 100;
-  max -= 100;
-  
-  if (min == max) {
-    thisroom.walk_area_zoom[area] = min;
-    thisroom.walk_area_zoom2[area] = NOT_VECTOR_SCALED;
-  }
-  else {
-    thisroom.walk_area_zoom[area] = min;
-    thisroom.walk_area_zoom2[area] = max;
-  }
-}
-
 // This is only called from draw_screen_background, but it's seperated
 // to help with profiling the program
 void prepare_objects_for_drawing() {
@@ -13676,7 +13644,7 @@ void DisplayThought(int chid, const char*texx, ...) {
   _DisplayThoughtCore(chid, displbuf);
 }
 
-void replace_tokens(char*srcmes,char*destm, int maxlen = 99999) {
+void replace_tokens(char*srcmes,char*destm, int maxlen) {
   int indxdest=0,indxsrc=0;
   char*srcp,*destp;
   while (srcmes[indxsrc]!=0) {
@@ -13755,22 +13723,6 @@ void get_message_text (int msnum, char *buffer, char giveErr) {
 
 }
 
-/* *** SCRIPT SYMBOL: [Room] GetMessageText *** */
-void GetMessageText (int msg, char *buffer) {
-  VALIDATE_STRING(buffer);
-  get_message_text (msg, buffer, 0);
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::geti_Messages *** */
-const char* Room_GetMessages(int index) {
-  if ((index < 0) || (index >= thisroom.nummes)) {
-    return NULL;
-  }
-  char buffer[STD_BUFFER_SIZE];
-  buffer[0]=0;
-  replace_tokens(get_translation(thisroom.message[index]), buffer, STD_BUFFER_SIZE);
-  return CreateNewScriptString(buffer);
-}
 
 /* *** SCRIPT SYMBOL: [Game] Game::geti_GlobalMessages *** */
 const char* Game_GetGlobalMessages(int index) {
@@ -14532,68 +14484,6 @@ int Object_GetGraphic(ScriptObject *objj) {
   return GetObjectGraphic(objj->id);
 }
 
-#define OVERLAPPING_OBJECT 1000
-struct Rect {
-  int x1,y1,x2,y2;
-};
-
-int GetThingRect(int thing, Rect *rect) {
-  if (is_valid_character(thing)) {
-    if (game.chars[thing].room != displayed_room)
-      return 0;
-    
-    int charwid = divide_down_coordinate(GetCharacterWidth(thing));
-    rect->x1 = game.chars[thing].x - (charwid / 2);
-    rect->x2 = rect->x1 + charwid;
-    rect->y1 = game.chars[thing].get_effective_y() - divide_down_coordinate(GetCharacterHeight(thing));
-    rect->y2 = game.chars[thing].get_effective_y();
-  }
-  else if (is_valid_object(thing - OVERLAPPING_OBJECT)) {
-    int objid = thing - OVERLAPPING_OBJECT;
-    if (objs[objid].on != 1)
-      return 0;
-    rect->x1 = objs[objid].x;
-    rect->x2 = objs[objid].x + divide_down_coordinate(objs[objid].get_width());
-    rect->y1 = objs[objid].y - divide_down_coordinate(objs[objid].get_height());
-    rect->y2 = objs[objid].y;
-  }
-  else
-    quit("!AreThingsOverlapping: invalid parameter");
-
-  return 1;
-}
-
-/* *** SCRIPT SYMBOL: [Room] AreThingsOverlapping *** */
-int AreThingsOverlapping(int thing1, int thing2) {
-  Rect r1, r2;
-  // get the bounding rectangles, and return 0 if the object/char
-  // is currently turned off
-  if (GetThingRect(thing1, &r1) == 0)
-    return 0;
-  if (GetThingRect(thing2, &r2) == 0)
-    return 0;
-
-  if ((r1.x2 > r2.x1) && (r1.x1 < r2.x2) &&
-      (r1.y2 > r2.y1) && (r1.y1 < r2.y2)) {
-    // determine how far apart they are
-    // take the smaller of the X distances as the overlapping amount
-    int xdist = abs(r1.x2 - r2.x1);
-    if (abs(r1.x1 - r2.x2) < xdist)
-      xdist = abs(r1.x1 - r2.x2);
-    // take the smaller of the Y distances
-    int ydist = abs(r1.y2 - r2.y1);
-    if (abs(r1.y1 - r2.y2) < ydist)
-      ydist = abs(r1.y1 - r2.y2);
-    // the overlapping amount is the smaller of the X and Y ovrlap
-    if (xdist < ydist)
-      return xdist;
-    else
-      return ydist;
-//    return 1;
-  }
-  return 0;
-}
-
 /* *** SCRIPT SYMBOL: [Object] AreObjectsColliding *** */
 int AreObjectsColliding(int obj1,int obj2) {
   if ((!is_valid_object(obj1)) | (!is_valid_object(obj2)))
@@ -14701,28 +14591,6 @@ int WaitMouseKey(int nloops) {
   if (play.wait_counter < 0)
     return 1;
   return 0;
-}
-
-
-/* *** SCRIPT SYMBOL: [Room] Room::GetDrawingSurfaceForBackground^1 *** */
-ScriptDrawingSurface* Room_GetDrawingSurfaceForBackground(int backgroundNumber)
-{
-  if (displayed_room < 0)
-    quit("!Room.GetDrawingSurfaceForBackground: no room is currently loaded");
-
-  if (backgroundNumber == SCR_NO_VALUE)
-  {
-    backgroundNumber = play.bg_frame;
-  }
-
-  if ((backgroundNumber < 0) || (backgroundNumber >= thisroom.num_bscenes))
-    quit("!Room.GetDrawingSurfaceForBackground: invalid background number specified");
-
-
-  ScriptDrawingSurface *surface = new ScriptDrawingSurface();
-  surface->roomBackgroundNumber = backgroundNumber;
-  ccRegisterManagedObject(surface, surface);
-  return surface;
 }
 
 
@@ -16133,50 +16001,6 @@ int Game_DoOnceOnly(const char *token)
   return 1;
 }
 
-/* *** SCRIPT SYMBOL: [Room] Room::get_ObjectCount *** */
-int Room_GetObjectCount() {
-  return croom->numobj;
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_Width *** */
-int Room_GetWidth() {
-  return thisroom.width;
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_Height *** */
-int Room_GetHeight() {
-  return thisroom.height;
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_ColorDepth *** */
-int Room_GetColorDepth() {
-  return bitmap_color_depth(thisroom.ebscene[0]);
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_LeftEdge *** */
-int Room_GetLeftEdge() {
-  return thisroom.left;
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_RightEdge *** */
-int Room_GetRightEdge() {
-  return thisroom.right;
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_TopEdge *** */
-int Room_GetTopEdge() {
-  return thisroom.top;
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_BottomEdge *** */
-int Room_GetBottomEdge() {
-  return thisroom.bottom;
-}
-
-/* *** SCRIPT SYMBOL: [Room] Room::get_MusicOnLoad *** */
-int Room_GetMusicOnLoad() {
-  return thisroom.options[ST_TUNE];
-}
 
 /* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Flipped *** */
 int ViewFrame_GetFlipped(ScriptViewFrame *svf) {
@@ -16598,10 +16422,6 @@ int Object_GetProperty (ScriptObject *objj, const char *property) {
   return GetObjectProperty(objj->id, property);
 }
 
-/* *** SCRIPT SYMBOL: [Room] GetRoomProperty *** */
-int GetRoomProperty (const char *property) {
-  return get_int_property (&thisroom.roomProps, property);
-}
 
 
 /* *** SCRIPT SYMBOL: [InventoryItem] GetInvPropertyText *** */
@@ -16652,14 +16472,7 @@ void Object_GetPropertyText(ScriptObject *objj, const char *property, char *bufe
 const char* Object_GetTextProperty(ScriptObject *objj, const char *property) {
   return get_text_property_dynamic_string(&thisroom.objProps[objj->id], property);
 }
-/* *** SCRIPT SYMBOL: [Room] GetRoomPropertyText *** */
-void GetRoomPropertyText (const char *property, char *bufer) {
-  get_text_property (&thisroom.roomProps, property, bufer);
-}
-/* *** SCRIPT SYMBOL: [Room] Room::GetTextProperty^1 *** */
-const char* Room_GetTextProperty(const char *property) {
-  return get_text_property_dynamic_string(&thisroom.roomProps, property);
-}
+
 
 // end custom property functions
 
@@ -16836,23 +16649,6 @@ int do_movelist_move(short*mlnum,int*xx,int*yy) {
   return need_to_fix_sprite;
   }
 
-/* *** SCRIPT SYMBOL: [Room] RemoveWalkableArea *** */
-void RemoveWalkableArea(int areanum) {
-  if ((areanum<1) | (areanum>15))
-    quit("!RemoveWalkableArea: invalid area number specified (1-15).");
-  play.walkable_areas_on[areanum]=0;
-  redo_walkable_areas();
-  DEBUG_CONSOLE("Walkable area %d removed", areanum);
-}
-
-/* *** SCRIPT SYMBOL: [Room] RestoreWalkableArea *** */
-void RestoreWalkableArea(int areanum) {
-  if ((areanum<1) | (areanum>15))
-    quit("!RestoreWalkableArea: invalid area number specified (1-15).");
-  play.walkable_areas_on[areanum]=1;
-  redo_walkable_areas();
-  DEBUG_CONSOLE("Walkable area %d restored", areanum);
-}
 
 /* *** SCRIPT SYMBOL: [Hotspot] DisableHotspot *** */
 void DisableHotspot(int hsnum) {
@@ -16922,39 +16718,6 @@ int Region_GetEnabled(ScriptRegion *ssr) {
 /* *** SCRIPT SYMBOL: [Region] Region::get_ID *** */
 int Region_GetID(ScriptRegion *ssr) {
   return ssr->id;
-}
-
-/* *** SCRIPT SYMBOL: [Room] DisableGroundLevelAreas *** */
-void DisableGroundLevelAreas(int alsoEffects) {
-  if ((alsoEffects < 0) || (alsoEffects > 1))
-    quit("!DisableGroundLevelAreas: invalid parameter: must be 0 or 1");
-
-  play.ground_level_areas_disabled = GLED_INTERACTION;
-
-  if (alsoEffects)
-    play.ground_level_areas_disabled |= GLED_EFFECTS;
-
-  DEBUG_CONSOLE("Ground-level areas disabled");
-}
-
-/* *** SCRIPT SYMBOL: [Room] EnableGroundLevelAreas *** */
-void EnableGroundLevelAreas() {
-  play.ground_level_areas_disabled = 0;
-
-  DEBUG_CONSOLE("Ground-level areas re-enabled");
-}
-
-/* *** SCRIPT SYMBOL: [Room] SetWalkBehindBase *** */
-void SetWalkBehindBase(int wa,int bl) {
-  if ((wa < 1) || (wa >= MAX_OBJ))
-    quit("!SetWalkBehindBase: invalid walk-behind area specified");
-
-  if (bl != croom->walkbehind_base[wa]) {
-    walk_behind_baselines_changed = 1;
-    invalidate_cached_walkbehinds();
-    croom->walkbehind_base[wa] = bl;
-    DEBUG_CONSOLE("Walk-behind %d baseline changed to %d", wa, bl);
-  }
 }
 
 /* *** SCRIPT SYMBOL: [Screen] FlipScreen *** */
@@ -19447,29 +19210,6 @@ void NewRoomNPC(int charid, int nrnum, int newx, int newy) {
   Character_ChangeRoom(&game.chars[charid], nrnum, newx, newy);
 }
 
-/* *** SCRIPT SYMBOL: [Room] ResetRoom *** */
-void ResetRoom(int nrnum) {
-  if (nrnum == displayed_room)
-    quit("!ResetRoom: cannot reset current room");
-  if ((nrnum<0) | (nrnum>=MAX_ROOMS))
-    quit("!ResetRoom: invalid room number");
-  if (roomstats[nrnum].beenhere) {
-    if (roomstats[nrnum].tsdata!=NULL)
-      free(roomstats[nrnum].tsdata);
-    roomstats[nrnum].tsdata=NULL;
-    roomstats[nrnum].tsdatasize=0;
-    }
-  roomstats[nrnum].beenhere=0;
-  DEBUG_CONSOLE("Room %d reset to original state", nrnum);
-}
-
-/* *** SCRIPT SYMBOL: [Room] HasPlayerBeenInRoom *** */
-int HasPlayerBeenInRoom(int roomnum) {
-  if ((roomnum < 0) || (roomnum >= MAX_ROOMS))
-    return 0;
-  return roomstats[roomnum].beenhere;
-}
-
 /* *** SCRIPT SYMBOL: [Game] SetRestartPoint *** */
 void SetRestartPoint() {
   save_game(RESTART_POINT_SAVE_GAME_NUMBER, "Restart Game Auto-Save");
@@ -19855,18 +19595,6 @@ ScriptHotspot *GetHotspotAtLocation(int xx, int yy) {
   return &scrHotspot[hsnum];
 }
 
-/* *** SCRIPT SYMBOL: [Room] GetWalkableAreaAt *** */
-int GetWalkableAreaAt(int xxx,int yyy) {
-  xxx += divide_down_coordinate(offsetx);
-  yyy += divide_down_coordinate(offsety);
-  if ((xxx>=thisroom.width) | (xxx<0) | (yyy<0) | (yyy>=thisroom.height))
-    return 0;
-  int result = get_walkable_area_pixel(xxx, yyy);
-  if (result <= 0)
-    return 0;
-  return result;
-}
-
 // allowHotspot0 defines whether Hotspot 0 returns LOCTYPE_HOTSPOT
 // or whether it returns 0
 int __GetLocationType(int xxx,int yyy, int allowHotspot0) {
@@ -20169,11 +19897,6 @@ void Object_Move(ScriptObject *objj, int x, int y, int speed, int blocking, int 
     quit("Object.Move: invalid BLOCKING paramter");
 }
 
-/* *** SCRIPT SYMBOL: [Room] GetPlayerCharacter *** */
-int GetPlayerCharacter() {
-  return game.playercharacter;
-  }
-
 /* *** SCRIPT SYMBOL: [Character] SetCharacterSpeedEx *** */
 void SetCharacterSpeedEx(int chaa, int xspeed, int yspeed) {
   if (!is_valid_character(chaa))
@@ -20425,80 +20148,6 @@ void MoveCharacterBlocking(int chaa,int xx,int yy,int direct) {
   buffr[199]=0;
   }*/
 
-/* *** SCRIPT SYMBOL: [Room] SetViewport *** */
-void SetViewport(int offsx,int offsy) {
-  DEBUG_CONSOLE("Viewport locked to %d,%d", offsx, offsy);
-  offsetx = multiply_up_coordinate(offsx);
-  offsety = multiply_up_coordinate(offsy);
-  check_viewport_coords();
-  play.offsets_locked = 1;
-}
-/* *** SCRIPT SYMBOL: [Room] ReleaseViewport *** */
-void ReleaseViewport() {
-  play.offsets_locked = 0;
-  DEBUG_CONSOLE("Viewport released back to engine control");
-}
-/* *** SCRIPT SYMBOL: [Room] GetViewportX *** */
-int GetViewportX () {
-  return divide_down_coordinate(offsetx);
-  }
-/* *** SCRIPT SYMBOL: [Room] GetViewportY *** */
-int GetViewportY () {
-  return divide_down_coordinate(offsety);
-  }
-
-void on_background_frame_change () {
-
-  invalidate_screen();
-  mark_current_background_dirty();
-  invalidate_cached_walkbehinds();
-
-  // get the new frame's palette
-  memcpy (palette, thisroom.bpalettes[play.bg_frame], sizeof(color) * 256);
-
-  // hi-colour, update the palette. It won't have an immediate effect
-  // but will be drawn properly when the screen fades in
-  if (game.color_depth > 1)
-    setpal();
-
-  if (in_enters_screen)
-    return;
-
-  // Don't update the palette if it hasn't changed
-  if (thisroom.ebpalShared[play.bg_frame])
-    return;
-
-  // 256-colours, tell it to update the palette (will actually be done as
-  // close as possible to the screen update to prevent flicker problem)
-  if (game.color_depth == 1)
-    bg_just_changed = 1;
-}
-
-/* *** SCRIPT SYMBOL: [Room] SetBackgroundFrame *** */
-void SetBackgroundFrame(int frnum) {
-  if ((frnum<-1) | (frnum>=thisroom.num_bscenes))
-    quit("!SetBackgrondFrame: invalid frame number specified");
-  if (frnum<0) {
-    play.bg_frame_locked=0;
-    return;
-  }
-
-  play.bg_frame_locked = 1;
-
-  if (frnum == play.bg_frame)
-  {
-    // already on this frame, do nothing
-    return;
-  }
-
-  play.bg_frame = frnum;
-  on_background_frame_change ();
-}
-
-/* *** SCRIPT SYMBOL: [Room] GetBackgroundFrame *** */
-int GetBackgroundFrame() {
-  return play.bg_frame;
-  }
 
 /* *** SCRIPT SYMBOL: [Game] Debug *** */
 void script_debug(int cmdd,int dataa) {
@@ -23955,19 +23604,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("System::set_VSync", (void *)System_SetVsync);
   scAdd_External_Symbol("System::get_Windowed", (void *)System_GetWindowed);
 
-  scAdd_External_Symbol("Room::GetDrawingSurfaceForBackground^1", (void *)Room_GetDrawingSurfaceForBackground);
-  scAdd_External_Symbol("Room::GetTextProperty^1",(void *)Room_GetTextProperty);
-  scAdd_External_Symbol("Room::get_BottomEdge", (void *)Room_GetBottomEdge);
-  scAdd_External_Symbol("Room::get_ColorDepth", (void *)Room_GetColorDepth);
-  scAdd_External_Symbol("Room::get_Height", (void *)Room_GetHeight);
-  scAdd_External_Symbol("Room::get_LeftEdge", (void *)Room_GetLeftEdge);
-  scAdd_External_Symbol("Room::geti_Messages",(void *)Room_GetMessages);
-  scAdd_External_Symbol("Room::get_MusicOnLoad", (void *)Room_GetMusicOnLoad);
-  scAdd_External_Symbol("Room::get_ObjectCount", (void *)Room_GetObjectCount);
-  scAdd_External_Symbol("Room::get_RightEdge", (void *)Room_GetRightEdge);
-  scAdd_External_Symbol("Room::get_TopEdge", (void *)Room_GetTopEdge);
-  scAdd_External_Symbol("Room::get_Width", (void *)Room_GetWidth);
-
+  register_room_script_functions();
   register_parser_script_functions();
 
   scAdd_External_Symbol("ViewFrame::get_Flipped", (void *)ViewFrame_GetFlipped);
@@ -23993,7 +23630,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("AreCharactersColliding",(void *)AreCharactersColliding);
   scAdd_External_Symbol("AreCharObjColliding",(void *)AreCharObjColliding);
   scAdd_External_Symbol("AreObjectsColliding",(void *)AreObjectsColliding);
-  scAdd_External_Symbol("AreThingsOverlapping",(void *)AreThingsOverlapping);
   scAdd_External_Symbol("CallRoomScript",(void *)CallRoomScript);
   scAdd_External_Symbol("CDAudio",(void *)cd_manager);
   scAdd_External_Symbol("CentreGUI",(void *)CentreGUI);
@@ -24006,7 +23642,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("DeleteSaveSlot",(void *)DeleteSaveSlot);
   scAdd_External_Symbol("DeleteSprite",(void *)free_dynamic_sprite);
   scAdd_External_Symbol("DisableCursorMode",(void *)disable_cursor_mode);
-  scAdd_External_Symbol("DisableGroundLevelAreas",(void *)DisableGroundLevelAreas);
   scAdd_External_Symbol("DisableHotspot",(void *)DisableHotspot);
   scAdd_External_Symbol("DisableInterface",(void *)DisableInterface);
   scAdd_External_Symbol("DisableRegion",(void *)DisableRegion);
@@ -24022,7 +23657,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("DisplayThought",(void *)DisplayThought);
   scAdd_External_Symbol("DisplayTopBar",(void *)DisplayTopBar);
   scAdd_External_Symbol("EnableCursorMode",(void *)enable_cursor_mode);
-  scAdd_External_Symbol("EnableGroundLevelAreas",(void *)EnableGroundLevelAreas);
   scAdd_External_Symbol("EnableHotspot",(void *)EnableHotspot);
   scAdd_External_Symbol("EnableInterface",(void *)EnableInterface);
   scAdd_External_Symbol("EnableRegion",(void *)EnableRegion);
@@ -24047,7 +23681,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("FlipScreen",(void *)FlipScreen);
   scAdd_External_Symbol("FollowCharacter",(void *)FollowCharacter);
   scAdd_External_Symbol("FollowCharacterEx",(void *)FollowCharacterEx);
-  scAdd_External_Symbol("GetBackgroundFrame",(void *)GetBackgroundFrame);
   scAdd_External_Symbol("GetButtonPic",(void *)GetButtonPic);
   scAdd_External_Symbol("GetCharacterAt",(void *)GetCharacterAt);
   scAdd_External_Symbol("GetCharacterProperty",(void *)GetCharacterProperty);
@@ -24077,7 +23710,6 @@ void setup_script_exports() {
   //scAdd_External_Symbol("GetLanguageString",(void *)GetLanguageString);
   scAdd_External_Symbol("GetLocationName",(void *)GetLocationName);
   scAdd_External_Symbol("GetLocationType",(void *)GetLocationType);
-  scAdd_External_Symbol("GetMessageText", (void *)GetMessageText);
   scAdd_External_Symbol("GetMIDIPosition", (void *)GetMIDIPosition);
   scAdd_External_Symbol("GetMP3PosMillis", (void *)GetMP3PosMillis);
   scAdd_External_Symbol("GetObjectAt",(void *)GetObjectAt);
@@ -24089,10 +23721,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetObjectX",(void *)GetObjectX);
   scAdd_External_Symbol("GetObjectY",(void *)GetObjectY);
 //  scAdd_External_Symbol("GetPalette",(void *)scGetPal);
-  scAdd_External_Symbol("GetPlayerCharacter",(void *)GetPlayerCharacter);
   scAdd_External_Symbol("GetRegionAt",(void *)GetRegionAt);
-  scAdd_External_Symbol("GetRoomProperty",(void *)GetRoomProperty);
-  scAdd_External_Symbol("GetRoomPropertyText",(void *)GetRoomPropertyText);
   scAdd_External_Symbol("GetSaveSlotDescription",(void *)GetSaveSlotDescription);
   scAdd_External_Symbol("GetScalingAt",(void *)GetScalingAt);
   scAdd_External_Symbol("GetSliderValue",(void *)GetSliderValue);
@@ -24102,11 +23731,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetTime",(void *)sc_GetTime);
   scAdd_External_Symbol("GetTranslation", (void *)get_translation);
   scAdd_External_Symbol("GetTranslationName", (void *)GetTranslationName);
-  scAdd_External_Symbol("GetViewportX",(void *)GetViewportX);
-  scAdd_External_Symbol("GetViewportY",(void *)GetViewportY);
-  scAdd_External_Symbol("GetWalkableAreaAt",(void *)GetWalkableAreaAt);
   scAdd_External_Symbol("GiveScore",(void *)GiveScore);
-  scAdd_External_Symbol("HasPlayerBeenInRoom",(void *)HasPlayerBeenInRoom);
   scAdd_External_Symbol("InputBox",(void *)sc_inputbox);
   scAdd_External_Symbol("InterfaceOff",(void *)InterfaceOff);
   scAdd_External_Symbol("InterfaceOn",(void *)InterfaceOn);
@@ -24193,15 +23818,11 @@ void setup_script_exports() {
   scAdd_External_Symbol("RawSetColor", (void *)RawSetColor);
   scAdd_External_Symbol("RawSetColorRGB", (void *)RawSetColorRGB);
   scAdd_External_Symbol("ReleaseCharacterView",(void *)ReleaseCharacterView);
-  scAdd_External_Symbol("ReleaseViewport",(void *)ReleaseViewport);
   scAdd_External_Symbol("RemoveObjectTint",(void *)RemoveObjectTint);
   scAdd_External_Symbol("RemoveOverlay",(void *)RemoveOverlay);
-  scAdd_External_Symbol("RemoveWalkableArea",(void *)RemoveWalkableArea);
-  scAdd_External_Symbol("ResetRoom",(void *)ResetRoom);
   scAdd_External_Symbol("RestartGame",(void *)restart_game);
   scAdd_External_Symbol("RestoreGameDialog",(void *)restore_game_dialog);
   scAdd_External_Symbol("RestoreGameSlot",(void *)RestoreGameSlot);
-  scAdd_External_Symbol("RestoreWalkableArea",(void *)RestoreWalkableArea);
   scAdd_External_Symbol("RunAGSGame", (void *)RunAGSGame);
   scAdd_External_Symbol("RunCharacterInteraction",(void *)RunCharacterInteraction);
   scAdd_External_Symbol("RunDialog",(void *)RunDialog);
@@ -24220,8 +23841,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetActiveInventory",(void *)SetActiveInventory);
   scAdd_External_Symbol("SetAmbientTint",(void *)SetAmbientTint);
   scAdd_External_Symbol("SetAreaLightLevel",(void *)SetAreaLightLevel);
-  scAdd_External_Symbol("SetAreaScaling",(void *)SetAreaScaling);
-  scAdd_External_Symbol("SetBackgroundFrame",(void *)SetBackgroundFrame);
   scAdd_External_Symbol("SetButtonPic",(void *)SetButtonPic);
   scAdd_External_Symbol("SetButtonText",(void *)SetButtonText);
   scAdd_External_Symbol("SetChannelVolume",(void *)SetChannelVolume);
@@ -24301,9 +23920,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetTextOverlay",(void *)SetTextOverlay);
   scAdd_External_Symbol("SetTextWindowGUI",(void *)SetTextWindowGUI);
   scAdd_External_Symbol("SetTimer",(void *)script_SetTimer);
-  scAdd_External_Symbol("SetViewport",(void *)SetViewport);
   scAdd_External_Symbol("SetVoiceMode",(void *)SetVoiceMode);
-  scAdd_External_Symbol("SetWalkBehindBase",(void *)SetWalkBehindBase);
   scAdd_External_Symbol("ShakeScreen",(void *)ShakeScreen);
   scAdd_External_Symbol("ShakeScreenBackground",(void *)ShakeScreenBackground);
   scAdd_External_Symbol("SkipUntilCharacterStops",(void *)SkipUntilCharacterStops);

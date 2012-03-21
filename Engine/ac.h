@@ -124,4 +124,22 @@ extern void invalidate_sprite(int x1, int y1, IDriverDependantBitmap *pic);
 extern struct GlobalMouseState global_mouse_state;
 extern GUIMain*guis;
 
+// for ac_room.cpp
+extern int get_walkable_area_pixel(int x, int y);
+extern int get_area_scaling (int onarea, int xx, int yy);
+extern void get_message_text (int msnum, char *buffer, char giveErr);
+extern void replace_tokens(char*srcmes,char*destm, int maxlen = 99999);
+extern int GetCharacterHeight(int charid);
+extern int get_int_property (CustomProperties *cprop, const char *property);
+extern void get_text_property (CustomProperties *cprop, const char *property, char *bufer) ;
+extern const char* get_text_property_dynamic_string(CustomProperties *cprop, const char *property) ;
+extern void redo_walkable_areas() ;
+extern void check_viewport_coords() ;
+extern void mark_current_background_dirty();
+extern void invalidate_cached_walkbehinds() ;
+extern void setpal();
+extern RoomStatus *roomstats;
+extern int walk_behind_baselines_changed ;
+extern int bg_just_changed;
+
 #endif
