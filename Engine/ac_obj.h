@@ -1,7 +1,10 @@
 #ifndef _AC_SCR_OBJ_H_HEADER
 #define _AC_SCR_OBJ_H_HEADER
 
-#include "acroom.h"
+// forward declarations:
+#include "allegro.h"    // for BITMAP
+typedef BITMAP *block;  // wgt2allh.h
+class MoveList;         // acroom.h
 
 extern int check_click_on_object(int xx,int yy,int mood);
 extern int GetObjectAt(int xx,int yy) ;

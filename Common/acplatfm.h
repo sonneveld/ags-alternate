@@ -15,11 +15,10 @@
 #endif
 
 #include "wgt2allg.h"
-#include "acroom.h"
 #include "acruntim.h"
-#include "acsound.h"
-#include "cscomp.h"
-#include "ali3d.h"
+
+// forward declarations:
+class IGraphicsDriver; // ali3d.h
 
 #ifdef WINDOWS_VERSION
 #include <ddraw.h>

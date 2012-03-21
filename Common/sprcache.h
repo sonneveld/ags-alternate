@@ -13,6 +13,12 @@
 #ifndef __SPRCACHE_H
 #define __SPRCACHE_H
 
+#include <stdio.h>
+
+// forward declarations:
+#include "allegro.h"        // for BITMAP
+typedef BITMAP *block;      // wgt2allh.h
+
 // We can't rely on offsets[slot]==0 because when the engine is running
 // this is changed to reference the Bluecup sprite. Therefore we need
 // a definite way of knowing whether the sprite existed in the sprite file.

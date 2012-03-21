@@ -14,7 +14,7 @@
 #define __CSCOMP_H
 #include <stdio.h>
 #include <string.h>
-#include "fmem.h"
+//#include "fmem.h"
 
 #define SCOM_VERSION 89
 #define SCOM_VERSIONSTR "0.89"

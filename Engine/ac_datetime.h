@@ -1,7 +1,7 @@
 #ifndef _AC_DATETIME_H_HEADER
 #define _AC_DATETIME_H_HEADER
 
-#include "ac_dynobj.h"
+#include "ac_dynobj.h"  // for AGSCCDynamicObject
 
 struct ScriptDateTime : AGSCCDynamicObject {
   int year, month, day;

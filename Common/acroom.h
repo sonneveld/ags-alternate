@@ -16,11 +16,15 @@
 #ifndef __CROOM_H
 #define __CROOM_H
 
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "cscomp.h"
+
+// forward declarations:
+#include "allegro.h"        // for BITMAP
+typedef BITMAP *block;      // wgt2allh.h
+#define color RGB           // wgt2allh.h
+struct ccScript;            // cscomp.h
 
 // MACPORT FIX: endian support
 #include "bigend.h"

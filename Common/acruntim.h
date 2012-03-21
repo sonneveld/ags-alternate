@@ -10,11 +10,16 @@
 #define __ACRUNTIME_H
 
 #include "bigend.h"
-#include "sprcache.h"
-#include "acsound.h"
-#include "acgfx.h"
-#include "ali3d.h"
-#include "ac_datetime.h"
+#include "acroom.h"  // misc DEFINES
+#include "ac_dynobj.h" // for AGSCCDynamicObject
+
+// forward declarations:
+class IDriverDependantBitmap; // ali3d.h
+struct SOUNDCLIP; // acsound.h
+struct ScriptDateTime; // acsound.h
+struct GFXFilter; // acgfx.h
+class SpriteCache; //sprcache.h
+struct IMouseGetPosCallback; //wgt2allg.h
 
 // Max script string length
 #define MAX_MAXSTRLEN 200
@@ -894,7 +899,6 @@ extern int  is_route_possible(int,int,int,int,block);
 extern void set_route_move_speed(int x, int y);
 extern void init_pathfinder();
 extern block prepare_walkable_areas (int sourceChar);
-extern void do_main_cycle(int,int);
 extern void add_inventory(int inum);
 extern void lose_inventory(int inum);
 extern void animate_character(CharacterInfo *,int,int,int,int = 0, int = 0);

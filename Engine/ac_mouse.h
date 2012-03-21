@@ -1,7 +1,10 @@
 #ifndef _AC_MOUSE_H_HEADER
 #define _AC_MOUSE_H_HEADER
 
-#include "ali3d.h"
+// forward declarations:
+#include "allegro.h"        // for BITMAP
+typedef BITMAP *block;      // wgt2allh.h
+class IDriverDependantBitmap; // ali3d.h
 
 // The text script's "mouse" struct
 struct ScriptMouse {

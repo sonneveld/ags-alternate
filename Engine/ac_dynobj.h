@@ -1,8 +1,7 @@
 #ifndef _AC_DYNOBJ_H_HEADER
 #define _AC_DYNOBJ_H_HEADER
 
-// for ICCDynamicObject
-#include "cscomp.h"
+#include "cscomp.h" // for ICCDynamicObject
 
 struct AGSCCDynamicObject : ICCDynamicObject {
 public:

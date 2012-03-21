@@ -7,7 +7,10 @@
 #ifndef __ALI3D_H
 #define __ALI3D_H
 
-#include "acgfx.h"
+#include "allegro.h"
+
+// forward declarations:
+struct GFXFilter; // acgfx.h
 
 typedef void (*ALI3DCLIENTCALLBACK)();
 typedef bool (*ALI3DCLIENTCALLBACKXY)(int x, int y);
