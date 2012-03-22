@@ -387,6 +387,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_gui_button.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_gui_control.cpp"
 				>
 			</File>
@@ -1113,6 +1117,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_file.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_gui_button.h"
 				>
 			</File>
 			<File
