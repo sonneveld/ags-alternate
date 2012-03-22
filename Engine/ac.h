@@ -211,4 +211,7 @@ extern int calculate_max_volume();
 extern void update_ambient_sound_vol ();
 extern int check_for_messages_from_editor();
 
+// for ac_text
+extern int GetGlobalInt(int index);
+
 #endif

@@ -356,6 +356,11 @@ extern volatile int mvolcounter;
 extern int update_music_at;
 extern int time_between_timers;
 
+extern TopBarSettings topBar;
+extern block screenop;
+extern int wantFreeScreenop;
+extern int texthit;
+
 extern int char_lowest_yp;
 extern int obj_lowest_yp;
 
