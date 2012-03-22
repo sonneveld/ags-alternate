@@ -9,10 +9,10 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
+#include "acsound.h"
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "acruntim.h"
-
 #include "clib32.h"
 
 ScriptAudioChannel scrAudioChannel[MAX_SOUND_CHANNELS + 1];

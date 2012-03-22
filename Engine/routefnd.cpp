@@ -12,12 +12,17 @@
   CLEAR that the code has been altered from the Standard Version.
 */
 
-#include "bmp.h"
+#include "routefnd.h"
 
-#include "wgt2allg.h"
-#include "acroom.h"
 #include <string.h>
 #include <math.h>
+
+#include "ac.h"
+#include "ac_context.h"
+#include "bmp.h"
+#include "wgt2allg.h"
+#include "acroom.h"
+
 #define MANOBJNUM 99
 
 #define MAXPATHBACK 1000
@@ -27,7 +32,7 @@ int routex1, routey1;
 int suggestx, suggesty;
 fixed move_speed_x, move_speed_y;
 
-#include "ac.h"
+
 
 #define COPYRIGHT_CRC 172668
 // stupid name, to deter hackers

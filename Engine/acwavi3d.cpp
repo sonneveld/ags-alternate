@@ -16,6 +16,7 @@
 typedef float D3DVALUE, *LPD3DVALUE;
 #include "VMR9Graph.h"
 #include <ali3d.h>
+#include "ac_context.h"
 //#include <atlbase.h>
 
 #ifndef VS2005
@@ -75,7 +76,8 @@ inline LPWSTR WINAPI AtlA2WHelper(LPWSTR lpw, LPCSTR lpa, int nChars)
 // Interface from main game
 
 #include "ac.h"
-#include "acwavi.h"
+#include "ac_context.h"
+#include "acwavi.h" // for lastError
 
 CVMR9Graph *graph = NULL;
 

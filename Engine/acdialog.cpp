@@ -10,11 +10,13 @@
 
 */
 
+#include <string.h>
+
 #include "ac.h"
+#include "ac_context.h"
 
 // DIALOG SYSTEM STUFF below
 #include "wgt2allg.h"
-#include <string.h>
 #include "ali3d.h"
 
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)

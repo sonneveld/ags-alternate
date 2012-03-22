@@ -16,7 +16,7 @@
 // forward declarations:
 class IDriverDependantBitmap; // ali3d.h
 struct SOUNDCLIP; // acsound.h
-struct ScriptDateTime; // acsound.h
+struct ScriptDateTime; // ac_sound.h
 struct GFXFilter; // acgfx.h
 class SpriteCache; //sprcache.h
 struct IMouseGetPosCallback; //wgt2allg.h
@@ -675,6 +675,7 @@ struct ExecutingScript {
 };
 
 #ifndef _AGS_PLUGIN_H
+//#pragma message ( "setting IAGSManagedObjectReader to void" )
 #define IAGSManagedObjectReader void
 #endif
 

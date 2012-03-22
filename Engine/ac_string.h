@@ -1,6 +1,9 @@
 #ifndef _AC_STRING_H_HEADER
 #define _AC_STRING_H_HEADER
 
+#include "ac_dynobj.h"  // AGSCCDynamicObject
+#include "cscomp.h"     // ICCStringClass
+
 struct ScriptString : AGSCCDynamicObject, ICCStringClass {
   char *text;
 

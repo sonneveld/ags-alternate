@@ -1,27 +1,29 @@
 #ifndef _AC_H_HEADER
 #define _AC_H_HEADER
 
-#include "wgt2allg.h"
-#include "ali3d.h"
-#include "acroom.h"
-#include "acruntim.h"
-#include "sprcache.h"
-#include "acgui.h"
-#include "ac_mouse.h"
+// forward declarations:
+#include "allegro.h"        // for BITMAP
+typedef BITMAP *block;      // wgt2allh.h
+class IDriverDependantBitmap; // ali3d.h
+struct CharacterInfo;       // acroom.h
+struct CustomProperties;    // acroom.h
+struct NewInteraction;      // acroom.h
+struct InteractionScripts;  // acroom.h
+struct ccInstance;          // cscomp.h
+struct EventHappened;       // acruntim.h
 
 // Check that a supplied buffer from a text script function was not null
 #define VALIDATE_STRING(strin) if ((unsigned long)strin <= 4096) quit("!String argument was null: make sure you pass a string, not an int, as a buffer")
 
+#define IS_ANTIALIAS_SPRITES usetup.enable_antialiasing && (play.disable_antialiasing == 0)
+
+#define write_log_debug(msg) platform->WriteDebugString(msg)
+
 extern void quit(char*quitmsg);
 extern void put_sprite_256(int, int, block);
-extern char alpha_blend_cursor ;
-extern color palette[256];
-
 extern void write_log(char*msg);
 extern void initialize_sprite (int ee);
 extern void pre_save_sprite(int ee);
-extern void get_new_size_for_sprite (int ee, int ww, int hh, int &newwid, int &newhit);
-extern int spritewidth[], spriteheight[];
 
 // for acwavi.cpp
 extern void update_polled_stuff_and_crossfade();
@@ -32,28 +34,17 @@ extern int rec_getch();
 extern void next_iteration();
 extern void update_music_volume();
 extern void render_to_screen(BITMAP *toRender, int atx, int aty);
-extern int crossFading;
-extern int crossFadeStep;
-extern volatile char want_exit;
-extern IGraphicsDriver *gfxDriver;
 
 // for acfonts.cpp
 extern bool ShouldAntiAliasText();
-extern int our_eip;
 
 // for routefnd.cpp
 extern char ac_engine_copyright[];
 extern void Display(char *, ...);
 extern void write_log(char *);
 extern void update_polled_stuff();
-extern MoveList *mls;
-
-// for acplwin.cpp
-extern char* game_file_name;
 
 // for acsound.cpp
-extern int use_extra_sound_offset;
-extern int our_eip;
 extern void write_log(char*msg) ;
 //extern void sample_update_callback(SAMPLE *sample, int voice);
 
@@ -62,8 +53,6 @@ extern int rec_mgetbutton();
 extern int rec_kbhit();
 extern int rec_getch();
 extern void update_polled_stuff_and_crossfade();
-extern volatile char want_exit;
-extern volatile int timerloop;
 extern void next_iteration();
 
 // for acdialog.cpp
@@ -72,7 +61,6 @@ extern int rec_kbhit();
 extern int load_game(int,char*, int*);
 extern void break_up_text_into_lines(int wii,int fonnt,char*todis);
 extern void wouttext_outline(int xxp,int yyp,int usingfont,char*texx);
-extern IGraphicsDriver *gfxDriver;
 extern inline int get_fixed_pixel_size(int pixels);
 
 // for acdialog.cpp
@@ -80,21 +68,16 @@ extern void rec_domouse(int);
 extern int rec_misbuttondown(int);
 extern int rec_mgetbutton();
 extern void next_iteration();
-extern void render_graphics(IDriverDependantBitmap *extraBitmap, int extraX, int extraY);
 extern void update_polled_stuff();
-extern int sgsiglen;
 extern void update_polled_stuff_and_crossfade();
 extern char *get_global_message(int);
 extern int GetBaseWidth();
-extern GameSetup usetup;
-extern volatile int timerloop;
 extern char saveGameSuffix[21];
 extern char *get_language_text(int);
 extern void get_save_game_path(int slotNum, char *buffer);
 extern char saveGameDirectory[260];
 
 // for acgui.cpp
-extern SpriteCache spriteset;
 extern void draw_sprite_compensate(int spr, int x, int y, int xray);
 extern inline int divide_down_coordinate(int coord);
 extern inline int multiply_up_coordinate(int coord);
@@ -102,8 +85,6 @@ extern inline void multiply_up_coordinates(int *x, int *y);
 extern inline int get_fixed_pixel_size(int pixels);
 
 // for acchars.cpp
-extern int current_screen_resolution_multiplier;
-extern int engineNeedsAsInt;
 extern const char* Character_GetTextProperty(CharacterInfo *chaa, const char *property);
 extern CharacterInfo *GetCharacterAtLocation(int xx, int yy);
 extern int Character_GetSpeakingFrame(CharacterInfo *chaa);
@@ -121,9 +102,6 @@ extern int  GetLocationType(int,int);
 extern void CheckViewFrame (int view, int loop, int frame);
 extern void invalidate_sprite(int x1, int y1, IDriverDependantBitmap *pic);
 
-extern struct GlobalMouseState global_mouse_state;
-extern GUIMain*guis;
-
 // for ac_room.cpp
 extern int get_walkable_area_pixel(int x, int y);
 extern void get_message_text (int msnum, char *buffer, char giveErr);
@@ -137,35 +115,30 @@ extern void check_viewport_coords() ;
 extern void mark_current_background_dirty();
 extern void invalidate_cached_walkbehinds() ;
 extern void setpal();
-extern RoomStatus *roomstats;
-extern int walk_behind_baselines_changed ;
-extern int bg_just_changed;
 
 // for ac_obj.cpp
+extern void do_main_cycle(int untilwhat,int daaa);
 extern void scAnimateCharacter (int chh, int loopn, int sppd, int rept);
-extern block *actsps;
 extern void tint_image (block srcimg, block destimg, int red, int grn, int blu, int light_level, int luminance);
 extern block recycle_bitmap(block bimp, int coldep, int wid, int hit);
-#define IS_ANTIALIAS_SPRITES usetup.enable_antialiasing && (play.disable_antialiasing == 0)
-extern IDriverDependantBitmap* *actspsbmp;
-extern int in_new_room;
 extern int get_walkable_area_at_location(int xx, int yy);
 extern int  run_interaction_event (NewInteraction *nint, int evnt, int chkAny = -1, int isInv = 0);
 extern int  run_interaction_script(InteractionScripts *nint, int evnt, int chkAny = -1, int isInv = 0);
-enum WalkBehindMethodEnum
-{
-  DrawOverCharSprite,
-  DrawAsSeparateSprite,
-  DrawAsSeparateCharSprite
-};
-extern WalkBehindMethodEnum walkBehindMethod;
 extern void sort_out_char_sprite_walk_behind(int actspsIndex, int xx, int yy, int basel, int zoom, int width, int height);
 extern int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsFrom = NULL, block checkPixelsFrom = NULL, int zoom=100);
 extern void add_to_sprite_list(IDriverDependantBitmap* spp, int xx, int yy, int baseline, int trans, int sprNum, bool isWalkBehind = false);
 extern int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww,int sphh, int flipped = 0);
-extern int char_lowest_yp, obj_lowest_yp;
-extern ScriptObject scrObj[MAX_INIT_SPR];
-extern char*evblockbasename;
-extern int evblocknum;
+
+// for sprcache.cpp
+extern void get_new_size_for_sprite (int ee, int ww, int hh, int &newwid, int &newhit);
+
+// for ac_main.cpp
+extern bool send_message_to_editor(const char *msg);
+extern void get_script_name(ccInstance *rinst, char *curScrName);
+extern void process_event(EventHappened*evp);
+extern int run_text_script(ccInstance*sci,char*tsname);
+extern void setevent(int evtyp,int ev1,int ev2,int ev3);
+
+extern void render_graphics(IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
 
 #endif

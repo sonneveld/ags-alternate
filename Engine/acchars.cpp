@@ -12,6 +12,8 @@
 
 */
 
+#include "acchars.h"
+
 #include "bmp.h"
 
 #include "wgt2allg.h"
@@ -20,6 +22,7 @@
 #include <math.h>
 #include "routefnd.h"
 #include "ac.h"
+#include "ac_context.h"
 #include "ac_string.h"
 #include "ac_mouse.h"
 #include "ac_obj.h"

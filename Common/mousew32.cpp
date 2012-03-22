@@ -12,7 +12,7 @@
   prior express permission from Chris Jones.
 */
 
-#include "bmp.h"
+#include "mousew32.h"
 
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #include <dos.h>
@@ -22,7 +22,12 @@
 
 #include <stdio.h>
 
+#include "ac.h"
+#include "ac_context.h"
+#include "bmp.h"
+#include "clib32.h"
 #include "wgt2allg.h"
+
 #if !defined(WINDOWS_VERSION) && !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #error This is the Windows 32-bit version
 #endif
@@ -35,9 +40,6 @@
 #define MAXCURSORS 20
 
 void msetgraphpos(int,int);
-
-#include "clib32.h"
-#include "ac.h"
 
 char currentcursor = 0;
 int mousex = 0;

@@ -3,6 +3,9 @@
   allegro
   2002 Chris Jones
 */
+
+#include "acwavi.h"
+
 //#define ALLEGRO_STATICLINK  // already defined in project settings
 #include <allegro.h>
 #include <winalleg.h>
@@ -14,12 +17,13 @@
 #include <ddstream.h>	// DirectDraw multimedia stream interfaces
 #include <initguid.h>   // Defines DEFINE_GUID macro and enables GUID initialization
 //#include <dsound.h>
-#include "ali3d.h"
 
 //link with the following libraries under project/settings/link...
 //amstrmid.lib quartz.lib strmbase.lib ddraw.lib 
 
+#include "ali3d.h"
 #include "ac.h"
+#include "ac_context.h"
 
 //DirectDrawEx Global interfaces
 // I'm not sure where these are defined... allegro somewhere?

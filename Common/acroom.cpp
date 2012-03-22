@@ -1,13 +1,16 @@
 
+#include "acroom.h"
 
 #include "wgt2allg.h"
-
 #include "clib32.h"
 #include "compress.h"
 #include "bmp.h"
 #include "misc.h"
+#include "cscomp.h"
 
-#include "acroom.h"
+// copied over from ac.cpp`
+#define NO_SAVE_FUNCTIONS
+#define LOADROOM_DO_POLL
 
 
 static char *croom_h_copyright = "ChrisRoom v2.00 - CRM reader/writer copyright (c) 1995, 1998, 1999 by Chris Jones.";

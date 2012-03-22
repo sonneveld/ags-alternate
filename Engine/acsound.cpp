@@ -11,10 +11,11 @@
   CLEAR that the code has been altered from the Standard Version.
 */
 
-#include "ac.h"
-
-#include "wgt2allg.h"
 #include "acsound.h"
+
+#include "ac.h"
+#include "ac_context.h"
+#include "wgt2allg.h"
 #include "alogg.h"
 #include "almp3.h"
 

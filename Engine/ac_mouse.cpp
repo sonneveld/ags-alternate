@@ -1,5 +1,11 @@
+#include "ac_mouse.h"
+
 #include "ac.h"
+#include "ac_context.h"
 #include "acgui.h"
+#include "ali3d.h"
+#include "sprcache.h"
+#include "acgfx.h"
 #include "bmp.h"
 
 void update_script_mouse_coords() {

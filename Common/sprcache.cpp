@@ -10,9 +10,7 @@
 **
 */
 
-#include "bmp.h"
-
-#include "ac.h"
+#include "sprcache.h"
 
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL
@@ -20,9 +18,11 @@
 #pragma warning (disable: 4996 4312)  // disable deprecation warnings
 #endif
 
+#include "ac.h"
+#include "ac_context.h"
+#include "bmp.h"
 #include "wgt2allg.h"
 #include "acroom.h"
-#include "sprcache.h"
 #include "compress.h"
 #include "bigend.h"
 

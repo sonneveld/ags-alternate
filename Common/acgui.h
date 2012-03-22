@@ -13,12 +13,17 @@
 #ifndef __ACGUI_H
 #define __ACGUI_H
 
+#include <stdio.h>
 #include "bigend.h"
+
+// Forward declarations:
+struct GameSetupStruct; // acroom.h
 
 #ifndef __WGT4_H
 #endif
 
 #ifndef WOUTTEXT_REVERSE
+//#pragma message ( "WOUTTEXT_REVERSE was not defined." )
 #define WOUTTEXT_REVERSE wouttext_outline
 #endif
 

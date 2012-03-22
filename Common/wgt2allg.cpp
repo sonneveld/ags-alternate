@@ -1,6 +1,9 @@
 #include "wgt2allg.h"
 #include "bmp.h"
 
+// copied over from ac.cpp
+#define USE_CLIB
+
 static const char *wgt2allgcopyright = "WGT2Allegro (c) 1997,1998 Chris Jones";
 static fpos_t lfpos;
 static FILE *libf;

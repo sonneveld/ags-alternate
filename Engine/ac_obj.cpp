@@ -1,9 +1,17 @@
-#include "ac.h"
-#include "routefnd.h"
-#include "bmp.h"
-#include "ac_room.h"
+#include "ac_obj.h"
+
 #include <aastr.h>
+
+#include "ac.h"
+#include "ac_context.h"
+#include "routefnd.h"
+#include "ac_room.h"
 #include "ac_string.h"
+#include "acgfx.h"
+#include "sprcache.h"
+#include "ali3d.h"
+#include "bmp.h"
+
 
 /* *** SCRIPT SYMBOL: [Object] SetObjectTint *** */
 static void SetObjectTint(int obj, int red, int green, int blue, int opacity, int luminance) {

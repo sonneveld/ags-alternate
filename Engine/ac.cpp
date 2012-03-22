@@ -67,7 +67,6 @@ extern void * memcpy_amd(void *dest, const void *src, size_t n);
 
 #define USE_CLIB
 
-
 extern int our_eip;
 #include "wgt2allg.h"
 #include "sprcache.h"
@@ -89,9 +88,7 @@ extern int our_eip;
 #include <crtdbg.h>
 #include "winalleg.h"
 #include <shlwapi.h>
-
 #elif defined(LINUX_VERSION) || defined(MAC_VERSION)
-
 #define HWND long
 #define _getcwd getcwd
 
@@ -101,16 +98,13 @@ long int filelength(int fhandle)
 	fstat(fhandle, &statbuf);
 	return statbuf.st_size;
 }
-
 #else   // it's DOS (DJGPP)
-
 #include "sys/exceptn.h"
 #define _getcwd getcwd
 
 int sys_getch() {
   return getch();
 }
-
 #endif  // WINDOWS_VERSION
 
 #define getr32(xx) ((xx >> _rgb_r_shift_32) & 0xFF)
@@ -132,15 +126,12 @@ extern "C" {
 #endif  // WINDOWS_VERSION || LINUX_VERSION || MAC_VERSION
 */
 
-void draw_sprite_compensate(int,int,int,int);
-
-char *get_translation(const char*);
-int   source_text_length = -1;
+// these 2 defines were applicable to acroom.h when it contained code.
 #define NO_SAVE_FUNCTIONS
 #define LOADROOM_DO_POLL
 #include "acroom.h"
-#include "cscomp.h"
 
+#include "cscomp.h"
 
 #include <acdebug.h>
 
@@ -150,28 +141,35 @@ int   source_text_length = -1;
 #include "agsplugin.h"
 #include <apeg.h>
 
-// We need COLOR_DEPTH_24 to allow it to load the preload PCX in hi-col
-BEGIN_COLOR_DEPTH_LIST
-  COLOR_DEPTH_8
-  COLOR_DEPTH_15
-  COLOR_DEPTH_16
-  COLOR_DEPTH_24
-  COLOR_DEPTH_32
-END_COLOR_DEPTH_LIST
+#include "clib32.h"
+#include "mousew32.h"
+#include "routefnd.h"
+#include "acdialog.h"
+#include "csrun.h"
+#include "cdplaylib.h"
+#include "acchars.h"
+#include "ac_parser.h"
+
+// WOUTTEST_REVERSE used by acgui.h
+#define WOUTTEXT_REVERSE wouttext_reverseifnecessary
+#include "acgui.h"
+
+#include "acruntim.h"
+#include "acsound.h"
+#include "ac.h"
+#include "acgfx.h"
+#include "ali3d.h"
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
 #endif
+
 extern "C" HWND allegro_wnd;
 
 // archive attributes to search for - al_findfirst breaks with 0
 #define FA_SEARCH -1
 
-
-
-
 // Windows Vista Rich Save Games, modified to be platform-agnostic
-
 #define RM_MAXLENGTH    1024
 #define RM_MAGICNUMBER  "RGMH"
 
@@ -209,63 +207,390 @@ LPWSTR *wArgv;
 #define StrCpyW strcpy
 #endif
 
+#define MAX_SCRIPT_MODULES 50
+
+
 // ***** EXTERNS ****
-#include "clib32.h"
-#include "mousew32.h"
-#include "routefnd.h"
-#include "acdialog.h"
-#include "csrun.h"
-#include "cdplaylib.h"
-#include "acchars.h"
-#include "ac_parser.h"
 
 //extern char*get_language_text(int);
 //extern void init_language_text(char*);
 //extern void QGRegisterFunctions();  // let the QFG module register its own
-
-int eip_guinum, eip_guiobj;
-int trans_mode=0;
-int engineNeedsAsInt = 100;
-
 int  sc_GetTime(int whatti);
-void quitprintf(char*texx, ...);
-void replace_macro_tokens(char*,char*);
-void wouttext_reverseifnecessary(int x, int y, int font, char *text);
-void SetGameSpeed(int newspd);
-void SetMultitasking(int mode);
-void put_sprite_256(int xxx,int yyy,block piccy);
-void construct_virtual_screen(bool fullRedraw);
-int initialize_engine_with_exception_handling(int argc,char*argv[]);
-int initialize_engine(int argc,char*argv[]);
-block recycle_bitmap(block bimp, int coldep, int wid, int hit);
 
-#define WOUTTEXT_REVERSE wouttext_reverseifnecessary
-#include "acgui.h"
-#include "acruntim.h"
-#include "acsound.h"
-
-#define MAX_SCRIPT_MODULES 50
-
-#include "ac.h"
 
 // **** TYPES ****
 
+#include "ac_types.h"
 
-struct ScriptGUI {
-  int id;
-  GUIMain *gui;
-};
 
-struct ScriptHotspot {
-  int id;
-  int reserved;
-};
+// **** GLOBALS ****
 
-struct ScriptRegion {
-  int id;
-  int reserved;
-};
+int source_text_length = -1;
 
+int eip_guinum;
+int eip_guiobj;
+int trans_mode=0;
+int engineNeedsAsInt = 100;
+
+struct GlobalMouseState global_mouse_state;
+struct GlobalRoomState global_room_state;
+char *music_file;
+char *speech_file;
+WCHAR directoryPathBuffer[MAX_PATH];
+
+/*extern int get_route_composition();
+extern int routex1;*/
+
+#define REC_MOUSECLICK 1
+#define REC_MOUSEMOVE  2
+#define REC_MOUSEDOWN  3
+#define REC_KBHIT      4
+#define REC_GETCH      5
+#define REC_KEYDOWN    6
+#define REC_MOUSEWHEEL 7
+#define REC_SPEECHFINISHED 8
+#define REC_ENDOFFILE  0x6f
+short *recordbuffer = NULL;
+int  recbuffersize = 0;
+int recsize = 0;
+volatile int switching_away_from_game = 0;
+
+int musicPollIterator; // long name so it doesn't interfere with anything else
+#define UPDATE_MP3 \
+   while (switching_away_from_game) { }\
+   for (musicPollIterator = 0; musicPollIterator <= MAX_SOUND_CHANNELS; musicPollIterator++) { \
+     if ((channels[musicPollIterator] != NULL) && (channels[musicPollIterator]->done == 0)) \
+       channels[musicPollIterator]->poll();\
+   }
+
+//#define UPDATE_MP3 update_polled_stuff();
+
+const char* sgnametemplate = "agssave.%03d";
+char saveGameSuffix[MAX_SG_EXT_LENGTH + 1];
+
+SOUNDCLIP *channels[MAX_SOUND_CHANNELS+1];
+SOUNDCLIP *cachedQueuedMusic = NULL;
+int numSoundChannels = 8;
+#define SCHAN_SPEECH  0
+#define SCHAN_AMBIENT 1
+#define SCHAN_MUSIC   2
+#define SCHAN_NORMAL  3
+#define AUDIOTYPE_LEGACY_AMBIENT_SOUND 1
+#define AUDIOTYPE_LEGACY_MUSIC 2
+#define AUDIOTYPE_LEGACY_SOUND 3
+
+#define MAX_ANIMATING_BUTTONS 15
+#define RESTART_POINT_SAVE_GAME_NUMBER 999
+
+AGSPlatformDriver *platform = NULL;
+// crossFading is >0 (channel number of new track), or -1 (old
+// track fading out, no new track)
+int crossFading = 0;
+int crossFadeVolumePerStep = 0;
+int crossFadeStep = 0;
+int crossFadeVolumeAtStart = 0;
+int last_sound_played[MAX_SOUND_CHANNELS + 1];
+char *heightTestString = "ZHwypgfjqhkilIK";
+block virtual_screen; 
+int scrnwid; 
+int scrnhit;
+int current_screen_resolution_multiplier = 1;
+roomstruct thisroom;
+GameSetupStruct game;
+RoomStatus *roomstats;
+RoomStatus troom;    // used for non-saveable rooms, eg. intro
+GameState play;
+GameSetup usetup;
+CharacterExtras *charextra;
+int force_letterbox = 0;
+int game_paused=0;
+int ifacepopped=-1;  // currently displayed pop-up GUI (-1 if none)
+color palette[256];
+//block spriteset[MAX_SPRITES+1];
+//SpriteCache spriteset (MAX_SPRITES+1);
+// initially size 1, this will be increased by the initFile function
+SpriteCache spriteset(1);
+long t1;  // timer for FPS
+int cur_mode; 
+int cur_cursor;
+int spritewidth[MAX_SPRITES];
+int spriteheight[MAX_SPRITES];
+char saveGameDirectory[260] = "./";
+//int abort_all_conditions=0;
+int fps=0;
+int display_fps=0;
+DebugConsoleText debug_line[DEBUG_CONSOLE_NUMLINES];
+int first_debug_line = 0;
+int last_debug_line = 0;
+int display_console = 0;
+char *walkBehindExists = NULL;  // whether a WB area is in this column
+int *walkBehindStartY = NULL;
+int *walkBehindEndY = NULL;
+char noWalkBehindsAtAll = 0;
+int walkBehindLeft[MAX_OBJ];
+int walkBehindTop[MAX_OBJ];
+int walkBehindRight[MAX_OBJ];
+int walkBehindBottom[MAX_OBJ];
+IDriverDependantBitmap *walkBehindBitmap[MAX_OBJ];
+int walkBehindsCachedForBgNum = 0;
+WalkBehindMethodEnum walkBehindMethod = DrawOverCharSprite;
+unsigned long loopcounter=0;
+unsigned long lastcounter=0;
+volatile unsigned long globalTimerCounter = 0;
+char alpha_blend_cursor = 0;
+RoomObject*objs;
+RoomStatus*croom=NULL;
+CharacterInfo*playerchar;
+long _sc_PlayerCharPtr = 0;
+int offsetx = 0;
+int offsety = 0;
+int use_extra_sound_offset = 0;
+GUIMain*guis=NULL;
+//GUIMain dummygui;
+//GUIButton dummyguicontrol;
+block *guibg = NULL;
+IDriverDependantBitmap **guibgbmp = NULL;
+ccScript* gamescript=NULL;
+ccScript* dialogScriptsScript = NULL;
+ccInstance *gameinst = NULL;
+ccInstance *roominst = NULL;
+ccInstance *dialogScriptsInst = NULL;
+ccInstance *gameinstFork = NULL;
+ccInstance *roominstFork = NULL;
+IGraphicsDriver *gfxDriver;
+IDriverDependantBitmap *blankImage = NULL;
+IDriverDependantBitmap *blankSidebarImage = NULL;
+IDriverDependantBitmap *debugConsole = NULL;
+block debugConsoleBuffer = NULL;
+
+bool current_background_is_dirty = false;
+int longestline = 0;
+
+PluginObjectReader pluginReaders[MAX_PLUGIN_OBJECT_READERS];
+int numPluginReaders = 0;
+
+ccScript *scriptModules[MAX_SCRIPT_MODULES];
+ccInstance *moduleInst[MAX_SCRIPT_MODULES];
+ccInstance *moduleInstFork[MAX_SCRIPT_MODULES];
+char *moduleRepExecAddr[MAX_SCRIPT_MODULES];
+int numScriptModules = 0;
+
+ViewStruct*views=NULL;
+COLOR_MAP maincoltable;
+ScriptSystem scsystem;
+block _old_screen=NULL;
+block _sub_screen=NULL;
+MoveList *mls = NULL;
+DialogTopic *dialog;
+block walkareabackup=NULL;
+block walkable_areas_temp = NULL;
+ExecutingScript scripts[MAX_SCRIPT_AT_ONCE];
+ExecutingScript*curscript = NULL;
+AnimatingGUIButton animbuts[MAX_ANIMATING_BUTTONS];
+int numAnimButs = 0;
+int num_scripts=0;
+int eventClaimed = EVENT_NONE;
+int getloctype_index = 0;
+int getloctype_throughgui = 0;
+int user_disabled_for=0;
+int user_disabled_data=0;
+int user_disabled_data2=0;
+int user_disabled_data3=0;
+int is_complete_overlay=0;
+int is_text_overlay=0;
+// Sierra-style speech settings
+int face_talking=-1;
+int facetalkview=0;
+int facetalkwait=0;
+int facetalkframe=0;
+int facetalkloop=0;
+int facetalkrepeat = 0;
+int facetalkAllowBlink = 1;
+int facetalkBlinkLoop = 0;
+CharacterInfo *facetalkchar = NULL;
+// lip-sync speech settings
+int loops_per_character;
+int text_lips_offset;
+int char_speaking = -1;
+char *text_lips_text = NULL;
+SpeechLipSyncLine *splipsync = NULL;
+int numLipLines = 0;
+int curLipLine = -1;
+int curLipLinePhenome = 0;
+int gameHasBeenRestored = 0;
+char **characterScriptObjNames = NULL;
+char objectScriptObjNames[MAX_INIT_SPR][MAX_SCRIPT_NAME_LEN + 5];
+char **guiScriptObjNames = NULL;
+
+// set to 0 once successful
+int working_gfx_mode_status = -1;
+
+int said_speech_line; // used while in dialog to track whether screen needs updating
+
+int restrict_until=0;
+int gs_to_newroom=-1;
+ScreenOverlay screenover[MAX_SCREEN_OVERLAYS];
+int proper_exit=0;
+int our_eip=0;
+int numscreenover=0;
+int scaddr;
+int walk_behind_baselines_changed = 0;
+int displayed_room=-10;
+int starting_room = -1;
+int mouse_on_iface=-1;   // mouse cursor is over this interface
+int mouse_on_iface_button=-1;
+int mouse_pushed_iface=-1;  // this BUTTON on interface MOUSE_ON_IFACE is pushed
+int mouse_ifacebut_xoffs=-1;
+int mouse_ifacebut_yoffs=-1;
+int debug_flags=0;
+IDriverDependantBitmap* roomBackgroundBmp = NULL;
+
+int use_compiled_folder_as_current_dir = 0;
+int editor_debugging_enabled = 0;
+int editor_debugging_initialized = 0;
+char editor_debugger_instance_token[100];
+IAGSEditorDebugger *editor_debugger = NULL;
+int break_on_next_script_step = 0;
+volatile int game_paused_in_debugger = 0;
+HWND editor_window_handle = NULL;
+
+int in_enters_screen=0;
+int done_es_error = 0;
+int in_leaves_screen = -1;
+int need_to_stop_cd=0;
+int debug_15bit_mode = 0;
+int debug_24bit_mode = 0;
+int said_text = 0;
+int convert_16bit_bgr = 0;
+int mouse_z_was = 0;
+int bg_just_changed = 0;
+int loaded_game_file_version = 0;
+volatile char want_exit = 0;
+volatile char abort_engine = 0;
+char check_dynamic_sprites_at_exit = 1;
+#define DBG_NOIFACE       1
+#define DBG_NODRAWSPRITES 2
+#define DBG_NOOBJECTS     4
+#define DBG_NOUPDATE      8
+#define DBG_NOSFX      0x10
+#define DBG_NOMUSIC    0x20
+#define DBG_NOSCRIPT   0x40
+#define DBG_DBGSCRIPT  0x80
+#define DBG_DEBUGMODE 0x100
+#define DBG_REGONLY   0x200
+#define DBG_NOVIDEO   0x400
+#define MAXEVENTS 15
+EventHappened event[MAXEVENTS+1];
+int numevents=0;
+#define EV_TEXTSCRIPT 1
+#define EV_RUNEVBLOCK 2
+#define EV_FADEIN     3
+#define EV_IFACECLICK 4
+#define EV_NEWROOM    5
+#define TS_REPEAT   1
+#define TS_KEYPRESS 2
+#define TS_MCLICK   3
+#define EVB_HOTSPOT 1
+#define EVB_ROOM    2
+char ac_engine_copyright[]="Adventure Game Studio engine & tools (c) 1999-2000 by Chris Jones.";
+int current_music_type = 0;
+
+#define LOCTYPE_HOTSPOT 1
+#define LOCTYPE_CHAR 2
+#define LOCTYPE_OBJ  3
+
+#define MAX_DYNAMIC_SURFACES 20
+#define REP_EXEC_ALWAYS_NAME "repeatedly_execute_always"
+#define REP_EXEC_NAME "repeatedly_execute"
+
+char*tsnames[4]={NULL, REP_EXEC_NAME, "on_key_press","on_mouse_click"};
+char*evblockbasename;
+int evblocknum;
+//int current_music=0;
+int frames_per_second=40;
+int in_new_room=0;
+int new_room_was = 0;  // 1 in new room, 2 first time in new room, 3 loading saved game
+int new_room_pos=0;
+int new_room_x = SCR_NO_VALUE;
+int new_room_y = SCR_NO_VALUE;
+unsigned int load_new_game = 0;
+int load_new_game_restore = -1;
+int inside_script=0;
+int in_graph_script=0;
+int no_blocking_functions = 0; // set to 1 while in rep_Exec_always
+int in_inv_screen = 0;
+int inv_screen_newroom = -1;
+int new_room_flags=0;
+#define MAX_SPRITES_ON_SCREEN 76
+SpriteListEntry sprlist[MAX_SPRITES_ON_SCREEN];
+int sprlistsize=0;
+#define MAX_THINGS_TO_DRAW 125
+SpriteListEntry thingsToDrawList[MAX_THINGS_TO_DRAW];
+int thingsToDrawSize = 0;
+int use_cdplayer=0;
+bool triedToUseCdAudioCommand = false;
+int final_scrn_wid=0;
+int final_scrn_hit=0;
+int final_col_dep=0;
+int post_script_cleanup_stack = 0;
+// actsps is used for temporary storage of the bitamp image
+// of the latest version of the sprite
+int actSpsCount = 0;
+block *actsps;
+IDriverDependantBitmap* *actspsbmp;
+// temporary cache of walk-behind for this actsps image
+block *actspswb;
+IDriverDependantBitmap* *actspswbbmp;
+CachedActSpsData* actspswbcache;
+
+CharacterCache *charcache = NULL;
+ObjectCache objcache[MAX_INIT_SPR];
+
+ScriptObject scrObj[MAX_INIT_SPR];
+ScriptGUI *scrGui = NULL;
+ScriptHotspot scrHotspot[MAX_HOTSPOTS];
+ScriptRegion scrRegion[MAX_REGIONS];
+ScriptInvItem scrInv[MAX_INV];
+ScriptDialog scrDialog[MAX_DIALOG];
+
+RGB_MAP rgb_table;  // for 256-col antialiasing
+char* game_file_name=NULL;
+int want_quit = 0;
+int screen_reset = 0;
+block raw_saved_screen = NULL;
+block dynamicallyCreatedSurfaces[MAX_DYNAMIC_SURFACES];
+int scrlockWasDown = 0;
+// whether there are currently remnants of a DisplaySpeech
+int screen_is_dirty = 0;
+char replayfile[MAX_PATH] = "record.dat";
+int replay_time = 0;
+unsigned long replay_last_second = 0;
+int replay_start_this_time = 0;
+char pexbuf[STD_BUFFER_SIZE];
+
+int pluginsWantingDebugHooks = 0;
+
+const char *replayTempFile = "~replay.tmp";
+
+NonBlockingScriptFunction repExecAlways(REP_EXEC_ALWAYS_NAME, 0);
+NonBlockingScriptFunction getDialogOptionsDimensionsFunc("dialog_options_get_dimensions", 1);
+NonBlockingScriptFunction renderDialogOptionsFunc("dialog_options_render", 1);
+NonBlockingScriptFunction getDialogOptionUnderCursorFunc("dialog_options_get_active", 1);
+NonBlockingScriptFunction runDialogOptionMouseClickHandlerFunc("dialog_options_mouse_click", 2);
+
+
+// We need COLOR_DEPTH_24 to allow it to load the preload PCX in hi-col
+BEGIN_COLOR_DEPTH_LIST
+  COLOR_DEPTH_8
+  COLOR_DEPTH_15
+  COLOR_DEPTH_16
+  COLOR_DEPTH_24
+  COLOR_DEPTH_32
+END_COLOR_DEPTH_LIST
+
+
+
+// *** TYPE IMPLEMENTATIONS ***
 
 
 
@@ -322,39 +647,16 @@ ExecutingScript::ExecutingScript() {
   init();
 }
 
-struct TempEip {
-  int oldval;
-  TempEip (int newval) {
+
+
+  TempEip::TempEip (int newval) {
     oldval = our_eip;
     our_eip = newval;
   }
-  ~TempEip () { our_eip = oldval; }
-};
+  TempEip::~TempEip () { our_eip = oldval; }
 
-struct DebugConsoleText {
-  char text[100];
-  char script[12];
-};
 
-struct CachedActSpsData {
-  int xWas, yWas;
-  int baselineWas;
-  int isWalkBehindHere;
-  int valid;
-};
-
-struct NonBlockingScriptFunction
-{
-  const char* functionName;
-  int numParameters;
-  void* param1;
-  void* param2;
-  bool roomHasFunction;
-  bool globalScriptHasFunction;
-  bool moduleHasFunction[MAX_SCRIPT_MODULES];
-  bool atLeastOneImplementationExists;
-
-  NonBlockingScriptFunction(const char*funcName, int numParams)
+NonBlockingScriptFunction::NonBlockingScriptFunction(const char*funcName, int numParams)
   {
     this->functionName = funcName;
     this->numParameters = numParams;
@@ -367,315 +669,13 @@ struct NonBlockingScriptFunction
       moduleHasFunction[i] = true;
     }
   }
-};
-
-
-// **** GLOBALS ****
-struct GlobalMouseState global_mouse_state;
-struct GlobalRoomState global_room_state;
-char *music_file;
-char *speech_file;
-WCHAR directoryPathBuffer[MAX_PATH];
-
-/*extern int get_route_composition();
-extern int routex1;*/
-
-#define REC_MOUSECLICK 1
-#define REC_MOUSEMOVE  2
-#define REC_MOUSEDOWN  3
-#define REC_KBHIT      4
-#define REC_GETCH      5
-#define REC_KEYDOWN    6
-#define REC_MOUSEWHEEL 7
-#define REC_SPEECHFINISHED 8
-#define REC_ENDOFFILE  0x6f
-short *recordbuffer = NULL;
-int  recbuffersize = 0, recsize = 0;
-volatile int switching_away_from_game = 0;
-
-int musicPollIterator; // long name so it doesn't interfere with anything else
-#define UPDATE_MP3 \
-   while (switching_away_from_game) { }\
-   for (musicPollIterator = 0; musicPollIterator <= MAX_SOUND_CHANNELS; musicPollIterator++) { \
-     if ((channels[musicPollIterator] != NULL) && (channels[musicPollIterator]->done == 0)) \
-       channels[musicPollIterator]->poll();\
-   }
-
-//#define UPDATE_MP3 update_polled_stuff();
 
 
 
-const char* sgnametemplate = "agssave.%03d";
-char saveGameSuffix[MAX_SG_EXT_LENGTH + 1];
-
-SOUNDCLIP *channels[MAX_SOUND_CHANNELS+1];
-SOUNDCLIP *cachedQueuedMusic = NULL;
-int numSoundChannels = 8;
-#define SCHAN_SPEECH  0
-#define SCHAN_AMBIENT 1
-#define SCHAN_MUSIC   2
-#define SCHAN_NORMAL  3
-#define AUDIOTYPE_LEGACY_AMBIENT_SOUND 1
-#define AUDIOTYPE_LEGACY_MUSIC 2
-#define AUDIOTYPE_LEGACY_SOUND 3
-
-#define MAX_ANIMATING_BUTTONS 15
-#define RESTART_POINT_SAVE_GAME_NUMBER 999
 
 
 
-AGSPlatformDriver *platform = NULL;
-// crossFading is >0 (channel number of new track), or -1 (old
-// track fading out, no new track)
-int crossFading = 0, crossFadeVolumePerStep = 0, crossFadeStep = 0;
-int crossFadeVolumeAtStart = 0;
-int last_sound_played[MAX_SOUND_CHANNELS + 1];
-char *heightTestString = "ZHwypgfjqhkilIK";
-block virtual_screen; 
-int scrnwid,scrnhit;
-int current_screen_resolution_multiplier = 1;
-roomstruct thisroom;
-GameSetupStruct game;
-RoomStatus *roomstats;
-RoomStatus troom;    // used for non-saveable rooms, eg. intro
-GameState play;
-GameSetup usetup;
-CharacterExtras *charextra;
-int force_letterbox = 0;
-int game_paused=0;
-int ifacepopped=-1;  // currently displayed pop-up GUI (-1 if none)
-color palette[256];
-//block spriteset[MAX_SPRITES+1];
-//SpriteCache spriteset (MAX_SPRITES+1);
-// initially size 1, this will be increased by the initFile function
-SpriteCache spriteset(1);
-long t1;  // timer for FPS
-int cur_mode,cur_cursor;
-int spritewidth[MAX_SPRITES],spriteheight[MAX_SPRITES];
-char saveGameDirectory[260] = "./";
-//int abort_all_conditions=0;
-int fps=0,display_fps=0;
-DebugConsoleText debug_line[DEBUG_CONSOLE_NUMLINES];
-int first_debug_line = 0, last_debug_line = 0, display_console = 0;
-char *walkBehindExists = NULL;  // whether a WB area is in this column
-int *walkBehindStartY = NULL, *walkBehindEndY = NULL;
-char noWalkBehindsAtAll = 0;
-int walkBehindLeft[MAX_OBJ], walkBehindTop[MAX_OBJ];
-int walkBehindRight[MAX_OBJ], walkBehindBottom[MAX_OBJ];
-IDriverDependantBitmap *walkBehindBitmap[MAX_OBJ];
-int walkBehindsCachedForBgNum = 0;
-WalkBehindMethodEnum walkBehindMethod = DrawOverCharSprite;
-unsigned long loopcounter=0,lastcounter=0;
-volatile unsigned long globalTimerCounter = 0;
-char alpha_blend_cursor = 0;
-RoomObject*objs;
-RoomStatus*croom=NULL;
-CharacterInfo*playerchar;
-long _sc_PlayerCharPtr = 0;
-int offsetx = 0, offsety = 0;
-int use_extra_sound_offset = 0;
-GUIMain*guis=NULL;
-//GUIMain dummygui;
-//GUIButton dummyguicontrol;
-block *guibg = NULL;
-IDriverDependantBitmap **guibgbmp = NULL;
-ccScript* gamescript=NULL;
-ccScript* dialogScriptsScript = NULL;
-ccInstance *gameinst = NULL, *roominst = NULL;
-ccInstance *dialogScriptsInst = NULL;
-ccInstance *gameinstFork = NULL, *roominstFork = NULL;
-IGraphicsDriver *gfxDriver;
-IDriverDependantBitmap *blankImage = NULL;
-IDriverDependantBitmap *blankSidebarImage = NULL;
-IDriverDependantBitmap *debugConsole = NULL;
-block debugConsoleBuffer = NULL;
 
-bool current_background_is_dirty = false;
-int longestline = 0;
-
-PluginObjectReader pluginReaders[MAX_PLUGIN_OBJECT_READERS];
-int numPluginReaders = 0;
-
-ccScript *scriptModules[MAX_SCRIPT_MODULES];
-ccInstance *moduleInst[MAX_SCRIPT_MODULES];
-ccInstance *moduleInstFork[MAX_SCRIPT_MODULES];
-char *moduleRepExecAddr[MAX_SCRIPT_MODULES];
-int numScriptModules = 0;
-
-ViewStruct*views=NULL;
-COLOR_MAP maincoltable;
-ScriptSystem scsystem;
-block _old_screen=NULL;
-block _sub_screen=NULL;
-MoveList *mls = NULL;
-DialogTopic *dialog;
-block walkareabackup=NULL, walkable_areas_temp = NULL;
-ExecutingScript scripts[MAX_SCRIPT_AT_ONCE];
-ExecutingScript*curscript = NULL;
-AnimatingGUIButton animbuts[MAX_ANIMATING_BUTTONS];
-int numAnimButs = 0;
-int num_scripts=0, eventClaimed = EVENT_NONE;
-int getloctype_index = 0, getloctype_throughgui = 0;
-int user_disabled_for=0,user_disabled_data=0,user_disabled_data2=0;
-int user_disabled_data3=0;
-int is_complete_overlay=0,is_text_overlay=0;
-// Sierra-style speech settings
-int face_talking=-1,facetalkview=0,facetalkwait=0,facetalkframe=0;
-int facetalkloop=0, facetalkrepeat = 0, facetalkAllowBlink = 1;
-int facetalkBlinkLoop = 0;
-CharacterInfo *facetalkchar = NULL;
-// lip-sync speech settings
-int loops_per_character, text_lips_offset, char_speaking = -1;
-char *text_lips_text = NULL;
-SpeechLipSyncLine *splipsync = NULL;
-int numLipLines = 0, curLipLine = -1, curLipLinePhenome = 0;
-int gameHasBeenRestored = 0;
-char **characterScriptObjNames = NULL;
-char objectScriptObjNames[MAX_INIT_SPR][MAX_SCRIPT_NAME_LEN + 5];
-char **guiScriptObjNames = NULL;
-
-// set to 0 once successful
-int working_gfx_mode_status = -1;
-
-int said_speech_line; // used while in dialog to track whether screen needs updating
-
-int restrict_until=0;
-int gs_to_newroom=-1;
-ScreenOverlay screenover[MAX_SCREEN_OVERLAYS];
-int proper_exit=0,our_eip=0;
-int numscreenover=0;
-int scaddr;
-int walk_behind_baselines_changed = 0;
-int displayed_room=-10,starting_room = -1;
-int mouse_on_iface=-1;   // mouse cursor is over this interface
-int mouse_on_iface_button=-1;
-int mouse_pushed_iface=-1;  // this BUTTON on interface MOUSE_ON_IFACE is pushed
-int mouse_ifacebut_xoffs=-1,mouse_ifacebut_yoffs=-1;
-int debug_flags=0;
-IDriverDependantBitmap* roomBackgroundBmp = NULL;
-
-int use_compiled_folder_as_current_dir = 0;
-int editor_debugging_enabled = 0;
-int editor_debugging_initialized = 0;
-char editor_debugger_instance_token[100];
-IAGSEditorDebugger *editor_debugger = NULL;
-int break_on_next_script_step = 0;
-volatile int game_paused_in_debugger = 0;
-HWND editor_window_handle = NULL;
-
-int in_enters_screen=0,done_es_error = 0;
-int in_leaves_screen = -1;
-int need_to_stop_cd=0;
-int debug_15bit_mode = 0, debug_24bit_mode = 0;
-int said_text = 0;
-int convert_16bit_bgr = 0;
-int mouse_z_was = 0;
-int bg_just_changed = 0;
-int loaded_game_file_version = 0;
-volatile char want_exit = 0, abort_engine = 0;
-char check_dynamic_sprites_at_exit = 1;
-#define DBG_NOIFACE       1
-#define DBG_NODRAWSPRITES 2
-#define DBG_NOOBJECTS     4
-#define DBG_NOUPDATE      8
-#define DBG_NOSFX      0x10
-#define DBG_NOMUSIC    0x20
-#define DBG_NOSCRIPT   0x40
-#define DBG_DBGSCRIPT  0x80
-#define DBG_DEBUGMODE 0x100
-#define DBG_REGONLY   0x200
-#define DBG_NOVIDEO   0x400
-#define MAXEVENTS 15
-EventHappened event[MAXEVENTS+1];
-int numevents=0;
-#define EV_TEXTSCRIPT 1
-#define EV_RUNEVBLOCK 2
-#define EV_FADEIN     3
-#define EV_IFACECLICK 4
-#define EV_NEWROOM    5
-#define TS_REPEAT   1
-#define TS_KEYPRESS 2
-#define TS_MCLICK   3
-#define EVB_HOTSPOT 1
-#define EVB_ROOM    2
-char ac_engine_copyright[]="Adventure Game Studio engine & tools (c) 1999-2000 by Chris Jones.";
-int current_music_type = 0;
-
-#define LOCTYPE_HOTSPOT 1
-#define LOCTYPE_CHAR 2
-#define LOCTYPE_OBJ  3
-
-#define MAX_DYNAMIC_SURFACES 20
-#define REP_EXEC_ALWAYS_NAME "repeatedly_execute_always"
-#define REP_EXEC_NAME "repeatedly_execute"
-
-char*tsnames[4]={NULL, REP_EXEC_NAME, "on_key_press","on_mouse_click"};
-char*evblockbasename;
-int evblocknum;
-//int current_music=0;
-int frames_per_second=40;
-int in_new_room=0, new_room_was = 0;  // 1 in new room, 2 first time in new room, 3 loading saved game
-int new_room_pos=0;
-int new_room_x = SCR_NO_VALUE, new_room_y = SCR_NO_VALUE;
-unsigned int load_new_game = 0;
-int load_new_game_restore = -1;
-int inside_script=0,in_graph_script=0;
-int no_blocking_functions = 0; // set to 1 while in rep_Exec_always
-int in_inv_screen = 0, inv_screen_newroom = -1;
-int new_room_flags=0;
-#define MAX_SPRITES_ON_SCREEN 76
-SpriteListEntry sprlist[MAX_SPRITES_ON_SCREEN];
-int sprlistsize=0;
-#define MAX_THINGS_TO_DRAW 125
-SpriteListEntry thingsToDrawList[MAX_THINGS_TO_DRAW];
-int thingsToDrawSize = 0;
-int use_cdplayer=0;
-bool triedToUseCdAudioCommand = false;
-int final_scrn_wid=0,final_scrn_hit=0,final_col_dep=0;
-int post_script_cleanup_stack = 0;
-// actsps is used for temporary storage of the bitamp image
-// of the latest version of the sprite
-int actSpsCount = 0;
-block *actsps;
-IDriverDependantBitmap* *actspsbmp;
-// temporary cache of walk-behind for this actsps image
-block *actspswb;
-IDriverDependantBitmap* *actspswbbmp;
-CachedActSpsData* actspswbcache;
-
-CharacterCache *charcache = NULL;
-ObjectCache objcache[MAX_INIT_SPR];
-
-ScriptObject scrObj[MAX_INIT_SPR];
-ScriptGUI *scrGui = NULL;
-ScriptHotspot scrHotspot[MAX_HOTSPOTS];
-ScriptRegion scrRegion[MAX_REGIONS];
-ScriptInvItem scrInv[MAX_INV];
-ScriptDialog scrDialog[MAX_DIALOG];
-
-RGB_MAP rgb_table;  // for 256-col antialiasing
-char* game_file_name=NULL;
-int want_quit = 0, screen_reset = 0;
-block raw_saved_screen = NULL;
-block dynamicallyCreatedSurfaces[MAX_DYNAMIC_SURFACES];
-int scrlockWasDown = 0;
-// whether there are currently remnants of a DisplaySpeech
-int screen_is_dirty = 0;
-char replayfile[MAX_PATH] = "record.dat";
-int replay_time = 0;
-unsigned long replay_last_second = 0;
-int replay_start_this_time = 0;
-char pexbuf[STD_BUFFER_SIZE];
-
-int pluginsWantingDebugHooks = 0;
-
-const char *replayTempFile = "~replay.tmp";
-
-NonBlockingScriptFunction repExecAlways(REP_EXEC_ALWAYS_NAME, 0);
-NonBlockingScriptFunction getDialogOptionsDimensionsFunc("dialog_options_get_dimensions", 1);
-NonBlockingScriptFunction renderDialogOptionsFunc("dialog_options_render", 1);
-NonBlockingScriptFunction getDialogOptionUnderCursorFunc("dialog_options_get_active", 1);
-NonBlockingScriptFunction runDialogOptionMouseClickHandlerFunc("dialog_options_mouse_click", 2);
 
 //  *** FUNCTIONS ****
 
@@ -685,6 +685,23 @@ bool AmbientSound::IsPlaying () {
   return (channels[channel] != NULL) ? true : false;
 }
 
+void draw_sprite_compensate(int,int,int,int);
+char *get_translation(const char*);
+
+void draw_sprite_compensate(int,int,int,int);
+char *get_translation(const char*);
+void quitprintf(char*texx, ...);
+void replace_macro_tokens(char*,char*);
+void wouttext_reverseifnecessary(int x, int y, int font, char *text);
+void SetGameSpeed(int newspd);
+void SetMultitasking(int mode);
+void put_sprite_256(int xxx,int yyy,block piccy);
+void construct_virtual_screen(bool fullRedraw);
+int initialize_engine_with_exception_handling(int argc,char*argv[]);
+int initialize_engine(int argc,char*argv[]);
+block recycle_bitmap(block bimp, int coldep, int wid, int hit);
+
+void do_main_cycle(int untilwhat,int daaa);
 int  Overlay_GetValid(ScriptOverlay *scover);
 void mainloop(bool checkControls = false, IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
 void set_default_cursor();
@@ -749,7 +766,7 @@ void SetSpeechFont (int);
 void SetNormalFont (int);
 void tint_image (block source, block dest, int red, int grn, int blu, int light_level, int luminance=255);
 void get_message_text (int msnum, char *buffer, char giveErr = 1);
-void render_graphics(IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
+//void render_graphics(IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
 int  wait_loop_still_valid();
 SOUNDCLIP *load_music_from_disk(int mnum, bool repeat);
 void play_new_music(int mnum, SOUNDCLIP *music);

@@ -4,7 +4,7 @@
 // forward declarations:
 #include "allegro.h"    // for BITMAP
 typedef BITMAP *block;  // wgt2allh.h
-class MoveList;         // acroom.h
+struct MoveList;        // acroom.h
 
 extern int check_click_on_object(int xx,int yy,int mood);
 extern int GetObjectAt(int xx,int yy) ;

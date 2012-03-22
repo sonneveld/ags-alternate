@@ -10,13 +10,15 @@
 
 */
 
+#include "acgui.h"
+
 #include "bmp.h"
 
 #pragma unmanaged
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "acruntim.h"
-#include "acgui.h"
+#include "sprcache.h"
 
 #ifdef THIS_IS_THE_ENGINE
 #define get_adjusted_spritewidth(x) wgetblockwidth(spriteset[x])

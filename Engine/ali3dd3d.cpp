@@ -18,7 +18,8 @@
 #include <winalleg.h>
 #include <allegro/platform/aintwin.h>
 #include <d3d9.h>
-#include <ali3d.h>
+#include "ali3d.h"
+#include "acgfx.h"
 #include "acwavi3d.h"
 
 void dummy_vsync() { }

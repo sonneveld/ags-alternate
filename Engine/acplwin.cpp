@@ -52,6 +52,8 @@ extern "C" HWND allegro_wnd;
 #include "acwavi.h"
 #include "acwsetup.h"
 #include "ac.h"
+#include "ali3d.h"
+#include "acsound.h"
 
 struct AGSWin32 : AGS32BitOSDriver {
   AGSWin32();

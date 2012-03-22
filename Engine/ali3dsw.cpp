@@ -13,7 +13,8 @@
 */
 #include <allegro.h>
 #include <winalleg.h>
-#include <ali3d.h>
+#include "ali3d.h"
+#include "acgfx.h"
 
 #ifdef _WIN32
 extern int dxmedia_play_video (const char*, bool, int, int);
