@@ -172,4 +172,9 @@ extern void mainloop(bool checkControls = false, IDriverDependantBitmap *extraBi
 extern void construct_virtual_screen(bool fullRedraw);
 
 
+// for ac_hotspot
+extern void walk_character(int chac,int tox,int toy,int ignwal, bool autoWalkAnims);
+extern int is_pos_on_character(int xx,int yy);
+
+
 #endif

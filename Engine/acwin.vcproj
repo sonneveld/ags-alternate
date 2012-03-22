@@ -415,6 +415,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_hotspot.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_invitem.cpp"
 				>
 			</File>
@@ -1161,6 +1165,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_gui_textbox.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_hotspot.h"
 				>
 			</File>
 			<File
