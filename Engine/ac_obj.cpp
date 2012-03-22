@@ -5,7 +5,7 @@
 #include "ac.h"
 #include "ac_context.h"
 #include "routefnd.h"
-#include "ac_room.h"
+#include "ac_script_room.h"
 #include "ac_string.h"
 #include "acgfx.h"
 #include "sprcache.h"

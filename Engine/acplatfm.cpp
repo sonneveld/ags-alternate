@@ -17,7 +17,7 @@
 #include "bmp.h"
 #include "ac_string.h"
 #include "ac_mouse.h"
-#include "ac_room.h"
+#include "ac_script_room.h"
 #include "ac_datetime.h"
 #include "ali3d.h"
 #include "sprcache.h"

@@ -76,7 +76,7 @@ extern int our_eip;
 #include "ac_string.h"
 #include "ac_maths.h"
 #include "ac_mouse.h"
-#include "ac_room.h"
+#include "ac_script_room.h"
 
 // Allegro 4 has switched 15-bit colour to BGR instead of RGB, so
 // in this case we need to convert the graphics on load

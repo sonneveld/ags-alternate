@@ -407,7 +407,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ac_room.cpp"
+				RelativePath=".\ac_script_room.cpp"
 				>
 			</File>
 			<File
@@ -1128,7 +1128,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ac_room.h"
+				RelativePath=".\ac_script_room.h"
 				>
 			</File>
 			<File
