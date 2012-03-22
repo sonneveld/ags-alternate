@@ -443,6 +443,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_region.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_script_gui.cpp"
 				>
 			</File>
@@ -1193,6 +1197,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_parser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_region.h"
 				>
 			</File>
 			<File
