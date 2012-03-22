@@ -12,6 +12,17 @@ struct InteractionScripts;  // acroom.h
 struct ccInstance;          // cscomp.h
 struct EventHappened;       // acruntim.h
 
+#ifdef NO_MP3_PLAYER
+#define _AC_SPECIAL_VERSION "NMP"
+#else
+#define _AC_SPECIAL_VERSION ""
+#endif
+// Version and build numbers
+#define AC_VERSION_TEXT "3.21 "
+#define ACI_VERSION_TEXT "3.21.1115"_AC_SPECIAL_VERSION
+// this needs to be updated if the "play" struct changes
+#define LOWEST_SGVER_COMPAT "3.20.1103"_AC_SPECIAL_VERSION
+
 // Check that a supplied buffer from a text script function was not null
 #define VALIDATE_STRING(strin) if ((unsigned long)strin <= 4096) quit("!String argument was null: make sure you pass a string, not an int, as a buffer")
 

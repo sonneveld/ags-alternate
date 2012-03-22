@@ -467,6 +467,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_system.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_viewframe.cpp"
 				>
 			</File>
@@ -1233,6 +1237,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_string.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_system.h"
 				>
 			</File>
 			<File
