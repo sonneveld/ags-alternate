@@ -439,6 +439,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_multimedia.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_obj.cpp"
 				>
 			</File>
@@ -1209,6 +1213,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_mouse.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_multimedia.h"
 				>
 			</File>
 			<File
