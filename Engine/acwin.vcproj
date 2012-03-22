@@ -403,7 +403,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_overlay.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_parser.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_script_gui.cpp"
 				>
 			</File>
 			<File
@@ -1116,15 +1124,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ac_overlay.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\ac_overlay.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ac_parser.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_script_gui.h"
 				>
 			</File>
 			<File
