@@ -11,6 +11,7 @@ struct NewInteraction;      // acroom.h
 struct InteractionScripts;  // acroom.h
 struct ccInstance;          // cscomp.h
 struct EventHappened;       // acruntim.h
+struct ViewFrame;           // acroom.h
 
 #ifdef NO_MP3_PLAYER
 #define _AC_SPECIAL_VERSION "NMP"
@@ -189,8 +190,20 @@ extern int is_pos_on_character(int xx,int yy);
 
 // for ac_drawsurf
 extern void get_message_text (int msnum, char *buffer, char giveErr = 1);
-void tint_image (block source, block dest, int red, int grn, int blu, int light_level, int luminance=255);
+extern void tint_image (block source, block dest, int red, int grn, int blu, int light_level, int luminance=255);
 extern void push_screen ();
 extern void pop_screen();
+
+// for acchars
+extern int play_speech(int charid,int sndid) ;
+extern void stop_speech() ;
+extern int adjust_y_for_guis ( int yy);
+extern int get_textwindow_top_border_height (int twgui) ;
+extern void DrawViewFrame(block target, ViewFrame *vframe, int x, int y);
+extern int get_textwindow_border_width (int twgui);
+extern void _display_at(int xx,int yy,int wii,char*todis,int blocking,int asspch, int isThought, int allowShrink, bool overlayPositionFixed);
+extern void new_room(int newnum,CharacterInfo*forchar);
+extern void setevent(int evtyp,int ev1=0,int ev2=-1000,int ev3=0);
+
 
 #endif

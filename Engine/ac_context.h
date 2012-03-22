@@ -350,7 +350,11 @@ extern NonBlockingScriptFunction renderDialogOptionsFunc;
 extern NonBlockingScriptFunction getDialogOptionUnderCursorFunc;
 extern NonBlockingScriptFunction runDialogOptionMouseClickHandlerFunc;
 
+// set by dj_timer_handler
 extern volatile int timerloop;
+extern volatile int mvolcounter;
+extern int update_music_at;
+extern int time_between_timers;
 
 extern int char_lowest_yp;
 extern int obj_lowest_yp;

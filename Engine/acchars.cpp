@@ -14,19 +14,23 @@
 
 #include "acchars.h"
 
+#include "ac.h"
+#include "ac_context.h"
 #include "bmp.h"
-
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "acruntim.h"
 #include <math.h>
 #include "routefnd.h"
-#include "ac.h"
 #include "ac_context.h"
 #include "ac_string.h"
 #include "ac_mouse.h"
 #include "ac_obj.h"
-
+#include "sprcache.h"
+#include "ac_overlay.h"
+#include "ac_viewframe.h"
+#include "acgfx.h"
+#include "ali3d.h"
 
 // order of loops to turn character in circle from down to down
 int turnlooporder[8] = {0, 6, 1, 7, 3, 5, 2, 4};
@@ -1895,6 +1899,1073 @@ void Character_SetZ(CharacterInfo *chaa, int newval) {
 
 
 
+/* *** SCRIPT SYMBOL: [Character] SetCharacterIdle *** */
+void SetCharacterIdle(int who, int iview, int itime) {
+  if (!is_valid_character(who))
+    quit("!SetCharacterIdle: Invalid character specified");
+
+  Character_SetIdleView(&game.chars[who], iview, itime);
+}
+
+
+int get_character_currently_talking() {
+  if ((face_talking >= 0) && (facetalkrepeat))
+    return facetalkchar->index_id;
+  else if (char_speaking >= 0)
+    return char_speaking;
+
+  return -1;
+}
+
+/* *** SCRIPT SYMBOL: [Character] Character::get_SpeakingFrame *** */
+int Character_GetSpeakingFrame(CharacterInfo *chaa) {
+
+  if ((face_talking >= 0) && (facetalkrepeat))
+  {
+    if (facetalkchar->index_id == chaa->index_id)
+    {
+      return facetalkframe;
+    }
+  }
+  else if (char_speaking >= 0)
+  {
+    if (char_speaking == chaa->index_id)
+    {
+      return chaa->frame;
+    }
+  }
+
+  quit("!Character.SpeakingFrame: character is not currently speaking");
+  return -1;
+}
+
+
+
+void _displayspeech(char*texx, int aschar, int xx, int yy, int widd, int isThought) {
+  if (!is_valid_character(aschar))
+    quit("!DisplaySpeech: invalid character");
+
+  CharacterInfo *speakingChar = &game.chars[aschar];
+  if ((speakingChar->view < 0) || (speakingChar->view >= game.numviews))
+    quit("!DisplaySpeech: character has invalid view");
+
+  if (is_text_overlay > 0)
+    quit("!DisplaySpeech: speech was already displayed (nested DisplaySpeech, perhaps room script and global script conflict?)");
+
+  EndSkippingUntilCharStops();
+
+  said_speech_line = 1;
+
+  int aa;
+  if (play.bgspeech_stay_on_display == 0) {
+    // remove any background speech
+    for (aa=0;aa<numscreenover;aa++) {
+      if (screenover[aa].timeout > 0) {
+        remove_screen_overlay(screenover[aa].type);
+        aa--;
+      }
+    }
+  }
+  said_text = 1;
+
+  // the strings are pre-translated
+  //texx = get_translation(texx);
+  our_eip=150;
+
+  int isPause = 1;
+  // if the message is all .'s, don't display anything
+  for (aa = 0; texx[aa] != 0; aa++) {
+    if (texx[aa] != '.') {
+      isPause = 0;
+      break;
+    }
+  }
+
+  play.messagetime = GetTextDisplayTime(texx);
+
+  if (isPause) {
+    if (update_music_at > 0)
+      update_music_at += play.messagetime;
+    do_main_cycle(UNTIL_INTISNEG,(int)&play.messagetime);
+    return;
+  }
+
+  int textcol = speakingChar->talkcolor;
+  
+  // if it's 0, it won't be recognised as speech
+  if (textcol == 0)
+    textcol = 16;
+
+  int allowShrink = 0;
+  int bwidth = widd;
+  if (bwidth < 0)
+    bwidth = scrnwid/2 + scrnwid/4;
+
+  our_eip=151;
+
+  int useview = speakingChar->talkview;
+  if (isThought) {
+    useview = speakingChar->thinkview;
+    // view 0 is not valid for think views
+    if (useview == 0)
+      useview = -1;
+    // speech bubble can shrink to fit
+    allowShrink = 1;
+    if (speakingChar->room != displayed_room) {
+      // not in room, centre it
+      xx = -1;
+      yy = -1;
+    }
+  }
+
+  if (useview >= game.numviews)
+    quitprintf("!Character.Say: attempted to use view %d for animation, but it does not exist", useview + 1);
+
+  int tdxp = xx,tdyp = yy;
+  int oldview=-1, oldloop = -1;
+  int ovr_type = 0;
+
+  text_lips_offset = 0;
+  text_lips_text = texx;
+
+  block closeupface=NULL;
+  if (texx[0]=='&') {
+    // auto-speech
+    int igr=atoi(&texx[1]);
+    while ((texx[0]!=' ') & (texx[0]!=0)) texx++;
+    if (texx[0]==' ') texx++;
+    if (igr <= 0)
+      quit("DisplaySpeech: auto-voice symbol '&' not followed by valid integer");
+
+    text_lips_text = texx;
+
+    if (play_speech(aschar,igr)) {
+      if (play.want_speech == 2)
+        texx = "  ";  // speech only, no text.
+    }
+  }
+  if (game.options[OPT_SPEECHTYPE] == 3)
+    remove_screen_overlay(OVER_COMPLETE);
+  our_eip=1500;
+
+  if (game.options[OPT_SPEECHTYPE] == 0)
+    allowShrink = 1;
+
+  if (speakingChar->idleleft < 0)  {
+    // if idle anim in progress for the character, stop it
+    ReleaseCharacterView(aschar);
+//    speakingChar->idleleft = speakingChar->idletime;
+  }
+
+  bool overlayPositionFixed = false;
+  int charFrameWas = 0;
+  int viewWasLocked = 0;
+  if (speakingChar->flags & CHF_FIXVIEW)
+    viewWasLocked = 1;
+
+  /*if ((speakingChar->room == displayed_room) ||
+      ((useview >= 0) && (game.options[OPT_SPEECHTYPE] > 0)) ) {*/
+
+  if (speakingChar->room == displayed_room) {
+    // If the character is in this room, go for it - otherwise
+    // run the "else" clause which  does text in the middle of
+    // the screen.
+    our_eip=1501;
+    if (tdxp < 0)
+      tdxp = multiply_up_coordinate(speakingChar->x) - offsetx;
+    if (tdxp < 2)
+      tdxp=2;
+
+    if (speakingChar->walking)
+      StopMoving(aschar);
+
+    // save the frame we need to go back to
+    // if they were moving, this will be 0 (because we just called
+    // StopMoving); otherwise, it might be a specific animation 
+    // frame which we should return to
+    if (viewWasLocked)
+      charFrameWas = speakingChar->frame;
+
+    // if the current loop doesn't exist in talking view, use loop 0
+    if (speakingChar->loop >= views[speakingChar->view].numLoops)
+      speakingChar->loop = 0;
+
+    if ((speakingChar->view < 0) || 
+        (speakingChar->loop >= views[speakingChar->view].numLoops) ||
+        (views[speakingChar->view].loops[speakingChar->loop].numFrames < 1))
+    {
+      quitprintf("Unable to display speech because the character %s has an invalid view frame (View %d, loop %d, frame %d)", speakingChar->scrname, speakingChar->view + 1, speakingChar->loop, speakingChar->frame);
+    }
+
+    our_eip=1504;
+
+    if (tdyp < 0) 
+    {
+      int sppic = views[speakingChar->view].loops[speakingChar->loop].frames[0].pic;
+      tdyp = multiply_up_coordinate(speakingChar->get_effective_y()) - offsety - get_fixed_pixel_size(5);
+      if (charextra[aschar].height < 1)
+        tdyp -= spriteheight[sppic];
+      else
+        tdyp -= charextra[aschar].height;
+      // if it's a thought, lift it a bit further up
+      if (isThought)  
+        tdyp -= get_fixed_pixel_size(10);
+    }
+
+    our_eip=1505;
+    if (tdyp < 5)
+      tdyp=5;
+      
+    tdxp=-tdxp;  // tell it to centre it
+    our_eip=152;
+
+    if ((useview >= 0) && (game.options[OPT_SPEECHTYPE] > 0)) {
+      // Sierra-style close-up portrait
+
+      if (play.swap_portrait_lastchar != aschar) {
+        // if the portraits are set to Alternate, OR they are
+        // set to Left but swap_portrait has been set to 1 (the old
+        // method for enabling it), then swap them round
+        if ((game.options[OPT_PORTRAITSIDE] == PORTRAIT_ALTERNATE) ||
+            ((game.options[OPT_PORTRAITSIDE] == 0) &&
+             (play.swap_portrait_side > 0))) {
+
+          if (play.swap_portrait_side == 2)
+            play.swap_portrait_side = 1;
+          else
+            play.swap_portrait_side = 2;
+        }
+
+        if (game.options[OPT_PORTRAITSIDE] == PORTRAIT_XPOSITION) {
+          // Portrait side based on character X-positions
+          if (play.swap_portrait_lastchar < 0) {
+            // no previous character been spoken to
+            // therefore, find another character in this room
+            // that it could be
+            for (int ce = 0; ce < game.numcharacters; ce++) {
+              if ((game.chars[ce].room == speakingChar->room) &&
+                  (game.chars[ce].on == 1) &&
+                  (ce != aschar)) {
+                play.swap_portrait_lastchar = ce;
+                break;
+              }
+            }
+          }
+
+          if (play.swap_portrait_lastchar >= 0) {
+            // if this character is right of the one before, put the
+            // portrait on the right
+            if (speakingChar->x > game.chars[play.swap_portrait_lastchar].x)
+              play.swap_portrait_side = -1;
+            else
+              play.swap_portrait_side = 0;
+          }
+        }
+
+        play.swap_portrait_lastchar = aschar;
+      }
+
+      // Determine whether to display the portrait on the left or right
+      int portrait_on_right = 0;
+
+      if (game.options[OPT_SPEECHTYPE] == 3) 
+        { }  // always on left with QFG-style speech
+      else if ((play.swap_portrait_side == 1) ||
+          (play.swap_portrait_side == -1) ||
+          (game.options[OPT_PORTRAITSIDE] == PORTRAIT_RIGHT))
+        portrait_on_right = 1;
+
+
+      int bigx=0,bigy=0,kk;
+      ViewStruct*viptr=&views[useview];
+      for (kk = 0; kk < viptr->loops[0].numFrames; kk++) 
+      {
+        int tw = spritewidth[viptr->loops[0].frames[kk].pic];
+        if (tw > bigx) bigx=tw;
+        tw = spriteheight[viptr->loops[0].frames[kk].pic];
+        if (tw > bigy) bigy=tw;
+      }
+
+      // if they accidentally used a large full-screen image as the sierra-style
+      // talk view, correct it
+      if ((game.options[OPT_SPEECHTYPE] != 3) && (bigx > scrnwid - get_fixed_pixel_size(50)))
+        bigx = scrnwid - get_fixed_pixel_size(50);
+
+      if (widd > 0)
+        bwidth = widd - bigx;
+
+      our_eip=153;
+      int draw_yp = 0, ovr_yp = get_fixed_pixel_size(20);
+      if (game.options[OPT_SPEECHTYPE] == 3) {
+        // QFG4-style whole screen picture
+        closeupface = create_bitmap_ex(bitmap_color_depth(spriteset[viptr->loops[0].frames[0].pic]), scrnwid, scrnhit);
+        clear_to_color(closeupface, 0);
+        draw_yp = scrnhit/2 - spriteheight[viptr->loops[0].frames[0].pic]/2;
+        bigx = scrnwid/2 - get_fixed_pixel_size(20);
+        ovr_type = OVER_COMPLETE;
+        ovr_yp = 0;
+        tdyp = -1;  // center vertically
+      }
+      else {
+        // KQ6-style close-up face picture
+        if (yy < 0)
+          ovr_yp = adjust_y_for_guis (ovr_yp);
+        else
+          ovr_yp = yy;
+
+        closeupface = create_bitmap_ex(bitmap_color_depth(spriteset[viptr->loops[0].frames[0].pic]),bigx+1,bigy+1);
+        clear_to_color(closeupface,bitmap_mask_color(closeupface));
+        ovr_type = OVER_PICTURE;
+
+        if (yy < 0)
+          tdyp = ovr_yp + get_textwindow_top_border_height(play.speech_textwindow_gui);
+      }
+      //draw_sprite(closeupface,spriteset[viptr->frames[0][0].pic],0,draw_yp);
+      DrawViewFrame(closeupface, &viptr->loops[0].frames[0], 0, draw_yp);
+
+      int overlay_x = get_fixed_pixel_size(10);
+
+      if (xx < 0) {
+        tdxp = get_fixed_pixel_size(16) + bigx + get_textwindow_border_width(play.speech_textwindow_gui) / 2;
+
+        int maxWidth = (scrnwid - tdxp) - get_fixed_pixel_size(5) - 
+             get_textwindow_border_width (play.speech_textwindow_gui) / 2;
+
+        if (bwidth > maxWidth)
+          bwidth = maxWidth;
+      }
+      else {
+        tdxp = xx + bigx + get_fixed_pixel_size(8);
+        overlay_x = xx;
+      }
+
+      // allow the text box to be shrunk to fit the text
+      allowShrink = 1;
+
+      // if the portrait's on the right, swap it round
+      if (portrait_on_right) {
+        if ((xx < 0) || (widd < 0)) {
+          overlay_x = (scrnwid - bigx) - get_fixed_pixel_size(5);
+          tdxp = get_fixed_pixel_size(9);
+        }
+        else {
+          overlay_x = (xx + widd - bigx) - get_fixed_pixel_size(5);
+          tdxp = xx;
+        }
+        tdxp += get_textwindow_border_width(play.speech_textwindow_gui) / 2;
+        allowShrink = 2;
+      }
+      if (game.options[OPT_SPEECHTYPE] == 3)
+        overlay_x = 0;
+      face_talking=add_screen_overlay(overlay_x,ovr_yp,ovr_type,closeupface);
+      facetalkframe = 0;
+      facetalkwait = viptr->loops[0].frames[0].speed + GetCharacterSpeechAnimationDelay(speakingChar);
+      facetalkloop = 0;
+      facetalkview = useview;
+      facetalkrepeat = (isThought) ? 0 : 1;
+      facetalkBlinkLoop = 0;
+      facetalkAllowBlink = 1;
+      if ((isThought) && (speakingChar->flags & CHF_NOBLINKANDTHINK))
+        facetalkAllowBlink = 0;
+      facetalkchar = &game.chars[aschar];
+      if (facetalkchar->blinktimer < 0)
+        facetalkchar->blinktimer = facetalkchar->blinkinterval;
+      textcol=-textcol;
+      overlayPositionFixed = true;
+    }
+    else if (useview >= 0) {
+      // Lucasarts-style speech
+      our_eip=154;
+
+      oldview = speakingChar->view;
+      oldloop = speakingChar->loop;
+      speakingChar->animating = 1 | (GetCharacterSpeechAnimationDelay(speakingChar) << 8);
+      // only repeat if speech, not thought
+      if (!isThought)
+        speakingChar->animating |= CHANIM_REPEAT;
+
+      speakingChar->view = useview;
+      speakingChar->frame=0;
+      speakingChar->flags|=CHF_FIXVIEW;
+
+      if (speakingChar->loop >= views[speakingChar->view].numLoops)
+      {
+        // current character loop is outside the normal talking directions
+        speakingChar->loop = 0;
+      }
+
+      facetalkBlinkLoop = speakingChar->loop;
+
+      if ((speakingChar->loop >= views[speakingChar->view].numLoops) ||
+          (views[speakingChar->view].loops[speakingChar->loop].numFrames < 1))
+      {
+        quitprintf("!Unable to display speech because the character %s has an invalid speech view (View %d, loop %d, frame %d)", speakingChar->scrname, speakingChar->view + 1, speakingChar->loop, speakingChar->frame);
+      }
+
+      // set up the speed of the first frame
+      speakingChar->wait = GetCharacterSpeechAnimationDelay(speakingChar) + 
+                           views[speakingChar->view].loops[speakingChar->loop].frames[0].speed;
+
+      if (widd < 0) {
+        bwidth = scrnwid/2 + scrnwid/6;
+        // If they are close to the screen edge, make the text narrower
+        int relx = multiply_up_coordinate(speakingChar->x) - offsetx;
+        if ((relx < scrnwid / 4) || (relx > scrnwid - (scrnwid / 4)))
+          bwidth -= scrnwid / 5;
+      }
+/*   this causes the text to bob up and down as they talk
+      tdxp = OVR_AUTOPLACE;
+      tdyp = aschar;*/
+      if (!isThought)  // set up the lip sync if not thinking
+        char_speaking = aschar;
+
+    }
+  }
+  else
+    allowShrink = 1;
+
+  // it wants the centred position, so make it so
+  if ((xx >= 0) && (tdxp < 0))
+    tdxp -= widd / 2;
+
+  // if they used DisplaySpeechAt, then use the supplied width
+  if ((widd > 0) && (isThought == 0))
+    allowShrink = 0;
+
+  our_eip=155;
+  _display_at(tdxp,tdyp,bwidth,texx,0,textcol, isThought, allowShrink, overlayPositionFixed);
+  our_eip=156;
+  if ((play.in_conversation > 0) && (game.options[OPT_SPEECHTYPE] == 3))
+    closeupface = NULL;
+  if (closeupface!=NULL)
+    remove_screen_overlay(ovr_type);
+  screen_is_dirty = 1;
+  face_talking = -1;
+  facetalkchar = NULL;
+  our_eip=157;
+  if (oldview>=0) {
+    speakingChar->flags &= ~CHF_FIXVIEW;
+    if (viewWasLocked)
+      speakingChar->flags |= CHF_FIXVIEW;
+    speakingChar->view=oldview;
+    speakingChar->loop = oldloop;
+    speakingChar->animating=0;
+    speakingChar->frame = charFrameWas;
+    speakingChar->wait=0;
+    speakingChar->idleleft = speakingChar->idletime;
+    // restart the idle animation straight away
+    charextra[aschar].process_idle_this_time = 1;
+  }
+  char_speaking = -1;
+  stop_speech();
+}
+
+
+void DisplaySpeech(char*texx, int aschar) {
+  _displayspeech (texx, aschar, -1, -1, -1, 0);
+}
+
+// **** THIS IS UNDOCUMENTED BECAUSE IT DOESN'T WORK PROPERLY
+// **** AT 640x400 AND DOESN'T USE THE RIGHT SPEECH STYLE
+/* *** SCRIPT SYMBOL: [Character] DisplaySpeechAt *** */
+void DisplaySpeechAt (int xx, int yy, int wii, int aschar, char*spch) {
+  multiply_up_coordinates(&xx, &yy);
+  wii = multiply_up_coordinate(wii);
+  _displayspeech (get_translation(spch), aschar, xx, yy, wii, 0);
+}
+
+
+
+void _DisplaySpeechCore(int chid, char *displbuf) {
+  if (displbuf[0] == 0) {
+    // no text, just update the current character who's speaking
+    // this allows the portrait side to be switched with an empty
+    // speech line
+    play.swap_portrait_lastchar = chid;
+    return;
+  }
+
+  // adjust timing of text (so that DisplaySpeech("%s", str) pauses
+  // for the length of the string not 2 frames)
+  if ((int)strlen(displbuf) > source_text_length + 3)
+    source_text_length = strlen(displbuf);
+
+  DisplaySpeech(displbuf, chid);
+}
+
+/* *** SCRIPT SYMBOL: [Character] DisplaySpeech *** */
+void __sc_displayspeech(int chid,char*texx, ...) {
+  if ((chid<0) || (chid>=game.numcharacters))
+    quit("!DisplaySpeech: invalid character specified");
+
+  char displbuf[STD_BUFFER_SIZE];
+  va_list ap;
+  va_start(ap,texx);
+  my_sprintf(displbuf, get_translation(texx), ap);
+  va_end(ap);
+
+  _DisplaySpeechCore(chid, displbuf);
+
+}
+
+
+void _DisplayThoughtCore(int chid, const char *displbuf) {
+  // adjust timing of text (so that DisplayThought("%s", str) pauses
+  // for the length of the string not 2 frames)
+  if ((int)strlen(displbuf) > source_text_length + 3)
+    source_text_length = strlen(displbuf);
+
+  int xpp = -1, ypp = -1, width = -1;
+
+  if ((game.options[OPT_SPEECHTYPE] == 0) || (game.chars[chid].thinkview <= 0)) {
+    // lucasarts-style, so we want a speech bubble actually above
+    // their head (or if they have no think anim in Sierra-style)
+    width = multiply_up_coordinate(play.speech_bubble_width);
+    xpp = (multiply_up_coordinate(game.chars[chid].x) - offsetx) - width / 2;
+    if (xpp < 0)
+      xpp = 0;
+    // -1 will automatically put it above the char's head
+    ypp = -1;
+  }
+
+  _displayspeech ((char*)displbuf, chid, xpp, ypp, width, 1);
+}
+
+/* *** SCRIPT SYMBOL: [Character] DisplayThought *** */
+void DisplayThought(int chid, const char*texx, ...) {
+  if ((chid < 0) || (chid >= game.numcharacters))
+    quit("!DisplayThought: invalid character specified");
+
+  char displbuf[STD_BUFFER_SIZE];
+  va_list ap;
+  va_start(ap,texx);
+  my_sprintf(displbuf,get_translation(texx),ap);
+  va_end(ap);
+
+  _DisplayThoughtCore(chid, displbuf);
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterBaseline *** */
+void SetCharacterBaseline (int obn, int basel) {
+  if (!is_valid_character(obn)) quit("!SetCharacterBaseline: invalid object number specified");
+  
+  Character_SetBaseline(&game.chars[obn], basel);
+}
+
+// pass trans=0 for fully solid, trans=100 for fully transparent
+/* *** SCRIPT SYMBOL: [Character] SetCharacterTransparency *** */
+void SetCharacterTransparency(int obn,int trans) {
+  if (!is_valid_character(obn))
+    quit("!SetCharTransparent: invalid character number specified");
+  
+  Character_SetTransparency(&game.chars[obn], trans);
+}
+
+/* *** SCRIPT SYMBOL: [Character] AnimateCharacter *** */
+void scAnimateCharacter (int chh, int loopn, int sppd, int rept) {
+  if (!is_valid_character(chh))
+    quit("AnimateCharacter: invalid character");
+
+  animate_character(&game.chars[chh], loopn, sppd, rept);
+}
+
+/* *** SCRIPT SYMBOL: [Character] AnimateCharacterEx *** */
+void AnimateCharacterEx(int chh, int loopn, int sppd, int rept, int direction, int blocking) {
+  if ((direction < 0) || (direction > 1))
+    quit("!AnimateCharacterEx: invalid direction");
+  if (!is_valid_character(chh))
+    quit("AnimateCharacter: invalid character");
+
+  if (direction)
+    direction = BACKWARDS;
+  else
+    direction = FORWARDS;
+
+  if (blocking)
+    blocking = BLOCKING;
+  else
+    blocking = IN_BACKGROUND;
+
+  Character_Animate(&game.chars[chh], loopn, sppd, rept, blocking, direction);
+
+}
+
+void animate_character(CharacterInfo *chap, int loopn,int sppd,int rept, int noidleoverride, int direction) {
+
+  if ((chap->view < 0) || (chap->view > game.numviews)) {
+    quitprintf("!AnimateCharacter: you need to set the view number first\n"
+      "(trying to animate '%s' using loop %d. View is currently %d).",chap->name,loopn,chap->view+1);
+  }
+  DEBUG_CONSOLE("%s: Start anim view %d loop %d, spd %d, repeat %d", chap->scrname, chap->view+1, loopn, sppd, rept);
+  if ((chap->idleleft < 0) && (noidleoverride == 0)) {
+    // if idle view in progress for the character (and this is not the
+    // "start idle animation" animate_character call), stop the idle anim
+    Character_UnlockView(chap);
+    chap->idleleft=chap->idletime;
+  }
+  if ((loopn < 0) || (loopn >= views[chap->view].numLoops))
+    quit("!AnimateCharacter: invalid loop number specified");
+  Character_StopMoving(chap);
+  chap->animating=1;
+  if (rept) chap->animating |= CHANIM_REPEAT;
+  if (direction) chap->animating |= CHANIM_BACKWARDS;
+
+  chap->animating|=((sppd << 8) & 0xff00);
+  chap->loop=loopn;
+  
+  if (direction) {
+    chap->frame = views[chap->view].loops[loopn].numFrames - 1;
+  }
+  else
+    chap->frame=0;
+
+  chap->wait = sppd + views[chap->view].loops[loopn].frames[chap->frame].speed;
+  CheckViewFrameForCharacter(chap);
+}
+
+block GetCharacterImage(int charid, int *isFlipped) 
+{
+  if (!gfxDriver->HasAcceleratedStretchAndFlip())
+  {
+    if (actsps[charid + MAX_INIT_SPR] != NULL) 
+    {
+      // the actsps image is pre-flipped, so no longer register the image as such
+      if (isFlipped)
+        *isFlipped = 0;
+      return actsps[charid + MAX_INIT_SPR];
+    }
+  }
+  CharacterInfo*chin=&game.chars[charid];
+  int sppic = views[chin->view].loops[chin->loop].frames[chin->frame].pic;
+  return spriteset[sppic];
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] AreCharObjColliding *** */
+int AreCharObjColliding(int charid,int objid) {
+  if (!is_valid_character(charid))
+    quit("!AreCharObjColliding: invalid character");
+  if (!is_valid_object(objid))
+    quit("!AreCharObjColliding: invalid object number");
+
+  return Character_IsCollidingWithObject(&game.chars[charid], &scrObj[objid]);
+}
+
+/* *** SCRIPT SYMBOL: [Character] AreCharactersColliding *** */
+int AreCharactersColliding(int cchar1,int cchar2) {
+  if (!is_valid_character(cchar1))
+    quit("!AreCharactersColliding: invalid char1");
+  if (!is_valid_character(cchar2))
+    quit("!AreCharactersColliding: invalid char2");
+
+  return Character_IsCollidingWithChar(&game.chars[cchar1], &game.chars[cchar2]);
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] AddInventory *** */
+void add_inventory(int inum) {
+  if ((inum < 0) || (inum >= MAX_INV))
+    quit("!AddInventory: invalid inventory number");
+
+  Character_AddInventory(playerchar, &scrInv[inum], SCR_NO_VALUE);
+
+  play.obsolete_inv_numorder = charextra[game.playercharacter].invorder_count;
+}
+
+/* *** SCRIPT SYMBOL: [Character] LoseInventory *** */
+void lose_inventory(int inum) {
+  if ((inum < 0) || (inum >= MAX_INV))
+    quit("!LoseInventory: invalid inventory number");
+
+  Character_LoseInventory(playerchar, &scrInv[inum]);
+
+  play.obsolete_inv_numorder = charextra[game.playercharacter].invorder_count;
+}
+
+/* *** SCRIPT SYMBOL: [Character] AddInventoryToCharacter *** */
+void AddInventoryToCharacter(int charid, int inum) {
+  if (!is_valid_character(charid))
+    quit("!AddInventoryToCharacter: invalid character specified");
+  if ((inum < 1) || (inum >= game.numinvitems))
+    quit("!AddInventory: invalid inv item specified");
+
+  Character_AddInventory(&game.chars[charid], &scrInv[inum], SCR_NO_VALUE);
+}
+
+/* *** SCRIPT SYMBOL: [Character] LoseInventoryFromCharacter *** */
+void LoseInventoryFromCharacter(int charid, int inum) {
+  if (!is_valid_character(charid))
+    quit("!LoseInventoryFromCharacter: invalid character specified");
+  if ((inum < 1) || (inum >= game.numinvitems))
+    quit("!AddInventory: invalid inv item specified");
+  
+  Character_LoseInventory(&game.chars[charid], &scrInv[inum]);
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] GetCharacterAt *** */
+int GetCharacterAt (int xx, int yy) {
+  xx += divide_down_coordinate(offsetx);
+  yy += divide_down_coordinate(offsety);
+  return is_pos_on_character(xx,yy);
+}
+
+/* *** SCRIPT SYMBOL: [Character] Character::GetAtScreenXY^2 *** */
+CharacterInfo *GetCharacterAtLocation(int xx, int yy) {
+  int hsnum = GetCharacterAt(xx, yy);
+  if (hsnum < 0)
+    return NULL;
+  return &game.chars[hsnum];
+}
+
+/* *** SCRIPT SYMBOL: [Character] RunCharacterInteraction *** */
+void RunCharacterInteraction (int cc, int mood) {
+  if (!is_valid_character(cc))
+    quit("!RunCharacterInteraction: invalid character");
+
+  int passon=-1,cdata=-1;
+  if (mood==MODE_LOOK) passon=0;
+  else if (mood==MODE_HAND) passon=1;
+  else if (mood==MODE_TALK) passon=2;
+  else if (mood==MODE_USE) { passon=3;
+    cdata=playerchar->activeinv;
+    play.usedinv=cdata;
+    }
+  else if (mood==MODE_PICKUP) passon = 5;
+  else if (mood==MODE_CUSTOM1) passon = 6;
+  else if (mood==MODE_CUSTOM2) passon = 7;
+
+  evblockbasename="character%d"; evblocknum=cc;
+  if (game.charScripts != NULL) 
+  {
+    if (passon>=0)
+      run_interaction_script(game.charScripts[cc], passon, 4, (passon == 3));
+    run_interaction_script(game.charScripts[cc], 4);  // any click on char
+  }
+  else 
+  {
+    if (passon>=0)
+      run_interaction_event(game.intrChar[cc],passon, 4, (passon == 3));
+    run_interaction_event(game.intrChar[cc],4);  // any click on char
+  }
+}
+
+/* *** SCRIPT SYMBOL: [Character] Character::RunInteraction^1 *** */
+void Character_RunInteraction(CharacterInfo *chaa, int mood) {
+
+  RunCharacterInteraction(chaa->index_id, mood);
+}
+
+
+int check_click_on_character(int xx,int yy,int mood) {
+  int lowestwas=is_pos_on_character(xx,yy);
+  if (lowestwas>=0) {
+    RunCharacterInteraction (lowestwas, mood);
+    return 1;
+  }
+  return 0;
+}
+
+
+
+/* *** SCRIPT SYMBOL: [Character] GetCharacterProperty *** */
+int GetCharacterProperty (int cha, const char *property) {
+  if (!is_valid_character(cha))
+    quit("!GetCharacterProperty: invalid character");
+  return get_int_property (&game.charProps[cha], property);
+}
+/* *** SCRIPT SYMBOL: [Character] Character::GetProperty^1 *** */
+int Character_GetProperty(CharacterInfo *chaa, const char *property) {
+
+  return get_int_property(&game.charProps[chaa->index_id], property);
+
+}
+
+/* *** SCRIPT SYMBOL: [Character] GetCharacterPropertyText *** */
+void GetCharacterPropertyText (int item, const char *property, char *bufer) {
+  get_text_property (&game.charProps[item], property, bufer);
+}
+/* *** SCRIPT SYMBOL: [Character] Character::GetPropertyText^2 *** */
+void Character_GetPropertyText(CharacterInfo *chaa, const char *property, char *bufer) {
+  get_text_property(&game.charProps[chaa->index_id], property, bufer);
+}
+/* *** SCRIPT SYMBOL: [Character] Character::GetTextProperty^1 *** */
+const char* Character_GetTextProperty(CharacterInfo *chaa, const char *property) {
+  return get_text_property_dynamic_string(&game.charProps[chaa->index_id], property);
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] SetPlayerCharacter *** */
+void SetPlayerCharacter(int newchar) {
+  if (!is_valid_character(newchar))
+    quit("!SetPlayerCharacter: Invalid character specified");
+
+  Character_SetAsPlayer(&game.chars[newchar]);
+}
+
+/* *** SCRIPT SYMBOL: [Character] FollowCharacterEx *** */
+void FollowCharacterEx(int who, int tofollow, int distaway, int eagerness) {
+  if (!is_valid_character(who))
+    quit("!FollowCharacter: Invalid character specified");
+  CharacterInfo *chtofollow;
+  if (tofollow == -1)
+    chtofollow = NULL;
+  else if (!is_valid_character(tofollow))
+    quit("!FollowCharacterEx: invalid character to follow");
+  else
+    chtofollow = &game.chars[tofollow];
+
+  Character_FollowCharacter(&game.chars[who], chtofollow, distaway, eagerness);
+}
+
+/* *** SCRIPT SYMBOL: [Character] FollowCharacter *** */
+void FollowCharacter(int who, int tofollow) {
+  FollowCharacterEx(who,tofollow,10,97);
+  }
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterIgnoreLight *** */
+void SetCharacterIgnoreLight (int who, int yesorno) {
+  if (!is_valid_character(who))
+    quit("!SetCharacterIgnoreLight: Invalid character specified");
+
+  Character_SetIgnoreLighting(&game.chars[who], yesorno);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterProperty *** */
+void SetCharacterProperty (int who, int flag, int yesorno) {
+  if (!is_valid_character(who))
+    quit("!SetCharacterProperty: Invalid character specified");
+
+  Character_SetOption(&game.chars[who], flag, yesorno);
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] NewRoom *** */
+void NewRoom(int nrnum) {
+  if (nrnum < 0)
+    quitprintf("!NewRoom: room change requested to invalid room number %d.", nrnum);
+
+  if (displayed_room < 0) {
+    // called from game_start; change the room where the game will start
+    playerchar->room = nrnum;
+    return;
+  }
+
+  
+  DEBUG_CONSOLE("Room change requested to room %d", nrnum);
+  EndSkippingUntilCharStops();
+
+  can_run_delayed_command();
+
+  if (play.stop_dialog_at_end != DIALOG_NONE) {
+    if (play.stop_dialog_at_end == DIALOG_RUNNING)
+      play.stop_dialog_at_end = DIALOG_NEWROOM + nrnum;
+    else
+      quit("!NewRoom: two NewRoom/RunDialog/StopDialog requests within dialog");
+    return;
+  }
+
+  if (in_leaves_screen >= 0) {
+    // NewRoom called from the Player Leaves Screen event -- just
+    // change which room it will go to
+    in_leaves_screen = nrnum;
+  }
+  else if (in_enters_screen) {
+    setevent(EV_NEWROOM,nrnum);
+    return;
+  }
+  else if (in_inv_screen) {
+    inv_screen_newroom = nrnum;
+    return;
+  }
+  else if ((inside_script==0) & (in_graph_script==0)) {
+    new_room(nrnum,playerchar);
+    return;
+  }
+  else if (inside_script) {
+    curscript->queue_action(ePSANewRoom, nrnum, "NewRoom");
+    // we might be within a MoveCharacterBlocking -- the room
+    // change should abort it
+    if ((playerchar->walking > 0) && (playerchar->walking < TURNING_AROUND)) {
+      // nasty hack - make sure it doesn't move the character
+      // to a walkable area
+      mls[playerchar->walking].direct = 1;
+      StopMoving(game.playercharacter);
+    }
+  }
+  else if (in_graph_script)
+    gs_to_newroom = nrnum;
+}
+
+/* *** SCRIPT SYMBOL: [Character] NewRoomEx *** */
+void NewRoomEx(int nrnum,int newx,int newy) {
+
+  Character_ChangeRoom(playerchar, nrnum, newx, newy);
+
+}
+
+/* *** SCRIPT SYMBOL: [Character] NewRoomNPC *** */
+void NewRoomNPC(int charid, int nrnum, int newx, int newy) {
+  if (!is_valid_character(charid))
+    quit("!NewRoomNPC: invalid character");
+  if (charid == game.playercharacter)
+    quit("!NewRoomNPC: use NewRoomEx with the player character");
+
+  Character_ChangeRoom(&game.chars[charid], nrnum, newx, newy);
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] MoveCharacter *** */
+void MoveCharacter(int cc,int xx,int yy) {
+  walk_character(cc,xx,yy,0, true);
+}
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterDirect *** */
+void MoveCharacterDirect(int cc,int xx, int yy) {
+  walk_character(cc,xx,yy,1, true);
+}
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterStraight *** */
+void MoveCharacterStraight(int cc,int xx, int yy) {
+  if (!is_valid_character(cc))
+    quit("!MoveCharacterStraight: invalid character specified");
+  
+  Character_WalkStraight(&game.chars[cc], xx, yy, IN_BACKGROUND);
+}
+
+// Append to character path
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterPath *** */
+void MoveCharacterPath (int chac, int tox, int toy) {
+  if (!is_valid_character(chac))
+    quit("!MoveCharacterPath: invalid character specified");
+
+  Character_AddWaypoint(&game.chars[chac], tox, toy);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterSpeedEx *** */
+void SetCharacterSpeedEx(int chaa, int xspeed, int yspeed) {
+  if (!is_valid_character(chaa))
+    quit("!SetCharacterSpeedEx: invalid character");
+
+  Character_SetSpeed(&game.chars[chaa], xspeed, yspeed);
+
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterSpeed *** */
+void SetCharacterSpeed(int chaa,int nspeed) {
+  SetCharacterSpeedEx(chaa, nspeed, nspeed);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetTalkingColor *** */
+void SetTalkingColor(int chaa,int ncol) {
+  if (!is_valid_character(chaa)) quit("!SetTalkingColor: invalid character");
+  
+  Character_SetSpeechColor(&game.chars[chaa], ncol);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterSpeechView *** */
+void SetCharacterSpeechView (int chaa, int vii) {
+  if (!is_valid_character(chaa))
+    quit("!SetCharacterSpeechView: invalid character specified");
+  
+  Character_SetSpeechView(&game.chars[chaa], vii);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterBlinkView *** */
+void SetCharacterBlinkView (int chaa, int vii, int intrv) {
+  if (!is_valid_character(chaa))
+    quit("!SetCharacterBlinkView: invalid character specified");
+
+  Character_SetBlinkView(&game.chars[chaa], vii);
+  Character_SetBlinkInterval(&game.chars[chaa], intrv);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterView *** */
+void SetCharacterView(int chaa,int vii) {
+  if (!is_valid_character(chaa))
+    quit("!SetCharacterView: invalid character specified");
+  
+  Character_LockView(&game.chars[chaa], vii);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterFrame *** */
+void SetCharacterFrame(int chaa, int view, int loop, int frame) {
+
+  Character_LockViewFrame(&game.chars[chaa], view, loop, frame);
+}
+
+// similar to SetCharView, but aligns the frame to make it line up
+/* *** SCRIPT SYMBOL: [Character] SetCharacterViewEx *** */
+void SetCharacterViewEx (int chaa, int vii, int loop, int align) {
+  
+  Character_LockViewAligned(&game.chars[chaa], vii, loop, align);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterViewOffset *** */
+void SetCharacterViewOffset (int chaa, int vii, int xoffs, int yoffs) {
+
+  Character_LockViewOffset(&game.chars[chaa], vii, xoffs, yoffs);
+}
+
+
+/* *** SCRIPT SYMBOL: [Character] ChangeCharacterView *** */
+void ChangeCharacterView(int chaa,int vii) {
+  if (!is_valid_character(chaa))
+    quit("!ChangeCharacterView: invalid character specified");
+  
+  Character_ChangeView(&game.chars[chaa], vii);
+}
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterClickable *** */
+void SetCharacterClickable (int cha, int clik) {
+  if (!is_valid_character(cha))
+    quit("!SetCharacterClickable: Invalid character specified");
+  // make the character clicklabe (reset "No interaction" bit)
+  game.chars[cha].flags&=~CHF_NOINTERACT;
+  // if they don't want it clickable, set the relevant bit
+  if (clik == 0)
+    game.chars[cha].flags|=CHF_NOINTERACT;
+  }
+
+/* *** SCRIPT SYMBOL: [Character] SetCharacterIgnoreWalkbehinds *** */
+void SetCharacterIgnoreWalkbehinds (int cha, int clik) {
+  if (!is_valid_character(cha))
+    quit("!SetCharacterIgnoreWalkbehinds: Invalid character specified");
+
+  Character_SetIgnoreWalkbehinds(&game.chars[cha], clik);
+}
+
+/* *** SCRIPT SYMBOL: [Game] MoveCharacterToObject *** */
+void MoveCharacterToObject(int chaa,int obbj) {
+  // invalid object, do nothing
+  // this allows MoveCharacterToObject(EGO, GetObjectAt(...));
+  if (!is_valid_object(obbj))
+    return;
+
+  walk_character(chaa,objs[obbj].x+5,objs[obbj].y+6,0, true);
+  do_main_cycle(UNTIL_MOVEEND,(int)&game.chars[chaa].walking);
+}
+
+
+
+/* *** SCRIPT SYMBOL: [Character] MoveCharacterBlocking *** */
+void MoveCharacterBlocking(int chaa,int xx,int yy,int direct) {
+  if (!is_valid_character (chaa))
+    quit("!MoveCharacterBlocking: invalid character");
+
+  // check if they try to move the player when Hide Player Char is
+  // ticked -- otherwise this will hang the game
+  if (game.chars[chaa].on != 1)
+    quit("!MoveCharacterBlocking: character is turned off (is Hide Player Character selected?) and cannot be moved");
+
+  if (direct)
+    MoveCharacterDirect(chaa,xx,yy);
+  else
+    MoveCharacter(chaa,xx,yy);
+  do_main_cycle(UNTIL_MOVEEND,(int)&game.chars[chaa].walking);
+  }
+
+
+
 
 void register_character_script_functions() {
     scAdd_External_Symbol("Character::AddInventory^2",(void *)Character_AddInventory);
@@ -2025,4 +3096,48 @@ void register_character_script_functions() {
   scAdd_External_Symbol("FaceLocation",(void *)FaceLocation);
   scAdd_External_Symbol("ReleaseCharacterView",(void *)ReleaseCharacterView);
   scAdd_External_Symbol("StopMoving",(void *)StopMoving);
+  scAdd_External_Symbol("AddInventory",(void *)add_inventory);
+  scAdd_External_Symbol("AddInventoryToCharacter",(void *)AddInventoryToCharacter);
+  scAdd_External_Symbol("AnimateCharacter",(void *)scAnimateCharacter);
+  scAdd_External_Symbol("AnimateCharacterEx",(void *)AnimateCharacterEx);
+  scAdd_External_Symbol("AreCharactersColliding",(void *)AreCharactersColliding);
+  scAdd_External_Symbol("AreCharObjColliding",(void *)AreCharObjColliding);
+  scAdd_External_Symbol("ChangeCharacterView",(void *)ChangeCharacterView);
+  scAdd_External_Symbol("DisplaySpeech",(void *)__sc_displayspeech);
+  scAdd_External_Symbol("DisplaySpeechAt", (void *)DisplaySpeechAt);
+  scAdd_External_Symbol("DisplayThought",(void *)DisplayThought);
+  scAdd_External_Symbol("FollowCharacter",(void *)FollowCharacter);
+  scAdd_External_Symbol("FollowCharacterEx",(void *)FollowCharacterEx);
+  scAdd_External_Symbol("GetCharacterAt",(void *)GetCharacterAt);
+  scAdd_External_Symbol("GetCharacterProperty",(void *)GetCharacterProperty);
+  scAdd_External_Symbol("GetCharacterPropertyText",(void *)GetCharacterPropertyText);
+  scAdd_External_Symbol("LoseInventory",(void *)lose_inventory);
+  scAdd_External_Symbol("LoseInventoryFromCharacter",(void *)LoseInventoryFromCharacter);
+  scAdd_External_Symbol("MoveCharacter",(void *)MoveCharacter);
+  scAdd_External_Symbol("MoveCharacterBlocking",(void *)MoveCharacterBlocking);
+  scAdd_External_Symbol("MoveCharacterDirect",(void *)MoveCharacterDirect);
+  scAdd_External_Symbol("MoveCharacterPath",(void *)MoveCharacterPath);
+  scAdd_External_Symbol("MoveCharacterStraight",(void *)MoveCharacterStraight);
+  scAdd_External_Symbol("MoveCharacterToObject",(void *)MoveCharacterToObject);
+  scAdd_External_Symbol("NewRoom",(void *)NewRoom);
+  scAdd_External_Symbol("NewRoomEx",(void *)NewRoomEx);
+  scAdd_External_Symbol("NewRoomNPC",(void *)NewRoomNPC);
+  scAdd_External_Symbol("SetCharacterBaseline",(void *)SetCharacterBaseline);
+  scAdd_External_Symbol("SetCharacterClickable",(void *)SetCharacterClickable);
+  scAdd_External_Symbol("SetCharacterFrame",(void *)SetCharacterFrame);
+  scAdd_External_Symbol("SetCharacterIdle",(void *)SetCharacterIdle);
+  scAdd_External_Symbol("SetCharacterIgnoreLight",(void *)SetCharacterIgnoreLight);
+  scAdd_External_Symbol("SetCharacterIgnoreWalkbehinds",(void *)SetCharacterIgnoreWalkbehinds);
+  scAdd_External_Symbol("SetCharacterProperty",(void *)SetCharacterProperty);
+  scAdd_External_Symbol("SetCharacterBlinkView",(void *)SetCharacterBlinkView);
+  scAdd_External_Symbol("SetCharacterSpeechView",(void *)SetCharacterSpeechView);
+  scAdd_External_Symbol("SetCharacterSpeed",(void *)SetCharacterSpeed);
+  scAdd_External_Symbol("SetCharacterSpeedEx",(void *)SetCharacterSpeedEx);
+  scAdd_External_Symbol("SetCharacterTransparency",(void *)SetCharacterTransparency);
+  scAdd_External_Symbol("SetCharacterView",(void *)SetCharacterView);
+  scAdd_External_Symbol("SetCharacterViewEx",(void *)SetCharacterViewEx);
+  scAdd_External_Symbol("SetCharacterViewOffset",(void *)SetCharacterViewOffset);
+  scAdd_External_Symbol("RunCharacterInteraction",(void *)RunCharacterInteraction);
+  scAdd_External_Symbol("SetPlayerCharacter",(void *)SetPlayerCharacter);
+  scAdd_External_Symbol("SetTalkingColor",(void *)SetTalkingColor);
 }
