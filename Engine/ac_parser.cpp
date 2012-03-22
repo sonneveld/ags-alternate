@@ -260,4 +260,5 @@ void register_parser_script_functions() {
     scAdd_External_Symbol("Parser::Said^1",(void *)Said);
     scAdd_External_Symbol("Said",(void *)Said);
     scAdd_External_Symbol("SaidUnknownWord",(void *)SaidUnknownWord);
+  scAdd_External_Symbol("ParseText",(void *)ParseText);
 }

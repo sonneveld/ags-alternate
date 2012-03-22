@@ -305,5 +305,6 @@ void register_hotspot_script_functions() {
   scAdd_External_Symbol("GetHotspotProperty",(void *)GetHotspotProperty);
   scAdd_External_Symbol("GetHotspotPropertyText",(void *)GetHotspotPropertyText);
   scAdd_External_Symbol("RunHotspotInteraction", (void *)RunHotspotInteraction);
+  scAdd_External_Symbol("MoveCharacterToHotspot",(void *)MoveCharacterToHotspot);
 }
 

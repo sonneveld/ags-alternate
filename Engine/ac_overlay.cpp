@@ -324,5 +324,7 @@ void register_overlay_script_functions() {
   scAdd_External_Symbol("IsOverlayValid",(void *)IsOverlayValid);
   scAdd_External_Symbol("MoveOverlay",(void *)MoveOverlay);
   scAdd_External_Symbol("SetTextOverlay",(void *)SetTextOverlay);
+  scAdd_External_Symbol("CreateTextOverlay",(void *)CreateTextOverlay);
+  scAdd_External_Symbol("RemoveOverlay",(void *)RemoveOverlay);
 }
 

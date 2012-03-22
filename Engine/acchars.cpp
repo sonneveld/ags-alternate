@@ -2022,4 +2022,7 @@ void register_character_script_functions() {
   scAdd_External_Symbol("Character::set_Z", (void *)Character_SetZ);
   scAdd_External_Symbol("Character::get_z", (void *)Character_GetZ);
   scAdd_External_Symbol("Character::set_z", (void *)Character_SetZ);
+  scAdd_External_Symbol("FaceLocation",(void *)FaceLocation);
+  scAdd_External_Symbol("ReleaseCharacterView",(void *)ReleaseCharacterView);
+  scAdd_External_Symbol("StopMoving",(void *)StopMoving);
 }

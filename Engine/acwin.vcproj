@@ -467,6 +467,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_viewframe.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\acaudio.cpp"
 				>
 			</File>
@@ -1233,6 +1237,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_types.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_viewframe.h"
 				>
 			</File>
 			<File

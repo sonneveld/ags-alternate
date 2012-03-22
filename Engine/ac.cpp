@@ -176,6 +176,7 @@ extern "C" {
 #include "ac_region.h"
 #include "ac_drawsurf.h"
 #include "ac_dynspr.h"
+#include "ac_viewframe.h"
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
@@ -5325,63 +5326,6 @@ int IsSoundPlaying() {
   return 0;
 }
 
-/* *** SCRIPT SYMBOL: [ViewFrame] SetFrameSound *** */
-void SetFrameSound (int vii, int loop, int frame, int sound) {
-  if ((vii < 1) || (vii > game.numviews))
-    quit("!SetFrameSound: invalid view number");
-  vii--;
-
-  if (loop >= views[vii].numLoops)
-    quit("!SetFrameSound: invalid loop number");
-
-  if (frame >= views[vii].loops[loop].numFrames)
-    quit("!SetFrameSound: invalid frame number");
-
-  if (sound < 1)
-  {
-    views[vii].loops[loop].frames[frame].sound = -1;
-  }
-  else
-  {
-    ScriptAudioClip* clip = get_audio_clip_for_old_style_number(false, sound);
-    if (clip == NULL)
-      quitprintf("!SetFrameSound: audio clip aSound%d not found", sound);
-
-    views[vii].loops[loop].frames[frame].sound = clip->id;
-  }
-}
-
-// the specified frame has just appeared, see if we need
-// to play a sound or whatever
-void CheckViewFrame (int view, int loop, int frame) {
-  if (views[view].loops[loop].frames[frame].sound >= 0) {
-    // play this sound (eg. footstep)
-    play_audio_clip_by_index(views[view].loops[loop].frames[frame].sound);
-  }
-}
-
-void CheckViewFrameForCharacter(CharacterInfo *chi) {
-
-  int soundVolumeWas = play.sound_volume;
-
-  if (chi->flags & CHF_SCALEVOLUME) {
-    // adjust the sound volume using the character's zoom level
-    int zoom_level = charextra[chi->index_id].zoom;
-    if (zoom_level == 0)
-      zoom_level = 100;
-
-    play.sound_volume = (play.sound_volume * zoom_level) / 100;
-
-    if (play.sound_volume < 0)
-      play.sound_volume = 0;
-    if (play.sound_volume > 255)
-      play.sound_volume = 255;
-  }
-
-  CheckViewFrame(chi->view, chi->loop, chi->frame);
-
-  play.sound_volume = soundVolumeWas;
-}
 
 // return the walkable area at the character's feet, taking into account
 // that he might just be off the edge of one
@@ -12511,92 +12455,6 @@ int Game_DoOnceOnly(const char *token)
 }
 
 
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Flipped *** */
-int ViewFrame_GetFlipped(ScriptViewFrame *svf) {
-  if (views[svf->view].loops[svf->loop].frames[svf->frame].flags & VFLG_FLIPSPRITE)
-    return 1;
-  return 0;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Graphic *** */
-int ViewFrame_GetGraphic(ScriptViewFrame *svf) {
-  return views[svf->view].loops[svf->loop].frames[svf->frame].pic;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::set_Graphic *** */
-void ViewFrame_SetGraphic(ScriptViewFrame *svf, int newPic) {
-  views[svf->view].loops[svf->loop].frames[svf->frame].pic = newPic;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_LinkedAudio *** */
-ScriptAudioClip* ViewFrame_GetLinkedAudio(ScriptViewFrame *svf) 
-{
-  int soundIndex = views[svf->view].loops[svf->loop].frames[svf->frame].sound;
-  if (soundIndex < 0)
-    return NULL;
-
-  return &game.audioClips[soundIndex];
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::set_LinkedAudio *** */
-void ViewFrame_SetLinkedAudio(ScriptViewFrame *svf, ScriptAudioClip* clip) 
-{
-  int newSoundIndex = -1;
-  if (clip != NULL)
-    newSoundIndex = clip->id;
-
-  views[svf->view].loops[svf->loop].frames[svf->frame].sound = newSoundIndex;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Sound *** */
-int ViewFrame_GetSound(ScriptViewFrame *svf) {
-  // convert audio clip to old-style sound number
-  int soundIndex = views[svf->view].loops[svf->loop].frames[svf->frame].sound;
-  if (soundIndex >= 0)
-  {
-    if (sscanf(game.audioClips[soundIndex].scriptName, "aSound%d", &soundIndex) == 1)
-      return soundIndex;
-  }
-  return 0;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::set_Sound *** */
-void ViewFrame_SetSound(ScriptViewFrame *svf, int newSound) 
-{
-  if (newSound < 1)
-  {
-    views[svf->view].loops[svf->loop].frames[svf->frame].sound = -1;
-  }
-  else
-  {
-    // convert sound number to audio clip
-    ScriptAudioClip* clip = get_audio_clip_for_old_style_number(false, newSound);
-    if (clip == NULL)
-      quitprintf("!SetFrameSound: audio clip aSound%d not found", newSound);
-
-    views[svf->view].loops[svf->loop].frames[svf->frame].sound = clip->id;
-  }
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Speed *** */
-int ViewFrame_GetSpeed(ScriptViewFrame *svf) {
-  return views[svf->view].loops[svf->loop].frames[svf->frame].speed;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_View *** */
-int ViewFrame_GetView(ScriptViewFrame *svf) {
-  return svf->view + 1;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Loop *** */
-int ViewFrame_GetLoop(ScriptViewFrame *svf) {
-  return svf->loop;
-}
-
-/* *** SCRIPT SYMBOL: [ViewFrame] ViewFrame::get_Frame *** */
-int ViewFrame_GetFrame(ScriptViewFrame *svf) {
-  return svf->frame;
-}
 
 #define GP_SPRITEWIDTH   1
 #define GP_SPRITEHEIGHT  2
@@ -16963,18 +16821,7 @@ void setup_script_exports() {
 
   register_room_script_functions();
   register_parser_script_functions();
-
-  scAdd_External_Symbol("ViewFrame::get_Flipped", (void *)ViewFrame_GetFlipped);
-  scAdd_External_Symbol("ViewFrame::get_Frame", (void *)ViewFrame_GetFrame);
-  scAdd_External_Symbol("ViewFrame::get_Graphic", (void *)ViewFrame_GetGraphic);
-  scAdd_External_Symbol("ViewFrame::set_Graphic", (void *)ViewFrame_SetGraphic);
-  scAdd_External_Symbol("ViewFrame::get_LinkedAudio", (void *)ViewFrame_GetLinkedAudio);
-  scAdd_External_Symbol("ViewFrame::set_LinkedAudio", (void *)ViewFrame_SetLinkedAudio);
-  scAdd_External_Symbol("ViewFrame::get_Loop", (void *)ViewFrame_GetLoop);
-  scAdd_External_Symbol("ViewFrame::get_Sound", (void *)ViewFrame_GetSound);
-  scAdd_External_Symbol("ViewFrame::set_Sound", (void *)ViewFrame_SetSound);
-  scAdd_External_Symbol("ViewFrame::get_Speed", (void *)ViewFrame_GetSpeed);
-  scAdd_External_Symbol("ViewFrame::get_View", (void *)ViewFrame_GetView);
+  register_view_frame_script_functions();
   
   scAdd_External_Symbol("AbortGame",(void *)_sc_AbortGame);
   scAdd_External_Symbol("AddInventory",(void *)add_inventory);
@@ -16988,7 +16835,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("CDAudio",(void *)cd_manager);
   scAdd_External_Symbol("ChangeCharacterView",(void *)ChangeCharacterView);
   scAdd_External_Symbol("ClaimEvent",(void *)ClaimEvent);
-  scAdd_External_Symbol("CreateTextOverlay",(void *)CreateTextOverlay);
   scAdd_External_Symbol("CyclePalette",(void *)CyclePalette);
   scAdd_External_Symbol("Debug",(void *)script_debug);
   scAdd_External_Symbol("DeleteSaveSlot",(void *)DeleteSaveSlot);
@@ -17009,7 +16855,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("EnableInterface",(void *)EnableInterface);
   scAdd_External_Symbol("EndCutscene", (void *)EndCutscene);
   scAdd_External_Symbol("FaceCharacter",(void *)FaceCharacter);
-  scAdd_External_Symbol("FaceLocation",(void *)FaceLocation);
   scAdd_External_Symbol("FadeIn",(void *)FadeIn);
   scAdd_External_Symbol("FadeOut",(void *)my_fade_out);
   scAdd_External_Symbol("FlipScreen",(void *)FlipScreen);
@@ -17057,7 +16902,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("IsVoxAvailable",(void *)IsVoxAvailable);
   scAdd_External_Symbol("LoseInventory",(void *)lose_inventory);
   scAdd_External_Symbol("LoseInventoryFromCharacter",(void *)LoseInventoryFromCharacter);
-  scAdd_External_Symbol("MergeObject",(void *)MergeObject);
   scAdd_External_Symbol("MoveCharacter",(void *)MoveCharacter);
   scAdd_External_Symbol("MoveCharacterBlocking",(void *)MoveCharacterBlocking);
   scAdd_External_Symbol("MoveCharacterDirect",(void *)MoveCharacterDirect);
@@ -17069,7 +16913,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("NewRoom",(void *)NewRoom);
   scAdd_External_Symbol("NewRoomEx",(void *)NewRoomEx);
   scAdd_External_Symbol("NewRoomNPC",(void *)NewRoomNPC);
-  scAdd_External_Symbol("ParseText",(void *)ParseText);
   scAdd_External_Symbol("PauseGame",(void *)PauseGame);
   scAdd_External_Symbol("PlayAmbientSound",(void *)PlayAmbientSound);
   scAdd_External_Symbol("PlayFlic",(void *)play_flc_file);
@@ -17084,8 +16927,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("ProcessClick",(void *)ProcessClick);
   scAdd_External_Symbol("QuitGame",(void *)QuitGame);
   scAdd_External_Symbol("Random",(void *)__Rand);
-  scAdd_External_Symbol("ReleaseCharacterView",(void *)ReleaseCharacterView);
-  scAdd_External_Symbol("RemoveOverlay",(void *)RemoveOverlay);
   scAdd_External_Symbol("RestartGame",(void *)restart_game);
   scAdd_External_Symbol("RestoreGameDialog",(void *)restore_game_dialog);
   scAdd_External_Symbol("RestoreGameSlot",(void *)RestoreGameSlot);
@@ -17120,7 +16961,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetDefaultCursor",(void *)set_default_cursor);
   scAdd_External_Symbol("SetDigitalMasterVolume",(void *)SetDigitalMasterVolume);
   scAdd_External_Symbol("SetFadeColor",(void *)SetFadeColor);
-  scAdd_External_Symbol("SetFrameSound",(void *)SetFrameSound);
   scAdd_External_Symbol("SetGameOption",(void *)SetGameOption);
   scAdd_External_Symbol("SetGameSpeed",(void *)SetGameSpeed);
   scAdd_External_Symbol("SetGlobalInt",(void *)SetGlobalInt);
@@ -17155,7 +16995,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("StartRecording", (void *)scStartRecording);
   scAdd_External_Symbol("StopAmbientSound",(void *)StopAmbientSound);
   scAdd_External_Symbol("StopChannel",(void *)stop_and_destroy_channel);
-  scAdd_External_Symbol("StopMoving",(void *)StopMoving);
   scAdd_External_Symbol("StopMusic", (void *)scr_StopMusic);
   scAdd_External_Symbol("TintScreen",(void *)TintScreen);
   scAdd_External_Symbol("UnPauseGame",(void *)UnPauseGame);
