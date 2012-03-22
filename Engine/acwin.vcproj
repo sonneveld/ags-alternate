@@ -459,6 +459,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_screen.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_script_gui.cpp"
 				>
 			</File>
@@ -1237,6 +1241,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_region.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_screen.h"
 				>
 			</File>
 			<File

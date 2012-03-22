@@ -214,4 +214,7 @@ extern int check_for_messages_from_editor();
 // for ac_text
 extern int GetGlobalInt(int index);
 
+// for ac_Screen
+extern void clear_letterbox_borders();
+
 #endif
