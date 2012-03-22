@@ -176,5 +176,10 @@ extern void construct_virtual_screen(bool fullRedraw);
 extern void walk_character(int chac,int tox,int toy,int ignwal, bool autoWalkAnims);
 extern int is_pos_on_character(int xx,int yy);
 
+// for ac_drawsurf
+extern void get_message_text (int msnum, char *buffer, char giveErr = 1);
+void tint_image (block source, block dest, int red, int grn, int blu, int light_level, int luminance=255);
+extern void push_screen ();
+extern void pop_screen();
 
 #endif

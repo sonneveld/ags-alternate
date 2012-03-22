@@ -379,6 +379,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_drawsurf.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_dynobj.cpp"
 				>
 			</File>
@@ -1133,6 +1137,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_dialog_render.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_drawsurf.h"
 				>
 			</File>
 			<File
