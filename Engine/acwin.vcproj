@@ -387,6 +387,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_gui_control.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_invitem.cpp"
 				>
 			</File>
@@ -1105,6 +1109,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_file.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_gui_control.h"
 				>
 			</File>
 			<File
