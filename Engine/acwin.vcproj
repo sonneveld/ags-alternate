@@ -383,6 +383,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_file.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_maths.cpp"
 				>
 			</File>
@@ -1085,6 +1089,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_dynobj.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_file.h"
 				>
 			</File>
 			<File
