@@ -146,5 +146,8 @@ extern void can_run_delayed_command();
 extern void do_conversation(int dlgnum);
 extern int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBackground);
 
-
+// for ac_overlay
+extern void get_overlay_position(int overlayidx, int *x, int *y);
+extern int GetTextDisplayTime (char *text, int canberel=0);
+extern int _display_main(int xx,int yy,int wii,char*todis,int blocking,int usingfont,int asspch, int isThought, int allowShrink, bool overlayPositionFixed) ;
 #endif
