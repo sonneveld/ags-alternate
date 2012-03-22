@@ -4,6 +4,9 @@
 #include "ac_context.h"
 
 
+void setpal() {
+  wsetpalette(0,255,palette);
+}
 
 /* *** SCRIPT SYMBOL: [Palette] CyclePalette *** */
 void CyclePalette(int strt,int eend) {

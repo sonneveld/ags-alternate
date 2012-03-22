@@ -3140,4 +3140,6 @@ void register_character_script_functions() {
   scAdd_External_Symbol("RunCharacterInteraction",(void *)RunCharacterInteraction);
   scAdd_External_Symbol("SetPlayerCharacter",(void *)SetPlayerCharacter);
   scAdd_External_Symbol("SetTalkingColor",(void *)SetTalkingColor);
+  scAdd_External_Symbol("FaceCharacter",(void *)FaceCharacter);
+  scAdd_External_Symbol("MoveToWalkableArea", (void *)MoveToWalkableArea);
 }

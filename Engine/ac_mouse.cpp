@@ -470,5 +470,11 @@ void register_mouse_script_functions() {
   scAdd_External_Symbol("SetMousePosition",(void *)SetMousePosition);
   scAdd_External_Symbol("ShowMouseCursor",(void *)ShowMouseCursor);
   scAdd_External_Symbol("RefreshMouse",(void *)RefreshMouse);
-  scAdd_External_Symbol("mouse",&global_mouse_state.scmouse);
+  scAdd_External_Symbol("DisableCursorMode",(void *)disable_cursor_mode);
+  scAdd_External_Symbol("EnableCursorMode",(void *)enable_cursor_mode);
+  scAdd_External_Symbol("GetCursorMode",(void *)GetCursorMode);
+  scAdd_External_Symbol("SetCursorMode",(void *)set_cursor_mode);
+  scAdd_External_Symbol("SetDefaultCursor",(void *)set_default_cursor);
+  scAdd_External_Symbol("SetNextCursorMode", (void *)SetNextCursor);
+
 }

@@ -286,5 +286,6 @@ void register_inventory_item_script_functions() {
   scAdd_External_Symbol("RunInventoryInteraction", (void *)RunInventoryInteraction);
   scAdd_External_Symbol("SetInvItemName",(void *)SetInvItemName);
   scAdd_External_Symbol("SetInvItemPic",(void *)set_inv_item_pic);
+  scAdd_External_Symbol("SetActiveInventory",(void *)SetActiveInventory);
 }
 

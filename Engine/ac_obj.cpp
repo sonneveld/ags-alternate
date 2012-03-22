@@ -1422,5 +1422,6 @@ void register_object_script_functions() {
   scAdd_External_Symbol("SetObjectView",(void *)SetObjectView);
   scAdd_External_Symbol("StopObjectMoving",(void *)StopObjectMoving);
   scAdd_External_Symbol("MergeObject",(void *)MergeObject);
+  scAdd_External_Symbol("AnimateObject",(void *)AnimateObject);
 
 }

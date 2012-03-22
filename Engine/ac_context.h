@@ -361,6 +361,12 @@ extern block screenop;
 extern int wantFreeScreenop;
 extern int texthit;
 
+extern const char *load_game_errors[];
+
+#define SGVERSION 8  // savegames
+extern char*sgsig;
+extern int sgsiglen;
+
 extern int char_lowest_yp;
 extern int obj_lowest_yp;
 

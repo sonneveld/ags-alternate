@@ -674,5 +674,6 @@ void register_dynamic_sprite_script_functions() {
 
   scAdd_External_Symbol("LoadImageFile",(void *)LoadImageFile);
   scAdd_External_Symbol("LoadSaveSlotScreenshot",(void *)LoadSaveSlotScreenshot);
+  scAdd_External_Symbol("DeleteSprite",(void *)free_dynamic_sprite);
 }
 

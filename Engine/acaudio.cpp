@@ -1757,4 +1757,5 @@ void register_audio_script_functions()
   scAdd_External_Symbol("StopAmbientSound",(void *)StopAmbientSound);
   scAdd_External_Symbol("IsChannelPlaying",(void *)IsChannelPlaying);
   scAdd_External_Symbol("PlayAmbientSound",(void *)PlayAmbientSound);
+  scAdd_External_Symbol("StopChannel",(void *)stop_and_destroy_channel);
 }

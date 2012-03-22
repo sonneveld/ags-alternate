@@ -249,5 +249,6 @@ void register_region_script_functions() {
   scAdd_External_Symbol("RunRegionInteraction", (void *)RunRegionInteraction);
   scAdd_External_Symbol("SetAreaLightLevel",(void *)SetAreaLightLevel);
   scAdd_External_Symbol("SetRegionTint",(void *)SetRegionTint);
+  scAdd_External_Symbol("GetRegionAt",(void *)GetRegionAt);
 }
 

@@ -5,6 +5,7 @@
 #include "acroom.h"
 #include "ac_string.h"
 #include "ac_obj.h"
+#include "ac_palette.h"
 
 
 /* *** SCRIPT SYMBOL: [Room] GetScalingAt *** */
@@ -409,4 +410,5 @@ void register_room_script_functions() {
   scAdd_External_Symbol("SetBackgroundFrame",(void *)SetBackgroundFrame);
   scAdd_External_Symbol("SetViewport",(void *)SetViewport);
   scAdd_External_Symbol("SetWalkBehindBase",(void *)SetWalkBehindBase);
+  scAdd_External_Symbol("GetScalingAt",(void *)GetScalingAt);
 }

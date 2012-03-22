@@ -2,6 +2,7 @@
 #define _AC_H_HEADER
 
 // forward declarations:
+#include <stdio.h>          // for FILE
 #include "allegro.h"        // for BITMAP
 typedef BITMAP *block;      // wgt2allh.h
 class IDriverDependantBitmap; // ali3d.h
@@ -12,6 +13,7 @@ struct InteractionScripts;  // acroom.h
 struct ccInstance;          // cscomp.h
 struct EventHappened;       // acruntim.h
 struct ViewFrame;           // acroom.h
+struct InteractionVariable; // acroom.h
 
 #ifdef NO_MP3_PLAYER
 #define _AC_SPECIAL_VERSION "NMP"
@@ -23,6 +25,18 @@ struct ViewFrame;           // acroom.h
 #define ACI_VERSION_TEXT "3.21.1115"_AC_SPECIAL_VERSION
 // this needs to be updated if the "play" struct changes
 #define LOWEST_SGVER_COMPAT "3.20.1103"_AC_SPECIAL_VERSION
+
+#define ALLEGRO_KEYBOARD_HANDLER
+#ifdef MAC_VERSION
+#define EXTENDED_KEY_CODE 0x3f
+#else
+#define EXTENDED_KEY_CODE 0
+#endif
+#define AGS_KEYCODE_INSERT 382
+#define AGS_KEYCODE_DELETE 383
+#define AGS_KEYCODE_ALT_TAB 399
+#define READKEY_CODE_ALT_TAB 0x4000
+
 
 // Check that a supplied buffer from a text script function was not null
 #define VALIDATE_STRING(strin) if ((unsigned long)strin <= 4096) quit("!String argument was null: make sure you pass a string, not an int, as a buffer")
@@ -141,7 +155,6 @@ extern void redo_walkable_areas() ;
 extern void check_viewport_coords() ;
 extern void mark_current_background_dirty();
 extern void invalidate_cached_walkbehinds() ;
-extern void setpal();
 
 // for ac_obj.cpp
 extern void do_main_cycle(int untilwhat,int daaa);
@@ -216,5 +229,24 @@ extern int GetGlobalInt(int index);
 
 // for ac_Screen
 extern void clear_letterbox_borders();
+
+// for ac_game
+extern int load_game_and_print_error(int toload);
+extern void unload_old_room();
+extern void unload_game_file();
+extern void show_preload ();
+extern int load_game_file();
+extern void init_game_settings();
+extern void start_game();
+extern void set_game_speed(int fps);
+extern InteractionVariable *FindGraphicalVariable(const char *varName);
+extern int convert_gui_disabled_style(int oldStyle);
+extern void convert_guid_from_text_to_binary(const char *guidText, unsigned char *buffer) ;
+extern void safeguard_string (unsigned char *descript);
+extern void save_game_data (FILE *ooo, block screenshot);
+extern long write_screen_shot_for_vista(FILE *ooo, block screenshot) ;
+extern void initialize_skippable_cutscene();
+extern void stop_fast_forwarding();
+extern int rec_iskeypressed (int keycode);
 
 #endif

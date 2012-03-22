@@ -395,6 +395,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_game.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_gui_button.cpp"
 				>
 			</File>
@@ -1181,6 +1185,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_file.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_game.h"
 				>
 			</File>
 			<File
