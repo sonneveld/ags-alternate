@@ -451,6 +451,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_palette.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_parser.cpp"
 				>
 			</File>
@@ -1233,6 +1237,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_overlay.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_palette.h"
 				>
 			</File>
 			<File

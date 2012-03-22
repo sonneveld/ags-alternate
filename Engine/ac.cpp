@@ -171,6 +171,7 @@ extern "C" {
 #include "ac_multimedia.h"
 #include "ac_text.h"
 #include "ac_screen.h"
+#include "ac_palette.h"
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
@@ -10869,44 +10870,6 @@ int GetGameOption (int opt) {
 }
 
 
-/* *** SCRIPT SYMBOL: [Palette] CyclePalette *** */
-void CyclePalette(int strt,int eend) {
-  // hi-color game must invalidate screen since the palette changes
-  // the effect of the drawing operations
-  if (game.color_depth > 1)
-    invalidate_screen();
-
-  if ((strt < 0) || (strt > 255) || (eend < 0) || (eend > 255))
-    quit("!CyclePalette: start and end must be 0-255");
-
-  if (eend > strt) {
-    // forwards
-    wcolrotate(strt, eend, 0, palette);
-    wsetpalette(strt, eend, palette);
-  }
-  else {
-    // backwards
-    wcolrotate(eend, strt, 1, palette);
-    wsetpalette(eend, strt, palette);
-  }
-  
-}
-/* *** SCRIPT SYMBOL: [Palette] SetPalRGB *** */
-void SetPalRGB(int inndx,int rr,int gg,int bb) {
-  if (game.color_depth > 1)
-    invalidate_screen();
-
-  wsetrgb(inndx,rr,gg,bb,palette);
-  wsetpalette(inndx,inndx,palette);
-}
-/*void scSetPal(color*pptr) {
-  wsetpalette(0,255,pptr);
-  }
-void scGetPal(color*pptr) {
-  get_palette(pptr);
-  }*/
-
-
 
 /* *** SCRIPT SYMBOL: [Game] Random *** */
 int __Rand(int upto) {
@@ -13565,14 +13528,6 @@ int load_game(int slotn, char*descrp, int *wantShot) {
   return do_game_load(nametouse, slotn, descrp, wantShot);
 }
 
-/* *** SCRIPT SYMBOL: [Palette] UpdatePalette *** */
-void UpdatePalette() {
-  if (game.color_depth > 1)
-    invalidate_screen();
-
-  if (!play.fast_forward)  
-    setpal();
-}
 
 // Helper functions used by StartCutscene/EndCutscene, but also
 // by SkipUntilCharacterStops
@@ -13768,12 +13723,12 @@ void setup_script_exports() {
   register_view_frame_script_functions();
   register_text_script_functions();
   register_screen_script_functions();
+  register_palette_script_functions();
 
   scAdd_External_Symbol("AbortGame",(void *)_sc_AbortGame);
   scAdd_External_Symbol("AnimateObject",(void *)AnimateObject);
   scAdd_External_Symbol("CallRoomScript",(void *)CallRoomScript);
   scAdd_External_Symbol("ClaimEvent",(void *)ClaimEvent);
-  scAdd_External_Symbol("CyclePalette",(void *)CyclePalette);
   scAdd_External_Symbol("Debug",(void *)script_debug);
   scAdd_External_Symbol("DeleteSaveSlot",(void *)DeleteSaveSlot);
   scAdd_External_Symbol("DeleteSprite",(void *)free_dynamic_sprite);
@@ -13792,7 +13747,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetGraphicalVariable",(void *)GetGraphicalVariable);
   //scAdd_External_Symbol("GetLanguageString",(void *)GetLanguageString);
   scAdd_External_Symbol("GetLocationName",(void *)GetLocationName);
-//  scAdd_External_Symbol("GetPalette",(void *)scGetPal);
   scAdd_External_Symbol("GetRegionAt",(void *)GetRegionAt);
   scAdd_External_Symbol("GetSaveSlotDescription",(void *)GetSaveSlotDescription);
   scAdd_External_Symbol("GetScalingAt",(void *)GetScalingAt);
@@ -13837,8 +13791,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetMultitaskingMode",(void *)SetMultitasking);
   scAdd_External_Symbol("SetNextCursorMode", (void *)SetNextCursor);
   scAdd_External_Symbol("SetNormalFont", (void *)SetNormalFont);
-//  scAdd_External_Symbol("SetPalette",scSetPal);
-  scAdd_External_Symbol("SetPalRGB",(void *)SetPalRGB);
   scAdd_External_Symbol("SetRestartPoint",(void *)SetRestartPoint);
   scAdd_External_Symbol("SetSpeechFont", (void *)SetSpeechFont);
   scAdd_External_Symbol("SetTextWindowGUI",(void *)SetTextWindowGUI);
@@ -13849,7 +13801,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("StopChannel",(void *)stop_and_destroy_channel);
   scAdd_External_Symbol("UnPauseGame",(void *)UnPauseGame);
   scAdd_External_Symbol("UpdateInventory", (void *)update_invorder);
-  scAdd_External_Symbol("UpdatePalette",(void *)UpdatePalette);
   scAdd_External_Symbol("Wait",(void *)scrWait);
   scAdd_External_Symbol("WaitKey",(void *)WaitKey);
   scAdd_External_Symbol("WaitMouseKey",(void *)WaitMouseKey);
