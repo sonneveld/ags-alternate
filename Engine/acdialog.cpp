@@ -32,10 +32,6 @@
 #define _getcwd getcwd
 #endif
 
-#undef kbhit
-#define kbhit rec_kbhit
-#define getch() rec_getch()
-
 #include "acgui.h"
 #include "mousew32.h"
 
@@ -66,7 +62,6 @@ IDriverDependantBitmap *dialogBmp = NULL;
 int windowPosX, windowPosY, windowPosWidth, windowPosHeight;
 block windowBuffer = NULL;
 
-#define domouse rec_domouse
 
 /*#define COL251 26
 #define COL252 28
@@ -218,9 +213,9 @@ struct NewControl
   }
   void drawandmouse()
   {
-//    domouse(2);
+//    ac_domouse(2);
     draw();
-  //  domouse(1);
+  //  ac_domouse(1);
   }
 };
 
@@ -279,12 +274,12 @@ struct PushButton:public NewControl
       // stop mp3 skipping if button held down
       update_polled_stuff();
       if (wasstat != state) {
-//        domouse(2);
+//        ac_domouse(2);
         draw();
-        //domouse(1);
+        //ac_domouse(1);
       }
 
-//      domouse(0);
+//      ac_domouse(0);
 
       refresh_screen();
 
@@ -292,9 +287,9 @@ struct PushButton:public NewControl
     }
     wasstat = state;
     state = 0;
-//    domouse(2);
+//    ac_domouse(2);
     draw();
-  //  domouse(1);
+  //  ac_domouse(1);
     return wasstat;
   }
 
@@ -397,9 +392,9 @@ struct MyListBox:public NewControl
 
     }
 
-//    domouse(2);
+//    ac_domouse(2);
     draw();
-  //  domouse(1);
+  //  ac_domouse(1);
     smcode = CM_SELCHANGE;
     return 0;
   }
@@ -662,7 +657,7 @@ int WINAPI _export CSCIDrawWindow(int xx, int yy, int wid, int hit)
     quit("Too many windows created.");
 
   windowcount++;
-//  domouse(2);
+//  ac_domouse(2);
   xx -= 2;
   yy -= 2;
   wid += 4;
@@ -671,7 +666,7 @@ int WINAPI _export CSCIDrawWindow(int xx, int yy, int wid, int hit)
   oswi[drawit].x = xx;
   oswi[drawit].y = yy;
   wbutt(xx + 1, yy + 1, xx + wid - 1, yy + hit - 1);    // wbutt goes outside its area
-//  domouse(1);
+//  ac_domouse(1);
   oswi[drawit].oldtop = topwindowhandle;
   topwindowhandle = drawit;
   windowPosX = xx;
@@ -683,12 +678,12 @@ int WINAPI _export CSCIDrawWindow(int xx, int yy, int wid, int hit)
 
 void WINAPI _export CSCIEraseWindow(int handl)
 {
-//  domouse(2);
+//  ac_domouse(2);
   ignore_bounds--;
   topwindowhandle = oswi[handl].oldtop;
   wputblock(oswi[handl].x, oswi[handl].y, oswi[handl].buffer, 0);
   wfreeblock(oswi[handl].buffer);
-//  domouse(1);
+//  ac_domouse(1);
   oswi[handl].buffer = NULL;
   windowcount--;
 }
@@ -730,9 +725,9 @@ int WINAPI _export CSCIWaitMessage(CSCIMessage * cscim)
   wtexttransparent(TEXTFG);
   for (int uu = 0; uu < MAXCONTROLS; uu++) {
     if (vobjs[uu] != NULL) {
-//      domouse(2);
+//      ac_domouse(2);
       vobjs[uu]->drawifneeded();
-//      domouse(1);
+//      ac_domouse(1);
     }
   }
 
@@ -748,10 +743,10 @@ int WINAPI _export CSCIWaitMessage(CSCIMessage * cscim)
     cscim->id = -1;
     cscim->code = 0;
     smcode = 0;
-    if (kbhit()) {
-      int keywas = getch();
+    if (ac_kbhit()) {
+      int keywas = ac_getch();
       if (keywas == 0)
-        keywas = getch() + 300;
+        keywas = ac_getch() + 300;
 
       if (keywas == 13) {
         cscim->id = finddefaultcontrol(CNF_DEFAULT);
@@ -830,9 +825,9 @@ int WINAPI _export CSCICreateControl(int typeandflags, int xx, int yy, int wii, 
   vobjs[usec]->typeandflags = typeandflags;
   wtexttransparent(TEXTFG);
   vobjs[usec]->wlevel = topwindowhandle;
-//  domouse(2);
+//  ac_domouse(2);
   vobjs[usec]->draw();
-//  domouse(1);
+//  ac_domouse(1);
   return usec;
 }
 

@@ -329,7 +329,7 @@ void disable_cursor_mode(int modd) {
 static int IsButtonDown(int which) {
   if ((which < 1) || (which > 3))
     quit("!IsButtonDown: only works with eMouseLeft, eMouseRight, eMouseMiddle");
-  if (misbuttondown(which-1))
+  if (ac_misbuttondown(which-1))
     return 1;
   return 0;
 }
@@ -338,7 +338,7 @@ static int IsButtonDown(int which) {
 /* *** SCRIPT SYMBOL: [Mouse] Mouse::Update^0 *** */
 /* *** SCRIPT SYMBOL: [Mouse] RefreshMouse *** */
 void RefreshMouse() {
-  domouse(DOMOUSE_NOCURSOR);
+  ac_domouse(DOMOUSE_NOCURSOR);
   global_mouse_state.scmouse.x = divide_down_coordinate(mousex);
   global_mouse_state.scmouse.y = divide_down_coordinate(mousey);
 }
@@ -390,7 +390,7 @@ static void SaveCursorForLocationChange() {
 void update_animating_cursor() {
   // update animating mouse cursor
   if (game.mcurs[cur_cursor].view>=0) {
-    domouse (DOMOUSE_NOCURSOR);
+    ac_domouse (DOMOUSE_NOCURSOR);
     // only on mousemove, and it's not moving
     if (((game.mcurs[cur_cursor].flags & MCF_ANIMMOVE)!=0) &&
       (mousex==global_mouse_state.lastmx) && (mousey==global_mouse_state.lastmy)) ;
@@ -420,7 +420,7 @@ void update_animating_cursor() {
 
 void update_and_draw_mouse_on_screen() {
     
-  domouse(DOMOUSE_NOCURSOR);
+  ac_domouse(DOMOUSE_NOCURSOR);
 
   if (!play.mouse_cursor_hidden)
   {
@@ -429,14 +429,14 @@ void update_and_draw_mouse_on_screen() {
   }
 
   /*
-  domouse(1);
+  ac_domouse(1);
   // if the cursor is hidden, remove it again. However, it needs
   // to go on-off in order to update the stored mouse coordinates
   if (play.mouse_cursor_hidden)
-    domouse(2);*/
+    ac_domouse(2);*/
 
   //if (!play.mouse_cursor_hidden)
-//    domouse(2);
+//    ac_domouse(2);
 
 }
 

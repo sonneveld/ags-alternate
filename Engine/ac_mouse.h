@@ -46,6 +46,7 @@ extern void update_script_mouse_coords();
 extern void update_animating_cursor() ;
 extern void update_and_draw_mouse_on_screen();
 extern void set_mouse_cursor(int newcurs);
+extern void set_default_cursor();
 
 extern void register_mouse_script_functions();
 

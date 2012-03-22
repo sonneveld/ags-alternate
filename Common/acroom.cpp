@@ -403,7 +403,7 @@ int ff;
  //  printf("Before %ld\n",farcoreleft());
   for (ff=0;ff<5;ff++) { //backups[ff]=wnewblock(0,0,319,199);
     backups[ff]=wallocblock(320,200);
-//    printf("%d ",ff); if (kbhit()) break;
+//    printf("%d ",ff); if (ac_kbhit()) break;
     if (backups[ff]==NULL) quit("ROOM.C, AllocMem: Out of memory"); }
   walls=::backups[0];  // this is because blocks in a struct don't work
   object=::backups[1]; // properly

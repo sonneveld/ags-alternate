@@ -395,11 +395,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_gui_inv_window.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_gui_label.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\ac_gui_slider.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_gui_textbox.cpp"
 				>
 			</File>
 			<File
@@ -1132,11 +1140,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_gui_inv_window.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_gui_label.h"
 				>
 			</File>
 			<File
 				RelativePath=".\ac_gui_slider.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_gui_textbox.h"
 				>
 			</File>
 			<File

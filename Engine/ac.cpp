@@ -169,6 +169,8 @@ extern "C" {
 #include "ac_gui_label.h"
 #include "ac_gui_button.h"
 #include "ac_gui_slider.h"
+#include "ac_gui_textbox.h"
+#include "ac_gui_inv_window.h"
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
@@ -706,15 +708,12 @@ void wouttext_reverseifnecessary(int x, int y, int font, char *text);
 void SetGameSpeed(int newspd);
 void SetMultitasking(int mode);
 void put_sprite_256(int xxx,int yyy,block piccy);
-void construct_virtual_screen(bool fullRedraw);
 int initialize_engine_with_exception_handling(int argc,char*argv[]);
 int initialize_engine(int argc,char*argv[]);
 block recycle_bitmap(block bimp, int coldep, int wid, int hit);
 
 void do_main_cycle(int untilwhat,int daaa);
 int  Overlay_GetValid(ScriptOverlay *scover);
-void mainloop(bool checkControls = false, IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
-void set_default_cursor();
 int  run_text_script(ccInstance*,char*);
 int  run_text_script_2iparam(ccInstance*,char*,int,int);
 int  run_text_script_iparam(ccInstance*,char*,int);
@@ -788,7 +787,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
 #undef wouttext_outline
 void wouttext_outline(int xxp, int yyp, int usingfont, char *texx);
   
-#define Random __Rand
+
 
 
 #define ALLEGRO_KEYBOARD_HANDLER
@@ -1160,12 +1159,28 @@ int check_mouse_wheel () {
 
   return result;
 }
-#undef kbhit
-#define mgetbutton rec_mgetbutton
-#define domouse rec_domouse
-#define misbuttondown rec_misbuttondown
-#define kbhit rec_kbhit
-#define getch rec_getch
+
+
+int ac_mgetbutton() {
+  return rec_mgetbutton();
+}
+
+void ac_domouse(int str) {
+  return rec_domouse(str);
+}
+
+int ac_misbuttondown(int buno) {
+  return rec_misbuttondown(buno);
+}
+
+int ac_kbhit() {
+  return rec_kbhit();
+}
+
+int ac_getch() {
+  return rec_getch();
+}
+
 
 void quitprintf(char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
@@ -1184,7 +1199,7 @@ void write_log(char*msg) {
 
 // this function is only enabled for special builds if a startup
 // issue needs to be checked
-#define write_log_debug(msg) platform->WriteDebugString(msg)
+//#define write_log_debug(msg) platform->WriteDebugString(msg)  //<-- moved to ac.h
 /*extern "C" {
 void write_log_debug(const char*msg) {
   //if (play.debug_mode == 0)
@@ -1273,7 +1288,6 @@ void debug_write_console (char *msg, ...) {
     first_debug_line = (first_debug_line + 1) % DEBUG_CONSOLE_NUMLINES;
 
 }
-#define DEBUG_CONSOLE if (play.debug_mode) debug_write_console
 
 
 const char *get_cur_script(int numberOfLinesOfCallStack) {
@@ -2750,13 +2764,13 @@ void setup_for_dialog() {
   acdialog_font = play.normal_font;
   wsetscreen(virtual_screen);
   if (!play.mouse_cursor_hidden)
-    domouse(1);
+    ac_domouse(1);
   oldmouse=cur_cursor; set_mouse_cursor(CURS_ARROW);
 }
 void restore_after_dialog() {
   set_mouse_cursor(oldmouse);
   if (!play.mouse_cursor_hidden)
-    domouse(2);
+    ac_domouse(2);
   construct_virtual_screen(true);
 }
 
@@ -4415,8 +4429,8 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   play.gscript_timer=-1;  // avoid screw-ups with changing screens
   play.player_on_region = 0;
   // trash any input which they might have done while it was loading
-  while (kbhit()) { if (getch()==0) getch(); }
-  while (mgetbutton()!=NONE) ;
+  while (ac_kbhit()) { if (ac_getch()==0) ac_getch(); }
+  while (ac_mgetbutton()!=NONE) ;
   // no fade in, so set the palette immediately in case of 256-col sprites
   if (game.color_depth > 1)
     setpal();
@@ -5148,7 +5162,7 @@ void check_controls() {
   // check mouse clicks on GUIs
   static int wasbutdown=0,wasongui=0;
 
-  if ((wasbutdown>0) && (misbuttondown(wasbutdown-1))) {
+  if ((wasbutdown>0) && (ac_misbuttondown(wasbutdown-1))) {
     for (aa=0;aa<guis[wasongui].numobjs;aa++) {
       if (guis[wasongui].objs[aa]->activated<1) continue;
       if (guis[wasongui].get_control_type(aa)!=GOBJ_SLIDER) continue;
@@ -5158,7 +5172,7 @@ void check_controls() {
       break;
       }
     }
-  else if ((wasbutdown>0) && (!misbuttondown(wasbutdown-1))) {
+  else if ((wasbutdown>0) && (!ac_misbuttondown(wasbutdown-1))) {
     guis[wasongui].mouse_but_up();
     int whichbut=wasbutdown;
     wasbutdown=0;
@@ -5202,7 +5216,7 @@ void check_controls() {
     run_on_event(GE_GUI_MOUSEUP, wasongui);
   }
 
-  aa=mgetbutton();
+  aa=ac_mgetbutton();
   if (aa>NONE) {
     if ((play.in_cutscene == 3) || (play.in_cutscene == 4))
       start_skipping_cutscene();
@@ -5244,12 +5258,12 @@ void check_controls() {
     setevent (EV_TEXTSCRIPT, TS_MCLICK, 8);
 
   // check keypresses
-  if (kbhit()) {
+  if (ac_kbhit()) {
     // in case they press the finish-recording button, make sure we know
     int was_playing = play.playback;
 
-    int kgn = getch();
-    if (kgn==0) kgn=getch()+300;
+    int kgn = ac_getch();
+    if (kgn==0) kgn=ac_getch()+300;
 //    if (kgn==367) restart_game();
 //    if (kgn==2) Display("numover: %d character movesped: %d, animspd: %d",numscreenover,playerchar->walkspeed,playerchar->animspeed);
 //    if (kgn==2) CreateTextOverlay(50,60,170,FONT_SPEECH,14,"This is a test screen overlay which shouldn't disappear");
@@ -11364,7 +11378,7 @@ int _display_main(int xx,int yy,int wii,char*todis,int blocking,int usingfont,in
     remove_screen_overlay(OVER_TEXTMSG);*/
 
     if (!play.mouse_cursor_hidden)
-      domouse(1);
+      ac_domouse(1);
     // play.skip_display has same values as SetSkipSpeech:
     // 0 = click mouse or key to skip
     // 1 = key only
@@ -11377,21 +11391,21 @@ int _display_main(int xx,int yy,int wii,char*todis,int blocking,int usingfont,in
       timerloop = 0;
       NEXT_ITERATION();
 /*      if (!play.mouse_cursor_hidden)
-        domouse(0);
+        ac_domouse(0);
       write_screen();*/
 
       render_graphics();
 
       update_polled_stuff_and_crossfade();
-      if (mgetbutton()>NONE) {
+      if (ac_mgetbutton()>NONE) {
         // If we're allowed, skip with mouse
         if (skip_setting & SKIP_MOUSECLICK)
           break;
       }
-      if (kbhit()) {
+      if (ac_kbhit()) {
         // discard keypress, and don't leave extended keys over
-        int kp = getch();
-        if (kp == 0) getch();
+        int kp = ac_getch();
+        if (kp == 0) ac_getch();
 
         // let them press ESC to skip the cutscene
         check_skip_cutscene_keypress (kp);
@@ -11428,7 +11442,7 @@ int _display_main(int xx,int yy,int wii,char*todis,int blocking,int usingfont,in
         break;
     }
     if (!play.mouse_cursor_hidden)
-      domouse(2);
+      ac_domouse(2);
     remove_screen_overlay(OVER_TEXTMSG);
 
     construct_virtual_screen(true);
@@ -13172,14 +13186,14 @@ int fliTargetWidth, fliTargetHeight;
 int check_if_user_input_should_cancel_video()
 {
   NEXT_ITERATION();
-  if (kbhit()) {
-    if ((getch()==27) && (canabort==1))
+  if (ac_kbhit()) {
+    if ((ac_getch()==27) && (canabort==1))
       return 1;
     if (canabort >= 2)
       return 1;  // skip on any key
   }
   if (canabort == 3) {  // skip on mouse click
-    if (mgetbutton()!=NONE) return 1;
+    if (ac_mgetbutton()!=NONE) return 1;
   }
   return 0;
 }
@@ -13282,7 +13296,7 @@ void play_flc_file(int numb,int playflags) {
     wfreeblock(hicol_buf);
     hicol_buf=NULL; }
 //  wsetscreen(screen); wputblock(0,0,backbuffer,0);
-  while (mgetbutton()!=NONE) ;
+  while (ac_mgetbutton()!=NONE) ;
   invalidate_screen();
 }
 // FLIC player end
@@ -15321,96 +15335,6 @@ int GetTextHeight(char *text, int fontnum, int width) {
 }
 
 
-// ** TEXT BOX FUNCTIONS
-
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::get_Text *** */
-const char* TextBox_GetText_New(GUITextBox *texbox) {
-  return CreateNewScriptString(texbox->text);
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::GetText^1 *** */
-void TextBox_GetText(GUITextBox *texbox, char *buffer) {
-  strcpy(buffer, texbox->text);
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::SetText^1 *** */
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::set_Text *** */
-void TextBox_SetText(GUITextBox *texbox, const char *newtex) {
-  if (strlen(newtex) > 190)
-    quit("!SetTextBoxText: text too long");
-
-  if (strcmp(texbox->text, newtex)) {
-    strcpy(texbox->text, newtex);
-    guis_need_update = 1;
-  }
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::get_TextColor *** */
-int TextBox_GetTextColor(GUITextBox *guit) {
-  return guit->textcol;
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::set_TextColor *** */
-void TextBox_SetTextColor(GUITextBox *guit, int colr)
-{
-  if (guit->textcol != colr) 
-  {
-    guit->textcol = colr;
-    guis_need_update = 1;
-  }
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::get_Font *** */
-int TextBox_GetFont(GUITextBox *guit) {
-  return guit->font;
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] TextBox::set_Font *** */
-void TextBox_SetFont(GUITextBox *guit, int fontnum) {
-  if ((fontnum < 0) || (fontnum >= game.numfonts))
-    quit("!SetTextBoxFont: invalid font number.");
-
-  if (guit->font != fontnum) {
-    guit->font = fontnum;
-    guis_need_update = 1;
-  }
-}
-
-
-/* *** SCRIPT SYMBOL: [TextBox] SetTextBoxFont *** */
-void SetTextBoxFont(int guin,int objn, int fontnum) {
-
-  if ((guin<0) | (guin>=game.numgui)) quit("!SetTextBoxFont: invalid GUI number");
-  if ((objn<0) | (objn>=guis[guin].numobjs)) quit("!SetTextBoxFont: invalid object number");
-  if (guis[guin].get_control_type(objn) != GOBJ_TEXTBOX)
-    quit("!SetTextBoxFont: specified control is not a text box");
-
-  GUITextBox *guit = (GUITextBox*)guis[guin].objs[objn];
-  TextBox_SetFont(guit, fontnum);
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] GetTextBoxText *** */
-void GetTextBoxText(int guin, int objn, char*txbuf) {
-  VALIDATE_STRING(txbuf);
-  if ((guin<0) | (guin>=game.numgui)) quit("!GetTextBoxText: invalid GUI number");
-  if ((objn<0) | (objn>=guis[guin].numobjs)) quit("!GetTextBoxText: invalid object number");
-  if (guis[guin].get_control_type(objn)!=GOBJ_TEXTBOX)
-    quit("!GetTextBoxText: specified control is not a text box");
-
-  GUITextBox*guisl=(GUITextBox*)guis[guin].objs[objn];
-  TextBox_GetText(guisl, txbuf);
-}
-
-/* *** SCRIPT SYMBOL: [TextBox] SetTextBoxText *** */
-void SetTextBoxText(int guin, int objn, char*txbuf) {
-  if ((guin<0) | (guin>=game.numgui)) quit("!SetTextBoxText: invalid GUI number");
-  if ((objn<0) | (objn>=guis[guin].numobjs)) quit("!SetTextBoxText: invalid object number");
-  if (guis[guin].get_control_type(objn)!=GOBJ_TEXTBOX)
-    quit("!SetTextBoxText: specified control is not a text box");
-
-  GUITextBox*guisl=(GUITextBox*)guis[guin].objs[objn];
-  TextBox_SetText(guisl, txbuf);
-}
 
 
 // *** LIST BOX FUNCTIONS
@@ -15761,105 +15685,6 @@ void ListBoxDirList (int guin, int objn, const char*filemask) {
 
 
 
-
-// *** INV WINDOW FUNCTIONS
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_CharacterToUse *** */
-void InvWindow_SetCharacterToUse(GUIInv *guii, CharacterInfo *chaa) {
-  if (chaa == NULL)
-    guii->charId = -1;
-  else
-    guii->charId = chaa->index_id;
-  // reset to top of list
-  guii->topIndex = 0;
-
-  guis_need_update = 1;
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_CharacterToUse *** */
-CharacterInfo* InvWindow_GetCharacterToUse(GUIInv *guii) {
-  if (guii->charId < 0)
-    return NULL;
-
-  return &game.chars[guii->charId];
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_ItemWidth *** */
-void InvWindow_SetItemWidth(GUIInv *guii, int newwidth) {
-  guii->itemWidth = newwidth;
-  guii->Resized();
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemWidth *** */
-int InvWindow_GetItemWidth(GUIInv *guii) {
-  return guii->itemWidth;
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_ItemHeight *** */
-void InvWindow_SetItemHeight(GUIInv *guii, int newhit) {
-  guii->itemHeight = newhit;
-  guii->Resized();
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemHeight *** */
-int InvWindow_GetItemHeight(GUIInv *guii) {
-  return guii->itemHeight;
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::set_TopItem *** */
-void InvWindow_SetTopItem(GUIInv *guii, int topitem) {
-  if (guii->topIndex != topitem) {
-    guii->topIndex = topitem;
-    guis_need_update = 1;
-  }
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_TopItem *** */
-int InvWindow_GetTopItem(GUIInv *guii) {
-  return guii->topIndex;
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemsPerRow *** */
-int InvWindow_GetItemsPerRow(GUIInv *guii) {
-  return guii->itemsPerLine;
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_ItemCount *** */
-int InvWindow_GetItemCount(GUIInv *guii) {
-  return charextra[guii->CharToDisplay()].invorder_count;
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::get_RowCount *** */
-int InvWindow_GetRowCount(GUIInv *guii) {
-  return guii->numLines;
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::ScrollDown^0 *** */
-void InvWindow_ScrollDown(GUIInv *guii) {
-  if ((charextra[guii->CharToDisplay()].invorder_count) >
-      (guii->topIndex + (guii->itemsPerLine * guii->numLines))) { 
-    guii->topIndex += guii->itemsPerLine;
-    guis_need_update = 1;
-  }
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::ScrollUp^0 *** */
-void InvWindow_ScrollUp(GUIInv *guii) {
-  if (guii->topIndex > 0) {
-    guii->topIndex -= guii->itemsPerLine;
-    if (guii->topIndex < 0)
-      guii->topIndex = 0;
-
-    guis_need_update = 1;
-  }
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] InvWindow::geti_ItemAtIndex *** */
-ScriptInvItem* InvWindow_GetItemAtIndex(GUIInv *guii, int index) {
-  if ((index < 0) || (index >= charextra[guii->CharToDisplay()].invorder_count))
-    return NULL;
-  return &scrInv[charextra[guii->CharToDisplay()].invorder[index]];
-}
 
 
 
@@ -16607,8 +16432,8 @@ void script_debug(int cmdd,int dataa) {
     destroy_bitmap(tempw);
     destroy_bitmap(stretched);
     gfxDriver->DestroyDDB(ddb);
-    while (!kbhit()) ;
-    getch();
+    while (!ac_kbhit()) ;
+    ac_getch();
     invalidate_screen();
   }
   else if (cmdd==3) 
@@ -16657,8 +16482,8 @@ void script_debug(int cmdd,int dataa) {
     stretch_sprite(screen, tempw, -offsetx, -offsety, multiply_up_coordinate(BMP_W(tempw)), multiply_up_coordinate(BMP_H(tempw)));
     render_to_screen(screen, 0, 0);
     wfreeblock(tempw);
-    while (!kbhit()) ;
-    getch();
+    while (!ac_kbhit()) ;
+    ac_getch();
   }
   else if (cmdd == 99)
     ccSetOption(SCOPT_DEBUGRUN, dataa);
@@ -17415,7 +17240,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
     update_polled_stuff();
     //blit(virtual_screen, tempScrn, 0, 0, 0, 0, BMP_W(screen), BMP_H(screen));
     if (!play.mouse_cursor_hidden)
-      domouse(1);
+      ac_domouse(1);
     update_polled_stuff();
 
  redraw_options:
@@ -17634,8 +17459,8 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
         update_polled_stuff_and_crossfade();
       }
 
-      if (kbhit()) {
-        int gkey = getch();
+      if (ac_kbhit()) {
+        int gkey = ac_getch();
         if (parserInput) {
           wantRefresh = 1;
           // type into the parser 
@@ -17644,13 +17469,13 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
             for (unsigned int i = strlen(parserInput->text); i < strlen(play.lastParserEntry); i++) {
               parserInput->KeyPress(play.lastParserEntry[i]);
             }
-            //domouse(2);
+            //ac_domouse(2);
             goto redraw_options;
           }
           else if ((gkey >= 32) || (gkey == 13) || (gkey == 8)) {
             parserInput->KeyPress(gkey);
             if (!parserInput->activated) {
-              //domouse(2);
+              //ac_domouse(2);
               goto redraw_options;
             }
           }
@@ -17707,7 +17532,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
           parserActivated = 1;
       }
 
-      int mouseButtonPressed = mgetbutton();
+      int mouseButtonPressed = ac_mgetbutton();
 
       if (mouseButtonPressed != NONE) {
         if (mouseison < 0) 
@@ -17766,7 +17591,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
         }
       }
       if (mousewason != mouseison) {
-        //domouse(2);
+        //ac_domouse(2);
         goto redraw_options;
       }
       while ((timerloop == 0) && (play.fast_forward == 0)) {
@@ -17776,12 +17601,12 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
 
     }
     if (!play.mouse_cursor_hidden)
-      domouse(2);
+      ac_domouse(2);
   }
   else 
     chose = disporder[0];  // only one choice, so select it
 
-  while (kbhit()) getch(); // empty keyboard buffer
+  while (ac_kbhit()) ac_getch(); // empty keyboard buffer
   //leave_real_screen();
   construct_virtual_screen(true);
 
@@ -19198,273 +19023,6 @@ int load_game(int slotn, char*descrp, int *wantShot) {
   return do_game_load(nametouse, slotn, descrp, wantShot);
 }
 
-#define ICONSPERLINE 4
-
-struct DisplayInvItem {
-  int num;
-  int sprnum;
-  };
-int __actual_invscreen() {
-  
-  int BUTTONAREAHEIGHT = get_fixed_pixel_size(30);
-  int cmode=CURS_ARROW, toret = -1;
-  int top_item = 0, num_visible_items = 0;
-  int MAX_ITEMAREA_HEIGHT = ((scrnhit - BUTTONAREAHEIGHT) - get_fixed_pixel_size(20));
-  in_inv_screen++;
-  inv_screen_newroom = -1;
-
-start_actinv:
-  wsetscreen(virtual_screen);
-  
-  DisplayInvItem dii[MAX_INV];
-  int numitems=0,ww,widest=0,highest=0;
-  if (charextra[game.playercharacter].invorder_count < 0)
-    update_invorder();
-  if (charextra[game.playercharacter].invorder_count == 0) {
-    DisplayMessage(996);
-    in_inv_screen--;
-    return -1;
-  }
-
-  if (inv_screen_newroom >= 0) {
-    in_inv_screen--;
-    NewRoom(inv_screen_newroom);
-    return -1;
-  }
-
-  for (ww = 0; ww < charextra[game.playercharacter].invorder_count; ww++) {
-    if (game.invinfo[charextra[game.playercharacter].invorder[ww]].name[0]!=0) {
-      dii[numitems].num = charextra[game.playercharacter].invorder[ww];
-      dii[numitems].sprnum = game.invinfo[charextra[game.playercharacter].invorder[ww]].pic;
-      int snn=dii[numitems].sprnum;
-      if (spritewidth[snn] > widest) widest=spritewidth[snn];
-      if (spriteheight[snn] > highest) highest=spriteheight[snn];
-      numitems++;
-      }
-    }
-  if (numitems != charextra[game.playercharacter].invorder_count)
-    quit("inconsistent inventory calculations");
-
-  widest += get_fixed_pixel_size(4);
-  highest += get_fixed_pixel_size(4);
-  num_visible_items = (MAX_ITEMAREA_HEIGHT / highest) * ICONSPERLINE;
-
-  int windowhit = highest * (numitems/ICONSPERLINE) + get_fixed_pixel_size(4);
-  if ((numitems%ICONSPERLINE) !=0) windowhit+=highest;
-  if (windowhit > MAX_ITEMAREA_HEIGHT) {
-    windowhit = (MAX_ITEMAREA_HEIGHT / highest) * highest + get_fixed_pixel_size(4);
-  }
-  windowhit += BUTTONAREAHEIGHT;
-
-  int windowwid = widest*ICONSPERLINE + get_fixed_pixel_size(4);
-  if (windowwid < get_fixed_pixel_size(105)) windowwid = get_fixed_pixel_size(105);
-  int windowxp=scrnwid/2-windowwid/2;
-  int windowyp=scrnhit/2-windowhit/2;
-  int buttonyp=windowyp+windowhit-BUTTONAREAHEIGHT;
-  wsetcolor(play.sierra_inv_color);
-  wbar(windowxp,windowyp,windowxp+windowwid,windowyp+windowhit);
-  wsetcolor(0); 
-  int bartop = windowyp + get_fixed_pixel_size(2);
-  int barxp = windowxp + get_fixed_pixel_size(2);
-  wbar(barxp,bartop, windowxp + windowwid - get_fixed_pixel_size(2),buttonyp-1);
-  for (ww = top_item; ww < numitems; ww++) {
-    if (ww >= top_item + num_visible_items)
-      break;
-    block spof=spriteset[dii[ww].sprnum];
-    wputblock(barxp+1+((ww-top_item)%4)*widest+widest/2-wgetblockwidth(spof)/2,
-      bartop+1+((ww-top_item)/4)*highest+highest/2-wgetblockheight(spof)/2,spof,1);
-    }
-  if ((spriteset[2041] == NULL) || (spriteset[2042] == NULL) || (spriteset[2043] == NULL))
-    quit("!InventoryScreen: one or more of the inventory screen graphics have been deleted");
-  #define BUTTONWID spritewidth[2042]
-  // Draw select, look and OK buttons
-  wputblock(windowxp+2, buttonyp + get_fixed_pixel_size(2), spriteset[2041], 1);
-  wputblock(windowxp+3+BUTTONWID, buttonyp + get_fixed_pixel_size(2), spriteset[2042], 1);
-  wputblock(windowxp+4+BUTTONWID*2, buttonyp + get_fixed_pixel_size(2), spriteset[2043], 1);
-
-  // Draw Up and Down buttons if required
-  const int ARROWBUTTONWID = 11;
-  block arrowblock = create_bitmap (ARROWBUTTONWID, ARROWBUTTONWID);
-  clear_to_color(arrowblock, bitmap_mask_color(arrowblock));
-  int usecol;
-  __my_setcolor(&usecol, 0);
-  if (play.sierra_inv_color == 0)
-    __my_setcolor(&usecol, 14);
-
-  line(arrowblock,ARROWBUTTONWID/2, 2, ARROWBUTTONWID-2, 9, usecol);
-  line(arrowblock,ARROWBUTTONWID/2, 2, 2, 9, usecol);
-  line(arrowblock, 2, 9, ARROWBUTTONWID-2, 9, usecol);
-  floodfill(arrowblock, ARROWBUTTONWID/2, 4, usecol);
-
-  if (top_item > 0)
-    wputblock(windowxp+windowwid-ARROWBUTTONWID, buttonyp + get_fixed_pixel_size(2), arrowblock, 1);
-  if (top_item + num_visible_items < numitems)
-    draw_sprite_v_flip (abuf, arrowblock, windowxp+windowwid-ARROWBUTTONWID, buttonyp + get_fixed_pixel_size(4) + ARROWBUTTONWID);
-  wfreeblock(arrowblock);
-
-  domouse(1);
-  set_mouse_cursor(cmode);
-  int wasonitem=-1;
-  while (!kbhit()) {
-    timerloop = 0;
-    NEXT_ITERATION();
-    domouse(0);
-    update_polled_stuff_and_crossfade();
-    write_screen();
-
-    int isonitem=((mousey-bartop)/highest)*ICONSPERLINE+(mousex-barxp)/widest;
-    if (mousey<=bartop) isonitem=-1;
-    else if (isonitem >= 0) isonitem += top_item;
-    if ((isonitem<0) | (isonitem>=numitems) | (isonitem >= top_item + num_visible_items))
-      isonitem=-1;
-
-    int mclick = mgetbutton();
-    if (mclick == LEFT) {
-      if ((mousey<windowyp) | (mousey>windowyp+windowhit) | (mousex<windowxp) | (mousex>windowxp+windowwid))
-        continue;
-      if (mousey<buttonyp) {
-        int clickedon=isonitem;
-        if (clickedon<0) continue;
-        evblocknum=dii[clickedon].num;
-        play.used_inv_on = dii[clickedon].num;
-
-        if (cmode==MODE_LOOK) {
-          domouse(2);
-          run_event_block_inv(dii[clickedon].num, 0); 
-          // in case the script did anything to the screen, redraw it
-          mainloop();
-          
-          goto start_actinv;
-          continue;
-        }
-        else if (cmode==MODE_USE) {
-          // use objects on each other
-          play.usedinv=toret;
-
-          // set the activeinv so the script can check it
-          int activeinvwas = playerchar->activeinv;
-          playerchar->activeinv = toret;
-
-          domouse(2);
-          run_event_block_inv(dii[clickedon].num, 3);
-
-          // if the script didn't change it, then put it back
-          if (playerchar->activeinv == toret)
-            playerchar->activeinv = activeinvwas;
-
-          // in case the script did anything to the screen, redraw it
-          mainloop();
-          
-          // They used the active item and lost it
-          if (playerchar->inv[toret] < 1) {
-            cmode = CURS_ARROW;
-            set_mouse_cursor(cmode);
-            toret = -1;
-          }
- 
-          goto start_actinv;
-//          continue;
-          }
-        toret=dii[clickedon].num;
-//        int plusng=play.using; play.using=toret;
-        update_inv_cursor(toret);
-        set_mouse_cursor(MODE_USE);
-        cmode=MODE_USE;
-//        play.using=plusng;
-//        break;
-        continue;
-        }
-      else {
-        if (mousex >= windowxp+windowwid-ARROWBUTTONWID) {
-          if (mousey < buttonyp + get_fixed_pixel_size(2) + ARROWBUTTONWID) {
-            if (top_item > 0) {
-              top_item -= ICONSPERLINE;
-              domouse(2);
-              goto start_actinv;
-              }
-            }
-          else if ((mousey < buttonyp + get_fixed_pixel_size(4) + ARROWBUTTONWID*2) && (top_item + num_visible_items < numitems)) {
-            top_item += ICONSPERLINE;
-            domouse(2);
-            goto start_actinv;
-            }
-          continue;
-          }
-
-        int buton=(mousex-windowxp)-2;
-        if (buton<0) continue;
-        buton/=BUTTONWID;
-        if (buton>=3) continue;
-        if (buton==0) { toret=-1; cmode=MODE_LOOK; }
-        else if (buton==1) { cmode=CURS_ARROW; toret=-1; }
-        else break;
-        set_mouse_cursor(cmode);
-        }
-      }
-    else if (mclick == RIGHT) {
-      if (cmode == CURS_ARROW)
-        cmode = MODE_LOOK;
-      else
-        cmode = CURS_ARROW;
-      toret = -1;
-      set_mouse_cursor(cmode);
-    }
-    else if (isonitem!=wasonitem) { domouse(2);
-      int rectxp=barxp+1+(wasonitem%4)*widest;
-      int rectyp=bartop+1+((wasonitem - top_item)/4)*highest;
-      if (wasonitem>=0) {
-        wsetcolor(0);
-        wrectangle(rectxp,rectyp,rectxp+widest-1,rectyp+highest-1);
-        }
-      if (isonitem>=0) { wsetcolor(14);//opts.invrectcol);
-        rectxp=barxp+1+(isonitem%4)*widest;
-        rectyp=bartop+1+((isonitem - top_item)/4)*highest;
-        wrectangle(rectxp,rectyp,rectxp+widest-1,rectyp+highest-1);
-        }
-      domouse(1);
-      }
-    wasonitem=isonitem;
-    while (timerloop == 0) {
-      update_polled_stuff();
-      platform->YieldCPU();
-    }
-  }
-  while (kbhit()) getch();
-  set_default_cursor();
-  domouse(2);
-  construct_virtual_screen(true);
-  in_inv_screen--;
-  return toret;
-  }
-
-int invscreen() {
-  int selt=__actual_invscreen();
-  if (selt<0) return -1;
-  playerchar->activeinv=selt;
-  guis_need_update = 1;
-  set_cursor_mode(MODE_USE);
-  return selt;
-  }
-
-/* *** SCRIPT SYMBOL: [Game] InventoryScreen *** */
-void sc_invscreen() {
-  curscript->queue_action(ePSAInvScreen, 0, "InventoryScreen");
-}
-
-/* *** SCRIPT SYMBOL: [InvWindow] SetInvDimensions *** */
-void SetInvDimensions(int ww,int hh) {
-  play.inv_item_wid = ww;
-  play.inv_item_hit = hh;
-  play.inv_numdisp = 0;
-  // backwards compatibility
-  for (int i = 0; i < numguiinv; i++) {
-    guiinv[i].itemWidth = ww;
-    guiinv[i].itemHeight = hh;
-    guiinv[i].Resized();
-  }
-  guis_need_update = 1;
-}
-
 /* *** SCRIPT SYMBOL: [Palette] UpdatePalette *** */
 void UpdatePalette() {
   if (game.color_depth > 1)
@@ -19610,31 +19168,8 @@ void setup_script_exports() {
   register_label_script_functions();
   register_button_script_functions();
   register_slider_script_functions();
-
-
-  scAdd_External_Symbol("TextBox::GetText^1", (void *)TextBox_GetText);
-  scAdd_External_Symbol("TextBox::SetText^1", (void *)TextBox_SetText);
-  scAdd_External_Symbol("TextBox::get_Font", (void *)TextBox_GetFont);
-  scAdd_External_Symbol("TextBox::set_Font", (void *)TextBox_SetFont);
-  scAdd_External_Symbol("TextBox::get_Text", (void *)TextBox_GetText_New);
-  scAdd_External_Symbol("TextBox::set_Text", (void *)TextBox_SetText);
-  scAdd_External_Symbol("TextBox::get_TextColor", (void *)TextBox_GetTextColor);
-  scAdd_External_Symbol("TextBox::set_TextColor", (void *)TextBox_SetTextColor);
-
-  scAdd_External_Symbol("InvWindow::ScrollDown^0", (void *)InvWindow_ScrollDown);
-  scAdd_External_Symbol("InvWindow::ScrollUp^0", (void *)InvWindow_ScrollUp);
-  scAdd_External_Symbol("InvWindow::get_CharacterToUse", (void *)InvWindow_GetCharacterToUse);
-  scAdd_External_Symbol("InvWindow::set_CharacterToUse", (void *)InvWindow_SetCharacterToUse);
-  scAdd_External_Symbol("InvWindow::geti_ItemAtIndex", (void *)InvWindow_GetItemAtIndex);
-  scAdd_External_Symbol("InvWindow::get_ItemCount", (void *)InvWindow_GetItemCount);
-  scAdd_External_Symbol("InvWindow::get_ItemHeight", (void *)InvWindow_GetItemHeight);
-  scAdd_External_Symbol("InvWindow::set_ItemHeight", (void *)InvWindow_SetItemHeight);
-  scAdd_External_Symbol("InvWindow::get_ItemWidth", (void *)InvWindow_GetItemWidth);
-  scAdd_External_Symbol("InvWindow::set_ItemWidth", (void *)InvWindow_SetItemWidth);
-  scAdd_External_Symbol("InvWindow::get_ItemsPerRow", (void *)InvWindow_GetItemsPerRow);
-  scAdd_External_Symbol("InvWindow::get_RowCount", (void *)InvWindow_GetRowCount);
-  scAdd_External_Symbol("InvWindow::get_TopItem", (void *)InvWindow_GetTopItem);
-  scAdd_External_Symbol("InvWindow::set_TopItem", (void *)InvWindow_SetTopItem);
+  register_textbox_script_functions();
+  register_inv_window_script_functions();
 
   scAdd_External_Symbol("ListBox::AddItem^1", (void *)ListBox_AddItem);
   scAdd_External_Symbol("ListBox::Clear^0", (void *)ListBox_Clear);
@@ -19891,7 +19426,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetRegionAt",(void *)GetRegionAt);
   scAdd_External_Symbol("GetSaveSlotDescription",(void *)GetSaveSlotDescription);
   scAdd_External_Symbol("GetScalingAt",(void *)GetScalingAt);
-  scAdd_External_Symbol("GetTextBoxText",(void *)GetTextBoxText);
   scAdd_External_Symbol("GetTextHeight",(void *)GetTextHeight);
   scAdd_External_Symbol("GetTextWidth",(void *)GetTextWidth);
   scAdd_External_Symbol("GetTime",(void *)sc_GetTime);
@@ -19899,7 +19433,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetTranslationName", (void *)GetTranslationName);
   scAdd_External_Symbol("GiveScore",(void *)GiveScore);
   scAdd_External_Symbol("InputBox",(void *)sc_inputbox);
-  scAdd_External_Symbol("InventoryScreen",(void *)sc_invscreen);
 
   scAdd_External_Symbol("IsChannelPlaying",(void *)IsChannelPlaying);
   scAdd_External_Symbol("IsGamePaused",(void *)IsGamePaused);
@@ -20017,7 +19550,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetGlobalInt",(void *)SetGlobalInt);
   scAdd_External_Symbol("SetGlobalString",(void *)SetGlobalString);
   scAdd_External_Symbol("SetGraphicalVariable",(void *)SetGraphicalVariable);
-  scAdd_External_Symbol("SetInvDimensions",(void *)SetInvDimensions);
 
   scAdd_External_Symbol("SetMultitaskingMode",(void *)SetMultitasking);
   scAdd_External_Symbol("SetMusicMasterVolume",(void *)SetMusicMasterVolume);
@@ -20038,8 +19570,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetSpeechStyle", (void *)SetSpeechStyle);
   scAdd_External_Symbol("SetSpeechVolume",(void *)SetSpeechVolume);
   scAdd_External_Symbol("SetTalkingColor",(void *)SetTalkingColor);
-  scAdd_External_Symbol("SetTextBoxFont",(void *)SetTextBoxFont);
-  scAdd_External_Symbol("SetTextBoxText",(void *)SetTextBoxText);
   scAdd_External_Symbol("SetTextWindowGUI",(void *)SetTextWindowGUI);
   scAdd_External_Symbol("SetTimer",(void *)script_SetTimer);
   scAdd_External_Symbol("SetVoiceMode",(void *)SetVoiceMode);
@@ -20388,7 +19918,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
       setevent(EV_RUNEVBLOCK,EVB_ROOM,0,7);
   }
   our_eip=7;
-//    if (mgetbutton()>NONE) break;
+//    if (ac_mgetbutton()>NONE) break;
   update_polled_stuff();
   if (play.bg_anim_delay > 0) play.bg_anim_delay--;
   else if (play.bg_frame_locked) ;

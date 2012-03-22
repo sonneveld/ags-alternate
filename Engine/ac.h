@@ -19,6 +19,21 @@ struct EventHappened;       // acruntim.h
 
 #define write_log_debug(msg) platform->WriteDebugString(msg)
 
+#define Random __Rand
+
+#define DEBUG_CONSOLE if (play.debug_mode) debug_write_console
+
+#define scAdd_External_Symbol ccAddExternalSymbol
+
+
+// recordable input 
+extern int ac_mgetbutton();
+extern void ac_domouse(int str);
+extern int ac_misbuttondown(int buno);
+extern int ac_kbhit();
+extern int ac_getch();
+
+
 extern void quit(char*quitmsg);
 extern void put_sprite_256(int, int, block);
 extern void write_log(char*msg);
@@ -90,7 +105,7 @@ extern CharacterInfo *GetCharacterAtLocation(int xx, int yy);
 extern int Character_GetSpeakingFrame(CharacterInfo *chaa);
 
 extern void ccAddExternalSymbol(char *namof, void *addrof);
-#define scAdd_External_Symbol ccAddExternalSymbol
+
 
 // for ac_mouse.cpp
 extern void multiply_up_coordinates_round_up(int *x, int *y);
@@ -150,4 +165,11 @@ extern int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoop
 extern void get_overlay_position(int overlayidx, int *x, int *y);
 extern int GetTextDisplayTime (char *text, int canberel=0);
 extern int _display_main(int xx,int yy,int wii,char*todis,int blocking,int usingfont,int asspch, int isThought, int allowShrink, bool overlayPositionFixed) ;
+
+// for ac_gui_inv_window
+extern void write_screen();
+extern void mainloop(bool checkControls = false, IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
+extern void construct_virtual_screen(bool fullRedraw);
+
+
 #endif
