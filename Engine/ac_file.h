@@ -3,6 +3,10 @@
 
 #include "ac_dynobj.h"
 
+// maybe not best place to put this?
+// archive attributes to search for - al_findfirst breaks with 0
+#define FA_SEARCH -1
+
 // object-based File routine -- struct definition
 #define scFileRead   1
 #define scFileWrite  2

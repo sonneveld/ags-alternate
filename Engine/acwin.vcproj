@@ -403,6 +403,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_gui_list_box.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_gui_slider.cpp"
 				>
 			</File>
@@ -1145,6 +1149,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_gui_label.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_gui_list_box.h"
 				>
 			</File>
 			<File
