@@ -12,6 +12,7 @@
 #include "bigend.h"
 #include "acroom.h"  // misc DEFINES
 #include "ac_dynobj.h" // for AGSCCDynamicObject
+#include "ac_invitem.h" // for ScriptInvItem
 
 // forward declarations:
 class IDriverDependantBitmap; // ali3d.h
@@ -575,17 +576,10 @@ struct GameState {
   int   default_audio_type_volumes[MAX_AUDIO_TYPES];
 };
 
-
-struct ScriptInvItem {
-  int id;
-  int reserved;
-};
-
 struct ScriptDialog {
   int id;
   int reserved;
 };
-
 
 // stores cached info about the character
 struct CharacterCache {

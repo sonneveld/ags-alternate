@@ -387,6 +387,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_invitem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_maths.cpp"
 				>
 			</File>
@@ -1093,6 +1097,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_file.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_invitem.h"
 				>
 			</File>
 			<File
