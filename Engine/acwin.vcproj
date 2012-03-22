@@ -371,6 +371,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_dialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_dynobj.cpp"
 				>
 			</File>
@@ -1065,6 +1069,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_datetime.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_dialog.h"
 				>
 			</File>
 			<File

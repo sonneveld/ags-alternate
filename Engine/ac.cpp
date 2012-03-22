@@ -159,6 +159,7 @@ extern "C" {
 #include "ac.h"
 #include "acgfx.h"
 #include "ali3d.h"
+#include "ac_dialog.h"
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
@@ -14310,27 +14311,6 @@ void LoseInventoryFromCharacter(int charid, int inum) {
   Character_LoseInventory(&game.chars[charid], &scrInv[inum]);
 }
 
-/* *** SCRIPT SYMBOL: [Dialog] RunDialog *** */
-void RunDialog(int tum) {
-  if ((tum<0) | (tum>=game.numdialog))
-    quit("!RunDialog: invalid topic number specified");
-
-  can_run_delayed_command();
-
-  if (play.stop_dialog_at_end != DIALOG_NONE) {
-    if (play.stop_dialog_at_end == DIALOG_RUNNING)
-      play.stop_dialog_at_end = DIALOG_NEWTOPIC + tum;
-    else
-      quit("!NewRoom: two NewRoom/RunDiaolg/StopDialog requests within dialog");
-    return;
-  }
-
-  if (inside_script) 
-    curscript->queue_action(ePSARunDialog, tum, "RunDialog");
-  else
-    do_conversation(tum);
-}
-
 /* *** SCRIPT SYMBOL: [GUI] GetGUIAt *** */
 int GetGUIAt (int xx,int yy) {
   multiply_up_coordinates(&xx, &yy);
@@ -18160,126 +18140,6 @@ int GetGameOption (int opt) {
   return game.options[opt];
 }
 
-/* *** SCRIPT SYMBOL: [Dialog] StopDialog *** */
-void StopDialog() {
-  if (play.stop_dialog_at_end == DIALOG_NONE) {
-    debug_log("StopDialog called, but was not in a dialog");
-    DEBUG_CONSOLE("StopDialog called but no dialog");
-    return;
-  }
-  play.stop_dialog_at_end = DIALOG_STOP;
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] SetDialogOption *** */
-void SetDialogOption(int dlg,int opt,int onoroff) {
-  if ((dlg<0) | (dlg>=game.numdialog))
-    quit("!SetDialogOption: Invalid topic number specified");
-  if ((opt<1) | (opt>dialog[dlg].numoptions))
-    quit("!SetDialogOption: Invalid option number specified");
-  opt--;
-
-  dialog[dlg].optionflags[opt]&=~DFLG_ON;
-  if ((onoroff==1) & ((dialog[dlg].optionflags[opt] & DFLG_OFFPERM)==0))
-    dialog[dlg].optionflags[opt]|=DFLG_ON;
-  else if (onoroff==2)
-    dialog[dlg].optionflags[opt]|=DFLG_OFFPERM;
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] GetDialogOption *** */
-int GetDialogOption (int dlg, int opt) {
-  if ((dlg<0) | (dlg>=game.numdialog))
-    quit("!GetDialogOption: Invalid topic number specified");
-  if ((opt<1) | (opt>dialog[dlg].numoptions))
-    quit("!GetDialogOption: Invalid option number specified");
-  opt--;
-
-  if (dialog[dlg].optionflags[opt] & DFLG_OFFPERM)
-    return 2;
-  if (dialog[dlg].optionflags[opt] & DFLG_ON)
-    return 1;
-  return 0;
-}
-
-/* *** SCRIPT SYMBOL: [Game] Game::get_DialogCount *** */
-int Game_GetDialogCount()
-{
-  return game.numdialog;
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::Start^0 *** */
-void Dialog_Start(ScriptDialog *sd) {
-  RunDialog(sd->id);
-}
-
-#define CHOSE_TEXTPARSER -3053
-#define SAYCHOSEN_USEFLAG 1
-#define SAYCHOSEN_YES 2
-#define SAYCHOSEN_NO  3 
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::DisplayOptions^1 *** */
-int Dialog_DisplayOptions(ScriptDialog *sd, int sayChosenOption) 
-{
-  if ((sayChosenOption < 1) || (sayChosenOption > 3))
-    quit("!Dialog.DisplayOptions: invalid parameter passed");
-
-  int chose = show_dialog_options(sd->id, sayChosenOption, (game.options[OPT_RUNGAMEDLGOPTS] != 0));
-  if (chose != CHOSE_TEXTPARSER)
-  {
-    chose++;
-  }
-  return chose;
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::SetOptionState^2 *** */
-void Dialog_SetOptionState(ScriptDialog *sd, int option, int newState) {
-  SetDialogOption(sd->id, option, newState);
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::GetOptionState^1 *** */
-int Dialog_GetOptionState(ScriptDialog *sd, int option) {
-  return GetDialogOption(sd->id, option);
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::HasOptionBeenChosen^1 *** */
-int Dialog_HasOptionBeenChosen(ScriptDialog *sd, int option)
-{
-  if ((option < 1) || (option > dialog[sd->id].numoptions))
-    quit("!Dialog.HasOptionBeenChosen: Invalid option number specified");
-  option--;
-
-  if (dialog[sd->id].optionflags[option] & DFLG_HASBEENCHOSEN)
-    return 1;
-  return 0;
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::get_OptionCount *** */
-int Dialog_GetOptionCount(ScriptDialog *sd)
-{
-  return dialog[sd->id].numoptions;
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::get_ShowTextParser *** */
-int Dialog_GetShowTextParser(ScriptDialog *sd)
-{
-  return (dialog[sd->id].topicFlags & DTFLG_SHOWPARSER) ? 1 : 0;
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::GetOptionText^1 *** */
-const char* Dialog_GetOptionText(ScriptDialog *sd, int option)
-{
-  if ((option < 1) || (option > dialog[sd->id].numoptions))
-    quit("!Dialog.GetOptionText: Invalid option number specified");
-
-  option--;
-
-  return CreateNewScriptString(get_translation(dialog[sd->id].optionnames[option]));
-}
-
-/* *** SCRIPT SYMBOL: [Dialog] Dialog::get_ID *** */
-int Dialog_GetID(ScriptDialog *sd) {
-  return sd->id;
-}
-
 /* *** SCRIPT SYMBOL: [Screen] ShakeScreen *** */
 void ShakeScreen(int severe) {
   EndSkippingUntilCharStops();
@@ -21898,16 +21758,7 @@ void setup_script_exports() {
   register_audio_script_functions();
   register_character_script_functions();
   register_object_script_functions();
-
-  scAdd_External_Symbol("Dialog::get_ID", (void *)Dialog_GetID);
-  scAdd_External_Symbol("Dialog::get_OptionCount", (void *)Dialog_GetOptionCount);
-  scAdd_External_Symbol("Dialog::get_ShowTextParser", (void *)Dialog_GetShowTextParser);
-  scAdd_External_Symbol("Dialog::DisplayOptions^1", (void *)Dialog_DisplayOptions);
-  scAdd_External_Symbol("Dialog::GetOptionState^1", (void *)Dialog_GetOptionState);
-  scAdd_External_Symbol("Dialog::GetOptionText^1", (void *)Dialog_GetOptionText);
-  scAdd_External_Symbol("Dialog::HasOptionBeenChosen^1", (void *)Dialog_HasOptionBeenChosen);
-  scAdd_External_Symbol("Dialog::SetOptionState^2", (void *)Dialog_SetOptionState);
-  scAdd_External_Symbol("Dialog::Start^0", (void *)Dialog_Start);
+  register_dialog_script_functions();
 
   scAdd_External_Symbol("DialogOptionsRenderingInfo::get_ActiveOptionID", (void *)DialogOptionsRendering_GetActiveOptionID);
   scAdd_External_Symbol("DialogOptionsRenderingInfo::set_ActiveOptionID", (void *)DialogOptionsRendering_SetActiveOptionID);
@@ -22211,7 +22062,7 @@ void setup_script_exports() {
   scAdd_External_Symbol("Game::SetSaveGameDirectory^1", (void *)Game_SetSaveGameDirectory);
   scAdd_External_Symbol("Game::StopSound^1", (void *)StopAllSounds);
   scAdd_External_Symbol("Game::get_CharacterCount", (void *)Game_GetCharacterCount);
-  scAdd_External_Symbol("Game::get_DialogCount", (void *)Game_GetDialogCount);
+
   scAdd_External_Symbol("Game::get_FileName", (void *)Game_GetFileName);
   scAdd_External_Symbol("Game::get_FontCount", (void *)Game_GetFontCount);
   scAdd_External_Symbol("Game::geti_GlobalMessages",(void *)Game_GetGlobalMessages);
@@ -22343,7 +22194,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("GetCharacterPropertyText",(void *)GetCharacterPropertyText);
   scAdd_External_Symbol("GetCurrentMusic",(void *)GetCurrentMusic);
   scAdd_External_Symbol("GetCursorMode",(void *)GetCursorMode);
-  scAdd_External_Symbol("GetDialogOption",(void *)GetDialogOption);
   scAdd_External_Symbol("GetGameOption",(void *)GetGameOption);
   scAdd_External_Symbol("GetGameParameter",(void *)GetGameParameter);
   scAdd_External_Symbol("GetGameSpeed",(void *)GetGameSpeed);
@@ -22466,7 +22316,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("RestoreGameSlot",(void *)RestoreGameSlot);
   scAdd_External_Symbol("RunAGSGame", (void *)RunAGSGame);
   scAdd_External_Symbol("RunCharacterInteraction",(void *)RunCharacterInteraction);
-  scAdd_External_Symbol("RunDialog",(void *)RunDialog);
   scAdd_External_Symbol("RunHotspotInteraction", (void *)RunHotspotInteraction);
   scAdd_External_Symbol("RunInventoryInteraction", (void *)RunInventoryInteraction);
   scAdd_External_Symbol("RunRegionInteraction", (void *)RunRegionInteraction);
@@ -22501,7 +22350,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("SetCharacterViewOffset",(void *)SetCharacterViewOffset);
   scAdd_External_Symbol("SetCursorMode",(void *)set_cursor_mode);
   scAdd_External_Symbol("SetDefaultCursor",(void *)set_default_cursor);
-  scAdd_External_Symbol("SetDialogOption",(void *)SetDialogOption);
   scAdd_External_Symbol("SetDigitalMasterVolume",(void *)SetDigitalMasterVolume);
   scAdd_External_Symbol("SetFadeColor",(void *)SetFadeColor);
   scAdd_External_Symbol("SetFrameSound",(void *)SetFrameSound);
@@ -22559,7 +22407,6 @@ void setup_script_exports() {
   scAdd_External_Symbol("StartRecording", (void *)scStartRecording);
   scAdd_External_Symbol("StopAmbientSound",(void *)StopAmbientSound);
   scAdd_External_Symbol("StopChannel",(void *)stop_and_destroy_channel);
-  scAdd_External_Symbol("StopDialog",(void *)StopDialog);
   scAdd_External_Symbol("StopMoving",(void *)StopMoving);
   scAdd_External_Symbol("StopMusic", (void *)scr_StopMusic);
   scAdd_External_Symbol("TintScreen",(void *)TintScreen);

@@ -141,4 +141,10 @@ extern void setevent(int evtyp,int ev1,int ev2,int ev3);
 
 extern void render_graphics(IDriverDependantBitmap *extraBitmap = NULL, int extraX = 0, int extraY = 0);
 
+// for ac_dialog.h
+extern void can_run_delayed_command();
+extern void do_conversation(int dlgnum);
+extern int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBackground);
+
+
 #endif
