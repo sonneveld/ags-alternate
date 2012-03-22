@@ -262,6 +262,13 @@ int __GetLocationType(int xxx,int yyy, int allowHotspot0) {
   return winner;
 }
 
+// GetLocationType exported function - just call through
+// to the main function with default 0
+/* *** SCRIPT SYMBOL: [Game] GetLocationType *** */
+int GetLocationType(int xxx,int yyy) {
+  return __GetLocationType(xxx, yyy, 0);
+}
+
 
 /* *** SCRIPT SYMBOL: [Hotspot] GetHotspotName *** */
 void GetHotspotName(int hotspot, char *buffer) {
@@ -306,5 +313,6 @@ void register_hotspot_script_functions() {
   scAdd_External_Symbol("GetHotspotPropertyText",(void *)GetHotspotPropertyText);
   scAdd_External_Symbol("RunHotspotInteraction", (void *)RunHotspotInteraction);
   scAdd_External_Symbol("MoveCharacterToHotspot",(void *)MoveCharacterToHotspot);
+  scAdd_External_Symbol("GetLocationType",(void *)GetLocationType);
 }
 

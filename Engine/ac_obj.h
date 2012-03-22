@@ -29,6 +29,7 @@ extern void scale_sprite_size(int sppic, int zoom_level, int *newwidth, int *new
 extern void prepare_objects_for_drawing();
 extern int get_area_scaling (int onarea, int xx, int yy);
 extern void SetObjectView(int,int);
+extern void MergeObject(int obn);
 
 extern void register_object_script_functions();
 

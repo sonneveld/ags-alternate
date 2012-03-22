@@ -209,5 +209,6 @@ extern void setevent(int evtyp,int ev1=0,int ev2=-1000,int ev3=0);
 // for ac_multimedia.h
 extern int calculate_max_volume();
 extern void update_ambient_sound_vol ();
+extern int check_for_messages_from_editor();
 
 #endif

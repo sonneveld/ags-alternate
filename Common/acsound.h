@@ -110,5 +110,14 @@ SOUNDCLIP *my_load_mod(const char *filname, int repet);
 
 int  init_mod_player(int numVoices);
 void remove_mod_player();
+extern void StopAmbientSound (int channel);
+extern void PlayMusicResetQueue(int newmus);
+extern void apply_volume_drop_modifier(bool applyModifier);
+extern void PlayMusicResetQueue(int newmus);
+extern void clear_music_cache();
+extern void stop_and_destroy_channel_ex(int chid, bool resetLegacyMusicSettings);
+extern void acaudio_update_mp3();
+extern int play_sound(int val1);
+extern SOUNDCLIP *load_music_from_disk(int mnum, bool doRepeat);
 
 #endif // __ACSOUND_H

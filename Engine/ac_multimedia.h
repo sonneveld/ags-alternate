@@ -4,6 +4,7 @@
 extern void play_flc_file(int,int);
 extern int  cd_manager(int,int);
 extern int IsMusicPlaying();
+extern void stopmusic();
 
 extern void register_multimedia_script_functions();
 

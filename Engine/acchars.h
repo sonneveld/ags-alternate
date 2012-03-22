@@ -11,6 +11,10 @@ extern void NewRoomEx(int nrnum,int newx,int newy);
 extern void FollowCharacter(int who, int tofollow) ;
 extern void SetCharacterIdle(int who, int iview, int itime);
 extern void ChangeCharacterView(int chaa,int vii);
+extern void StopMoving(int chaa);
+extern void ReleaseCharacterView(int chat);
+extern void SetCharacterView(int chaa,int vii);
+extern void FaceLocation(int cha, int xx, int yy);
 
 extern void register_character_script_functions();
 
