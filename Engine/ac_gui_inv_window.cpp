@@ -6,6 +6,8 @@
 #include "sprcache.h"
 #include "bmp.h"
 #include "ac_mouse.h"
+#include "ac_exescr.h"
+
 extern void DisplayMessage(int msnum); // ac_test.h
 
 // *** INV WINDOW FUNCTIONS

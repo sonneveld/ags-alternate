@@ -391,6 +391,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_exescr.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_file.cpp"
 				>
 			</File>
@@ -432,6 +436,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_invitem.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_keyinput.cpp"
 				>
 			</File>
 			<File
@@ -1184,6 +1192,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_exescr.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_file.h"
 				>
 			</File>
@@ -1225,6 +1237,10 @@
 			</File>
 			<File
 				RelativePath=".\ac_invitem.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ac_keyinput.h"
 				>
 			</File>
 			<File

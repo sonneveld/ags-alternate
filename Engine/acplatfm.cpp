@@ -23,6 +23,7 @@
 #include "sprcache.h"
 #include "acsound.h"
 #include "acgfx.h"
+#include "ac_exescr.h"
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;
 

@@ -21,6 +21,7 @@ struct ScriptDateTime; // ac_sound.h
 struct GFXFilter; // acgfx.h
 class SpriteCache; //sprcache.h
 struct IMouseGetPosCallback; //wgt2allg.h
+struct ExecutingScript;   // ac_exescr.h
 
 // Max script string length
 #define MAX_MAXSTRLEN 200
@@ -602,38 +603,7 @@ struct ObjectCache {
   int   xwas, ywas;
 };
 
-enum PostScriptAction {
-  ePSANewRoom,
-  ePSAInvScreen,
-  ePSARestoreGame,
-  ePSARestoreGameDialog,
-  ePSARunAGSGame,
-  ePSARunDialog,
-  ePSARestartGame,
-  ePSASaveGame,
-  ePSASaveGameDialog
-};
 
-#define MAX_QUEUED_SCRIPTS 4
-#define MAX_QUEUED_ACTIONS 5
-struct ExecutingScript {
-  ccInstance *inst;
-  PostScriptAction postScriptActions[MAX_QUEUED_ACTIONS];
-  const char *postScriptActionNames[MAX_QUEUED_ACTIONS];
-  char postScriptSaveSlotDescription[MAX_QUEUED_ACTIONS][100];
-  int  postScriptActionData[MAX_QUEUED_ACTIONS];
-  int  numPostScriptActions;
-  char script_run_another[MAX_QUEUED_SCRIPTS][30];
-  int  run_another_p1[MAX_QUEUED_SCRIPTS];
-  int  run_another_p2[MAX_QUEUED_SCRIPTS];
-  int  numanother;
-  char forked;
-
-  int queue_action(PostScriptAction act, int data, const char *aname);
-  void run_another (char *namm, int p1, int p2);
-  void init();
-  ExecutingScript();
-};
 
 #ifndef _AGS_PLUGIN_H
 //#pragma message ( "setting IAGSManagedObjectReader to void" )

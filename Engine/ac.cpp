@@ -173,6 +173,8 @@ extern "C" {
 #include "ac_screen.h"
 #include "ac_palette.h"
 #include "ac_game.h"
+#include "ac_exescr.h"
+#include "ac_keyinput.h"
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
@@ -594,58 +596,6 @@ END_COLOR_DEPTH_LIST
 
 // *** TYPE IMPLEMENTATIONS ***
 
-int ExecutingScript::queue_action(PostScriptAction act, int data, const char *aname) {
-  if (numPostScriptActions >= MAX_QUEUED_ACTIONS)
-    quitprintf("!%s: Cannot queue action, post-script queue full", aname);
-
-  if (numPostScriptActions > 0) {
-    // if something that will terminate the room has already
-    // been queued, don't allow a second thing to be queued
-    switch (postScriptActions[numPostScriptActions - 1]) {
-    case ePSANewRoom:
-    case ePSARestoreGame:
-    case ePSARestoreGameDialog:
-    case ePSARunAGSGame:
-    case ePSARestartGame:
-      quitprintf("!%s: Cannot run this command, since there is a %s command already queued to run", aname, postScriptActionNames[numPostScriptActions - 1]);
-      break;
-    // MACPORT FIX 9/6/5: added default clause to remove warning
-    default:
-      break;
-    }
-  }
-  
-  postScriptActions[numPostScriptActions] = act;
-  postScriptActionData[numPostScriptActions] = data;
-  postScriptActionNames[numPostScriptActions] = aname;
-  numPostScriptActions++;
-  return numPostScriptActions - 1;
-}
-
-void ExecutingScript::run_another (char *namm, int p1, int p2) {
-  if (numanother < MAX_QUEUED_SCRIPTS)
-    numanother++;
-  else {
-    /*debug_log("Warning: too many scripts to run, ignored %s(%d,%d)",
-      script_run_another[numanother - 1], run_another_p1[numanother - 1],
-      run_another_p2[numanother - 1]);*/
-  }
-  int thisslot = numanother - 1;
-  strcpy(script_run_another[thisslot], namm);
-  run_another_p1[thisslot] = p1;
-  run_another_p2[thisslot] = p2;
-}
-
-void ExecutingScript::init() {
-  inst = NULL;
-  forked = 0;
-  numanother = 0;
-  numPostScriptActions = 0;
-}
-
-ExecutingScript::ExecutingScript() {
-  init();
-}
 
 
 
@@ -769,8 +719,7 @@ int GetGameSpeed();
 void wouttext_outline(int xxp, int yyp, int usingfont, char *texx);
   
 
-
-// KEYBOARD HANDLER
+// setup separate errno
 #if defined(LINUX_VERSION) || defined(MAC_VERSION)
 int myerrno;
 #else
@@ -778,94 +727,12 @@ int errno;
 #define myerrno errno
 #endif
 
-
-
-int my_readkey() {
-  int gott=readkey();
-  int scancode = ((gott >> 8) & 0x00ff);
-
-  if (gott == READKEY_CODE_ALT_TAB)
-  {
-    // Alt+Tab, it gets stuck down unless we do this
-    return AGS_KEYCODE_ALT_TAB;
-  }
-
-/*  char message[200];
-  sprintf(message, "Scancode: %04X", gott);
-  OutputDebugString(message);*/
-
-  /*if ((scancode >= KEY_0_PAD) && (scancode <= KEY_9_PAD)) {
-    // fix numeric pad keys if numlock is off (allegro 4.2 changed this behaviour)
-    if ((key_shifts & KB_NUMLOCK_FLAG) == 0)
-      gott = (gott & 0xff00) | EXTENDED_KEY_CODE;
-  }*/
-
-  if ((gott & 0x00ff) == EXTENDED_KEY_CODE) {
-    gott = scancode + 300;
-
-    // convert Allegro KEY_* numbers to scan codes
-    // (for backwards compatibility we can't just use the
-    // KEY_* constants now, it's too late)
-    if ((gott>=347) & (gott<=356)) gott+=12;
-    // F11-F12
-    else if ((gott==357) || (gott==358)) gott+=76;
-    // insert / numpad insert
-    else if ((scancode == KEY_0_PAD) || (scancode == KEY_INSERT))
-      gott = AGS_KEYCODE_INSERT;
-    // delete / numpad delete
-    else if ((scancode == KEY_DEL_PAD) || (scancode == KEY_DEL))
-      gott = AGS_KEYCODE_DELETE;
-    // Home
-    else if (gott == 378) gott = 371;
-    // End
-    else if (gott == 379) gott = 379;
-    // PgUp
-    else if (gott == 380) gott = 373;
-    // PgDn
-    else if (gott == 381) gott = 381;
-    // left arrow
-    else if (gott==382) gott=375;
-    // right arrow
-    else if (gott==383) gott=377;
-    // up arrow
-    else if (gott==384) gott=372;
-    // down arrow
-    else if (gott==385) gott=380;
-    // numeric keypad
-    else if (gott==338) gott=379;
-    else if (gott==339) gott=380;
-    else if (gott==340) gott=381;
-    else if (gott==341) gott=375;
-    else if (gott==342) gott=376;
-    else if (gott==343) gott=377;
-    else if (gott==344) gott=371;
-    else if (gott==345) gott=372;
-    else if (gott==346) gott=373;
-  }
-  else
-    gott = gott & 0x00ff;
-
-  // Alt+X, abort (but only once game is loaded)
-  if ((gott == play.abort_key) && (displayed_room >= 0)) {
-    check_dynamic_sprites_at_exit = 0;
-    quit("!|");
-  }
-
-  //sprintf(message, "Keypress: %d", gott);
-  //OutputDebugString(message);
-
-  return gott;
-}
-//#define getch() my_readkey()
-//#undef kbhit
-//#define kbhit keypressed
-// END KEYBOARD HANDLER
-
-
 // for external modules to call
 void next_iteration() {
   NEXT_ITERATION();
 }
+
+
 void write_record_event (int evnt, int dlen, short *dbuf) {
 
   recordbuffer[recsize] = play.gamestep;
@@ -14077,11 +13944,7 @@ int initialize_engine(int argc,char*argv[])
 
   our_eip = -184;
 
-#ifdef ALLEGRO_KEYBOARD_HANDLER
-  write_log_debug("Initializing keyboard");
-
-  install_keyboard();
-#endif
+  keyboard_input_initialise();
 
   our_eip = -183;
 

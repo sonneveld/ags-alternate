@@ -3,6 +3,7 @@
 #include "ac.h"
 #include "ac_context.h"
 #include "ac_string.h"
+#include "ac_exescr.h"
 
 
 /* *** SCRIPT SYMBOL: [Dialog] RunDialog *** */

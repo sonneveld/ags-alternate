@@ -26,18 +26,6 @@ struct InteractionVariable; // acroom.h
 // this needs to be updated if the "play" struct changes
 #define LOWEST_SGVER_COMPAT "3.20.1103"_AC_SPECIAL_VERSION
 
-#define ALLEGRO_KEYBOARD_HANDLER
-#ifdef MAC_VERSION
-#define EXTENDED_KEY_CODE 0x3f
-#else
-#define EXTENDED_KEY_CODE 0
-#endif
-#define AGS_KEYCODE_INSERT 382
-#define AGS_KEYCODE_DELETE 383
-#define AGS_KEYCODE_ALT_TAB 399
-#define READKEY_CODE_ALT_TAB 0x4000
-
-
 // Check that a supplied buffer from a text script function was not null
 #define VALIDATE_STRING(strin) if ((unsigned long)strin <= 4096) quit("!String argument was null: make sure you pass a string, not an int, as a buffer")
 
@@ -61,6 +49,7 @@ extern int ac_getch();
 
 
 extern void quit(char*quitmsg);
+extern void quitprintf(char*texx, ...);
 extern void put_sprite_256(int, int, block);
 extern void write_log(char*msg);
 extern void initialize_sprite (int ee);
