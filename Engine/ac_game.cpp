@@ -21,7 +21,7 @@
 #include "ac_obj.h"
 #include "ac_script_gui.h"
 #include "ac_exescr.h"
-#include "ac_keyinput.h"
+#include "ac_input.h"
 
 #include "agsplugin.h"
 

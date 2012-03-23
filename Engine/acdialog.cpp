@@ -18,6 +18,7 @@
 // DIALOG SYSTEM STUFF below
 #include "wgt2allg.h"
 #include "ali3d.h"
+#include "ac_input.h"
 
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #include <conio.h>

@@ -7,6 +7,8 @@
 #include "sprcache.h"
 #include "acgfx.h"
 #include "bmp.h"
+#include "ac_input.h"
+
 
 void update_script_mouse_coords() {
   global_mouse_state.scmouse.x = divide_down_coordinate(mousex);

@@ -17,6 +17,7 @@ extern void QuitGame(int dialog);
 extern bool init_translation (const char *lang);
 extern void SetRestartPoint();
 extern int Game_SetSaveGameDirectory(const char *newFolder);
+extern void sc_inputbox(const char*,char*);
 
 extern void register_game_script_functions();
 

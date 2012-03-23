@@ -7,6 +7,8 @@
 #include "bmp.h"
 #include "ac_mouse.h"
 #include "ac_exescr.h"
+#include "ac_input.h"
+
 
 extern void DisplayMessage(int msnum); // ac_test.h
 

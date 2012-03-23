@@ -435,11 +435,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ac_invitem.cpp"
+				RelativePath=".\ac_input.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\ac_keyinput.cpp"
+				RelativePath=".\ac_invitem.cpp"
 				>
 			</File>
 			<File
@@ -1236,11 +1236,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ac_invitem.h"
+				RelativePath=".\ac_input.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ac_keyinput.h"
+				RelativePath=".\ac_invitem.h"
 				>
 			</File>
 			<File

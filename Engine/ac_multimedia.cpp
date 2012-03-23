@@ -7,6 +7,7 @@
 #include "acgfx.h"
 #include "ali3d.h"
 #include "clib32.h"
+#include "ac_input.h"
 
 
 /* *** SCRIPT SYMBOL: [Multimedia] IsSoundPlaying *** */

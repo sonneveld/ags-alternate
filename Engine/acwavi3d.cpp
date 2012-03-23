@@ -18,6 +18,8 @@ typedef float D3DVALUE, *LPD3DVALUE;
 #include <ali3d.h>
 #include "ac_context.h"
 //#include <atlbase.h>
+#include "ac_input.h"
+
 
 #ifndef VS2005
 // *** Workarounds to get this to work in VC 6

@@ -40,14 +40,6 @@ struct InteractionVariable; // acroom.h
 #define scAdd_External_Symbol ccAddExternalSymbol
 
 
-// recordable input 
-extern int ac_mgetbutton();
-extern void ac_domouse(int str);
-extern int ac_misbuttondown(int buno);
-extern int ac_kbhit();
-extern int ac_getch();
-
-
 extern void quit(char*quitmsg);
 extern void quitprintf(char*texx, ...);
 extern void put_sprite_256(int, int, block);
@@ -58,9 +50,6 @@ extern void pre_save_sprite(int ee);
 // for acwavi.cpp
 extern void update_polled_stuff_and_crossfade();
 extern void update_polled_stuff();
-extern int rec_mgetbutton();
-extern int rec_kbhit();
-extern int rec_getch();
 extern void next_iteration();
 extern void update_music_volume();
 extern void render_to_screen(BITMAP *toRender, int atx, int aty);
@@ -79,24 +68,16 @@ extern void write_log(char*msg) ;
 //extern void sample_update_callback(SAMPLE *sample, int voice);
 
 // for acwavi3d.cpp
-extern int rec_mgetbutton();
-extern int rec_kbhit();
-extern int rec_getch();
 extern void update_polled_stuff_and_crossfade();
 extern void next_iteration();
 
 // for acdialog.cpp
-extern int rec_getch();
-extern int rec_kbhit();
 extern int load_game(int,char*, int*);
 extern void break_up_text_into_lines(int wii,int fonnt,char*todis);
 extern void wouttext_outline(int xxp,int yyp,int usingfont,char*texx);
 extern inline int get_fixed_pixel_size(int pixels);
 
 // for acdialog.cpp
-extern void rec_domouse(int);
-extern int rec_misbuttondown(int);
-extern int rec_mgetbutton();
 extern void next_iteration();
 extern void update_polled_stuff();
 extern void update_polled_stuff_and_crossfade();
@@ -236,6 +217,5 @@ extern void save_game_data (FILE *ooo, block screenshot);
 extern long write_screen_shot_for_vista(FILE *ooo, block screenshot) ;
 extern void initialize_skippable_cutscene();
 extern void stop_fast_forwarding();
-extern int rec_iskeypressed (int keycode);
 
 #endif

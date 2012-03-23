@@ -24,6 +24,8 @@
 #include "ali3d.h"
 #include "ac.h"
 #include "ac_context.h"
+#include "ac_input.h"
+
 
 //DirectDrawEx Global interfaces
 // I'm not sure where these are defined... allegro somewhere?
