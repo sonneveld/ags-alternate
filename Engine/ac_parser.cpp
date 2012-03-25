@@ -27,6 +27,31 @@ int is_valid_word_char(char theChar) {
   return 0;
 }
 
+int find_word_in_dictionary (char *lookfor) {
+  int j;
+  if (game.dict == NULL)
+    return -1;
+
+  for (j = 0; j < game.dict->num_words; j++) {
+    if (stricmp(lookfor, game.dict->word[j]) == 0) {
+      return game.dict->wordnum[j];
+    }
+  }
+  if (lookfor[0] != 0) {
+    // If the word wasn't found, but it ends in 'S', see if there's
+    // a non-plural version
+    char *ptat = &lookfor[strlen(lookfor)-1];
+    char lastletter = *ptat;
+    if ((lastletter == 's') || (lastletter == 'S') || (lastletter == '\'')) {
+      *ptat = 0;
+      int reslt = find_word_in_dictionary (lookfor);
+      *ptat = lastletter;
+      return reslt;
+    } 
+  }
+  return -1;
+}
+
 int FindMatchingMultiWordWord(char *thisword, char **text) {
   // see if there are any multi-word words
   // that match -- if so, use them

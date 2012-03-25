@@ -203,7 +203,10 @@ LPWSTR *wArgv;
 #define MAX_SCRIPT_MODULES 50
 
 
-// ***** EXTERNS ****
+
+// ============================================================================
+// 000 EXTERNS
+// ============================================================================
 
 //extern char*get_language_text(int);
 //extern void init_language_text(char*);
@@ -211,12 +214,18 @@ LPWSTR *wArgv;
 int  sc_GetTime(int whatti);
 
 
-// **** TYPES ****
+
+// ============================================================================
+// 000 TYPES
+// ============================================================================
 
 #include "ac_types.h"
 
 
-// **** GLOBALS ****
+
+// ============================================================================
+// 000 GLOBALS
+// ============================================================================
 
 int source_text_length = -1;
 
@@ -594,10 +603,10 @@ BEGIN_COLOR_DEPTH_LIST
 END_COLOR_DEPTH_LIST
 
 
-// *** TYPE IMPLEMENTATIONS ***
 
-
-
+// ============================================================================
+// 000 TYPE IMPL
+// ============================================================================
 
   TempEip::TempEip (int newval) {
     oldval = our_eip;
@@ -622,14 +631,9 @@ NonBlockingScriptFunction::NonBlockingScriptFunction(const char*funcName, int nu
 
 
 
-
-
-
-
-
-//  *** FUNCTIONS ****
-
-
+// ============================================================================
+// 000 FUNC FOWARD DECLARATIONS
+// ============================================================================
 
 //void draw_sprite_compensate(int,int,int,int);
 //char *get_translation(const char*);
@@ -732,6 +736,10 @@ void next_iteration() {
 }
 
 
+
+// ============================================================================
+// DEBUG MESSAGES AND LOGGING?
+// ============================================================================
 
 void quitprintf(char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
@@ -840,7 +848,7 @@ void debug_write_console (char *msg, ...) {
 
 }
 
-
+// usually for debug messages
 const char *get_cur_script(int numberOfLinesOfCallStack) {
   ccGetCallStack(ccGetCurrentInstance(), pexbuf, numberOfLinesOfCallStack);
 
@@ -849,6 +857,12 @@ const char *get_cur_script(int numberOfLinesOfCallStack) {
 
   return &pexbuf[0];
 }
+
+
+
+// ============================================================================
+// EDITOR INTEGRATION
+// ============================================================================
 
 static const char* BREAK_MESSAGE = "BREAK";
 
@@ -1008,6 +1022,11 @@ int check_for_messages_from_editor()
 }
 
 
+
+// ============================================================================
+// NEW INTERACTION CMD IMPLEMENTATION
+// ============================================================================
+
 void NewInteractionCommand::remove () {
   if (children != NULL) {
     children->reset();
@@ -1019,6 +1038,11 @@ void NewInteractionCommand::remove () {
 }
 
 
+
+// ============================================================================
+// NON_BLOCKING CHECK
+// ============================================================================
+
 // check and abort game if the script is currently
 // inside the rep_exec_always function
 void can_run_delayed_command() {
@@ -1028,7 +1052,9 @@ void can_run_delayed_command() {
 
 
 
-
+// ============================================================================
+// FILE - FOPEN OVERRIDE
+// ============================================================================
 
 // override packfile functions to allow it to load from our
 // custom CLIB datafiles
@@ -1117,6 +1143,11 @@ PACKFILE *pack_fopen(char *filnam1, char *modd1) {
 // end packfile functions
 
 
+
+// ============================================================================
+// TIMER
+// ============================================================================
+
 // our timer, used to keep game running at same speed on all systems
 #if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
 void __cdecl dj_timer_handler() {
@@ -1135,13 +1166,18 @@ void set_game_speed(int fps) {
   install_int_ex(dj_timer_handler,MSEC_TO_TIMER(time_between_timers));
 }
 
+
+
+// ============================================================================
+// GRAPHICS JIGGERPOKERY
+// ============================================================================
+
 #ifdef USE_15BIT_FIX
 extern "C" {
     extern GFX_VTABLE *_get_vtable(int color_depth);
 }
 
 block convert_16_to_15(block iii) {
-#ifdef ENABLE_THIS_LATER
 //  int xx,yy,rpix;
   int iwid = BMP_W(iii), ihit = BMP_H(iii);
   int x,y;
@@ -1215,10 +1251,6 @@ block convert_16_to_15(block iii) {
   }*/
 
   return tempbl;
-#else
-    abort();
-    return NULL;
-#endif
 }
 
 int _places_r = 3, _places_g = 2, _places_b = 3;
@@ -1250,6 +1282,12 @@ block convert_16_to_16bgr(block tempbl) {
   return tempbl;
 }
 #endif
+
+
+
+// ============================================================================
+// GRAPHICS - RESOLUTION SYSTEM
+// ============================================================================
 
 // Begin resolution system functions
 
@@ -1320,6 +1358,12 @@ int divide_down_coordinate_round_up(int coord)
 
 // End resolution system functions
 
+
+
+// ============================================================================
+// TEXT - FONT/TEXT SIZES
+// ============================================================================
+
 int wgetfontheight(int font) {
   int htof = wgettextheight(heightTestString, font);
 
@@ -1353,8 +1397,9 @@ int wgettextwidth_compensate(const char *tex, int font) {
 
 
 
-
-// ** dirty rectangle system **
+// ============================================================================
+// GRAPHICS - DIRTY RECTANGLES
+// ============================================================================
 
 #define MAXDIRTYREGIONS 25
 #define WHOLESCREENDIRTY (MAXDIRTYREGIONS + 5)
@@ -1598,6 +1643,12 @@ void mark_current_background_dirty()
   current_background_is_dirty = true;
 }
 
+
+
+// ============================================================================
+// OBJECTS
+// ============================================================================
+
 inline int is_valid_object(int obtest) {
   if ((obtest < 0) || (obtest >= croom->numobj)) return 0;
   return 1;
@@ -1605,6 +1656,9 @@ inline int is_valid_object(int obtest) {
 
 
 
+// ============================================================================
+// SCREEN RENDERING
+// ============================================================================
 
 int get_screen_y_adjustment(BITMAP *checkFor) {
 
@@ -1726,6 +1780,10 @@ void write_screen() {
 
 
 
+// ============================================================================
+// SAVE GAMES
+// ============================================================================
+
 void get_save_game_path(int slotNum, char *buffer) {
   strcpy(buffer, saveGameDirectory);
   sprintf(&buffer[strlen(buffer)], sgnametemplate, slotNum);
@@ -1746,6 +1804,11 @@ int load_game_and_print_error(int toload) {
   return ecret;
 }
 
+
+
+// ============================================================================
+// SCRIPTS
+// ============================================================================
 
 char scfunctionname[30];
 int prepare_text_script(ccInstance*sci,char**tsname) {
@@ -2113,6 +2176,9 @@ int run_text_script_2iparam(ccInstance*sci,char*tsname,int iparam,int param2) {
 
 
 
+// ============================================================================
+// SCREEN / BITMAPS
+// ============================================================================
 
 int GetMaxScreenHeight () {
   int maxhit = BASEHEIGHT;
@@ -2180,6 +2246,11 @@ void current_fade_out_effect () {
   }
 }
 
+
+
+// ============================================================================
+// ROOMS
+// ============================================================================
 
 void save_room_data_segment () {
   if (croom->tsdatasize > 0)
@@ -2313,6 +2384,12 @@ void unload_old_room() {
 
 }
 
+
+
+// ============================================================================
+// WALKABLES
+// ============================================================================
+
 void redo_walkable_areas() {
 
   // since this is an 8-bit memory bitmap, we can just use direct 
@@ -2334,11 +2411,21 @@ void redo_walkable_areas() {
 }
 
 
+
+// ============================================================================
+// CHARACTER
+// ============================================================================
+
 int is_valid_character(int newchar) {
   if ((newchar < 0) || (newchar >= game.numcharacters)) return 0;
   return 1;
 }
 
+
+
+// ============================================================================
+// SCRIPTS / EVENTS
+// ============================================================================
 
 // runs the global script on_event fnuction
 void run_on_event (int evtype, int wparam) {
@@ -2349,10 +2436,11 @@ void run_on_event (int evtype, int wparam) {
     run_text_script_2iparam(gameinst,"on_event", evtype, wparam);
 }
 
-int GetBaseWidth () {
-  return BASEWIDTH;
-}
 
+
+// ============================================================================
+// WALK BEHINDS
+// ============================================================================
 
 void update_walk_behind_images()
 {
@@ -2490,6 +2578,12 @@ int get_walkable_area_pixel(int x, int y)
 {
   return getpixel(thisroom.walls, convert_to_low_res(x), convert_to_low_res(y));
 }
+
+
+
+// ============================================================================
+// ROOMS
+// ============================================================================
 
 void convert_room_coordinates_to_low_res(roomstruct *rstruc)
 {
@@ -3073,12 +3167,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
 //  MSS_CHECK_ALL_BLOCKS;
   }
 
-char bname[40],bne[40];
-char* make_ts_func_name(char*base,int iii,int subd) {
-  sprintf(bname,base,iii);
-  sprintf(bne,"%s_%c",bname,subd+'a');
-  return &bne[0];
-}
+
 
 
 void run_room_event(int id) {
@@ -3131,6 +3220,12 @@ void new_room(int newnum,CharacterInfo*forchar) {
 
   load_new_room(newnum,forchar);
 }
+
+
+
+// ============================================================================
+// EVENTS?
+// ============================================================================
 
 // animation player start
 
@@ -3458,6 +3553,11 @@ void update_events() {
 // end event list functions
 
 
+
+// ============================================================================
+// GUI - INVENTORY
+// ============================================================================
+
 void update_inv_cursor(int invnum) {
 
   if ((game.options[OPT_FIXEDINVCURSOR]==0) && (invnum > 0)) {
@@ -3479,6 +3579,11 @@ void update_inv_cursor(int invnum) {
   }
 
 
+
+// ============================================================================
+// GRAPHICS - DRAW SPRITE
+// ============================================================================
+
 void draw_sprite_support_alpha(int xpos, int ypos, block image, int slot) {
 
   if ((game.spriteflags[slot] & SPF_ALPHACHANNEL) && (trans_mode == 0)) 
@@ -3493,6 +3598,11 @@ void draw_sprite_support_alpha(int xpos, int ypos, block image, int slot) {
 }
 
 
+
+// ============================================================================
+// GRAPHICS - VIEW - PRECACHE
+// ============================================================================
+
 void precache_view(int view) 
 {
   if (view < 0) 
@@ -3506,6 +3616,9 @@ void precache_view(int view)
 
 
 
+// ============================================================================
+// GUI - INTERFACE
+// ============================================================================
 
 void remove_popup_interface(int ifacenum) {
   if (ifacepopped != ifacenum) return;
@@ -3564,6 +3677,10 @@ void process_interface_click(int ifce, int btn, int mbut) {
 
 
 
+// ============================================================================
+// CONTROLS
+// ============================================================================
+
 void start_skipping_cutscene () {
   play.fast_forward = 1;
   // if a drop-down icon bar is up, remove it as it will pause the game
@@ -3588,6 +3705,7 @@ void check_skip_cutscene_keypress (int kgn) {
 }
 
 // check_controls: checks mouse & keyboard interface
+// called from main loop.
 void check_controls() {
   int numevents_was = numevents;
   our_eip = 1007;
@@ -3919,6 +4037,9 @@ void check_controls() {
 
 
 
+// ============================================================================
+// WALKABLE AREAS
+// ============================================================================
 
 // return the walkable area at the character's feet, taking into account
 // that he might just be off the edge of one
@@ -3960,6 +4081,12 @@ int get_walkable_area_at_character (int charnum) {
   CharacterInfo *chin = &game.chars[charnum];
   return get_walkable_area_at_location(chin->x, chin->y);
 }
+
+
+
+// ============================================================================
+// DIALOG - LIP SYNC
+// ============================================================================
 
 // Calculate which frame of the loop to use for this character of
 // speech
@@ -4022,7 +4149,9 @@ int update_lip_sync(int talkview, int talkloop, int *talkframeptr) {
 
 
 
-
+// ============================================================================
+// CHARACTER
+// ============================================================================
 
 int GetCharacterWidth(int ww) {
   CharacterInfo *char1 = &game.chars[ww];
@@ -4115,6 +4244,12 @@ int is_char_on_another (int sourceChar, int ww, int*fromxptr, int*cwidptr) {
   return 0;
 }
 
+
+
+// ============================================================================
+// OBJECT
+// ============================================================================
+
 void get_object_blocking_rect(int objid, int *x1, int *y1, int *width, int *y2) {
   RoomObject *tehobj = &objs[objid];
   int cwidth, fromx;
@@ -4150,12 +4285,11 @@ void get_object_blocking_rect(int objid, int *x1, int *y1, int *width, int *y2) 
   }
 }
 
-int is_point_in_rect(int x, int y, int left, int top, int right, int bottom) {
-  if ((x >= left) && (x < right) && (y >= top ) && (y <= bottom))
-    return 1;
-  return 0;
-}
 
+
+// ============================================================================
+// CHARACTER
+// ============================================================================
 
 int wantMoveNow (int chnum, CharacterInfo *chi) {
   // check most likely case first
@@ -4224,6 +4358,12 @@ int wantMoveNow (int chnum, CharacterInfo *chi) {
   return 0;
 }
 
+
+
+// ============================================================================
+// GRAPHICS - VIEW FRAME
+// ============================================================================
+
 // draws a view frame, flipped if appropriate
 void DrawViewFrame(block target, ViewFrame *vframe, int x, int y) {
   if (vframe->flags & VFLG_FLIPSPRITE)
@@ -4231,6 +4371,12 @@ void DrawViewFrame(block target, ViewFrame *vframe, int x, int y) {
   else
     draw_sprite(target, spriteset[vframe->pic], x, y);
 }
+
+
+
+// ============================================================================
+// UPDATE STUFF (CHARCS, OBJS, SCRIPTS, etc)
+// ============================================================================
 
 // update_stuff: moves and animates objects, executes repeat scripts, and
 // the like.
@@ -4912,6 +5058,12 @@ void update_stuff() {
   our_eip = 25;
 }
 
+
+
+// ============================================================================
+// TEXT - MACROS (messages)
+// ============================================================================
+
 void replace_macro_tokens(char*statusbarformat,char*cur_stb_text) {
   char*curptr=&statusbarformat[0];
   char tmpm[3];
@@ -4970,6 +5122,11 @@ void replace_macro_tokens(char*statusbarformat,char*cur_stb_text) {
 }
 
 
+
+// ============================================================================
+// GUI INV
+// ============================================================================
+
 int GUIInv::CharToDisplay() {
   if (this->charId < 0)
     return game.playercharacter;
@@ -5027,6 +5184,12 @@ void GUIInv::Draw() {
 
 }
 
+
+
+// ============================================================================
+// GRAPHICS - BITMAPS
+// ============================================================================
+
 // Avoid freeing and reallocating the memory if possible
 IDriverDependantBitmap* recycle_ddb_bitmap(IDriverDependantBitmap *bimp, BITMAP *source, bool hasAlpha) {
   if (bimp != NULL) {
@@ -5043,6 +5206,12 @@ IDriverDependantBitmap* recycle_ddb_bitmap(IDriverDependantBitmap *bimp, BITMAP 
   bimp = gfxDriver->CreateDDBFromBitmap(source, hasAlpha, false);
   return bimp;
 }
+
+
+
+// ============================================================================
+// WALK BEHINDS
+// ============================================================================
 
 // sort_out_walk_behinds: modifies the supplied sprite by overwriting parts
 // of it with transparent pixels where there are walk-behind areas
@@ -5202,6 +5371,12 @@ void sort_out_char_sprite_walk_behind(int actspsIndex, int xx, int yy, int basel
     add_to_sprite_list(actspswbbmp[actspsIndex], xx - offsetx, yy - offsety, basel, 0, -1, true);
   }
 }
+
+
+
+// ============================================================================
+// GRAPHICS - DRAWING
+// ============================================================================
 
 void clear_draw_list() {
   thingsToDrawSize = 0;
@@ -5795,6 +5970,12 @@ void draw_screen_background() {
   our_eip=36;
 }
 
+
+
+// ============================================================================
+// SCRIPTS
+// ============================================================================
+
 void get_script_name(ccInstance *rinst, char *curScrName) {
   if (rinst == NULL)
     strcpy (curScrName, "Not in a script");
@@ -5806,6 +5987,11 @@ void get_script_name(ccInstance *rinst, char *curScrName) {
     strcpy (curScrName, "Unknown script");
 }
 
+
+
+// ============================================================================
+// GRAPHICS - OVERLAYS
+// ============================================================================
 
 void get_overlay_position(int overlayidx, int *x, int *y) {
   int tdxp, tdyp;
@@ -6064,6 +6250,12 @@ void draw_screen_overlay() {
   our_eip = 1101;
 }
 
+
+
+// ============================================================================
+// GRAPHICS DRIVER
+// ============================================================================
+
 bool GfxDriverNullSpriteCallback(int x, int y)
 {
   if (displayed_room < 0)
@@ -6079,6 +6271,11 @@ void GfxDriverOnInitCallback(void *data)
   platform->RunPluginInitGfxHooks(gfxDriver->GetDriverID(), data);
 }
 
+
+
+// ============================================================================
+// SCREEN STACK
+// ============================================================================
 
 int numOnStack = 0;
 block screenstack[10];
@@ -6096,6 +6293,11 @@ void pop_screen() {
   wsetscreen(screenstack[numOnStack]);
 }
 
+
+
+// ============================================================================
+// SCREEN
+// ============================================================================
 
 // update_screen: copies the contents of the virtual screen to the actual
 // screen, and draws the mouse cursor on.
@@ -6157,9 +6359,21 @@ void update_screen() {
   screen_is_dirty = 0;
 }
 
+
+
+// ============================================================================
+// VERSION
+// ============================================================================
+
 const char *get_engine_version() {
   return ACI_VERSION_TEXT;
 }
+
+
+
+// ============================================================================
+// QUIT
+// ============================================================================
 
 void atexit_handler() {
   if (proper_exit==0) {
@@ -6397,12 +6611,11 @@ extern "C" {
 		  }
 }
 
-void setup_sierra_interface() {
-  int rr;
-  game.numgui =0;
-  for (rr=0;rr<42;rr++) game.paluses[rr]=PAL_GAMEWIDE;
-  for (rr=42;rr<256;rr++) game.paluses[rr]=PAL_BACKGROUND;
-}
+
+
+// ============================================================================
+// TEXT
+// ============================================================================
 
 void set_default_glmsg (int msgnum, const char* val) {
   if (game.messages[msgnum-500] == NULL) {
@@ -6519,6 +6732,12 @@ void break_up_text_into_lines(int wii,int fonnt,char*todis) {
   }
 }
 
+
+
+// ============================================================================
+// SOUND
+// ============================================================================
+
 void stop_all_sound_and_music() 
 {
   int a;
@@ -6539,6 +6758,12 @@ void shutdown_sound()
   remove_sound();
 }
 
+
+
+// ============================================================================
+// PLAYER
+// ============================================================================
+
 void setup_player_character(int charid) {
   game.playercharacter = charid;
   playerchar = &game.chars[charid];
@@ -6546,8 +6771,12 @@ void setup_player_character(int charid) {
 }
 
 
-// *** The script serialization routines for built-in types
 
+// ============================================================================
+// DYN OBJ IMPLEMENTATIONS
+// ============================================================================
+
+// *** The script serialization routines for built-in types
 
 struct CCGUIObject : AGSCCDynamicObject {
 
@@ -6744,11 +6973,9 @@ struct CCObject : AGSCCDynamicObject {
 
 
 
-
-
-
-
-// ** SCRIPT VIEW FRAME OBJECT
+// ============================================================================
+// SCRIPT VIEW FRAME
+// ============================================================================
 
 int ScriptViewFrame::Dispose(const char *address, bool force) {
   // always dispose a ViewFrame
@@ -6790,8 +7017,9 @@ ScriptViewFrame::ScriptViewFrame() {
 
 
 
-
-// ** SCRIPT OVERLAY OBJECT
+// ============================================================================
+// SCRIPT OVERLAY FRAME
+// ============================================================================
 
 int ScriptOverlay::Dispose(const char *address, bool force) 
 {
@@ -6855,6 +7083,11 @@ ScriptOverlay::ScriptOverlay() {
 }
 
 
+
+// ============================================================================
+// DYN OBJ GLOBALS
+// ============================================================================
+
 CCGUIObject ccDynamicGUIObject;
 CCCharacter ccDynamicCharacter;
 CCHotspot   ccDynamicHotspot;
@@ -6867,8 +7100,11 @@ ScriptString myScriptStringImpl;
 ScriptDialogOptionsRendering ccDialogOptionsRendering;
 ScriptDrawingSurface* dialogOptionsRenderingSurface;
 
-// *** De-serialization of script objects
 
+
+// ============================================================================
+// SCRIPT DESERIALISER
+// ============================================================================
 
 struct AGSDeSerializer : ICCObjectReader {
 
@@ -6953,6 +7189,12 @@ struct AGSDeSerializer : ICCObjectReader {
 
 AGSDeSerializer ccUnserializer;
 
+
+
+// ============================================================================
+// GUI
+// ============================================================================
+
 void export_gui_controls(int ee) {
 
   for (int ff = 0; ff < guis[ee].numobjs; ff++) {
@@ -6973,6 +7215,12 @@ void unexport_gui_controls(int ee) {
       quit("unable to unregister guicontrol object");
   }
 }
+
+
+
+// ============================================================================
+// SCRIPT
+// ============================================================================
 
 int create_global_script() {
   ccSetOption(SCOPT_AUTOIMPORT, 1);
@@ -7005,6 +7253,12 @@ int create_global_script() {
   ccSetOption(SCOPT_AUTOIMPORT, 0);
   return 0;
 }
+
+
+
+// ============================================================================
+// GRAPHICS - VIEWS/PIXELS
+// ============================================================================
 
 void allocate_memory_for_views(int viewCount)
 {
@@ -7090,6 +7344,12 @@ void adjust_sizes_for_resolution(int filever)
   }
 
 }
+
+
+
+// ============================================================================
+// MAIN - LOAD GAME
+// ============================================================================
 
 int load_game_file() {
   int ee, bb;
@@ -7518,6 +7778,12 @@ int load_game_file() {
   return 0;
 }
 
+
+
+// ============================================================================
+// MAIN - UNLOAD GAME
+// ============================================================================
+
 void free_do_once_tokens() 
 {
   for (int i = 0; i < play.num_do_once_tokens; i++)
@@ -7715,6 +7981,11 @@ void unload_game_file() {
 
 
 
+// ============================================================================
+// GUI - BUTTON
+// ============================================================================
+
+// button corners
 void do_corner(int sprn,int xx1,int yy1,int typx,int typy) {
   if (sprn<0) return;
   block thisone = spriteset[sprn];
@@ -7783,6 +8054,12 @@ void draw_button_background(int xx1,int yy1,int xx2,int yy2,GUIMain*iep) {
     do_corner(get_but_pic(iep,3),xx2+1,yy2+1,0,0);  // bottom right
     }
   }
+
+
+
+// ============================================================================
+// TEXT WINDOW
+// ============================================================================
 
 // Calculate the width that the left and right border of the textwindow
 // GUI take up
@@ -8362,6 +8639,9 @@ void _display_at(int xx,int yy,int wii,char*todis,int blocking,int asspch, int i
 
 
 
+// ============================================================================
+// SPEECH
+// ============================================================================
 
 int play_speech(int charid,int sndid) {
   stop_and_destroy_channel (SCHAN_SPEECH);
@@ -8482,7 +8762,9 @@ void stop_speech() {
 
 
 
-
+// ============================================================================
+// GRAPHICS
+// ============================================================================
 
 int my_getpixel(BITMAP *blk, int x, int y) {
   if ((x < 0) || (y < 0) || (x >= BMP_W(blk)) || (y >= BMP_H(blk)))
@@ -8511,9 +8793,9 @@ block GetObjectImage(int obj, int *isFlipped)
 
 
 
-
-
-
+// ============================================================================
+// GRAPHICS - SPRITE POS/RECT
+// ============================================================================
 
 int isposinbox(int mmx,int mmy,int lf,int tp,int rt,int bt) {
   if ((mmx>=lf) & (mmx<=rt) & (mmy>=tp) & (mmy<=bt)) return TRUE;
@@ -8604,6 +8886,11 @@ int is_pos_on_character(int xx,int yy) {
 }
 
 
+
+// ============================================================================
+// WALKABLE
+// ============================================================================
+
 void remove_walkable_areas_from_temp(int fromx, int cwidth, int starty, int endy) {
 
   fromx = convert_to_low_res(fromx);
@@ -8623,6 +8910,12 @@ void remove_walkable_areas_from_temp(int fromx, int cwidth, int starty, int endy
     fromx ++;
   }
 
+}
+
+int is_point_in_rect(int x, int y, int left, int top, int right, int bottom) {
+  if ((x >= left) && (x < right) && (y >= top ) && (y <= bottom))
+    return 1;
+  return 0;
 }
 
 block prepare_walkable_areas (int sourceChar) {
@@ -8684,8 +8977,9 @@ block prepare_walkable_areas (int sourceChar) {
 
 
 
-
-
+// ============================================================================
+// PROPERTIES
+// ============================================================================
 
 // begin custom property functions
 
@@ -8746,6 +9040,9 @@ const char* get_text_property_dynamic_string(CustomProperties *cprop, const char
 
 
 
+// ============================================================================
+// MOVELIST
+// ============================================================================
 
 int do_movelist_move(short*mlnum,int*xx,int*yy) {
   int need_to_fix_sprite=0;
@@ -8861,35 +9158,9 @@ int do_movelist_move(short*mlnum,int*xx,int*yy) {
 
 
 
-
-
-
-
-int find_word_in_dictionary (char *lookfor) {
-  int j;
-  if (game.dict == NULL)
-    return -1;
-
-  for (j = 0; j < game.dict->num_words; j++) {
-    if (stricmp(lookfor, game.dict->word[j]) == 0) {
-      return game.dict->wordnum[j];
-    }
-  }
-  if (lookfor[0] != 0) {
-    // If the word wasn't found, but it ends in 'S', see if there's
-    // a non-plural version
-    char *ptat = &lookfor[strlen(lookfor)-1];
-    char lastletter = *ptat;
-    if ((lastletter == 's') || (lastletter == 'S') || (lastletter == '\'')) {
-      *ptat = 0;
-      int reslt = find_word_in_dictionary (lookfor);
-      *ptat = lastletter;
-      return reslt;
-    } 
-  }
-  return -1;
-}
-
+// ============================================================================
+// LANGUAGE (commented out)
+// ============================================================================
 
 /*void GetLanguageString(int indxx,char*buffr) {
   VALIDATE_STRING(buffr);
@@ -8901,6 +9172,10 @@ int find_word_in_dictionary (char *lookfor) {
 
 
 
+// ============================================================================
+// ROOM STATS
+// ============================================================================
+
 int HasBeenToRoom (int roomnum) {
   if ((roomnum < 0) || (roomnum >= MAX_ROOMS))
     quit("!HasBeenToRoom: invalid room number specified");
@@ -8911,6 +9186,12 @@ int HasBeenToRoom (int roomnum) {
 }
 
 // **** end of trext script exported functions
+
+
+
+// ============================================================================
+// INTERACTION
+// ============================================================================
 
 InteractionVariable *get_interaction_variable (int varindx) {
   
@@ -8943,6 +9224,14 @@ int get_nivalue (NewInteractionCommandList *nic, int idx, int parm) {
     return get_interaction_variable(nic->command[idx].data[parm].val)->value;
   }
   return nic->command[idx].data[parm].val;
+}
+
+
+char bname[40],bne[40];
+char* make_ts_func_name(char*base,int iii,int subd) {
+  sprintf(bname,base,iii);
+  sprintf(bne,"%s_%c",bname,subd+'a');
+  return &bne[0];
 }
 
 #define IPARAM1 get_nivalue(nicl, i, 0)
@@ -9301,6 +9590,12 @@ int run_interaction_script(InteractionScripts *nint, int evnt, int chkAny, int i
 
   return retval;
 }
+
+
+
+// ============================================================================
+// DIALOG
+// ============================================================================
 
 int run_dialog_request (int parmtr) {
   play.stop_dialog_at_end = DIALOG_RUNNING;
@@ -10098,6 +10393,11 @@ void do_conversation(int dlgnum)
 // end dialog manager
 
 
+
+// ============================================================================
+// SAVE GAMES
+// ============================================================================
+
 // save game functions
 int find_highest_room_entered() {
   int qq,fndas=-1;
@@ -10373,18 +10673,6 @@ void save_game_data (FILE *ooo, block screenshot) {
   update_polled_stuff();
 }
 
-// Some people have been having crashes with the save game list,
-// so make sure the game name is valid
-void safeguard_string (unsigned char *descript) {
-  int it;
-  for (it = 0; it < 50; it++) {
-    if ((descript[it] < 1) || (descript[it] > 127))
-      break;
-  }
-  if (descript[it] != 0)
-    descript[it] = 0;
-}
-
 // On Windows we could just use IIDFromString but this is platform-independant
 void convert_guid_from_text_to_binary(const char *guidText, unsigned char *buffer) 
 {
@@ -10411,6 +10699,24 @@ void convert_guid_from_text_to_binary(const char *guidText, unsigned char *buffe
   temp = buffer[1]; buffer[1] = buffer[2]; buffer[2] = temp;
   temp = buffer[4]; buffer[4] = buffer[5]; buffer[5] = temp;
   temp = buffer[6]; buffer[6] = buffer[7]; buffer[7] = temp;
+}
+
+
+
+// ============================================================================
+// SAVE GAMES - RESTORE GAMES
+// ============================================================================
+
+// Some people have been having crashes with the save game list,
+// so make sure the game name is valid
+void safeguard_string (unsigned char *descript) {
+  int it;
+  for (it = 0; it < 50; it++) {
+    if ((descript[it] < 1) || (descript[it] > 127))
+      break;
+  }
+  if (descript[it] != 0)
+    descript[it] = 0;
 }
 
 
@@ -11188,6 +11494,11 @@ int load_game(int slotn, char*descrp, int *wantShot) {
 }
 
 
+
+// ============================================================================
+// CUTSCENES
+// ============================================================================
+
 // Helper functions used by StartCutscene/EndCutscene, but also
 // by SkipUntilCharacterStops
 void initialize_skippable_cutscene() {
@@ -11228,6 +11539,9 @@ void EndSkippingUntilCharStops() {
 
 
 
+// ============================================================================
+// SCRIPT EXPORTS
+// ============================================================================
 
 #define scAdd_External_Symbol ccAddExternalSymbol
 void setup_script_exports() {
@@ -11282,6 +11596,12 @@ void setup_script_exports() {
 
 
 extern const char* ccGetSectionNameAtOffs(ccScript *scri, long offs);
+
+
+
+// ============================================================================
+// DEBUGGER
+// ============================================================================
 
 void break_into_debugger() 
 {
@@ -11358,6 +11678,12 @@ void check_debug_keys() {
 
 }
 
+
+
+// ============================================================================
+// ROOM - NEW ROOM
+// ============================================================================
+
 void check_new_room() {
   // if they're in a new room, run Player Enters Screen and on_event(ENTER_ROOM)
   if ((in_new_room>0) & (in_new_room!=3)) {
@@ -11377,6 +11703,12 @@ void check_new_room() {
 //    setevent(EV_RUNEVBLOCK,EVB_ROOM,0,5);
   }
 }
+
+
+
+// ============================================================================
+// GRAPHICS
+// ============================================================================
 
 void construct_virtual_screen(bool fullRedraw) 
 {
@@ -11434,6 +11766,12 @@ void render_graphics(IDriverDependantBitmap *extraBitmap, int extraX, int extraY
 
   update_screen();
 }
+
+
+
+// ============================================================================
+// MAIN LOOP
+// ============================================================================
 
 void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extraX, int extraY) {
   acaudio_update_mp3();
@@ -11795,6 +12133,12 @@ void do_main_cycle(int untilwhat,int daaa) {
   user_disabled_for = cached_user_disabled_for;
 }
 
+
+
+// ============================================================================
+// SCRIPTS
+// ============================================================================
+
 //char*ac_default_header=NULL,*temphdr=NULL;
 char ac_default_header[15000],temphdr[10000];
 
@@ -11842,6 +12186,12 @@ void compile_room_script() {
   repExecAlways.roomHasFunction = true;
   getDialogOptionsDimensionsFunc.roomHasFunction = true;
 }
+
+
+
+// ============================================================================
+// GRAPHICS - SPRITE GFX STUFF
+// ============================================================================
 
 void get_new_size_for_sprite (int ee, int ww, int hh, int &newwid, int &newhit) {
   newwid = ww * current_screen_resolution_multiplier;
@@ -12065,6 +12415,12 @@ void initialize_sprite (int ee) {
   }
 }
 
+
+
+// ============================================================================
+// DEBUG - MINIDUMP
+// ============================================================================
+
 #ifdef WINDOWS_VERSION
 CONTEXT cpustate;
 EXCEPTION_RECORD excinfo;
@@ -12175,6 +12531,12 @@ int malloc_fail_handler(size_t amountwanted) {
 }
 #endif
 
+
+
+// ============================================================================
+// GRAPHICS
+// ============================================================================
+
 int init_gfx_mode(int wid,int hit,int cdep) {
 
   // a mode has already been initialized, so abort
@@ -12218,6 +12580,12 @@ int init_gfx_mode(int wid,int hit,int cdep) {
   return working_gfx_mode_status;    
 }
 
+
+
+// ============================================================================
+// MAIN - CLOSE HOOK
+// ============================================================================
+
 void winclosehook() {
   want_exit = 1;
   abort_engine = 1;
@@ -12229,6 +12597,12 @@ void winclosehook() {
   else* / quit("|game aborted");
 */
 }
+
+
+
+// ============================================================================
+// CONFIG
+// ============================================================================
 
 void init_game_settings() {
   int ee;
@@ -12681,6 +13055,12 @@ void read_config_file(char *argv0) {
 
 }
 
+
+
+// ============================================================================
+// INIT
+// ============================================================================
+
 void start_game() {
   set_cursor_mode(MODE_WALK);
   filter->SetMousePosition(160,100);
@@ -12866,6 +13246,12 @@ void initialize_start_and_play_game(int override_start_room, const char *loadSav
 
 }
 
+
+
+// ============================================================================
+// GRAPHICS - INIT
+// ============================================================================
+
 int initialize_graphics_filter(const char *filterID, int width, int height, int colDepth)
 {
   int idx = 0;
@@ -13020,6 +13406,12 @@ void CreateBlankImage()
 
 }
 
+
+
+// ============================================================================
+// GRAPHICS - PRELOAD
+// ============================================================================
+
 void show_preload () {
   // ** Do the preload graphic if available
   color temppal[256];
@@ -13050,6 +13442,12 @@ void show_preload () {
   }
 }
 
+
+
+// ============================================================================
+// FILE
+// ============================================================================
+
 void change_to_directory_of_file(LPCWSTR fileName)
 {
   WCHAR wcbuffer[MAX_PATH];
@@ -13068,6 +13466,12 @@ void change_to_directory_of_file(LPCWSTR fileName)
     }
 #endif
 }
+
+
+
+// ============================================================================
+// INIT
+// ============================================================================
 
 // Startup flags, set from parameters to engine
 int datafile_argv=0, change_to_game_dir = 0, force_window = 0;
@@ -13293,6 +13697,19 @@ gfxDriver = GetSoftwareGraphicsDriver(filter);
   gfxDriver->SetCallbackOnInit(GfxDriverOnInitCallback);
   gfxDriver->SetTintMethod(TintReColourise);
 }
+
+void setup_sierra_interface() {
+  int rr;
+  game.numgui =0;
+  for (rr=0;rr<42;rr++) game.paluses[rr]=PAL_GAMEWIDE;
+  for (rr=42;rr<256;rr++) game.paluses[rr]=PAL_BACKGROUND;
+}
+
+
+
+// ============================================================================
+// INIT ENGINE
+// ============================================================================
 
 int initialize_engine(int argc,char*argv[])
 {

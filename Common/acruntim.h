@@ -814,7 +814,6 @@ extern int  IsChannelPlaying(int chan) ;
 extern void stop_and_destroy_channel (int chid) ;
 extern void update_polled_stuff(bool checkForDebugMessages);
 extern void invalidate_rect(int x1, int y1, int x2, int y2);
-extern int  find_word_in_dictionary (char*);
 extern void break_up_text_into_lines(int wii,int fonnt,char*todis) ;
 extern int  wgetfontheight(int font);
 extern void draw_and_invalidate_text(int x1, int y1, int font, const char *text);

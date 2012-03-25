@@ -82,7 +82,6 @@ extern void next_iteration();
 extern void update_polled_stuff();
 extern void update_polled_stuff_and_crossfade();
 extern char *get_global_message(int);
-extern int GetBaseWidth();
 extern char saveGameSuffix[21];
 extern char *get_language_text(int);
 extern void get_save_game_path(int slotNum, char *buffer);
