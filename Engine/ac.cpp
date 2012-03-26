@@ -2043,17 +2043,6 @@ void redo_walkable_areas() {
 
 
 // ============================================================================
-// CHARACTER
-// ============================================================================
-
-int is_valid_character(int newchar) {
-  if ((newchar < 0) || (newchar >= game.numcharacters)) return 0;
-  return 1;
-}
-
-
-
-// ============================================================================
 // SCRIPTS / EVENTS
 // ============================================================================
 
@@ -3775,103 +3764,6 @@ int update_lip_sync(int talkview, int talkloop, int *talkframeptr) {
 
   talkframeptr[0] = talkframe;
   return talkwait;
-}
-
-
-
-// ============================================================================
-// CHARACTER
-// ============================================================================
-
-int GetCharacterWidth(int ww) {
-  CharacterInfo *char1 = &game.chars[ww];
-  
-  if (charextra[ww].width < 1)
-  {
-    if ((char1->view < 0) ||
-        (char1->loop >= views[char1->view].numLoops) ||
-        (char1->frame >= views[char1->view].loops[char1->loop].numFrames))
-    {
-      debug_log("GetCharacterWidth: Character %s has invalid frame: view %d, loop %d, frame %d", char1->scrname, char1->view + 1, char1->loop, char1->frame);
-      return multiply_up_coordinate(4);
-    }
-
-    return spritewidth[views[char1->view].loops[char1->loop].frames[char1->frame].pic];
-  }
-  else 
-    return charextra[ww].width;
-}
-
-int GetCharacterHeight(int charid) {
-  CharacterInfo *char1 = &game.chars[charid];
-
-  if (charextra[charid].height < 1)
-  {
-    if ((char1->view < 0) ||
-        (char1->loop >= views[char1->view].numLoops) ||
-        (char1->frame >= views[char1->view].loops[char1->loop].numFrames))
-    {
-      debug_log("GetCharacterHeight: Character %s has invalid frame: view %d, loop %d, frame %d", char1->scrname, char1->view + 1, char1->loop, char1->frame);
-      return multiply_up_coordinate(2);
-    }
-
-    return spriteheight[views[char1->view].loops[char1->loop].frames[char1->frame].pic];
-  }
-  else
-    return charextra[charid].height;
-}
-
-void get_char_blocking_rect(int charid, int *x1, int *y1, int *width, int *y2) {
-  CharacterInfo *char1 = &game.chars[charid];
-  int cwidth, fromx;
-
-  if (char1->blocking_width < 1)
-    cwidth = divide_down_coordinate(GetCharacterWidth(charid)) - 4;
-  else
-    cwidth = char1->blocking_width;
-
-  fromx = char1->x - cwidth/2;
-  if (fromx < 0) {
-    cwidth += fromx;
-    fromx = 0;
-  }
-  if (fromx + cwidth >= convert_back_to_high_res(BMP_W(walkable_areas_temp)))
-    cwidth = convert_back_to_high_res(BMP_W(walkable_areas_temp)) - fromx;
-
-  if (x1)
-    *x1 = fromx;
-  if (width)
-    *width = cwidth;
-  if (y1)
-    *y1 = char1->get_blocking_top();
-  if (y2)
-    *y2 = char1->get_blocking_bottom();
-}
-
-// Check whether the source char has walked onto character ww
-int is_char_on_another (int sourceChar, int ww, int*fromxptr, int*cwidptr) {
-
-  int fromx, cwidth;
-  int y1, y2;
-  get_char_blocking_rect(ww, &fromx, &y1, &cwidth, &y2);
-
-  if (fromxptr)
-    fromxptr[0] = fromx;
-  if (cwidptr)
-    cwidptr[0] = cwidth;
-
-  // if the character trying to move is already on top of
-  // this char somehow, allow them through
-  if ((sourceChar >= 0) &&
-      // x/width are left and width co-ords, so they need >= and <
-      (game.chars[sourceChar].x >= fromx) &&
-      (game.chars[sourceChar].x < fromx + cwidth) &&
-      // y1/y2 are the top/bottom co-ords, so they need >= / <=
-      (game.chars[sourceChar].y >= y1 ) &&
-      (game.chars[sourceChar].y <= y2 ))
-    return 1;
- 
-  return 0;
 }
 
 
