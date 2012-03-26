@@ -228,38 +228,225 @@ int  sc_GetTime(int whatti);
 // 000 GLOBALS
 // ============================================================================
 
-int source_text_length = -1;
+// TODO: commment and figure out what exactly for
+// create GlobalContext object?  or individual contexts?
 
+// SETUP
+// ------------------------------------
+GameSetupStruct game;
+
+// Startup flags, set from parameters to engine
+int datafile_argv=0, change_to_game_dir = 0, force_window = 0;
+int override_start_room = 0, force_16bit = 0;
+bool justRegisterGame = false;
+bool justUnRegisterGame = false;
+const char *loadSaveGameOnStartup = NULL;
+
+//char datname[80]="ac.clb";
+char ac_conf_file_defname[MAX_PATH] = "acsetup.cfg";
+char *ac_config_file = &ac_conf_file_defname[0];
+char conffilebuf[512];
+
+char filetouse[MAX_PATH] = "nofile";
+
+
+
+// ENGINE STATE
+// ------------------------------------
+int engineNeedsAsInt = 100;  // required engine version
+#define RESTART_POINT_SAVE_GAME_NUMBER 999
+AGSPlatformDriver *platform = NULL;
+
+GameState play;
+GameSetup usetup;
+
+int game_paused=0;
+
+unsigned long loopcounter=0;
+unsigned long lastcounter=0;
+volatile unsigned long globalTimerCounter = 0;
+
+int loaded_game_file_version = 0;
+
+
+volatile char want_exit = 0;
+volatile char abort_engine = 0;
+
+char ac_engine_copyright[]="Adventure Game Studio engine & tools (c) 1999-2000 by Chris Jones.";
+
+unsigned int load_new_game = 0;
+int load_new_game_restore = -1;
+
+char return_to_roomedit[30] = "\0";
+char return_to_room[150] = "\0";
+
+
+// DEBUG
+// ------------------------------------
 int eip_guinum;
 int eip_guiobj;
-int trans_mode=0;
-int engineNeedsAsInt = 100;
 
-struct GlobalMouseState global_mouse_state;
-struct GlobalRoomState global_room_state;
+DebugConsoleText debug_line[DEBUG_CONSOLE_NUMLINES];
+int first_debug_line = 0;
+int last_debug_line = 0;
+int display_console = 0;
+
+IDriverDependantBitmap *debugConsole = NULL;
+block debugConsoleBuffer = NULL;
+
+int proper_exit=0;
+int our_eip=0;
+
+int debug_flags=0;
+
+#define DBG_NOIFACE       1
+#define DBG_NODRAWSPRITES 2
+#define DBG_NOOBJECTS     4
+#define DBG_NOUPDATE      8
+#define DBG_NOSFX      0x10
+#define DBG_NOMUSIC    0x20
+#define DBG_NOSCRIPT   0x40
+#define DBG_DBGSCRIPT  0x80
+#define DBG_DEBUGMODE 0x100
+#define DBG_REGONLY   0x200
+#define DBG_NOVIDEO   0x400
+
+char* game_file_name=NULL;
+int want_quit = 0;
+
+
+// GRAPHICS
+// ------------------------------------
+int trans_mode=0;
+
+volatile int switching_away_from_game = 0;  // used by mp3 playing
+
+block virtual_screen; 
+int scrnwid; 
+int scrnhit;
+int current_screen_resolution_multiplier = 1;
+
+int force_letterbox = 0;
+
+color palette[256];
+//block spriteset[MAX_SPRITES+1];
+//SpriteCache spriteset (MAX_SPRITES+1);
+// initially size 1, this will be increased by the initFile function
+SpriteCache spriteset(1);
+
+long t1;  // timer for FPS
+
+int spritewidth[MAX_SPRITES];
+int spriteheight[MAX_SPRITES];
+
+int fps=0;
+int display_fps=0;
+
+int offsetx = 0; // view port scrolling offset (eg scumm scrolling)
+int offsety = 0;
+
+IGraphicsDriver *gfxDriver;
+IDriverDependantBitmap *blankImage = NULL;
+IDriverDependantBitmap *blankSidebarImage = NULL;
+
+bool current_background_is_dirty = false;
+
+ViewStruct*views=NULL;
+COLOR_MAP maincoltable;
+
+block _old_screen=NULL;
+block _sub_screen=NULL;
+
+int is_complete_overlay=0;
+int is_text_overlay=0;
+
+// set to 0 once successful
+int working_gfx_mode_status = -1;
+
+ScreenOverlay screenover[MAX_SCREEN_OVERLAYS];
+int numscreenover=0;  // number of screen overlays
+
+
+int debug_15bit_mode = 0;
+int debug_24bit_mode = 0;
+int convert_16bit_bgr = 0;
+int bg_just_changed = 0;
+
+char check_dynamic_sprites_at_exit = 1;
+
+#define MAX_DYNAMIC_SURFACES 20
+
+int frames_per_second=40;
+
+#define MAX_SPRITES_ON_SCREEN 76
+SpriteListEntry sprlist[MAX_SPRITES_ON_SCREEN];
+int sprlistsize=0;
+#define MAX_THINGS_TO_DRAW 125
+SpriteListEntry thingsToDrawList[MAX_THINGS_TO_DRAW];
+int thingsToDrawSize = 0;
+
+int final_scrn_wid=0;
+int final_scrn_hit=0;
+int final_col_dep=0;
+
+RGB_MAP rgb_table;  // for 256-col antialiasing
+
+int screen_reset = 0;
+block raw_saved_screen = NULL;
+block dynamicallyCreatedSurfaces[MAX_DYNAMIC_SURFACES];
+// whether there are currently remnants of a DisplaySpeech
+int screen_is_dirty = 0;
+
+
+// dirty rects
+#define MAXDIRTYREGIONS 25
+#define WHOLESCREENDIRTY (MAXDIRTYREGIONS + 5)
+#define MAX_SPANS_PER_ROW 4
+
+struct InvalidRect {
+  int x1, y1, x2, y2;
+};
+struct IRSpan {
+  int x1, x2;
+  int mergeSpan(int tx1, int tx2);
+};
+struct IRRow {
+  IRSpan span[MAX_SPANS_PER_ROW];
+  int numSpans;
+};
+
+IRRow *dirtyRow = NULL;
+int _dirtyRowSize;
+InvalidRect dirtyRegions[MAXDIRTYREGIONS];
+int numDirtyRegions = 0;
+int numDirtyBytes = 0;
+
+
+// screen
+block temp_virtual = NULL;
+color old_palette[256];
+
+int numOnStack = 0;
+block screenstack[10];
+
+// these vars are global to help with debugging
+block tmpdbl, curspr;
+int newwid, newhit;
+
+
+// TEXT
+// ------------------------------------
+int source_text_length = -1;
+char *heightTestString = "ZHwypgfjqhkilIK";
+int longestline = 0;
+
+char pexbuf[STD_BUFFER_SIZE];
+
+
+// AUDIO
+// ------------------------------------
 char *music_file;
 char *speech_file;
-WCHAR directoryPathBuffer[MAX_PATH];
-
-/*extern int get_route_composition();
-extern int routex1;*/
-
-#define REC_MOUSECLICK 1
-#define REC_MOUSEMOVE  2
-#define REC_MOUSEDOWN  3
-#define REC_KBHIT      4
-#define REC_GETCH      5
-#define REC_KEYDOWN    6
-#define REC_MOUSEWHEEL 7
-#define REC_SPEECHFINISHED 8
-#define REC_ENDOFFILE  0x6f
-short *recordbuffer = NULL;
-int  recbuffersize = 0;
-int recsize = 0;
-volatile int switching_away_from_game = 0;
-
-const char* sgnametemplate = "agssave.%03d";
-char saveGameSuffix[MAX_SG_EXT_LENGTH + 1];
 
 SOUNDCLIP *channels[MAX_SOUND_CHANNELS+1];
 SOUNDCLIP *cachedQueuedMusic = NULL;
@@ -272,10 +459,6 @@ int numSoundChannels = 8;
 #define AUDIOTYPE_LEGACY_MUSIC 2
 #define AUDIOTYPE_LEGACY_SOUND 3
 
-#define MAX_ANIMATING_BUTTONS 15
-#define RESTART_POINT_SAVE_GAME_NUMBER 999
-
-AGSPlatformDriver *platform = NULL;
 // crossFading is >0 (channel number of new track), or -1 (old
 // track fading out, no new track)
 int crossFading = 0;
@@ -283,39 +466,143 @@ int crossFadeVolumePerStep = 0;
 int crossFadeStep = 0;
 int crossFadeVolumeAtStart = 0;
 int last_sound_played[MAX_SOUND_CHANNELS + 1];
-char *heightTestString = "ZHwypgfjqhkilIK";
-block virtual_screen; 
-int scrnwid; 
-int scrnhit;
-int current_screen_resolution_multiplier = 1;
-roomstruct thisroom;
-GameSetupStruct game;
-RoomStatus *roomstats;
-RoomStatus troom;    // used for non-saveable rooms, eg. intro
-GameState play;
-GameSetup usetup;
-CharacterExtras *charextra;
-int force_letterbox = 0;
-int game_paused=0;
-int ifacepopped=-1;  // currently displayed pop-up GUI (-1 if none)
-color palette[256];
-//block spriteset[MAX_SPRITES+1];
-//SpriteCache spriteset (MAX_SPRITES+1);
-// initially size 1, this will be increased by the initFile function
-SpriteCache spriteset(1);
-long t1;  // timer for FPS
+
+int use_extra_sound_offset = 0;
+
+int current_music_type = 0;
+
+//int current_music=0;
+
+
+// INPUT
+// ------------------------------------
+#define REC_MOUSECLICK 1
+#define REC_MOUSEMOVE  2
+#define REC_MOUSEDOWN  3
+#define REC_KBHIT      4
+#define REC_GETCH      5
+#define REC_KEYDOWN    6
+#define REC_MOUSEWHEEL 7
+#define REC_SPEECHFINISHED 8
+#define REC_ENDOFFILE  0x6f
+short *recordbuffer = NULL;
+int  recbuffersize = 0;
+int recsize = 0;
+
+int scrlockWasDown = 0;
+
+char replayfile[MAX_PATH] = "record.dat";
+int replay_time = 0;
+unsigned long replay_last_second = 0;
+int replay_start_this_time = 0;
+
+const char *replayTempFile = "~replay.tmp";
+
+
+// INPUT - MOUSE
+// ------------------------------------
+struct GlobalMouseState global_mouse_state;
+struct GlobalRoomState global_room_state;
+
 int cur_mode; 
 int cur_cursor;
-int spritewidth[MAX_SPRITES];
-int spriteheight[MAX_SPRITES];
+
+char alpha_blend_cursor = 0;
+
+// maybe gui?
+int mouse_on_iface=-1;   // mouse cursor is over this interface
+int mouse_on_iface_button=-1;
+int mouse_pushed_iface=-1;  // this BUTTON on interface MOUSE_ON_IFACE is pushed
+int mouse_ifacebut_xoffs=-1;
+int mouse_ifacebut_yoffs=-1;
+
+int mouse_z_was = 0;
+
+
+// FILESYS
+// ------------------------------------
+WCHAR directoryPathBuffer[MAX_PATH]; // used only by initialise_game_file_name
+
+int use_compiled_folder_as_current_dir = 0;
+
+
+// SAVE GAMES
+// ------------------------------------
+const char* sgnametemplate = "agssave.%03d";
+char saveGameSuffix[MAX_SG_EXT_LENGTH + 1];
 char saveGameDirectory[260] = "./";
-//int abort_all_conditions=0;
-int fps=0;
-int display_fps=0;
-DebugConsoleText debug_line[DEBUG_CONSOLE_NUMLINES];
-int first_debug_line = 0;
-int last_debug_line = 0;
-int display_console = 0;
+int gameHasBeenRestored = 0;
+
+#define SGVERSION 8  // savegames
+char*sgsig="Adventure Game Studio saved game";  // savegames
+int sgsiglen=32;  // savegames
+
+char rbuffer[200];
+
+
+// GUI
+// ------------------------------------
+#define MAX_ANIMATING_BUTTONS 15
+
+int ifacepopped=-1;  // currently displayed pop-up GUI (-1 if none)
+
+GUIMain*guis=NULL;
+//GUIMain dummygui;
+//GUIButton dummyguicontrol;
+block *guibg = NULL;
+IDriverDependantBitmap **guibgbmp = NULL;
+
+AnimatingGUIButton animbuts[MAX_ANIMATING_BUTTONS];
+int numAnimButs = 0;
+
+
+int in_inv_screen = 0;
+int inv_screen_newroom = -1;
+
+TopBarSettings topBar;
+block screenop = NULL;      // for draw_text_window()
+int wantFreeScreenop = 0;   // for draw_text_window()
+int texthit;                // for draw_text_window()
+
+
+// ROOM
+// ------------------------------------
+roomstruct thisroom;
+RoomStatus *roomstats;
+RoomStatus troom;    // used for non-saveable rooms, eg. intro
+RoomStatus*croom=NULL;
+int gs_to_newroom=-1;
+int displayed_room=-10;
+int starting_room = -1;
+
+IDriverDependantBitmap* roomBackgroundBmp = NULL;
+
+int in_new_room=0;
+int new_room_was = 0;  // 1 in new room, 2 first time in new room, 3 loading saved game
+int new_room_pos=0;
+int new_room_x = SCR_NO_VALUE;
+int new_room_y = SCR_NO_VALUE;
+
+int new_room_flags=0;
+
+#define NO_GAME_ID_IN_ROOM_FILE 16325
+
+
+// CHARACTERS
+// ------------------------------------
+CharacterExtras *charextra;
+
+CharacterInfo*playerchar;
+long _sc_PlayerCharPtr = 0;
+
+MoveList *mls = NULL;
+/*extern int get_route_composition();
+extern int routex1;*/
+CharacterCache *charcache = NULL;
+
+
+// WALK BEHIND
+// ------------------------------------
 char *walkBehindExists = NULL;  // whether a WB area is in this column
 int *walkBehindStartY = NULL;
 int *walkBehindEndY = NULL;
@@ -327,22 +614,32 @@ int walkBehindBottom[MAX_OBJ];
 IDriverDependantBitmap *walkBehindBitmap[MAX_OBJ];
 int walkBehindsCachedForBgNum = 0;
 WalkBehindMethodEnum walkBehindMethod = DrawOverCharSprite;
-unsigned long loopcounter=0;
-unsigned long lastcounter=0;
-volatile unsigned long globalTimerCounter = 0;
-char alpha_blend_cursor = 0;
+int walk_behind_baselines_changed = 0;
+
+
+// actsps is used for temporary storage of the bitamp image
+// of the latest version of the sprite
+int actSpsCount = 0;
+block *actsps;
+IDriverDependantBitmap* *actspsbmp;
+// temporary cache of walk-behind for this actsps image
+block *actspswb;
+IDriverDependantBitmap* *actspswbbmp;
+CachedActSpsData* actspswbcache;
+
+
+
+// OBJECTS
+// ------------------------------------
 RoomObject*objs;
-RoomStatus*croom=NULL;
-CharacterInfo*playerchar;
-long _sc_PlayerCharPtr = 0;
-int offsetx = 0;
-int offsety = 0;
-int use_extra_sound_offset = 0;
-GUIMain*guis=NULL;
-//GUIMain dummygui;
-//GUIButton dummyguicontrol;
-block *guibg = NULL;
-IDriverDependantBitmap **guibgbmp = NULL;
+ObjectCache objcache[MAX_INIT_SPR];
+
+// Used for deciding whether a char or obj was closer
+int char_lowest_yp, obj_lowest_yp;
+
+
+// SCRIPTS
+// ------------------------------------
 ccScript* gamescript=NULL;
 ccScript* dialogScriptsScript = NULL;
 ccInstance *gameinst = NULL;
@@ -350,128 +647,21 @@ ccInstance *roominst = NULL;
 ccInstance *dialogScriptsInst = NULL;
 ccInstance *gameinstFork = NULL;
 ccInstance *roominstFork = NULL;
-IGraphicsDriver *gfxDriver;
-IDriverDependantBitmap *blankImage = NULL;
-IDriverDependantBitmap *blankSidebarImage = NULL;
-IDriverDependantBitmap *debugConsole = NULL;
-block debugConsoleBuffer = NULL;
-
-bool current_background_is_dirty = false;
-int longestline = 0;
-
-PluginObjectReader pluginReaders[MAX_PLUGIN_OBJECT_READERS];
-int numPluginReaders = 0;
-
-ccScript *scriptModules[MAX_SCRIPT_MODULES];
-ccInstance *moduleInst[MAX_SCRIPT_MODULES];
-ccInstance *moduleInstFork[MAX_SCRIPT_MODULES];
-char *moduleRepExecAddr[MAX_SCRIPT_MODULES];
-int numScriptModules = 0;
-
-ViewStruct*views=NULL;
-COLOR_MAP maincoltable;
 ScriptSystem scsystem;
-block _old_screen=NULL;
-block _sub_screen=NULL;
-MoveList *mls = NULL;
-DialogTopic *dialog;
-block walkareabackup=NULL;
-block walkable_areas_temp = NULL;
-ExecutingScript scripts[MAX_SCRIPT_AT_ONCE];
-ExecutingScript*curscript = NULL;
-AnimatingGUIButton animbuts[MAX_ANIMATING_BUTTONS];
-int numAnimButs = 0;
 int num_scripts=0;
 int eventClaimed = EVENT_NONE;
-int getloctype_index = 0;
-int getloctype_throughgui = 0;
-int user_disabled_for=0;
-int user_disabled_data=0;
-int user_disabled_data2=0;
-int user_disabled_data3=0;
-int is_complete_overlay=0;
-int is_text_overlay=0;
-// Sierra-style speech settings
-int face_talking=-1;
-int facetalkview=0;
-int facetalkwait=0;
-int facetalkframe=0;
-int facetalkloop=0;
-int facetalkrepeat = 0;
-int facetalkAllowBlink = 1;
-int facetalkBlinkLoop = 0;
-CharacterInfo *facetalkchar = NULL;
-// lip-sync speech settings
-int loops_per_character;
-int text_lips_offset;
-int char_speaking = -1;
-char *text_lips_text = NULL;
-SpeechLipSyncLine *splipsync = NULL;
-int numLipLines = 0;
-int curLipLine = -1;
-int curLipLinePhenome = 0;
-int gameHasBeenRestored = 0;
+
 char **characterScriptObjNames = NULL;
 char objectScriptObjNames[MAX_INIT_SPR][MAX_SCRIPT_NAME_LEN + 5];
 char **guiScriptObjNames = NULL;
 
-// set to 0 once successful
-int working_gfx_mode_status = -1;
-
-int said_speech_line; // used while in dialog to track whether screen needs updating
-
-int restrict_until=0;
-int gs_to_newroom=-1;
-ScreenOverlay screenover[MAX_SCREEN_OVERLAYS];
-int proper_exit=0;
-int our_eip=0;
-int numscreenover=0;
-int scaddr;
-int walk_behind_baselines_changed = 0;
-int displayed_room=-10;
-int starting_room = -1;
-int mouse_on_iface=-1;   // mouse cursor is over this interface
-int mouse_on_iface_button=-1;
-int mouse_pushed_iface=-1;  // this BUTTON on interface MOUSE_ON_IFACE is pushed
-int mouse_ifacebut_xoffs=-1;
-int mouse_ifacebut_yoffs=-1;
-int debug_flags=0;
-IDriverDependantBitmap* roomBackgroundBmp = NULL;
-
-int use_compiled_folder_as_current_dir = 0;
-int editor_debugging_enabled = 0;
-int editor_debugging_initialized = 0;
-char editor_debugger_instance_token[100];
-IAGSEditorDebugger *editor_debugger = NULL;
-int break_on_next_script_step = 0;
-volatile int game_paused_in_debugger = 0;
-HWND editor_window_handle = NULL;
+int scaddr;  // unused
 
 int in_enters_screen=0;
 int done_es_error = 0;
+
 int in_leaves_screen = -1;
-int need_to_stop_cd=0;
-int debug_15bit_mode = 0;
-int debug_24bit_mode = 0;
-int said_text = 0;
-int convert_16bit_bgr = 0;
-int mouse_z_was = 0;
-int bg_just_changed = 0;
-int loaded_game_file_version = 0;
-volatile char want_exit = 0;
-volatile char abort_engine = 0;
-char check_dynamic_sprites_at_exit = 1;
-#define DBG_NOIFACE       1
-#define DBG_NODRAWSPRITES 2
-#define DBG_NOOBJECTS     4
-#define DBG_NOUPDATE      8
-#define DBG_NOSFX      0x10
-#define DBG_NOMUSIC    0x20
-#define DBG_NOSCRIPT   0x40
-#define DBG_DBGSCRIPT  0x80
-#define DBG_DEBUGMODE 0x100
-#define DBG_REGONLY   0x200
-#define DBG_NOVIDEO   0x400
+
 #define MAXEVENTS 15
 EventHappened event[MAXEVENTS+1];
 int numevents=0;
@@ -485,59 +675,18 @@ int numevents=0;
 #define TS_MCLICK   3
 #define EVB_HOTSPOT 1
 #define EVB_ROOM    2
-char ac_engine_copyright[]="Adventure Game Studio engine & tools (c) 1999-2000 by Chris Jones.";
-int current_music_type = 0;
 
-#define LOCTYPE_HOTSPOT 1
-#define LOCTYPE_CHAR 2
-#define LOCTYPE_OBJ  3
-
-#define MAX_DYNAMIC_SURFACES 20
 #define REP_EXEC_ALWAYS_NAME "repeatedly_execute_always"
 #define REP_EXEC_NAME "repeatedly_execute"
-
 char*tsnames[4]={NULL, REP_EXEC_NAME, "on_key_press","on_mouse_click"};
 char*evblockbasename;
 int evblocknum;
-//int current_music=0;
-int frames_per_second=40;
-int in_new_room=0;
-int new_room_was = 0;  // 1 in new room, 2 first time in new room, 3 loading saved game
-int new_room_pos=0;
-int new_room_x = SCR_NO_VALUE;
-int new_room_y = SCR_NO_VALUE;
-unsigned int load_new_game = 0;
-int load_new_game_restore = -1;
+
 int inside_script=0;
 int in_graph_script=0;
 int no_blocking_functions = 0; // set to 1 while in rep_Exec_always
-int in_inv_screen = 0;
-int inv_screen_newroom = -1;
-int new_room_flags=0;
-#define MAX_SPRITES_ON_SCREEN 76
-SpriteListEntry sprlist[MAX_SPRITES_ON_SCREEN];
-int sprlistsize=0;
-#define MAX_THINGS_TO_DRAW 125
-SpriteListEntry thingsToDrawList[MAX_THINGS_TO_DRAW];
-int thingsToDrawSize = 0;
-int use_cdplayer=0;
-bool triedToUseCdAudioCommand = false;
-int final_scrn_wid=0;
-int final_scrn_hit=0;
-int final_col_dep=0;
-int post_script_cleanup_stack = 0;
-// actsps is used for temporary storage of the bitamp image
-// of the latest version of the sprite
-int actSpsCount = 0;
-block *actsps;
-IDriverDependantBitmap* *actspsbmp;
-// temporary cache of walk-behind for this actsps image
-block *actspswb;
-IDriverDependantBitmap* *actspswbbmp;
-CachedActSpsData* actspswbcache;
 
-CharacterCache *charcache = NULL;
-ObjectCache objcache[MAX_INIT_SPR];
+int post_script_cleanup_stack = 0;
 
 ScriptObject scrObj[MAX_INIT_SPR];
 ScriptGUI *scrGui = NULL;
@@ -546,41 +695,132 @@ ScriptRegion scrRegion[MAX_REGIONS];
 ScriptInvItem scrInv[MAX_INV];
 ScriptDialog scrDialog[MAX_DIALOG];
 
-RGB_MAP rgb_table;  // for 256-col antialiasing
-char* game_file_name=NULL;
-int want_quit = 0;
-int screen_reset = 0;
-block raw_saved_screen = NULL;
-block dynamicallyCreatedSurfaces[MAX_DYNAMIC_SURFACES];
-int scrlockWasDown = 0;
-// whether there are currently remnants of a DisplaySpeech
-int screen_is_dirty = 0;
-char replayfile[MAX_PATH] = "record.dat";
-int replay_time = 0;
-unsigned long replay_last_second = 0;
-int replay_start_this_time = 0;
-char pexbuf[STD_BUFFER_SIZE];
-
-int pluginsWantingDebugHooks = 0;
-
-const char *replayTempFile = "~replay.tmp";
-
 NonBlockingScriptFunction repExecAlways(REP_EXEC_ALWAYS_NAME, 0);
 NonBlockingScriptFunction getDialogOptionsDimensionsFunc("dialog_options_get_dimensions", 1);
 NonBlockingScriptFunction renderDialogOptionsFunc("dialog_options_render", 1);
 NonBlockingScriptFunction getDialogOptionUnderCursorFunc("dialog_options_get_active", 1);
 NonBlockingScriptFunction runDialogOptionMouseClickHandlerFunc("dialog_options_mouse_click", 2);
 
+char scfunctionname[30];
+
+//char*ac_default_header=NULL,*temphdr=NULL;
+char ac_default_header[15000],temphdr[10000];
+
+
+// PLUGINS
+// ------------------------------------
+PluginObjectReader pluginReaders[MAX_PLUGIN_OBJECT_READERS];
+int numPluginReaders = 0;
+int pluginsWantingDebugHooks = 0;
+
+
+// MODULES
+// ------------------------------------
+ccScript *scriptModules[MAX_SCRIPT_MODULES];
+ccInstance *moduleInst[MAX_SCRIPT_MODULES];
+ccInstance *moduleInstFork[MAX_SCRIPT_MODULES];
+char *moduleRepExecAddr[MAX_SCRIPT_MODULES];
+int numScriptModules = 0;
+ExecutingScript scripts[MAX_SCRIPT_AT_ONCE];
+ExecutingScript*curscript = NULL;
+
+
+// WALKING
+// ------------------------------------
+block walkareabackup=NULL;
+block walkable_areas_temp = NULL;
+
+
+// DIALOG
+// ------------------------------------
+DialogTopic *dialog;
+
+int said_speech_line; // used while in dialog to track whether screen needs updating
+
+int said_text = 0;
+
+
+// FACE TALK
+// ------------------------------------
+// Sierra-style speech settings
+int face_talking=-1;
+int facetalkview=0;
+int facetalkwait=0;
+int facetalkframe=0;
+int facetalkloop=0;
+int facetalkrepeat = 0;
+int facetalkAllowBlink = 1;
+int facetalkBlinkLoop = 0;
+CharacterInfo *facetalkchar = NULL;
+
+
+// LIP SYNC
+// ------------------------------------
+// lip-sync speech settings
+int loops_per_character;
+int text_lips_offset;
+int char_speaking = -1;
+char *text_lips_text = NULL;
+SpeechLipSyncLine *splipsync = NULL;
+int numLipLines = 0;
+int curLipLine = -1;
+int curLipLinePhenome = 0;
+
+
+// HOTSPOTS
+// ------------------------------------
+int getloctype_index = 0;
+int getloctype_throughgui = 0;
+
+#define LOCTYPE_HOTSPOT 1
+#define LOCTYPE_CHAR 2
+#define LOCTYPE_OBJ  3
+
+
+// USER DISABLED
+// ------------------------------------
+int user_disabled_for=0;
+int user_disabled_data=0;
+int user_disabled_data2=0;
+int user_disabled_data3=0;
+
+
+// ANIMATION?
+// ------------------------------------
+int restrict_until=0;
+
+
+// EDITOR DEBUG
+// ------------------------------------
+int editor_debugging_enabled = 0;
+int editor_debugging_initialized = 0;
+char editor_debugger_instance_token[100];
+IAGSEditorDebugger *editor_debugger = NULL;
+int break_on_next_script_step = 0;
+volatile int game_paused_in_debugger = 0;
+HWND editor_window_handle = NULL;
+
+
+// CD PLAYER
+// ------------------------------------
+int need_to_stop_cd=0;
+int use_cdplayer=0;                   // set to 1 if enabled.
+bool triedToUseCdAudioCommand = false;  // only written, never read
+
+
+// TIMER
+// ------------------------------------
 // set by dj_timer_handler
 volatile int timerloop=0;
 volatile int mvolcounter = 0;
 int update_music_at=0;
 int time_between_timers=25;  // in milliseconds
 
-TopBarSettings topBar;
-block screenop = NULL;      // for draw_text_window()
-int wantFreeScreenop = 0;   // for draw_text_window()
-int texthit;                // for draw_text_window()
+
+// MISC
+// ------------------------------------
+
+//int abort_all_conditions=0;
 
 // return codes for load_game()
 const char *load_game_errors[9] =
@@ -588,11 +828,6 @@ const char *load_game_errors[9] =
   "Invalid save game version","Saved with different interpreter",
   "Saved under a different game", "Resolution mismatch",
   "Colour depth mismatch", ""};
-
-#define SGVERSION 8  // savegames
-char*sgsig="Adventure Game Studio saved game";  // savegames
-int sgsiglen=32;  // savegames
-
 
 // We need COLOR_DEPTH_24 to allow it to load the preload PCX in hi-col
 BEGIN_COLOR_DEPTH_LIST
@@ -1031,25 +1266,7 @@ int wgettextwidth_compensate(const char *tex, int font) {
 // GRAPHICS - DIRTY RECTANGLES
 // ============================================================================
 
-#define MAXDIRTYREGIONS 25
-#define WHOLESCREENDIRTY (MAXDIRTYREGIONS + 5)
-#define MAX_SPANS_PER_ROW 4
-struct InvalidRect {
-  int x1, y1, x2, y2;
-};
-struct IRSpan {
-  int x1, x2;
-  int mergeSpan(int tx1, int tx2);
-};
-struct IRRow {
-  IRSpan span[MAX_SPANS_PER_ROW];
-  int numSpans;
-};
-IRRow *dirtyRow = NULL;
-int _dirtyRowSize;
-InvalidRect dirtyRegions[MAXDIRTYREGIONS];
-int numDirtyRegions = 0;
-int numDirtyBytes = 0;
+
 
 int IRSpan::mergeSpan(int tx1, int tx2) {
   if ((tx1 > x2) || (tx2 < x1))
@@ -1440,7 +1657,6 @@ int load_game_and_print_error(int toload) {
 // SCRIPTS
 // ============================================================================
 
-char scfunctionname[30];
 int prepare_text_script(ccInstance*sci,char**tsname) {
   ccError=0;
   if (sci==NULL) return -1;
@@ -1842,8 +2058,6 @@ block fix_bitmap_size(block todubl) {
 
 //#define _get_script_data_stack_size() (256*sizeof(int)+((int*)&scrpt[10*4])[0]+((int*)&scrpt[12*4])[0])
 //#define _get_script_data_stack_size(instac) ((int*)instac->code)[10]
-block temp_virtual = NULL;
-color old_palette[256];
 void current_fade_out_effect () {
   if (platform->RunPluginHooks(AGSE_TRANSITIONOUT, 0))
     return;
@@ -2236,7 +2450,7 @@ void convert_room_coordinates_to_low_res(roomstruct *rstruc)
 	  rstruc->height /= 2;
 }
 
-#define NO_GAME_ID_IN_ROOM_FILE 16325
+
 // forchar = playerchar on NewRoom, or NULL if restore saved game
 void load_new_room(int newnum,CharacterInfo*forchar) {
 
@@ -5799,8 +6013,7 @@ void GfxDriverOnInitCallback(void *data)
 // SCREEN STACK
 // ============================================================================
 
-int numOnStack = 0;
-block screenstack[10];
+
 void push_screen () {
   if (numOnStack >= 10)
     quit("!Too many push screen calls");
@@ -5947,8 +6160,7 @@ bool send_exception_to_editor(char *qmsg)
   return true;
 }
 
-char return_to_roomedit[30] = "\0";
-char return_to_room[150] = "\0";
+
 // quit - exits the engine, shutting down everything gracefully
 // The parameter is the message to print. If this message begins with
 // an '!' character, then it is printed as a "contact game author" error.
@@ -8363,8 +8575,7 @@ int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww,int sp
   return TRUE;
 }
 
-// Used for deciding whether a char or obj was closer
-int char_lowest_yp, obj_lowest_yp;
+
 
 int is_pos_on_character(int xx,int yy) {
   int cc,sppic,lowestyp=0,lowestwas=-1;
@@ -10255,7 +10466,7 @@ block read_serialized_bitmap(FILE* ooo) {
   return thispic;
 }
 
-char rbuffer[200];
+
 
 void first_room_initialization() {
   starting_room = displayed_room;
@@ -11457,10 +11668,7 @@ int check_write_access() {
   return 1;
 }
 
-//char datname[80]="ac.clb";
-char ac_conf_file_defname[MAX_PATH] = "acsetup.cfg";
-char *ac_config_file = &ac_conf_file_defname[0];
-char conffilebuf[512];
+
 
 
 int wait_loop_still_valid() {
@@ -11580,8 +11788,6 @@ void do_main_cycle(int untilwhat,int daaa) {
 // SCRIPTS
 // ============================================================================
 
-//char*ac_default_header=NULL,*temphdr=NULL;
-char ac_default_header[15000],temphdr[10000];
 
 void setup_exports(char*expfrom) {
   char namof[30]="\0"; temphdr[0]=0;
@@ -11728,9 +11934,7 @@ void pre_save_sprite(int ee) {
   // not used, we don't save
 }
 
-// these vars are global to help with debugging
-block tmpdbl, curspr;
-int newwid, newhit;
+
 void initialize_sprite (int ee) {
 
   if ((ee < 0) || (ee > spriteset.elements))
@@ -12159,7 +12363,7 @@ void init_game_settings() {
   displayed_room = -10;
 }
 
-char filetouse[MAX_PATH] = "nofile";
+
 
 // Replace the filename part of complete path WASGV with INIFIL
 void INIgetdirec(char *wasgv, char *inifil) {
@@ -12773,12 +12977,7 @@ void show_preload () {
 // INIT
 // ============================================================================
 
-// Startup flags, set from parameters to engine
-int datafile_argv=0, change_to_game_dir = 0, force_window = 0;
-int override_start_room = 0, force_16bit = 0;
-bool justRegisterGame = false;
-bool justUnRegisterGame = false;
-const char *loadSaveGameOnStartup = NULL;
+
 
 void initialise_game_file_name(int argc,char **argv)
 {
