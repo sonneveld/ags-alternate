@@ -3,6 +3,29 @@
 #include "ac.h"
 #include "ac_context.h"
 #include "ac_string.h"
+#include "clib32.h"
+#include "misc.h"
+
+#ifdef WINDOWS_VERSION
+#include <shlwapi.h>
+#elif defined(LINUX_VERSION) || defined(MAC_VERSION)
+#define HWND long
+#define _getcwd getcwd
+
+long int filelength(int fhandle)
+{
+	struct stat statbuf;
+	fstat(fhandle, &statbuf);
+	return statbuf.st_size;
+}
+#else   // it's DOS (DJGPP)
+#include "sys/exceptn.h"
+#define _getcwd getcwd
+
+int sys_getch() {
+  return getch();
+}
+#endif  // WINDOWS_VERSION
 
 #define MAX_OPEN_SCRIPT_FILES 10
 static FILE*valid_handles[MAX_OPEN_SCRIPT_FILES+1];
@@ -355,6 +378,116 @@ static int File_GetError(sc_File *fil) {
 }
 
 
+void change_to_directory_of_file(LPCWSTR fileName)
+{
+  WCHAR wcbuffer[MAX_PATH];
+  StrCpyW(wcbuffer, fileName);
+
+#if defined(LINUX_VERSION) || defined(MAC_VERSION)
+    if (strrchr(wcbuffer, '/') != NULL) {
+      strrchr(wcbuffer, '/')[0] = 0;
+      chdir(wcbuffer);
+    }
+#else
+  LPWSTR backSlashAt = StrRChrW(wcbuffer, NULL, L'\\');
+  if (backSlashAt != NULL) {
+      wcbuffer[wcslen(wcbuffer) - wcslen(backSlashAt)] = L'\0';
+      SetCurrentDirectoryW(wcbuffer);
+    }
+#endif
+}
+
+
+
+// ============================================================================
+// FILE - FOPEN OVERRIDE
+// ============================================================================
+
+// override packfile functions to allow it to load from our
+// custom CLIB datafiles
+extern "C" {
+PACKFILE*_my_temppack;
+extern PACKFILE *__old_pack_fopen(char *,char *);
+
+#if ALLEGRO_DATE > 19991010
+PACKFILE *pack_fopen(const char *filnam1, const char *modd1) {
+#else
+PACKFILE *pack_fopen(char *filnam1, char *modd1) {
+#endif
+      
+    char msg[2000];
+    sprintf(msg, "pack_fopen: %s - %s\n", filnam1, modd1);
+    write_log_debug(msg);
+  char  *filnam = (char *)filnam1;
+  char  *modd = (char *)modd1;
+  int   needsetback = 0;
+
+  if (filnam[0] == '~') {
+    // ~ signals load from specific data file, not the main default one
+    char gfname[80];
+    int ii = 0;
+    
+    filnam++;
+    while (filnam[0]!='~') {
+      gfname[ii] = filnam[0];
+      filnam++;
+      ii++;
+    }
+    filnam++;
+    // MACPORT FIX 9/6/5: changed from NULL TO '\0'
+    gfname[ii] = '\0';
+/*    char useloc[250];
+#ifdef LINUX_VERSION
+    sprintf(useloc,"%s/%s",usetup.data_files_dir,gfname);
+#else
+    sprintf(useloc,"%s\\%s",usetup.data_files_dir,gfname);
+#endif
+    csetlib(useloc,"");*/
+    
+    char *libname = ci_find_file(usetup.data_files_dir, gfname);
+    if (csetlib(libname,""))
+    {
+      // Hack for running in Debugger
+      free(libname);
+      libname = ci_find_file("Compiled", gfname);
+      csetlib(libname,"");
+    }
+    free(libname);
+    
+    needsetback = 1;
+  }
+
+  // if the file exists, override the internal file
+  FILE *testf = fopen(filnam, "rb");
+  if (testf != NULL)
+    fclose(testf);
+
+  if ((cliboffset(filnam)<1) || (testf != NULL)) {
+    if (needsetback) csetlib(game_file_name,"");
+    return __old_pack_fopen(filnam, modd);
+  } 
+  else {
+    _my_temppack=__old_pack_fopen(clibgetdatafile(filnam), modd);
+    if (_my_temppack == NULL)
+      quitprintf("pack_fopen: unable to change datafile: not found: %s", clibgetdatafile(filnam));
+
+    pack_fseek(_my_temppack,cliboffset(filnam));
+    
+#if ALLEGRO_DATE < 20050101
+    _my_temppack->todo=clibfilesize(filnam);
+#else
+    _my_temppack->normal.todo = clibfilesize(filnam);
+#endif
+
+    if (needsetback)
+      csetlib(game_file_name,"");
+    return _my_temppack;
+  }
+}
+
+} // end extern "C"
+
+// end packfile functions
 
 
 
