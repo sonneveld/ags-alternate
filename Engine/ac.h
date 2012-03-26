@@ -142,7 +142,6 @@ extern int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww
 extern void get_new_size_for_sprite (int ee, int ww, int hh, int &newwid, int &newhit);
 
 // for ac_main.cpp
-extern bool send_message_to_editor(const char *msg);
 extern void get_script_name(ccInstance *rinst, char *curScrName);
 extern void process_event(EventHappened*evp);
 extern int run_text_script(ccInstance*sci,char*tsname);

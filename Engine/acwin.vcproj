@@ -371,6 +371,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_debug.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_dialog.cpp"
 				>
 			</File>
@@ -508,37 +512,6 @@
 			</File>
 			<File
 				RelativePath="acchars.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseNoMP3|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugWorking|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="acdebug.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseNoMP3|Win32"
@@ -772,6 +745,37 @@
 			</File>
 			<File
 				RelativePath="ACWSETUP.CPP"
+				>
+				<FileConfiguration
+					Name="ReleaseNoMP3|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DebugWorking|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories=""
+						PreprocessorDefinitions=""
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\AGSEditorDebugger.cpp"
 				>
 				<FileConfiguration
 					Name="ReleaseNoMP3|Win32"
@@ -1172,6 +1176,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ac_debug.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ac_dialog.h"
 				>
 			</File>
@@ -1349,6 +1357,10 @@
 			</File>
 			<File
 				RelativePath=".\acwsetup.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AGSEditorDebugger.h"
 				>
 			</File>
 			<File

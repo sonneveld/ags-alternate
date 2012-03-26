@@ -25,6 +25,7 @@
 #include "acgfx.h"
 #include "ac_exescr.h"
 #include "ac_input.h"
+#include "ac_parser.h"
 
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;
