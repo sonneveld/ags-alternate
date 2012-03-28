@@ -233,71 +233,68 @@ int  sc_GetTime(int whatti);
 
 // SETUP
 // ------------------------------------
-GameSetupStruct game;
+GameSetup usetup;  // user preferences, setup.
 
 // Startup flags, set from parameters to engine
-int datafile_argv=0, change_to_game_dir = 0, force_window = 0;
-int override_start_room = 0, force_16bit = 0;
-bool justRegisterGame = false;
+int datafile_argv=0;  // datafile path as an offset in the commandline parameters
+int change_to_game_dir = 0;  // set to 1 if -shelllaunch 
+int force_window = 0;  // -windowed = 1, -fullscreen=2
+int override_start_room = 0;  // --startr - override starting room
+int force_16bit = 0;    // force to use hicolor mode.
+bool justRegisterGame = false;  // register/unregister with game explorer then quit
 bool justUnRegisterGame = false;
-const char *loadSaveGameOnStartup = NULL;
+const char *loadSaveGameOnStartup = NULL;  // if set, load this save game on start. full path to savegame.
+char return_to_roomedit[30] = "\0";  // roomedit? set with --testre but not used
+char return_to_room[150] = "\0";  // roomedit? set with --testre but not used
 
+// xref: read_config_file and acwsetup
 //char datname[80]="ac.clb";
-char ac_conf_file_defname[MAX_PATH] = "acsetup.cfg";
-char *ac_config_file = &ac_conf_file_defname[0];
-char conffilebuf[512];
-
-char filetouse[MAX_PATH] = "nofile";
-
+char ac_conf_file_defname[MAX_PATH] = "acsetup.cfg";  // buffer with default acsetup name
+char *ac_config_file = &ac_conf_file_defname[0];  // actual ptr to config file.  will be set to full path (cwd or exe file + acsetup.cfg)
+char conffilebuf[512];  // buf for parsing ini files.
+char filetouse[MAX_PATH] = "nofile";  // ac_config_file copied into it
 
 
 // ENGINE STATE
 // ------------------------------------
-int engineNeedsAsInt = 100;  // required engine version
-#define RESTART_POINT_SAVE_GAME_NUMBER 999
-AGSPlatformDriver *platform = NULL;
 
-GameState play;
-GameSetup usetup;
+AGSPlatformDriver *platform = NULL;   // cross platform wrapper.
+int engineNeedsAsInt = 100;  // required engine version, only affects walkable areas.
 
-int game_paused=0;
+char* game_file_name=NULL;  // path of the game's file
+GameSetupStruct game;  // the actual game. options, arrays of data, etc
+int loaded_game_file_version = 0;   // game file version, affects some functionality
 
-unsigned long loopcounter=0;
-unsigned long lastcounter=0;
-volatile unsigned long globalTimerCounter = 0;
+GameState play;       // the game state.
 
-int loaded_game_file_version = 0;
+int frames_per_second=40; // wanted game speed.
 
+unsigned long loopcounter=0;   // incremented every frame
+unsigned long lastcounter=0;   // the frame count at the start of the last second. (used for fps)
+volatile unsigned long globalTimerCounter = 0;  // global tick.
 
-volatile char want_exit = 0;
-volatile char abort_engine = 0;
+int game_paused=0;// controllable from scripts.  prevents update_stuff() from running.
 
+volatile char want_exit = 0;   // other other threads to ask for engine to quit.
+volatile char abort_engine = 0;  // kill main loop if set.
+int want_quit = 0;            // set by the close window hook.
+
+unsigned int load_new_game = 0; // if not 0 then we should start a new game
+
+// not actually used, checksum is generated against it.
 char ac_engine_copyright[]="Adventure Game Studio engine & tools (c) 1999-2000 by Chris Jones.";
 
-unsigned int load_new_game = 0;
-int load_new_game_restore = -1;
-
-char return_to_roomedit[30] = "\0";
-char return_to_room[150] = "\0";
 
 
 // DEBUG
 // ------------------------------------
-int eip_guinum;
-int eip_guiobj;
+int our_eip=0;  // program counter for identifying program location for crashes
 
-DebugConsoleText debug_line[DEBUG_CONSOLE_NUMLINES];
-int first_debug_line = 0;
-int last_debug_line = 0;
-int display_console = 0;
+int eip_guinum;  // an inner counter for gui/gfx ops.. so as to not affect out_eip
+int eip_guiobj;  // inner object counter
 
-IDriverDependantBitmap *debugConsole = NULL;
-block debugConsoleBuffer = NULL;
-
-int proper_exit=0;
-int our_eip=0;
-
-int debug_flags=0;
+char pexbuf[STD_BUFFER_SIZE];  // str buffer for storing exit messages.
+int proper_exit=0;  // if not set to 1 on exit, will print out debug error message.
 
 #define DBG_NOIFACE       1
 #define DBG_NODRAWSPRITES 2
@@ -311,94 +308,127 @@ int debug_flags=0;
 #define DBG_REGONLY   0x200
 #define DBG_NOVIDEO   0x400
 
-char* game_file_name=NULL;
-int want_quit = 0;
+int debug_flags=0;    // set by command line arguments.
+
+
+// DEBUG CONSOLE
+// ------------------------------------
+
+int display_console = 0;  // flag to display console ro not.
+DebugConsoleText debug_line[DEBUG_CONSOLE_NUMLINES];  // debug console content
+int first_debug_line = 0;  // offset of first line
+int last_debug_line = 0;  // offset of last line
+IDriverDependantBitmap *debugConsole = NULL;  // bitmap for console.
+block debugConsoleBuffer = NULL;  // gfx buffer for console.
 
 
 // GRAPHICS
 // ------------------------------------
-int trans_mode=0;
 
-volatile int switching_away_from_game = 0;  // used by mp3 playing
+IGraphicsDriver *gfxDriver;  // graphics driver, to abstract software / 3d renderer.
+int working_gfx_mode_status = -1;// set to 0 once successful
 
-block virtual_screen; 
-int scrnwid; 
-int scrnhit;
-int current_screen_resolution_multiplier = 1;
-
-int force_letterbox = 0;
-
-color palette[256];
-//block spriteset[MAX_SPRITES+1];
-//SpriteCache spriteset (MAX_SPRITES+1);
-// initially size 1, this will be increased by the initFile function
-SpriteCache spriteset(1);
-
-long t1;  // timer for FPS
-
-int spritewidth[MAX_SPRITES];
-int spriteheight[MAX_SPRITES];
-
-int fps=0;
-int display_fps=0;
-
-int offsetx = 0; // view port scrolling offset (eg scumm scrolling)
-int offsety = 0;
-
-IGraphicsDriver *gfxDriver;
-IDriverDependantBitmap *blankImage = NULL;
-IDriverDependantBitmap *blankSidebarImage = NULL;
-
-bool current_background_is_dirty = false;
-
-ViewStruct*views=NULL;
-COLOR_MAP maincoltable;
-
-block _old_screen=NULL;
-block _sub_screen=NULL;
-
-int is_complete_overlay=0;
-int is_text_overlay=0;
-
-// set to 0 once successful
-int working_gfx_mode_status = -1;
-
-ScreenOverlay screenover[MAX_SCREEN_OVERLAYS];
-int numscreenover=0;  // number of screen overlays
-
-
-int debug_15bit_mode = 0;
-int debug_24bit_mode = 0;
-int convert_16bit_bgr = 0;
-int bg_just_changed = 0;
-
-char check_dynamic_sprites_at_exit = 1;
-
-#define MAX_DYNAMIC_SURFACES 20
-
-int frames_per_second=40;
-
-#define MAX_SPRITES_ON_SCREEN 76
-SpriteListEntry sprlist[MAX_SPRITES_ON_SCREEN];
-int sprlistsize=0;
-#define MAX_THINGS_TO_DRAW 125
-SpriteListEntry thingsToDrawList[MAX_THINGS_TO_DRAW];
-int thingsToDrawSize = 0;
-
+// actual dimensions/depth used when initing gfx
 int final_scrn_wid=0;
 int final_scrn_hit=0;
 int final_col_dep=0;
 
+block virtual_screen;  // secondary buffer whcih is blitted to screen.
+int scrnwid;  // initialised screen dimensions
+int scrnhit;
+int current_screen_resolution_multiplier = 1;  // constant to convert from 320x200 to actual screen coords.
+
+color palette[256];  // the game's pallete.
+int bg_just_changed = 0;   // bg has changed so update palette when you can.
+
+int offsetx = 0; // view port scrolling offset (eg scumm scrolling)
+int offsety = 0;
+
+long t1;  // timer for FPS, when changed, we recalculate fps. (we always assume it was 1 sec period)
+int fps=0;  // last calc'd fls
+int display_fps=0;   // if non-zero, display the fps. Something happens if == 2 too.
+
+int force_letterbox = 0;  // if 1, allow borders to run in a different resolution
+IDriverDependantBitmap *blankImage = NULL;  // used for drawing letterbox borders.
+IDriverDependantBitmap *blankSidebarImage = NULL;   // used for drawing side borders for wide screens.
+
+COLOR_MAP maincoltable;  // allegro lighting table, used for 256 lighting effects.
+// created for allegro to speed up mapping 32bit colour to palette
 RGB_MAP rgb_table;  // for 256-col antialiasing
 
-int screen_reset = 0;
-block raw_saved_screen = NULL;
+// overlays
+ScreenOverlay screenover[MAX_SCREEN_OVERLAYS];  // buffer of overlays
+int numscreenover=0;  // number of screen overlays
+int is_complete_overlay=0;  // is complete overlay being dispalyed?
+int is_text_overlay=0;     // is text overlay being 
+
+block raw_saved_screen = NULL;  // backup copy of the screen, created by CreateCopy/RawSaveScreen
+// dynamically created surfaces = a list of copies of surfaces, similar to raw saved screen.
+#define MAX_DYNAMIC_SURFACES 20
 block dynamicallyCreatedSurfaces[MAX_DYNAMIC_SURFACES];
-// whether there are currently remnants of a DisplaySpeech
-int screen_is_dirty = 0;
+
+// crossfades
+block temp_virtual = NULL;  // a copy of the screen, for crossfades
+color old_palette[256];     // a copy of current palette, for crossfades
+
+block screenstack[10];  // a stack of copies, for push/pop_screen()
+int numOnStack = 0;
+
+volatile int switching_away_from_game = 0;  // non-zero when alt-tabbing.  used by mp3 player to disable itself temporarily
+
+// notify gfx system that background has changed and so has to redo walkbehind buffers or whatevs
+bool current_background_is_dirty = false; // set by mark_current_background_dirty
+
+// 'screen' is allegro's ptr to the video screen.
+block _old_screen=NULL;  // the original screen
+block _sub_screen=NULL;  // a sub screen
+
+int debug_15bit_mode = 0; // for debugging, override to 15bit mode
+int debug_24bit_mode = 0; // for debugging, override to 24bit mode
+
+int convert_16bit_bgr = 0; // gfx card is lying about being 16bit, do something about it.
+
+int screen_reset = 0; // UNUSED: set when screen is redrawn, never read.
 
 
-// dirty rects
+// SPRITES and VIEWS
+// ------------------------------------
+
+int trans_mode=0; // alpha channel for drawing sprites using put_sprite_256
+
+// sprites are just graphics, no animations
+//block spriteset[MAX_SPRITES+1];
+//SpriteCache spriteset (MAX_SPRITES+1);
+// initially size 1, this will be increased by the initFile function
+SpriteCache spriteset(1);  // cache of all the sprites
+int spritewidth[MAX_SPRITES];  // an easy lookup of sprite sizes?
+int spriteheight[MAX_SPRITES];
+char check_dynamic_sprites_at_exit = 1;  // normally set but disabled on abnormal exits.
+
+// views are collections of sprites to create an animation. with loops etc,
+ViewStruct*views=NULL;
+
+// the sprite list is an intermediate list used to order 
+// objects and characters by their baselines before everything
+// is added to the Thing To Draw List
+#define MAX_SPRITES_ON_SCREEN 76
+SpriteListEntry sprlist[MAX_SPRITES_ON_SCREEN];
+int sprlistsize=0;
+
+#define MAX_THINGS_TO_DRAW 125
+SpriteListEntry thingsToDrawList[MAX_THINGS_TO_DRAW];
+int thingsToDrawSize = 0;
+
+// stretching sprites
+// these vars are global to help with debugging
+block tmpdbl; // used for drawing stretched sprite
+block curspr; // last sprite stretched
+int newwid;   // new width
+int newhit;   // new height
+
+
+// DIRTY RECTANGLES
+// ------------------------------------
 #define MAXDIRTYREGIONS 25
 #define WHOLESCREENDIRTY (MAXDIRTYREGIONS + 5)
 #define MAX_SPANS_PER_ROW 4
@@ -415,49 +445,43 @@ struct IRRow {
   int numSpans;
 };
 
-IRRow *dirtyRow = NULL;
-int _dirtyRowSize;
-InvalidRect dirtyRegions[MAXDIRTYREGIONS];
-int numDirtyRegions = 0;
+IRRow *dirtyRow = NULL;   // size = screen height
+int _dirtyRowSize;    // == screen height
+InvalidRect dirtyRegions[MAXDIRTYREGIONS];  // not used, commented out.
+int numDirtyRegions = 0;  // ammount left.
 int numDirtyBytes = 0;
-
-
-// screen
-block temp_virtual = NULL;
-color old_palette[256];
-
-int numOnStack = 0;
-block screenstack[10];
-
-// these vars are global to help with debugging
-block tmpdbl, curspr;
-int newwid, newhit;
 
 
 // TEXT
 // ------------------------------------
-int source_text_length = -1;
-char *heightTestString = "ZHwypgfjqhkilIK";
-int longestline = 0;
+int source_text_length = -1;  // length of text displayed (orig, non-translated). == how long it is shown on screen for.
 
-char pexbuf[STD_BUFFER_SIZE];
+char *heightTestString = "ZHwypgfjqhkilIK";  // used by wgetfontheight
+
+int longestline = 0;  // longest line of text, used to figure out dialog sizes.
+
+// whether there are currently remnants of a DisplaySpeech
+int screen_is_dirty = 0;  // set when displaying speech, will disable gui if you try to show text at same time.
+
+int texthit;                // text height
 
 
 // AUDIO
 // ------------------------------------
-char *music_file;
-char *speech_file;
 
 SOUNDCLIP *channels[MAX_SOUND_CHANNELS+1];
-SOUNDCLIP *cachedQueuedMusic = NULL;
 int numSoundChannels = 8;
-#define SCHAN_SPEECH  0
-#define SCHAN_AMBIENT 1
-#define SCHAN_MUSIC   2
-#define SCHAN_NORMAL  3
-#define AUDIOTYPE_LEGACY_AMBIENT_SOUND 1
-#define AUDIOTYPE_LEGACY_MUSIC 2
-#define AUDIOTYPE_LEGACY_SOUND 3
+
+// predefined channel indexes.
+enum {SCHAN_SPEECH=0, SCHAN_AMBIENT=1, SCHAN_MUSIC=2, SCHAN_NORMAL=3};
+
+char *music_file;  // path to "audio.vox"
+char *speech_file; // path to "speech.vox"
+
+SOUNDCLIP *cachedQueuedMusic = NULL;  // next song to play when current finishes.
+
+// predefined audio clip types.
+enum {AUDIOTYPE_LEGACY_AMBIENT_SOUND=1, AUDIOTYPE_LEGACY_MUSIC=2, AUDIOTYPE_LEGACY_SOUND=3};
 
 // crossFading is >0 (channel number of new track), or -1 (old
 // track fading out, no new track)
@@ -465,17 +489,26 @@ int crossFading = 0;
 int crossFadeVolumePerStep = 0;
 int crossFadeStep = 0;
 int crossFadeVolumeAtStart = 0;
-int last_sound_played[MAX_SOUND_CHANNELS + 1];
 
-int use_extra_sound_offset = 0;
+int last_sound_played[MAX_SOUND_CHANNELS + 1];  // if new sound == last sound played, just replay that one.
 
-int current_music_type = 0;
+int use_extra_sound_offset = 0;  // if 1, adjust for directx's extra offset.
 
+int current_music_type = 0;  // current playig music type, eg, MIDI, MOD (MUS_*)
 //int current_music=0;
 
 
-// INPUT
+// INPUT - KEYS
 // ------------------------------------
+
+// state of scroll-lock
+int scrlockWasDown = 0;
+
+
+// INPUT RECORDING
+// ------------------------------------
+
+// recording types (when reading from rec'd file)
 #define REC_MOUSECLICK 1
 #define REC_MOUSEMOVE  2
 #define REC_MOUSEDOWN  3
@@ -485,120 +518,140 @@ int current_music_type = 0;
 #define REC_MOUSEWHEEL 7
 #define REC_SPEECHFINISHED 8
 #define REC_ENDOFFILE  0x6f
-short *recordbuffer = NULL;
-int  recbuffersize = 0;
-int recsize = 0;
 
-int scrlockWasDown = 0;
+short *recordbuffer = NULL;  // buffer of recording playback
+int  recbuffersize = 0;      // size of buff
+int recsize = 0;             // current offset into buffer (for recording)
 
-char replayfile[MAX_PATH] = "record.dat";
-int replay_time = 0;
-unsigned long replay_last_second = 0;
-int replay_start_this_time = 0;
+char replayfile[MAX_PATH] = "record.dat";  // replay file, default is 'record.dat' but can be changed
+int replay_time = 0;                       // length of recording in seconds
+unsigned long replay_last_second = 0;      // related to this and loopcounter and 40... 40fps?
+int replay_start_this_time = 0;            // set to non-zero by replay hotkey, plays replay
 
-const char *replayTempFile = "~replay.tmp";
+const char *replayTempFile = "~replay.tmp"; // temp recording file.
 
 
 // INPUT - MOUSE
 // ------------------------------------
+
+// global mouse state structure.
 struct GlobalMouseState global_mouse_state;
-struct GlobalRoomState global_room_state;
 
-int cur_mode; 
-int cur_cursor;
+int cur_mode;       // cursor mode, 
+int cur_cursor;     // what is the current cursor (different from mode)
 
-char alpha_blend_cursor = 0;
+char alpha_blend_cursor = 0;  // if non-zero, use alphablend when drawing cursor.
 
-// maybe gui?
-int mouse_on_iface=-1;   // mouse cursor is over this interface
-int mouse_on_iface_button=-1;
-int mouse_pushed_iface=-1;  // this BUTTON on interface MOUSE_ON_IFACE is pushed
-int mouse_ifacebut_xoffs=-1;
-int mouse_ifacebut_yoffs=-1;
-
-int mouse_z_was = 0;
+// mouse_z provided by allegro.
+int mouse_z_was = 0;  // previous mouse_wheel value.
 
 
 // FILESYS
 // ------------------------------------
+
+// intermediary buffer when creating game_file_name
 WCHAR directoryPathBuffer[MAX_PATH]; // used only by initialise_game_file_name
 
-int use_compiled_folder_as_current_dir = 0;
+int use_compiled_folder_as_current_dir = 0;  // only works when debugging
 
 
 // SAVE GAMES
 // ------------------------------------
-const char* sgnametemplate = "agssave.%03d";
-char saveGameSuffix[MAX_SG_EXT_LENGTH + 1];
-char saveGameDirectory[260] = "./";
-int gameHasBeenRestored = 0;
+// the save game number for "restart points", the save game to restore from for a restart
+#define RESTART_POINT_SAVE_GAME_NUMBER 999
 
-#define SGVERSION 8  // savegames
-char*sgsig="Adventure Game Studio saved game";  // savegames
-int sgsiglen=32;  // savegames
+const char* sgnametemplate = "agssave.%03d";  // sprintf template for save game name
+char saveGameSuffix[MAX_SG_EXT_LENGTH + 1]; // suffix to put at end of all save games.
+char saveGameDirectory[260] = "./";       // where to save games.
+int gameHasBeenRestored = 0;    // increment on every restore.  used by scripts to know when to rerun on reloaded game
 
-char rbuffer[200];
+#define SGVERSION 8  // current save version
+char*sgsig="Adventure Game Studio saved game";  // sig to identify save games
+int sgsiglen=32;  // len of above sig.
+
+char rbuffer[200];  // restore/load buffer.
+
+int load_new_game_restore = -1;  // slot number of the last restore?
 
 
 // GUI
 // ------------------------------------
 #define MAX_ANIMATING_BUTTONS 15
 
-int ifacepopped=-1;  // currently displayed pop-up GUI (-1 if none)
-
-GUIMain*guis=NULL;
+GUIMain*guis=NULL;    // gui data, loaded by read_gui
 //GUIMain dummygui;
 //GUIButton dummyguicontrol;
-block *guibg = NULL;
-IDriverDependantBitmap **guibgbmp = NULL;
+block *guibg = NULL;  // list of bgs for guis
+IDriverDependantBitmap **guibgbmp = NULL;    // list of bitmaps for gui
 
-AnimatingGUIButton animbuts[MAX_ANIMATING_BUTTONS];
+AnimatingGUIButton animbuts[MAX_ANIMATING_BUTTONS];  // list of gui buttons
 int numAnimButs = 0;
 
+int mouse_on_iface=-1;   // mouse cursor is over this interface
+int mouse_on_iface_button=-1;
+int mouse_pushed_iface=-1;  // this BUTTON on interface MOUSE_ON_IFACE is pushed
+int mouse_ifacebut_xoffs=-1;
+int mouse_ifacebut_yoffs=-1;
 
-int in_inv_screen = 0;
-int inv_screen_newroom = -1;
+int ifacepopped=-1;  // currently displayed pop-up GUI (-1 if none)
 
-TopBarSettings topBar;
-block screenop = NULL;      // for draw_text_window()
-int wantFreeScreenop = 0;   // for draw_text_window()
-int texthit;                // for draw_text_window()
+int in_inv_screen = 0; // true if in inventory screen
+int inv_screen_newroom = -1;  // go to a new room via inventory screen.
+
+
+// GUI - TOPBAR
+// ------------------------------------
+
+// draw_text_window()
+TopBarSettings topBar;    // settings for the top bar of text
+block screenop = NULL;      // 
+int wantFreeScreenop = 0;   // 
 
 
 // ROOM
 // ------------------------------------
-roomstruct thisroom;
-RoomStatus *roomstats;
-RoomStatus troom;    // used for non-saveable rooms, eg. intro
-RoomStatus*croom=NULL;
-int gs_to_newroom=-1;
-int displayed_room=-10;
-int starting_room = -1;
+
+#define NO_GAME_ID_IN_ROOM_FILE 16325
+
+roomstruct thisroom;    // room data
+
+RoomStatus *roomstats;  // status for each room
+RoomStatus troom;       // used for non-saveable rooms, eg. intro
+RoomStatus*croom=NULL;  // current room
+
+int gs_to_newroom=-1;   // set but never read, graphscript
+int displayed_room=-10; // index of displayed room
+int starting_room = -1; // start room
 
 IDriverDependantBitmap* roomBackgroundBmp = NULL;
 
-int in_new_room=0;
+int in_new_room=0;     
 int new_room_was = 0;  // 1 in new room, 2 first time in new room, 3 loading saved game
-int new_room_pos=0;
+int new_room_pos=0;  // 1000 for the left edge, 2000 for the right edge, 3000 for the bottom edge and 4000 for the top edge.
 int new_room_x = SCR_NO_VALUE;
 int new_room_y = SCR_NO_VALUE;
 
-int new_room_flags=0;
+int new_room_flags=0; // never used
 
-#define NO_GAME_ID_IN_ROOM_FILE 16325
 
 
 // CHARACTERS
 // ------------------------------------
-CharacterExtras *charextra;
 
-CharacterInfo*playerchar;
-long _sc_PlayerCharPtr = 0;
+CharacterInfo*playerchar; // player char info
+long _sc_PlayerCharPtr = 0;  // script symbol reference to player. use setup_player_character()
+
+CharacterExtras *charextra;  // extra character info.
+
+CharacterCache *charcache = NULL;  // cached info
+
+
+// MOVING
+// ------------------------------------
 
 MoveList *mls = NULL;
 /*extern int get_route_composition();
 extern int routex1;*/
-CharacterCache *charcache = NULL;
 
 
 // WALK BEHIND
@@ -640,8 +693,10 @@ int char_lowest_yp, obj_lowest_yp;
 
 // SCRIPTS
 // ------------------------------------
+
 ccScript* gamescript=NULL;
 ccScript* dialogScriptsScript = NULL;
+
 ccInstance *gameinst = NULL;
 ccInstance *roominst = NULL;
 ccInstance *dialogScriptsInst = NULL;
