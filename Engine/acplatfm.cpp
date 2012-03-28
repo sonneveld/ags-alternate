@@ -26,7 +26,8 @@
 #include "ac_exescr.h"
 #include "ac_input.h"
 #include "ac_parser.h"
-
+#include "dynobj/script_date_time.h"
+#include "cscomp.h"
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;
 

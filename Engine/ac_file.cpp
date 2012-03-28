@@ -5,6 +5,8 @@
 #include "ac_string.h"
 #include "clib32.h"
 #include "misc.h"
+#include "dynobj/sc_file.h"
+#include "cscomp.h"
 
 #ifdef WINDOWS_VERSION
 #include <shlwapi.h>
@@ -99,7 +101,7 @@ bool validate_user_file_path(const char *fnmm, char *output, bool currentDirOnly
 }
 
 /* *** SCRIPT SYMBOL: [File] FileOpen *** */
-static FILE* FileOpen(const char*fnmm, const char* mode) {
+FILE* FileOpen(const char*fnmm, const char* mode) {
   int useindx = 0;
   char fileToOpen[MAX_PATH];
 
@@ -128,7 +130,7 @@ static FILE* FileOpen(const char*fnmm, const char* mode) {
 }
 
 /* *** SCRIPT SYMBOL: [File] FileClose *** */
-static void FileClose(FILE*hha) {
+void FileClose(FILE*hha) {
   valid_handles[check_valid_file_handle(hha,"FileClose")] = NULL;
   fclose(hha);
   }
@@ -213,23 +215,6 @@ static void FileWriteRawChar(FILE *haa, int chartoWrite) {
   fputc(chartoWrite, haa);
 }
 
-// object-based File routines
-
-static const char *fopenModes[] = {NULL, "rb", "wb", "ab"};
-
-int sc_File::OpenFile(const char *filename, int mode) {
-  handle = FileOpen(filename, fopenModes[mode]);
-  if (handle == NULL)
-    return 0;
-  return 1;
-}
-
-void sc_File::Close() {
-  if (handle) {
-    FileClose(handle);
-    handle = NULL;
-  }
-}
 
 /* *** SCRIPT SYMBOL: [File] File::Exists^1 *** */
 static int File_Exists(const char *fnmm) {

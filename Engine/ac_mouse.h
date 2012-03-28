@@ -18,19 +18,21 @@ struct GlobalMouseState {
         
         blank_mouse_cursor = NULL;
         dotted_mouse_cursor = NULL;
-        mouse_frame=NULL;
-        mouse_delay=NULL;
+        mouse_frame=0;
+        mouse_delay=0;
         lastmx = -1;
         lastmy = -1;
 
     }
 
-    IDriverDependantBitmap *mouseCursor;
-    block blank_mouse_cursor;
-    block dotted_mouse_cursor;
-    int mouse_frame,mouse_delay;
-    int lastmx, lastmy;
-    ScriptMouse scmouse;
+    IDriverDependantBitmap *mouseCursor;  // bitmap of current mouse cursor
+    block blank_mouse_cursor;             // default blank mouse
+    block dotted_mouse_cursor;            // dotted mouse cursor
+    int mouse_frame;    // current frame of animated mouse
+    int mouse_delay;    // countdown delay until next frame update
+    int lastmx;     // last mouse position
+    int lastmy;
+    ScriptMouse scmouse;  // x,y of mouse.
 };
 
 

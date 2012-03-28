@@ -6,6 +6,8 @@
 #include "ac_string.h"
 #include "ac_obj.h"
 #include "ac_palette.h"
+#include "dynobj/script_drawing_surface.h"
+#include "cscomp.h"
 
 
 /* *** SCRIPT SYMBOL: [Room] GetScalingAt *** */

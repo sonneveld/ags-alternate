@@ -7,6 +7,7 @@
 
 #include "acgui.h"
 #include "AGSEditorDebugger.h"
+#include "cscomp.h"
 
 extern const char* ccGetSectionNameAtOffs(ccScript *scri, long offs);
 

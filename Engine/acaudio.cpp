@@ -19,6 +19,9 @@
 #include "clib32.h"
 #include "ac_multimedia.h"
 #include "ac_file.h"
+#include "dynobj/cc_audio_channel.h"
+#include "dynobj/cc_audio_clip.h"
+#include "cscomp.h"
 
 ScriptAudioChannel scrAudioChannel[MAX_SOUND_CHANNELS + 1];
 CCAudioChannel ccDynamicAudio;
@@ -745,7 +748,6 @@ void Game_SetAudioTypeVolume(int audioType, int volume, int changeType)
 }
 
 
-
 bool unserialize_audio_script_object(int index, const char *objectType, const char *serializedData, int dataSize)
 {
   if (strcmp(objectType, "AudioChannel") == 0)
@@ -763,39 +765,6 @@ bool unserialize_audio_script_object(int index, const char *objectType, const ch
   return true;
 }
 
-const char *CCAudioChannel::GetType() {
-  return "AudioChannel";
-}
-
-int CCAudioChannel::Serialize(const char *address, char *buffer, int bufsize) {
-  ScriptAudioChannel *ach = (ScriptAudioChannel*)address;
-  StartSerialize(buffer);
-  SerializeInt(ach->id);
-  return EndSerialize();
-}
-
-void CCAudioChannel::Unserialize(int index, const char *serializedData, int dataSize) {
-  StartUnserialize(serializedData, dataSize);
-  int id = UnserializeInt();
-  ccRegisterUnserializedObject(index, &scrAudioChannel[id], this);
-}
-
-const char *CCAudioClip::GetType() {
-  return "AudioClip";
-}
-
-int CCAudioClip::Serialize(const char *address, char *buffer, int bufsize) {
-  ScriptAudioClip *ach = (ScriptAudioClip*)address;
-  StartSerialize(buffer);
-  SerializeInt(ach->id);
-  return EndSerialize();
-}
-
-void CCAudioClip::Unserialize(int index, const char *serializedData, int dataSize) {
-  StartUnserialize(serializedData, dataSize);
-  int id = UnserializeInt();
-  ccRegisterUnserializedObject(index, &game.audioClips[id], this);
-}
 
 // ***** BACKWARDS COMPATIBILITY WITH OLD AUDIO SYSTEM ***** //
 

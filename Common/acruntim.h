@@ -11,7 +11,6 @@
 
 #include "bigend.h"
 #include "acroom.h"  // misc DEFINES
-#include "ac_dynobj.h" // for AGSCCDynamicObject
 #include "ac_invitem.h" // for ScriptInvItem
 
 // forward declarations:
@@ -22,6 +21,8 @@ struct GFXFilter; // acgfx.h
 class SpriteCache; //sprcache.h
 struct IMouseGetPosCallback; //wgt2allg.h
 struct ExecutingScript;   // ac_exescr.h
+struct ccInstance;      // cscomp.h
+struct ScriptOverlay;     // script_overlay.h
 
 // Max script string length
 #define MAX_MAXSTRLEN 200
@@ -287,94 +288,11 @@ struct ScriptObject {
   RoomObject *obj;
 };
 
-
-struct ScriptOverlay : AGSCCDynamicObject {
-  int overlayId;
-  int borderWidth;
-  int borderHeight;
-  int isBackgroundSpeech;
-
-  virtual int Dispose(const char *address, bool force);
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-  void Remove();
-  ScriptOverlay();
-};
-
-
-
-struct ScriptDrawingSurface : AGSCCDynamicObject {
-  int roomBackgroundNumber;
-  int dynamicSpriteNumber;
-  int dynamicSurfaceNumber;
-  bool isLinkedBitmapOnly;
-  BITMAP *linkedBitmapOnly;
-  int currentColour;
-  int currentColourScript;
-  int highResCoordinates;
-  int modified;
-  int hasAlphaChannel;
-  BITMAP* abufBackup;
-
-  virtual int Dispose(const char *address, bool force);
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-  BITMAP* GetBitmapSurface();
-  void StartDrawing();
-  void MultiplyThickness(int *adjustValue);
-  void UnMultiplyThickness(int *adjustValue);
-  void MultiplyCoordinates(int *xcoord, int *ycoord);
-  void FinishedDrawing();
-  void FinishedDrawingReadOnly();
-
-  ScriptDrawingSurface();
-};
-
-struct ScriptViewFrame : AGSCCDynamicObject {
-  int view, loop, frame;
-
-  virtual int Dispose(const char *address, bool force);
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-
-  ScriptViewFrame(int p_view, int p_loop, int p_frame);
-  ScriptViewFrame();
-};
-
-struct ScriptDynamicSprite : AGSCCDynamicObject {
-  int slot;
-
-  virtual int Dispose(const char *address, bool force);
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-
-  ScriptDynamicSprite(int slot);
-  ScriptDynamicSprite();
-};
-
 struct ScriptAudioChannel
 {
   int id;
   int reserved;
 };
-
-struct CCAudioChannel : AGSCCDynamicObject {
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-};
-
-struct CCAudioClip : AGSCCDynamicObject {
-  virtual const char *GetType();
-  virtual int Serialize(const char *address, char *buffer, int bufsize);
-  virtual void Unserialize(int index, const char *serializedData, int dataSize);
-};
-
-
 
 #define INVALID_X  30000
 #define MAXGSVALUES 500

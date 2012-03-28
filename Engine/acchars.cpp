@@ -32,7 +32,8 @@
 #include "acgfx.h"
 #include "ali3d.h"
 #include "ac_exescr.h"
-
+#include "dynobj/script_overlay.h"
+#include "cscomp.h"
 
 // order of loops to turn character in circle from down to down
 int turnlooporder[8] = {0, 6, 1, 7, 3, 5, 2, 4};

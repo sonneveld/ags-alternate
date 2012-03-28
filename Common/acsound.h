@@ -14,6 +14,7 @@
 #define __ACSOUND_H
 
 #include "allegro.h"
+#include "acruntim.h"
 
 #define MUS_MIDI 1
 #define MUS_MP3  2
@@ -119,5 +120,7 @@ extern void stop_and_destroy_channel_ex(int chid, bool resetLegacyMusicSettings)
 extern void acaudio_update_mp3();
 extern int play_sound(int val1);
 extern SOUNDCLIP *load_music_from_disk(int mnum, bool doRepeat);
+
+extern ScriptAudioChannel scrAudioChannel[];
 
 #endif // __ACSOUND_H

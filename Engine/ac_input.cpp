@@ -7,6 +7,7 @@
 #include "acsound.h"
 #include "acgfx.h"
 #include "ac_game.h"
+#include "cscomp.h"
 
 
 // KEYBOARD HANDLER

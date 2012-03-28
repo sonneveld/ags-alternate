@@ -176,6 +176,22 @@ extern "C" {
 #include "ac_game.h"
 #include "ac_exescr.h"
 #include "ac_input.h"
+#include "dynobj/cc_gui_object.h"
+#include "dynobj/cc_character.h"
+#include "dynobj/cc_hotspot.h"
+#include "dynobj/cc_region.h"
+#include "dynobj/cc_inventory.h"
+#include "dynobj/cc_gui.h"
+#include "dynobj/cc_object.h"
+#include "dynobj/cc_dialog.h"
+#include "dynobj/script_string.h"
+#include "dynobj/script_dialog_options_rendering.h"
+#include "dynobj/script_drawing_surface.h"
+#include "dynobj/sc_file.h"
+#include "dynobj/script_overlay.h"
+#include "dynobj/script_date_time.h"
+#include "dynobj/script_view_frame.h"
+#include "dynobj/script_dynamic_sprite.h"
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
@@ -6561,315 +6577,14 @@ void setup_player_character(int charid) {
 
 
 
-// ============================================================================
-// DYN OBJ IMPLEMENTATIONS
-// ============================================================================
-
-// *** The script serialization routines for built-in types
-
-struct CCGUIObject : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "GUIObject";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    GUIObject *guio = (GUIObject*)address;
-    StartSerialize(buffer);
-    SerializeInt(guio->guin);
-    SerializeInt(guio->objn);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int guinum = UnserializeInt();
-    int objnum = UnserializeInt();
-    ccRegisterUnserializedObject(index, guis[guinum].objs[objnum], this);
-  }
-
-};
-
-struct CCCharacter : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "Character";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    CharacterInfo *chaa = (CharacterInfo*)address;
-    StartSerialize(buffer);
-    SerializeInt(chaa->index_id);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int num = UnserializeInt();
-    ccRegisterUnserializedObject(index, &game.chars[num], this);
-  }
-
-};
-
-struct CCHotspot : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "Hotspot";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    ScriptHotspot *shh = (ScriptHotspot*)address;
-    StartSerialize(buffer);
-    SerializeInt(shh->id);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int num = UnserializeInt();
-    ccRegisterUnserializedObject(index, &scrHotspot[num], this);
-  }
-
-};
-
-struct CCRegion : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "Region";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    ScriptRegion *shh = (ScriptRegion*)address;
-    StartSerialize(buffer);
-    SerializeInt(shh->id);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int num = UnserializeInt();
-    ccRegisterUnserializedObject(index, &scrRegion[num], this);
-  }
-
-};
-
-struct CCInventory : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "Inventory";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    ScriptInvItem *shh = (ScriptInvItem*)address;
-    StartSerialize(buffer);
-    SerializeInt(shh->id);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int num = UnserializeInt();
-    ccRegisterUnserializedObject(index, &scrInv[num], this);
-  }
-
-};
-
-struct CCDialog : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "Dialog";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    ScriptDialog *shh = (ScriptDialog*)address;
-    StartSerialize(buffer);
-    SerializeInt(shh->id);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int num = UnserializeInt();
-    ccRegisterUnserializedObject(index, &scrDialog[num], this);
-  }
-
-};
-
-struct CCGUI : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "GUI";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    ScriptGUI *shh = (ScriptGUI*)address;
-    StartSerialize(buffer);
-    SerializeInt(shh->id);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int num = UnserializeInt();
-    ccRegisterUnserializedObject(index, &scrGui[num], this);
-  }
-};
-
-struct CCObject : AGSCCDynamicObject {
-
-  // return the type name of the object
-  virtual const char *GetType() {
-    return "Object";
-  }
-
-  // serialize the object into BUFFER (which is BUFSIZE bytes)
-  // return number of bytes used
-  virtual int Serialize(const char *address, char *buffer, int bufsize) {
-    ScriptObject *shh = (ScriptObject*)address;
-    StartSerialize(buffer);
-    SerializeInt(shh->id);
-    return EndSerialize();
-  }
-
-  virtual void Unserialize(int index, const char *serializedData, int dataSize) {
-    StartUnserialize(serializedData, dataSize);
-    int num = UnserializeInt();
-    ccRegisterUnserializedObject(index, &scrObj[num], this);
-  }
-
-};
 
 
 
-// ============================================================================
-// SCRIPT VIEW FRAME
-// ============================================================================
-
-int ScriptViewFrame::Dispose(const char *address, bool force) {
-  // always dispose a ViewFrame
-  delete this;
-  return 1;
-}
-
-const char *ScriptViewFrame::GetType() {
-  return "ViewFrame";
-}
-
-int ScriptViewFrame::Serialize(const char *address, char *buffer, int bufsize) {
-  StartSerialize(buffer);
-  SerializeInt(view);
-  SerializeInt(loop);
-  SerializeInt(frame);
-  return EndSerialize();
-}
-
-void ScriptViewFrame::Unserialize(int index, const char *serializedData, int dataSize) {
-  StartUnserialize(serializedData, dataSize);
-  view = UnserializeInt();
-  loop = UnserializeInt();
-  frame = UnserializeInt();
-  ccRegisterUnserializedObject(index, this, this);
-}
-
-ScriptViewFrame::ScriptViewFrame(int p_view, int p_loop, int p_frame) {
-  view = p_view;
-  loop = p_loop;
-  frame = p_frame;
-}
-
-ScriptViewFrame::ScriptViewFrame() {
-  view = -1;
-  loop = -1;
-  frame = -1;
-}
 
 
 
-// ============================================================================
-// SCRIPT OVERLAY FRAME
-// ============================================================================
-
-int ScriptOverlay::Dispose(const char *address, bool force) 
-{
-  // since the managed object is being deleted, remove the
-  // reference so it doesn't try and dispose something else
-  // with that handle later
-  int overlayIndex = find_overlay_of_type(overlayId);
-  if (overlayIndex >= 0)
-  {
-    screenover[overlayIndex].associatedOverlayHandle = 0;
-  }
-
-  // if this is being removed voluntarily (ie. pointer out of
-  // scope) then remove the associateed overlay
-  // Otherwise, it's a Restre Game or something so don't
-  if ((!force) && (!isBackgroundSpeech) && (Overlay_GetValid(this)))
-  {
-    Remove();
-  }
-
-  delete this;
-  return 1;
-}
-
-const char *ScriptOverlay::GetType() {
-  return "Overlay";
-}
-
-int ScriptOverlay::Serialize(const char *address, char *buffer, int bufsize) {
-  StartSerialize(buffer);
-  SerializeInt(overlayId);
-  SerializeInt(borderWidth);
-  SerializeInt(borderHeight);
-  SerializeInt(isBackgroundSpeech);
-  return EndSerialize();
-}
-
-void ScriptOverlay::Unserialize(int index, const char *serializedData, int dataSize) {
-  StartUnserialize(serializedData, dataSize);
-  overlayId = UnserializeInt();
-  borderWidth = UnserializeInt();
-  borderHeight = UnserializeInt();
-  isBackgroundSpeech = UnserializeInt();
-  ccRegisterUnserializedObject(index, this, this);
-}
-
-void ScriptOverlay::Remove() 
-{
-  int overlayIndex = find_overlay_of_type(overlayId);
-  if (overlayIndex < 0)
-  {
-    quit("ScriptOverlay::Remove: overlay is not there!");
-  }
-  remove_screen_overlay_index(overlayIndex);
-  overlayId = -1;
-}
 
 
-ScriptOverlay::ScriptOverlay() {
-  overlayId = -1;
-}
 
 
 

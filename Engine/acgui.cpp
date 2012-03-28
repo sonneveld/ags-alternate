@@ -19,6 +19,7 @@
 #include "acroom.h"
 #include "acruntim.h"
 #include "sprcache.h"
+#include "cscomp.h"
 
 #ifdef THIS_IS_THE_ENGINE
 #define get_adjusted_spritewidth(x) wgetblockwidth(spriteset[x])

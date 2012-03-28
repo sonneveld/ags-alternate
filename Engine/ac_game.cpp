@@ -22,6 +22,8 @@
 #include "ac_script_gui.h"
 #include "ac_exescr.h"
 #include "ac_input.h"
+#include "cscomp.h"
+#include "dynobj/script_view_frame.h"
 
 #include "agsplugin.h"
 

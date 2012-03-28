@@ -1,13 +1,12 @@
-#ifndef _AC_DYNOBJ_H_HEADER
-#define _AC_DYNOBJ_H_HEADER
+#ifndef _AGS_CC_DYNAMIC_OBJECT_H_HEADER
+#define _AGS_CC_DYNAMIC_OBJECT_H_HEADER
 
-#include "cscomp.h" // for ICCDynamicObject
+#include "dynobj/cc_dynamic_object.h" // for ICCDynamicObject
 
 struct AGSCCDynamicObject : ICCDynamicObject {
 public:
   // default implementation
   virtual int Dispose(const char *address, bool force);
-
   virtual void Unserialize(int index, const char *serializedData, int dataSize) = 0;
 
 protected:
@@ -20,7 +19,6 @@ protected:
   int  EndSerialize();
   void StartUnserialize(const char *sbuffer, int pTotalBytes);
   int  UnserializeInt();
-
 };
 
 #endif

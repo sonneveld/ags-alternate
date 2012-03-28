@@ -1,9 +1,6 @@
 #ifndef _AC_ROOM_H_HEADER
 #define _AC_ROOM_H_HEADER
 
-struct GlobalRoomState {
-};
-
 #define OVERLAPPING_OBJECT 1000
 
 extern int AreThingsOverlapping(int thing1, int thing2);

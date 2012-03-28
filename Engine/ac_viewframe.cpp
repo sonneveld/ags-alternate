@@ -2,6 +2,7 @@
 
 #include "ac.h"
 #include "ac_context.h"
+#include "dynobj/script_view_frame.h"
 
 
 /* *** SCRIPT SYMBOL: [ViewFrame] SetFrameSound *** */

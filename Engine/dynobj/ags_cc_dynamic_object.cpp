@@ -1,6 +1,7 @@
+#include "dynobj/ags_cc_dynamic_object.h"
 
 #include "ac.h"         // for quit()
-#include "ac_dynobj.h"
+
 
 int AGSCCDynamicObject::Dispose(const char *address, bool force) {
   // cannot be removed from memory

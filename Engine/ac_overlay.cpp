@@ -5,6 +5,8 @@
 #include "ac_string.h"
 #include "ali3d.h"
 #include "sprcache.h"
+#include "cscomp.h"
+#include "dynobj/script_overlay.h"
 
 
 void remove_screen_overlay_index(int cc) {
