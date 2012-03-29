@@ -253,6 +253,7 @@ GameSetup usetup;  // user preferences, setup.
 
 // Startup flags, set from parameters to engine
 int datafile_argv=0;  // datafile path as an offset in the commandline parameters
+int help_required=0;  // when ? is provided on command line.
 int change_to_game_dir = 0;  // set to 1 if -shelllaunch 
 int force_window = 0;  // -windowed = 1, -fullscreen=2
 int override_start_room = 0;  // --startr - override starting room
@@ -1042,6 +1043,14 @@ void next_iteration() {
   NEXT_ITERATION();
 }
 
+
+// ============================================================================
+// DEBUG
+// ============================================================================
+
+void set_eip(int eip) {
+  our_eip = eip;
+}
 
 
 
@@ -2555,7 +2564,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   update_polled_stuff();
 
   // load the room from disk
-  our_eip=200;
+  set_eip(200);
   thisroom.gameId = NO_GAME_ID_IN_ROOM_FILE;
   load_room(rmfile, &thisroom, (game.default_resolution > 2));
 
@@ -2570,7 +2579,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   }
 
   update_polled_stuff();
-  our_eip=201;
+  set_eip(201);
 /*  // apparently, doing this stops volume spiking between tracks
   if (thisroom.options[ST_TUNE]>0) {
     stopmusic();
@@ -2621,7 +2630,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
 
   update_polled_stuff();
 
-  our_eip=202;
+  set_eip(202);
   if (usetup.want_letterbox) {
     int abscreen=0;
     if (abuf==screen) abscreen=1;
@@ -2677,7 +2686,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
 
   SetMouseBounds (0,0,0,0);
 
-  our_eip=203;
+  set_eip(203);
   in_new_room=1;
 
   // walkable_areas_temp is used by the pathfinder to generate a
@@ -2691,7 +2700,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   if (walkareabackup!=NULL) wfreeblock(walkareabackup);
   walkareabackup=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
 
-  our_eip=204;
+  set_eip(204);
   // copy the walls screen
   blit(thisroom.walls,walkareabackup,0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
   update_polled_stuff();
@@ -2717,7 +2726,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
 
   recache_walk_behinds();
 
-  our_eip=205;
+  set_eip(205);
   // setup objects
   if (forchar != NULL) {
     // if not restoring a game, always reset this room
@@ -2848,7 +2857,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     ccAddExternalSymbol(thisroom.hotspotScriptNames[cc], &scrHotspot[cc]);
   }
 
-  our_eip=206;
+  set_eip(206);
 /*  THIS IS DONE IN THE EDITOR NOW
   thisroom.ebpalShared[0] = 1;
   for (dd = 1; dd < thisroom.num_bscenes; dd++) {
@@ -2863,7 +2872,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
 
   update_polled_stuff();
 
-  our_eip = 210;
+  set_eip(210);
   if (IS_ANTIALIAS_SPRITES) {
     // sometimes the palette has corrupt entries, which crash
     // the create_rgb_table call
@@ -2879,7 +2888,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     create_rgb_table (&rgb_table, palette, NULL);
     rgb_map = &rgb_table;
   }
-  our_eip = 211;
+  set_eip(211);
   if (forchar!=NULL) {
     // if it's not a Restore Game
 
@@ -2920,7 +2929,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       ccUnFlattenGlobalData (roominst);
       }
     }
-  our_eip=207;
+  set_eip(207);
   play.entered_edge = -1;
 
   if ((new_room_x != SCR_NO_VALUE) && (forchar != NULL))
@@ -3023,7 +3032,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   if (thisroom.options[ST_TUNE]>0)
     PlayMusicResetQueue(thisroom.options[ST_TUNE]);
 
-  our_eip=208;
+  set_eip(208);
   if (forchar!=NULL) {
     if (thisroom.options[ST_MANDISABLED]==0) { forchar->on=1;
       enable_cursor_mode(0); }
@@ -3042,12 +3051,12 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     }
   color_map = NULL;
 
-  our_eip = 209;
+  set_eip(209);
   update_polled_stuff();
   generate_light_table();
   update_music_volume();
   update_viewport();
-  our_eip = 212;
+  set_eip(212);
   invalidate_screen();
   for (cc=0;cc<croom->numobj;cc++) {
     if (objs[cc].on == 2)
@@ -3062,7 +3071,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   // no fade in, so set the palette immediately in case of 256-col sprites
   if (game.color_depth > 1)
     setpal();
-  our_eip=220;
+  set_eip(220);
   update_polled_stuff();
   DEBUG_CONSOLE("Now in room %d", displayed_room);
   guis_need_update = 1;
@@ -3612,7 +3621,7 @@ void check_skip_cutscene_keypress (int kgn) {
 // called from main loop.
 void check_controls() {
   int numevents_was = numevents;
-  our_eip = 1007;
+  set_eip(1007);
   NEXT_ITERATION();
 
   int aa,mongu=-1;
@@ -3935,7 +3944,7 @@ void check_controls() {
       }
     }
   }
-  our_eip = 1008;
+  set_eip(1008);
 
 }  // end check_controls
 
@@ -4189,7 +4198,7 @@ void DrawViewFrame(block target, ViewFrame *vframe, int x, int y) {
 // the like.
 void update_stuff() {
   int aa;
-  our_eip = 20;
+  set_eip(20);
 
   if (play.gscript_timer > 0) play.gscript_timer--;
   for (aa=0;aa<MAX_TIMERS;aa++) {
@@ -4264,7 +4273,7 @@ void update_stuff() {
     objs[aa].wait=vfptr->speed+objs[aa].overall_speed;
     CheckViewFrame (objs[aa].view, objs[aa].loop, objs[aa].frame);
   }
-  our_eip = 21;
+  set_eip(21);
 
   // shadow areas
   int onwalkarea = get_walkable_area_at_character (game.playercharacter);
@@ -4275,7 +4284,7 @@ void update_stuff() {
     else if (thisroom.options[ST_MANVIEW]==0) playerchar->view=playerchar->defview;
     else playerchar->view=thisroom.options[ST_MANVIEW]-1;
   }
-  our_eip = 22;
+  set_eip(22);
 
   #define MAX_SHEEP 30
   int numSheep = 0;
@@ -4683,7 +4692,7 @@ void update_stuff() {
       chi->baseline = usebase + 1;
   }
 
-  our_eip = 23;
+  set_eip(23);
 
   // update overlay timers
   for (aa=0;aa<numscreenover;aa++) {
@@ -4721,7 +4730,7 @@ void update_stuff() {
       }
     }
   }
-  our_eip = 24;
+  set_eip(24);
 
   // update sierra-style speech
   if ((face_talking >= 0) && (play.fast_forward == 0)) 
@@ -4862,7 +4871,7 @@ void update_stuff() {
     }  // end if updatedFrame
   }
 
-  our_eip = 25;
+  set_eip(25);
 }
 
 
@@ -5436,7 +5445,7 @@ void prepare_characters_for_drawing() {
   int light_level,coldept,aa;
   int tint_red, tint_green, tint_blue, tint_amount, tint_light = 255;
 
-  our_eip=33;
+  set_eip(33);
   // draw characters
   for (aa=0;aa<game.numcharacters;aa++) {
     if (game.chars[aa].on==0) continue;
@@ -5445,7 +5454,7 @@ void prepare_characters_for_drawing() {
     useindx = aa + MAX_INIT_SPR;
 
     CharacterInfo*chin=&game.chars[aa];
-    our_eip = 330;
+    set_eip(330);
     // if it's on but set to view -1, they're being silly
     if (chin->view < 0) {
       quitprintf("!The character '%s' was turned on in the current room (room %d) but has not been assigned a view number.",
@@ -5464,10 +5473,10 @@ void prepare_characters_for_drawing() {
     sppic=views[chin->view].loops[chin->loop].frames[chin->frame].pic;
     if ((sppic < 0) || (sppic >= MAX_SPRITES))
       sppic = 0;  // in case it's screwed up somehow
-    our_eip = 331;
+    set_eip(331);
     // sort out the stretching if required
     onarea = get_walkable_area_at_character (aa);
-    our_eip = 332;
+    set_eip(332);
     light_level = 0;
     tint_amount = 0;
      
@@ -5503,7 +5512,7 @@ void prepare_characters_for_drawing() {
       actsps[useindx] = NULL;
     }*/
 
-    our_eip = 3330;
+    set_eip(3330);
     int isMirrored = 0, specialpic = sppic;
     bool usingCachedImage = false;
 
@@ -5516,7 +5525,7 @@ void prepare_characters_for_drawing() {
       specialpic = -sppic;
     }
 
-    our_eip = 3331;
+    set_eip(3331);
 
     // if the character was the same sprite and scaling last time,
     // just use the cached image
@@ -5551,7 +5560,7 @@ void prepare_characters_for_drawing() {
       charcache[aa].inUse = 0;
     }
 
-    our_eip = 3332;
+    set_eip(3332);
     
     if (zoom_level != 100) {
       // it needs to be stretched, so calculate the new dimensions
@@ -5568,7 +5577,7 @@ void prepare_characters_for_drawing() {
       newheight = spriteheight[sppic];
     }
 
-    our_eip = 3336;
+    set_eip(3336);
 
     // Calculate the X & Y co-ordinates of where the sprite will be
     atxp=(multiply_up_coordinate(chin->x) - offsetx) - newwidth/2;
@@ -5601,7 +5610,7 @@ void prepare_characters_for_drawing() {
         actsps[useindx] = recycle_bitmap(actsps[useindx], coldept, spritewidth[sppic], spriteheight[sppic]);
       }
 
-      our_eip = 335;
+      set_eip(335);
 
       if (((light_level != 0) || (tint_amount != 0)) &&
           (!gfxDriver->HasAcceleratedStretchAndFlip())) {
@@ -5632,7 +5641,7 @@ void prepare_characters_for_drawing() {
     // adjust the Y positioning for the character's Z co-ord
     atyp -= multiply_up_coordinate(chin->z);
 
-    our_eip = 336;
+    set_eip(336);
 
     int bgX = atxp + offsetx + chin->pic_xoffs;
     int bgY = atyp + offsety + chin->pic_yoffs;
@@ -5682,7 +5691,7 @@ void prepare_characters_for_drawing() {
 
     }
 
-    our_eip = 337;
+    set_eip(337);
     // disable alpha blending with tinted sprites (because the
     // alpha channel was lost in the tinting process)
     //if (((tint_level) && (tint_amount < 100)) || (light_level))
@@ -5714,10 +5723,10 @@ void draw_screen_background() {
     clear(abuf);
     return;
     }*/
-  our_eip=30;
+  set_eip(30);
   update_viewport();
   
-  our_eip=31;
+  set_eip(31);
 
   if ((offsetx != offsetxWas) || (offsety != offsetyWas)) {
     invalidate_screen();
@@ -5770,11 +5779,11 @@ void draw_screen_background() {
     prepare_characters_for_drawing ();
 
     if ((debug_flags & DBG_NODRAWSPRITES)==0) {
-      our_eip=34;
+      set_eip(34);
       draw_sprite_list();
     }
   }
-  our_eip=36;
+  set_eip(36);
 }
 
 
@@ -5894,7 +5903,7 @@ void draw_screen_overlay() {
 
   // Draw GUIs - they should always be on top of overlays like
   // speech background text
-  our_eip=35;
+  set_eip(35);
   mouse_on_iface_button=-1;
   if (((debug_flags & DBG_NOIFACE)==0) && (displayed_room >= 0)) {
     int aa;
@@ -5910,19 +5919,19 @@ void draw_screen_overlay() {
       guis[aa].draw();
       guis[aa].poll();
       }*/
-    our_eip = 37;
+    set_eip(37);
     if (guis_need_update) {
       block abufwas = abuf;
       guis_need_update = 0;
       for (aa=0;aa<game.numgui;aa++) {
         if (guis[aa].on<1) continue;
         eip_guinum = aa;
-        our_eip = 370;
+        set_eip(370);
         clear_to_color (guibg[aa], bitmap_mask_color(guibg[aa]));
         abuf = guibg[aa];
-        our_eip = 372;
+        set_eip(372);
         guis[aa].draw_at(0,0);
-        our_eip = 373;
+        set_eip(373);
 
         bool isAlpha = false;
         if (guis[aa].is_alpha()) 
@@ -5944,11 +5953,11 @@ void draw_screen_overlay() {
         {
           guibgbmp[aa] = gfxDriver->CreateDDBFromBitmap(guibg[aa], isAlpha);
         }
-        our_eip = 374;
+        set_eip(374);
       }
       abuf = abufwas;
     }
-    our_eip = 38;
+    set_eip(38);
     // Draw the GUIs
     for (gg = 0; gg < game.numgui; gg++) {
       aa = play.gui_draw_order[gg];
@@ -5980,7 +5989,7 @@ void draw_screen_overlay() {
     }
   }
 
-  our_eip = 1099;
+  set_eip(1099);
 
   // *** Draw the Things To Draw List ***
 
@@ -6019,7 +6028,7 @@ void draw_screen_overlay() {
 
   clear_draw_list();
 
-  our_eip = 1100;
+  set_eip(1100);
 
 
   if (display_fps) 
@@ -6054,7 +6063,7 @@ void draw_screen_overlay() {
     draw_and_invalidate_text(get_fixed_pixel_size(5), get_fixed_pixel_size(10), FONT_SPEECH, tformat);
   }
 
-  our_eip = 1101;
+  set_eip(1101);
 }
 
 
@@ -6260,19 +6269,19 @@ void quit(char*quitmsg) {
     editor_debugger->Shutdown();
   }
 
-  our_eip = 9900;
+  set_eip(9900);
   stop_recording();
 
   if (need_to_stop_cd)
     cd_manager(3,0);
 
-  our_eip = 9020;
+  set_eip(9020);
   ccUnregisterAllObjects();
 
-  our_eip = 9019;
+  set_eip(9019);
   platform->AboutToQuitGame();
 
-  our_eip = 9016;
+  set_eip(9016);
   platform->ShutdownPlugins();
 
   if ((qmsg[0] == '|') && (check_dynamic_sprites_at_exit) && 
@@ -6294,13 +6303,13 @@ void quit(char*quitmsg) {
   if (use_cdplayer)
     platform->ShutdownCDPlayer();
 
-  our_eip = 9917;
+  set_eip(9917);
   game.options[OPT_CROSSFADEMUSIC] = 0;
   stopmusic();
   if (opts.mod_player)
     remove_mod_player();
   remove_sound();
-  our_eip = 9901;
+  set_eip(9901);
 
   char alertis[1500]="\0";
   if (qmsg[0]=='|') ; //qmsg++;
@@ -6338,7 +6347,7 @@ void quit(char*quitmsg) {
    "\nError: ");
 
   shutdown_font_renderer();
-  our_eip = 9902;
+  set_eip(9902);
 
   // close graphics mode (Win) or return to text mode (DOS)
   if (_sub_screen) {
@@ -6346,11 +6355,11 @@ void quit(char*quitmsg) {
     _sub_screen = NULL;
   }
   
-  our_eip = 9907;
+  set_eip(9907);
 
   close_translation();
 
-  our_eip = 9908;
+  set_eip(9908);
 
   // Release the display mode (and anything dependant on the window)
   if (gfxDriver != NULL)
@@ -6381,7 +6390,7 @@ void quit(char*quitmsg) {
   
   platform->PostAllegroExit();
 
-  our_eip = 9903;
+  set_eip(9903);
 
   // wipe all the interaction structs so they don't de-alloc the children twice
   memset (&roomstats[0], 0, sizeof(RoomStatus) * MAX_ROOMS);
@@ -6406,7 +6415,7 @@ void quit(char*quitmsg) {
 
   write_log_debug("***** ENGINE HAS SHUTDOWN");
 
-  our_eip = 9904;
+  set_eip(9904);
   exit(EXIT_NORMAL);
 }
 
@@ -6865,10 +6874,10 @@ int load_game_file() {
   FILE*iii = clibfopen("game28.dta","rb");
   if (iii==NULL) return -1;
 
-  our_eip=-18;
+  set_eip(-18);
   setup_script_exports();
 
-  our_eip=-16;
+  set_eip(-16);
 
   teststr[30]=0;
   fread(&teststr[0],30,1,iii);
@@ -6992,7 +7001,7 @@ int load_game_file() {
     moduleRepExecAddr[bb] = NULL;
   }
   
-  our_eip=-15;
+  set_eip(-15);
 
   charextra = (CharacterExtras*)calloc(game.numcharacters, sizeof(CharacterExtras));
   mls = (MoveList*)calloc(game.numcharacters + MAX_INIT_SPR + 1, sizeof(MoveList));
@@ -7011,7 +7020,7 @@ int load_game_file() {
     views[iteratorCount].ReadFromFile(iii);
   }
 
-  our_eip=-14;
+  set_eip(-14);
 
   game.chars=(CharacterInfo*)calloc(1,sizeof(CharacterInfo)*game.numcharacters+5);
 #ifndef ALLEGRO_BIG_ENDIAN
@@ -7044,7 +7053,7 @@ int load_game_file() {
   set_default_glmsg (993, "Quit");
   set_default_glmsg (994, "Play");
   set_default_glmsg (995, "Are you sure you want to quit?");
-  our_eip=-13;
+  set_eip(-13);
 
   dialog=(DialogTopic*)malloc(sizeof(DialogTopic)*game.numdialog+5);
 
@@ -7135,7 +7144,7 @@ int load_game_file() {
   if (game.numfonts == 0)
     return -2;  // old v2.00 version
 
-  our_eip=-11;
+  set_eip(-11);
   characterScriptObjNames = (char**)malloc(sizeof(char*) * game.numcharacters);
 
   for (ee=0;ee<game.numcharacters;ee++) {
@@ -7228,7 +7237,7 @@ int load_game_file() {
   //ccRegisterManagedObject(&dummygui, NULL);
   //ccRegisterManagedObject(&dummyguicontrol, NULL);
 
-  our_eip=-22;
+  set_eip(-22);
   for (ee=0;ee<game.numfonts;ee++) 
   {
     int fontsize = game.fontflags[ee] & FFLG_SIZEMASK;
@@ -7245,7 +7254,7 @@ int load_game_file() {
   wtexttransparent(TEXTFG);
   play.fade_effect=game.options[OPT_FADETYPE];
 
-  our_eip=-21;
+  set_eip(-21);
 
   for (ee = 0; ee < MAX_INIT_SPR; ee++) {
     ccRegisterManagedObject(&scrObj[ee], &ccDynamicObject);
@@ -7270,10 +7279,10 @@ int load_game_file() {
   ccAddExternalSymbol("inventory",&scrInv[0]);
   ccAddExternalSymbol("dialog", &scrDialog[0]);
 
-  our_eip = -23;
+  set_eip(-23);
   platform->StartPlugins();
 
-  our_eip = -24;
+  set_eip(-24);
   ccSetScriptAliveTimer(150000);
   ccSetStringClassImpl(&myScriptStringImpl);
   if (create_global_script())
@@ -10919,7 +10928,7 @@ int do_game_load(const char *nametouse, int slotNumber, char *descrp, int *wantS
     return -2; 
   }
   int oldeip = our_eip;
-  our_eip = 2050;
+  set_eip(2050);
 
   fgetstring_limit(rbuffer,ooo, 180);
   rbuffer[180] = 0;
@@ -10962,7 +10971,7 @@ int do_game_load(const char *nametouse, int slotNumber, char *descrp, int *wantS
     return 0;
   }
 
-  our_eip = 2051;
+  set_eip(2051);
 
   // do the actual restore
   int ress = restore_game_data(ooo, nametouse);
@@ -11139,7 +11148,7 @@ void construct_virtual_screen(bool fullRedraw)
   if (play.fast_forward)
     return;
 
-  our_eip=3;
+  set_eip(3);
 
   gfxDriver->UseSmoothScaling(IS_ANTIALIAS_SPRITES);
 
@@ -11164,7 +11173,7 @@ void construct_virtual_screen(bool fullRedraw)
 
   // make sure that the mp3 is always playing smoothly
   acaudio_update_mp3();
-  our_eip=4;
+  set_eip(4);
   draw_screen_overlay();
 
   if (fullRedraw)
@@ -11181,7 +11190,7 @@ void construct_virtual_screen(bool fullRedraw)
 void render_graphics(IDriverDependantBitmap *extraBitmap, int extraX, int extraY) {
 
   construct_virtual_screen(false);
-  our_eip=5;
+  set_eip(5);
 
   if (extraBitmap != NULL)
     gfxDriver->DrawSprite(extraX, extraY, extraBitmap);
@@ -11210,7 +11219,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
 #endif*/
   }
   ccNotifyScriptStillAlive ();
-  our_eip=1;
+  set_eip(1);
   timerloop=0;
   if (want_quit) {
     want_quit = 0;
@@ -11230,10 +11239,10 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
   if ((play.no_hicolor_fadein) && (game.options[OPT_FADETYPE] == FADE_NORMAL))
     play.screen_is_faded_out = 0;
 
-  our_eip = 1014;
+  set_eip(1014);
   update_gui_disabled_status();
 
-  our_eip = 1004;
+  set_eip(1004);
   if (in_new_room == 0) {
     // Run the room and game script repeatedly_execute
     run_function_on_non_blocking_thread(&repExecAlways);
@@ -11244,7 +11253,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
   // (player enters screen)
   check_new_room ();
   
-  our_eip = 1005;
+  set_eip(1005);
 
   if ((play.ground_level_areas_disabled & GLED_INTERACTION) == 0) {
     // check if he's standing on a hotspot
@@ -11300,7 +11309,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
     if (inRoom != displayed_room)
       check_new_room();
   }
-  our_eip=2;
+  set_eip(2);
   if (debug_flags & DBG_NOUPDATE) ;
   else if (game_paused==0) update_stuff();
 
@@ -11346,7 +11355,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
     rest(2);
 #endif
   }
-  our_eip=6;
+  set_eip(6);
   new_room_was = in_new_room;
   if (in_new_room>0)
     setevent(EV_FADEIN,0,0,0);
@@ -11361,7 +11370,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
     if (new_room_was!=3)   // enters screen after fadein
       setevent(EV_RUNEVBLOCK,EVB_ROOM,0,7);
   }
-  our_eip=7;
+  set_eip(7);
 //    if (ac_mgetbutton()>NONE) break;
   update_polled_stuff();
   if (play.bg_anim_delay > 0) play.bg_anim_delay--;
@@ -11395,7 +11404,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
   if (play.fast_forward)
     return;
 
-  our_eip=72;
+  set_eip(72);
   if (time(NULL) != t1) {
     t1 = time(NULL);
     fps = loopcounter - lastcounter;
@@ -11416,7 +11425,7 @@ int check_write_access() {
   if (platform->GetDiskFreeSpaceMB() < 2)
     return 0;
 
-  our_eip = -1895;
+  set_eip(-1895);
 
   // The Save Game Dir is the only place that we should write to
   char tempPath[MAX_PATH];
@@ -11425,12 +11434,12 @@ int check_write_access() {
   if (yy == NULL)
     return 0;
 
-  our_eip = -1896;
+  set_eip(-1896);
 
   fwrite("just to test the drive free space", 30, 1, yy);
   fclose(yy);
 
-  our_eip = -1897;
+  set_eip(-1897);
 
   if (unlink(tempPath))
     return 0;
@@ -11505,11 +11514,11 @@ int main_game_loop() {
     DEBUG_CONSOLE("Restore mouse to mode %d cursor %d", play.restore_cursor_mode_to, play.restore_cursor_image_to);
   }
 
-  our_eip=76;
+  set_eip(76);
   if (restrict_until==0) ;
   else {
     restrict_until = wait_loop_still_valid();
-    our_eip = 77;
+    set_eip(77);
 
     if (restrict_until==0) {
       set_default_cursor();
@@ -11528,7 +11537,7 @@ int main_game_loop() {
       user_disabled_for=0;
     }
   }
-  our_eip = 78;
+  set_eip(78);
   return 0;
 }
 
@@ -11724,7 +11733,7 @@ void initialize_sprite (int ee) {
   else {
     // stretch sprites to correct resolution
     int oldeip = our_eip;
-    our_eip = 4300;
+    set_eip(4300);
 
     if (game.spriteflags[ee] & SPF_HADALPHACHANNEL) {
       // we stripped the alpha channel out last time, put
@@ -11938,7 +11947,7 @@ void init_game_settings() {
   dummyguicontrol.guin = -1;
   dummyguicontrol.objn = -1;*/
 
-  our_eip=-6;
+  set_eip(-6);
 //  game.chars[0].talkview=4;
   //init_language_text(game.langcodes[0]);
 
@@ -11982,7 +11991,7 @@ void init_game_settings() {
     guibg[ee] = gfxDriver->ConvertBitmapToSupportedColourDepth(guibg[ee]);
   }
 
-  our_eip=-5;
+  set_eip(-5);
   for (ee=0;ee<game.numinvitems;ee++) {
     if (game.invinfo[ee].flags & IFLG_STARTWITH) playerchar->inv[ee]=1;
     else playerchar->inv[ee]=0;
@@ -12365,18 +12374,18 @@ void start_game() {
   filter->SetMousePosition(160,100);
   newmusic(0);
 
-  our_eip = -42;
+  set_eip(-42);
 
   for (int kk = 0; kk < numScriptModules; kk++)
     run_text_script(moduleInst[kk], "game_start");
 
   run_text_script(gameinst,"game_start");
 
-  our_eip = -43;
+  set_eip(-43);
 
   SetRestartPoint();
 
-  our_eip=-3;
+  set_eip(-3);
 
   if (displayed_room < 0) {
     current_fade_out_effect();
@@ -12778,37 +12787,13 @@ void initialise_game_file_name(int argc,char **argv)
 #endif
 }
 
-int main(int argc,char*argv[]) { 
-  our_eip = -999;
-  cfopenpriority=PR_FILEFIRST;
-  int ee;
-  play.recording = 0;
-  play.playback = 0;
-  play.takeover_data = 0;
 
-  platform = AGSPlatformDriver::GetDriver();
-
-#ifdef WINDOWS_VERSION
-  wArgv = CommandLineToArgvW(GetCommandLineW(), &wArgc);
-  if (wArgv == NULL)
-  {
-    platform->DisplayAlert("CommandLineToArgvW failed, unable to start the game.");
-    return 9;
-  }
-#endif
-
-  print_welcome_text(AC_VERSION_TEXT,ACI_VERSION_TEXT);
-  if ((argc>1) && (argv[1][1]=='?'))
-    return 0;
-
-  write_log_debug("***** ENGINE STARTUP");
-
-  install_debug_handlers();
-
+void main_handle_command_line_arguments(int argc, char **argv) {
+  
   debug_flags=0;
 
-  for (ee=1;ee<argc;ee++) {
-    if (argv[ee][1]=='?') return 0;
+  for (int ee=1;ee<argc;ee++) {
+    if (argv[ee][1]=='?') {help_required=1; return;}
     if (stricmp(argv[ee],"-shelllaunch") == 0)
       change_to_game_dir = 1;
     else if (stricmp(argv[ee],"-updatereg") == 0)
@@ -12880,8 +12865,9 @@ int main(int argc,char*argv[]) {
     }
     else if (argv[ee][0]!='-') datafile_argv=ee;
   }
-  
+}
 
+void main_init_crt_debug() {
 #ifdef _DEBUG
   /* logfile=fopen("g:\\ags.log","at");
    //_CrtSetReportHook( OurReportingFunction );
@@ -12905,6 +12891,44 @@ int main(int argc,char*argv[]) {
 //  _CrtMemCheckpoint(&memstart);
 //  _CrtMemDumpStatistics( &memstart );*/
 #endif
+}
+
+int main(int argc, char*argv[]) { 
+  set_eip(-999);
+  clib_set_open_priority(PR_FILEFIRST);
+
+  // input recording
+  play.recording = 0;
+  play.playback = 0;
+
+  // new game, no takeover data.
+  play.takeover_data = 0;
+
+  // init cross platform driver
+  platform = AGSPlatformDriver::GetDriver();
+
+#ifdef WINDOWS_VERSION
+  wArgv = CommandLineToArgvW(GetCommandLineW(), &wArgc);
+  if (wArgv == NULL)
+  {
+    platform->DisplayAlert("CommandLineToArgvW failed, unable to start the game.");
+    return 9;
+  }
+#endif
+
+  print_welcome_text(AC_VERSION_TEXT,ACI_VERSION_TEXT);
+  if ((argc>1) && (argv[1][1]=='?'))
+    return 0;
+
+  write_log_debug("***** ENGINE STARTUP");
+
+  install_debug_handlers();
+
+  main_handle_command_line_arguments(argc, argv);
+  if (help_required)
+    return 0;
+
+  main_init_crt_debug();
 
   if ((loadSaveGameOnStartup != NULL) && (argv[0] != NULL))
   {
@@ -12946,52 +12970,20 @@ int main(int argc,char*argv[]) {
   }
 }
 
-void create_gfx_driver() 
-{
-#ifdef ENABLE_THIS_LATER
-#ifdef WINDOWS_VERSION
-  if (stricmp(usetup.gfxDriverID, "D3D9") == 0)
-    gfxDriver = GetD3DGraphicsDriver(filter);
-  else
-#endif
-    gfxDriver = GetSoftwareGraphicsDriver(filter);
-#else
-  gfxDriver = GetStubGraphicsDriver(filter);
-#endif
-//gfxDriver = GetD3DGraphicsDriver(filter);
-gfxDriver = GetSoftwareGraphicsDriver(filter);
-  gfxDriver->SetCallbackOnInit(GfxDriverOnInitCallback);
-  gfxDriver->SetTintMethod(TintReColourise);
-}
-
-void setup_sierra_interface() {
-  int rr;
-  game.numgui =0;
-  for (rr=0;rr<42;rr++) game.paluses[rr]=PAL_GAMEWIDE;
-  for (rr=42;rr<256;rr++) game.paluses[rr]=PAL_BACKGROUND;
-}
-
 
 
 // ============================================================================
 // INIT ENGINE
 // ============================================================================
 
-int initialize_engine(int argc,char*argv[])
+
+int initeng_init_allegro() 
 {
-  FILE*ppp;
-  int ee;
-
-  write_log_debug("Reading config file");
-
-  our_eip = -200;
-  read_config_file(argv[0]);
-
   set_uformat(U_ASCII);
 
   write_log_debug("Initializing allegro");
 
-  our_eip = -199;
+  set_eip(-199);
   // Initialize allegro
 #ifdef WINDOWS_VERSION
   if (install_allegro(SYSTEM_AUTODETECT,&myerrno,atexit)) {
@@ -13003,9 +12995,15 @@ int initialize_engine(int argc,char*argv[])
     return EXIT_NORMAL;
   }
 
+  return 0;
+}
+
+int initeng_init_window( int argc, char* * argv ) 
+{
+
   write_log_debug("Setting up window");
 
-  our_eip = -198;
+  set_eip(-198);
 #if (ALLEGRO_DATE > 19990103)
   set_window_title("Adventure Game Studio");
 #if (ALLEGRO_DATE > 20021115)
@@ -13014,12 +13012,12 @@ int initialize_engine(int argc,char*argv[])
   set_window_close_hook (winclosehook);
 #endif
 
-  our_eip = -197;
+  set_eip(-197);
 #endif
 
   platform->SetGameWindowIcon();
 
-  our_eip = -196;
+  set_eip(-196);
 
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
   // check if Setup needs to be run instead
@@ -13050,8 +13048,14 @@ int initialize_engine(int argc,char*argv[])
     usetup.windowed = 1;
   else if (force_window == 2)
     usetup.windowed = 0;
-  
-  our_eip = -195;
+
+  return 0;
+}
+
+int initeng_init_game_data( int argc, char* * argv ) 
+{
+
+  set_eip(-195);
 
   write_log_debug("Initializing game data");
 
@@ -13061,11 +13065,11 @@ int initialize_engine(int argc,char*argv[])
 
   int errcod = csetlib(game_file_name,"");  // assume it's appended to exe
 
-  our_eip = -194;
-//  char gamefilenamebuf[200];
+  set_eip(-194);
+  //  char gamefilenamebuf[200];
   if ((errcod!=0) && (change_to_game_dir == 0)) {
     // it's not, so look for the file
-    
+
     game_file_name = ci_find_file(usetup.data_files_dir, usetup.main_data_filename);
 
     errcod=csetlib(game_file_name,"");
@@ -13073,37 +13077,37 @@ int initialize_engine(int argc,char*argv[])
       //sprintf(gamefilenamebuf,"%s\\ac2game.ags",usetup.data_files_dir);
       free(game_file_name);
       game_file_name = ci_find_file(usetup.data_files_dir, "ac2game.ags");
-      
+
       errcod = csetlib(game_file_name,"");
     }
   }
   else {
     // set the data filename to the EXE name
-    
+
     usetup.main_data_filename = get_filename(game_file_name);
 
     if (((strchr(game_file_name, '/') != NULL) ||
-         (strchr(game_file_name, '\\') != NULL)) &&
-         (stricmp(usetup.data_files_dir, ".") == 0)) {
-      // there is a path in the game file name (and the user
-      // has not specified another one)
-      // save the path, so that it can load the VOX files, etc
-      usetup.data_files_dir = (char*)malloc(strlen(game_file_name) + 1);
-      strcpy(usetup.data_files_dir, game_file_name);
-    
-      if (strrchr(usetup.data_files_dir, '/') != NULL)
-        strrchr(usetup.data_files_dir, '/')[0] = 0;
-      else if (strrchr(usetup.data_files_dir, '\\') != NULL)
-        strrchr(usetup.data_files_dir, '\\')[0] = 0;
-      else {
-        platform->DisplayAlert("Error processing game file name: slash but no slash");
-        return EXIT_NORMAL;
-      }
+      (strchr(game_file_name, '\\') != NULL)) &&
+      (stricmp(usetup.data_files_dir, ".") == 0)) {
+        // there is a path in the game file name (and the user
+        // has not specified another one)
+        // save the path, so that it can load the VOX files, etc
+        usetup.data_files_dir = (char*)malloc(strlen(game_file_name) + 1);
+        strcpy(usetup.data_files_dir, game_file_name);
+
+        if (strrchr(usetup.data_files_dir, '/') != NULL)
+          strrchr(usetup.data_files_dir, '/')[0] = 0;
+        else if (strrchr(usetup.data_files_dir, '\\') != NULL)
+          strrchr(usetup.data_files_dir, '\\')[0] = 0;
+        else {
+          platform->DisplayAlert("Error processing game file name: slash but no slash");
+          return EXIT_NORMAL;
+        }
     }
 
   }
 
-  our_eip = -193;
+  set_eip(-193);
 
   if (errcod!=0) {  // there's a problem
     if (errcod==-1) {  // file not found
@@ -13115,21 +13119,21 @@ int initialize_engine(int argc,char*argv[])
         "Run AGSEditor.exe to launch the editor.\n\n"
         "(Unable to find '%s')\n", argv[datafile_argv]);
       platform->DisplayAlert(emsg);
-      }
+    }
     else if (errcod==-4)
       platform->DisplayAlert("ERROR: Too many files in data file.");
     else platform->DisplayAlert("ERROR: The file is corrupt. Make sure you have the correct version of the\n"
-        "editor, and that this really is an AGS game.\n");
+      "editor, and that this really is an AGS game.\n");
     return EXIT_NORMAL;
   }
 
-  our_eip = -192;
+  return 0;
+}
 
-  write_log_debug("Initializing TTF renderer");
+int initeng_init_mouse() 
+{
 
-  init_font_renderer();
-
-  our_eip = -188;
+  set_eip(-188);
 
   write_log_debug("Initializing mouse");
 
@@ -13142,7 +13146,13 @@ int initialize_engine(int argc,char*argv[])
     return EXIT_NORMAL;
   }
 #endif // DEBUG
-  our_eip = -187;
+
+  return 0;
+}
+
+int initeng_mem_check() 
+{
+  set_eip(-187);
 
   write_log_debug("Checking memory");
 
@@ -13153,39 +13163,48 @@ int initialize_engine(int argc,char*argv[])
       "If you are running from Windows, check the 'DPMI memory' setting on the DOS box\n"
       "properties.\n");
     return EXIT_NORMAL;
-    }
+  }
   free(memcheck);
-  unlink (replayTempFile);
 
+  return 0;
+}
+
+void initeng_init_rooms() 
+{
   write_log_debug("Initializing rooms");
 
   roomstats=(RoomStatus*)calloc(sizeof(RoomStatus),MAX_ROOMS);
-  for (ee=0;ee<MAX_ROOMS;ee++) {
+  for (int ee=0;ee<MAX_ROOMS;ee++) {
     roomstats[ee].beenhere=0;
     roomstats[ee].numobj=0;
     roomstats[ee].tsdatasize=0;
     roomstats[ee].tsdata=NULL;
-    }
+  }
+}
+
+int initeng_init_speech() 
+{
+
   play.want_speech=-2;
 
-  our_eip = -186;
+  set_eip(-186);
   if (usetup.no_speech_pack == 0) {
     /* Can't just use fopen here, since we need to change the filename
-        so that pack functions, etc. will have the right case later */
+    so that pack functions, etc. will have the right case later */
     speech_file = ci_find_file(usetup.data_files_dir, "speech.vox");
-    
-    ppp = fopen(speech_file, "rb");
 
-    if (ppp == NULL)
+    FILE *speech_fp = fopen(speech_file, "rb");
+
+    if (speech_fp == NULL)
     {
       // In case they're running in debug, check Compiled folder
       free(speech_file);
       speech_file = ci_find_file("Compiled", "speech.vox");
-      ppp = fopen(speech_file, "rb");
+      speech_fp = fopen(speech_file, "rb");
     }
-    
-    if (ppp!=NULL) {
-      fclose(ppp);
+
+    if (speech_fp!=NULL) {
+      fclose(speech_fp);
 
       write_log_debug("Initializing speech vox");
 
@@ -13202,7 +13221,7 @@ int initialize_engine(int argc,char*argv[])
         else {
           numLipLines = getw(speechsync);
           splipsync = (SpeechLipSyncLine*)malloc (sizeof(SpeechLipSyncLine) * numLipLines);
-          for (ee = 0; ee < numLipLines; ee++)
+          for (int ee = 0; ee < numLipLines; ee++)
           {
             splipsync[ee].numPhenomes = getshort(speechsync);
             fread(splipsync[ee].filename, 1, 14, speechsync);
@@ -13220,27 +13239,33 @@ int initialize_engine(int argc,char*argv[])
     }
   }
 
-  our_eip = -185;
+  return 0;
+}
+
+int initeng_init_music() 
+{
+
+  set_eip(-185);
   play.seperate_music_lib = 0;
 
   /* Can't just use fopen here, since we need to change the filename
-      so that pack functions, etc. will have the right case later */
+  so that pack functions, etc. will have the right case later */
   music_file = ci_find_file(usetup.data_files_dir, "audio.vox");
 
   /* Don't need to use ci_fopen here, because we've used ci_find_file to get
-      the case insensitive matched filename already */
-  ppp = fopen(music_file, "rb");
-  
-  if (ppp == NULL)
+  the case insensitive matched filename already */
+  FILE *music_fp = fopen(music_file, "rb");
+
+  if (music_fp == NULL)
   {
     // In case they're running in debug, check Compiled folder
     free(music_file);
     music_file = ci_find_file("Compiled", "audio.vox");
-    ppp = fopen(music_file, "rb");
+    music_fp = fopen(music_file, "rb");
   }
 
-  if (ppp!=NULL) {
-    fclose(ppp);
+  if (music_fp!=NULL) {
+    fclose(music_fp);
 
     write_log_debug("Initializing audio vox");
 
@@ -13254,28 +13279,27 @@ int initialize_engine(int argc,char*argv[])
     play.seperate_music_lib = 1;
   }
 
-  our_eip = -184;
+  return 0;
+}
 
-  keyboard_input_initialise();
 
-  our_eip = -183;
 
-  write_log_debug("Install timer");
-
+void initeng_init_sound() 
+{
   platform->WriteConsole("Checking sound inits.\n");
   if (opts.mod_player) reserve_voices(16,-1);
   // maybe this line will solve the sound volume?
-  install_timer();
+
 #if ALLEGRO_DATE > 19991010
   set_volume_per_voice(1);
 #endif
 
-  our_eip = -182;
+  set_eip(-182);
 
 #ifdef WINDOWS_VERSION
   // don't let it use the hardware mixer verion, crashes some systems
   //if ((usetup.digicard == DIGI_AUTODETECT) || (usetup.digicard == DIGI_DIRECTX(0)))
-//    usetup.digicard = DIGI_DIRECTAMX(0);
+  //    usetup.digicard = DIGI_DIRECTAMX(0);
 
   if (usetup.digicard == DIGI_DIRECTX(0)) {
     // DirectX mixer seems to buffer an extra sample itself
@@ -13308,7 +13332,7 @@ int initialize_engine(int argc,char*argv[])
     }
   }
 
-  our_eip = -181;
+  set_eip(-181);
 
   if (usetup.digicard == DIGI_NONE) {
     // disable speech and music if no digital sound
@@ -13319,82 +13343,43 @@ int initialize_engine(int argc,char*argv[])
   }
 
   //set_volume(255,-1);
-  if ((debug_flags & (~DBG_DEBUGMODE)) >0) {
-    platform->DisplayAlert("Engine debugging enabled.\n"
-     "\nNOTE: You have selected to enable one or more engine debugging options.\n"
-     "These options cause many parts of the game to behave abnormally, and you\n"
-     "may not see the game as you are used to it. The point is to test whether\n"
-     "the engine passes a point where it is crashing on you normally.\n"
-     "[Debug flags enabled: 0x%02X]\n"
-     "Press a key to continue.\n",debug_flags);
-    }
+}
 
-  our_eip = -10;
+void setup_sierra_interface() {
+  int rr;
+  game.numgui =0;
+  for (rr=0;rr<42;rr++) game.paluses[rr]=PAL_GAMEWIDE;
+  for (rr=42;rr<256;rr++) game.paluses[rr]=PAL_BACKGROUND;
+}
 
-  write_log_debug("Install exit handler");
-
-  atexit(atexit_handler);
-  unlink("warnings.log");
-  play.randseed = time(NULL);
-  srand (play.randseed);
-
-  write_log_debug("Initialize path finder library");
-
-  init_pathfinder();
-
-  write_log_debug("Initialize gfx");
-
-  platform->InitialiseAbufAtStartup();
-
-  LOCK_VARIABLE(timerloop);
-  LOCK_FUNCTION(dj_timer_handler);
-  set_game_speed(40);
-
-  our_eip=-20;
-  //thisroom.allocall();
-  our_eip=-19;
-  //setup_sierra_interface();   // take this out later
-
+int initeng_load_game_data() 
+{
   write_log_debug("Load game data");
 
-  our_eip=-17;
-  if ((ee=load_game_file())!=0) {
+  set_eip(-17);
+  int loaderror;
+  if ((loaderror=load_game_file())!=0) {
     proper_exit=1;
     platform->FinishedUsingGraphicsMode();
 
-    if (ee==-1)
+    if (loaderror==-1)
       platform->DisplayAlert("Main game file not found. This may be from a different AGS version, or the file may have got corrupted.\n");
-    else if (ee==-2)
+    else if (loaderror==-2)
       platform->DisplayAlert("Invalid file format. The file may be corrupt, or from a different\n"
-        "version of AGS.\nThis engine can only run games made with AGS 3.2 or later.\n");
-    else if (ee==-3)
+      "version of AGS.\nThis engine can only run games made with AGS 3.2 or later.\n");
+    else if (loaderror==-3)
       platform->DisplayAlert("Script link failed: %s\n",ccErrorString);
     return EXIT_NORMAL;
   }
 
-  if (justRegisterGame) 
-  {
-    platform->RegisterGameWithGameExplorer();
-    proper_exit = 1;
-    return EXIT_NORMAL;
-  }
+  return 0;
+}
 
-  if (justUnRegisterGame) 
-  {
-    platform->UnRegisterGameWithGameExplorer();
-    proper_exit = 1;
-    return EXIT_NORMAL;
-  }
-
-  //platform->DisplayAlert("loaded game");
-  our_eip=-91;
-#if (ALLEGRO_DATE > 19990103)
-  set_window_title(game.gamename);
-#endif
-
+void initeng_load_extra_game_data() 
+{
   write_log_debug(game.gamename);
 
-  our_eip = -189;
+  set_eip(-189);
 
   if (file_exists("Compiled", FA_ARCH | FA_DIREC, NULL))
   {
@@ -13414,26 +13399,28 @@ int initialize_engine(int argc,char*argv[])
   {
     Game_SetSaveGameDirectory("Compiled");
   }
-  our_eip = -178;
+}
+
+int initeng_check_disk_space() 
+{
+  set_eip(-178);
 
   write_log_debug("Checking for disk space");
 
   //init_language_text("en");
   if (check_write_access()==0) {
     platform->DisplayAlert("Unable to write to the current directory. Do not run this game off a\n"
-    "network or CD-ROM drive. Also check drive free space (you need 1 Mb free).\n");
+      "network or CD-ROM drive. Also check drive free space (you need 1 Mb free).\n");
     proper_exit = 1;
     return EXIT_NORMAL; 
   }
 
-  if (fontRenderers[0] == NULL) 
-  {
-    platform->DisplayAlert("No fonts found. If you're trying to run the game from the Debug directory, this is not supported. Use the Build EXE command to create an executable in the Compiled folder.");
-    proper_exit = 1;
-    return EXIT_NORMAL;
-  }
+  return 0;
+}
 
-  our_eip = -179;
+void initeng_init_mod_player() 
+{
+  set_eip(-179);
 
   if (game.options[OPT_NOMODMUSIC])
     opts.mod_player = 0;
@@ -13446,7 +13433,10 @@ int initialize_engine(int argc,char*argv[])
       opts.mod_player=0;
     }
   }
+}
 
+void initeng_init_screen_settings(int &initasx, int &initasy, int &firstDepth, int &secondDepth) 
+{
   write_log_debug("Initializing screen settings");
 
   // default shifts for how we store the sprite data
@@ -13462,7 +13452,7 @@ int initialize_engine(int argc,char*argv[])
 
   usetup.base_width = 320;
   usetup.base_height = 200;
-  
+
   if (game.default_resolution >= 5)
   {
     if (game.default_resolution >= 6)
@@ -13485,14 +13475,14 @@ int initialize_engine(int argc,char*argv[])
     wtext_multiply = 2;
   }
   else if ((game.default_resolution == 4) ||
-           (game.default_resolution == 3))
+    (game.default_resolution == 3))
   {
     scrnwid = 640;
     scrnhit = 400;
     wtext_multiply = 2;
   }
   else if ((game.default_resolution == 2) ||
-           (game.default_resolution == 1))
+    (game.default_resolution == 1))
   {
     scrnwid = 320;
     scrnhit = 200;
@@ -13512,13 +13502,15 @@ int initialize_engine(int argc,char*argv[])
   current_screen_resolution_multiplier = scrnwid / BASEWIDTH;
 
   if ((game.default_resolution > 2) &&
-      (game.options[OPT_NATIVECOORDINATES]))
+    (game.options[OPT_NATIVECOORDINATES]))
   {
     usetup.base_width *= 2;
     usetup.base_height *= 2;
   }
 
-  int initasx=scrnwid,initasy=scrnhit;
+  initasx=scrnwid;
+  initasy=scrnhit;
+
   if (scrnwid==960) { initasx=1024; initasy=768; }
 
   // save this setting so we only do 640x480 full-screen if they want it
@@ -13531,7 +13523,9 @@ int initialize_engine(int argc,char*argv[])
   if (game.color_depth < 2)
     usetup.force_hicolor_mode = 0;
 
-  int firstDepth = 8, secondDepth = 8;
+  firstDepth = 8;
+  secondDepth = 8;
+
   if ((game.color_depth == 2) || (force_16bit) || (usetup.force_hicolor_mode)) {
     firstDepth = 16;
     secondDepth = 15;
@@ -13540,7 +13534,7 @@ int initialize_engine(int argc,char*argv[])
     firstDepth = 32;
     secondDepth = 24;
   }
-  
+
 #if 1
 #ifdef MAC_VERSION
   if (game.color_depth > 1)
@@ -13555,18 +13549,28 @@ int initialize_engine(int argc,char*argv[])
 #endif
 
   adjust_sizes_for_resolution(loaded_game_file_version);
+}
 
-  write_log_debug("Init gfx filters");
+void create_gfx_driver() 
+{
+#ifdef ENABLE_THIS_LATER
+#ifdef WINDOWS_VERSION
+  if (stricmp(usetup.gfxDriverID, "D3D9") == 0)
+    gfxDriver = GetD3DGraphicsDriver(filter);
+  else
+#endif
+    gfxDriver = GetSoftwareGraphicsDriver(filter);
+#else
+  gfxDriver = GetStubGraphicsDriver(filter);
+#endif
+  //gfxDriver = GetD3DGraphicsDriver(filter);
+  gfxDriver = GetSoftwareGraphicsDriver(filter);
+  gfxDriver->SetCallbackOnInit(GfxDriverOnInitCallback);
+  gfxDriver->SetTintMethod(TintReColourise);
+}
 
-  if (initialize_graphics_filter(usetup.gfxFilterID, initasx, initasy, firstDepth))
-  {
-    return EXIT_NORMAL;
-  }
-  
-  write_log_debug("Init gfx driver");
-
-  create_gfx_driver();
-
+int initeng_switch_gfx_mode(int &initasx, int &initasy, int &firstDepth, int &secondDepth) 
+{
   write_log_debug("Switching to graphics mode");
 
   if (switch_to_graphics_mode(initasx, initasy, scrnwid, scrnhit, firstDepth, secondDepth))
@@ -13595,12 +13599,12 @@ int initialize_engine(int argc,char*argv[])
       }
 
     }
-    
+
     if (errorAndExit)
     {
       proper_exit=1;
       platform->FinishedUsingGraphicsMode();
-  
+
       // make sure the error message displays the true resolution
       if (game.options[OPT_LETTERBOX])
         initasy = (initasy * 12) / 10;
@@ -13609,17 +13613,17 @@ int initialize_engine(int argc,char*argv[])
         filter->GetRealResolution(&initasx, &initasy);
 
       platform->DisplayAlert("There was a problem initializing graphics mode %d x %d (%d-bit).\n"
-       "(Problem: '%s')\n"
-       "Try to correct the problem, or seek help from the AGS homepage.\n"
-       "\nPossible causes:\n* your graphics card drivers do not support this resolution. "
-       "Run the game setup program and try the other resolution.\n"
-       "* the graphics driver you have selected does not work. Try switching between Direct3D and DirectDraw.\n"
-       "* the graphics filter you have selected does not work. Try another filter.",
-       initasx, initasy, firstDepth, allegro_error);
+        "(Problem: '%s')\n"
+        "Try to correct the problem, or seek help from the AGS homepage.\n"
+        "\nPossible causes:\n* your graphics card drivers do not support this resolution. "
+        "Run the game setup program and try the other resolution.\n"
+        "* the graphics driver you have selected does not work. Try switching between Direct3D and DirectDraw.\n"
+        "* the graphics filter you have selected does not work. Try another filter.",
+        initasx, initasy, firstDepth, allegro_error);
       return EXIT_NORMAL;
     }
   }
-  
+
   //screen = _filter->ScreenInitialized(screen, final_scrn_wid, final_scrn_hit);
   _old_screen = screen;
 
@@ -13629,6 +13633,12 @@ int initialize_engine(int argc,char*argv[])
 
     CreateBlankImage();
   }
+
+  return 0;
+}
+
+void initeng_prepare_gfx_screen(int &initasx, int &initasy, int &firstDepth, int &secondDepth) 
+{
 
   write_log_debug("Preparing graphics mode screen");
 
@@ -13680,16 +13690,284 @@ int initialize_engine(int argc,char*argv[])
   gfxDriver->SetCallbackForPolling(update_polled_stuff);
   gfxDriver->SetCallbackToDrawScreen(draw_screen_callback);
   gfxDriver->SetCallbackForNullSprite(GfxDriverNullSpriteCallback);
+}
+
+void initeng_init_screen_buffers() 
+{
+  write_log_debug("Set up screen");
+
+  virtual_screen=create_bitmap_ex(final_col_dep,scrnwid,scrnhit);
+  clear(virtual_screen);
+  gfxDriver->SetMemoryBackBuffer(virtual_screen);
+  //  ignore_mouseoff_bitmap = virtual_screen;
+  abuf=screen;
+
+  set_eip(-7);
+  for (int ee = 0; ee < MAX_INIT_SPR + game.numcharacters; ee++)
+    actsps[ee] = NULL;
+}
+
+void initeng_fill_scsystem() 
+{
+  scsystem.width = final_scrn_wid;
+  scsystem.height = final_scrn_hit;
+  scsystem.coldepth = final_col_dep;
+  scsystem.windowed = 0;
+  scsystem.vsync = 0;
+  scsystem.viewport_width = divide_down_coordinate(scrnwid);
+  scsystem.viewport_height = divide_down_coordinate(scrnhit);
+  strcpy(scsystem.aci_version, ACI_VERSION_TEXT);
+  scsystem.os = platform->GetSystemOSID();
+
+  if (usetup.windowed)
+    scsystem.windowed = 1;
+}
+
+void initeng_configure_mouse() 
+{
+#if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
+  filter->SetMouseArea(0, 0, scrnwid-1, scrnhit-1);
+#else
+  filter->SetMouseArea(0,0,BASEWIDTH-1,BASEHEIGHT-1);
+#endif
+  //  mloadwcursor("mouse.spr");
+  //mousecurs[0]=spriteset[2054];
+  currentcursor=0;
+  set_eip(-4);
+  mousey=100;  // stop icon bar popping up
+}
+
+void initeng_configure_screen() 
+{
+  wsetscreen(virtual_screen);
+  set_eip(-41);
+  gfxDriver->SetRenderOffset(get_screen_x_adjustment(virtual_screen), get_screen_y_adjustment(virtual_screen));
+}
+
+
+int initialize_engine(int argc,char*argv[])
+{
+  int result;
+
+  // CONFIG FILE ***********************************************************************************************
+
+  write_log_debug("Reading config file");
+  set_eip(-200);
+  read_config_file(argv[0]);
+
+  // ALLEGRO ***********************************************************************************************
+
+  result = initeng_init_allegro();
+  if (result) return result;
+
+  // WINDOW ***********************************************************************************************
+
+  result = initeng_init_window(argc, argv);
+  if (result) return result;
+
+  // GAME DATA ***********************************************************************************************
+
+  result = initeng_init_game_data(argc, argv);
+  if (result) return result;
+
+  // FONTS ***********************************************************************************************
+
+  set_eip(-192);
+  write_log_debug("Initializing TTF renderer");
+  init_font_renderer();
+
+  // MOUSE ***********************************************************************************************
+
+  result = initeng_init_mouse();
+  if (result) return result;
+
+  // MEM CHECK ***********************************************************************************************
+
+  result = initeng_mem_check();
+  if (result) return result;
+
+  // REPLAY ***********************************************************************************************
+
+  unlink (replayTempFile);
+
+  // ROOMS ***********************************************************************************************
+
+  initeng_init_rooms();
+
+  // SPEECH ***********************************************************************************************
+
+  result = initeng_init_speech();
+  if (result) return result;
+
+  // MUSIC ***********************************************************************************************
+
+  result = initeng_init_music();
+  if (result) return result;
+
+  // KEYBOARD INPUT ***********************************************************************************************
+
+  set_eip(-184);
+  keyboard_input_initialise();
+
+  // TIMER ***********************************************************************************************
+
+  set_eip(-183);
+  write_log_debug("Install timer");
+  install_timer();
+
+  // SOUND INITS ***********************************************************************************************
+
+  initeng_init_sound();
+
+  // ENGINE DEBUG MSG ***********************************************************************************************
+
+  if ((debug_flags & (~DBG_DEBUGMODE)) >0) {
+    platform->DisplayAlert("Engine debugging enabled.\n"
+     "\nNOTE: You have selected to enable one or more engine debugging options.\n"
+     "These options cause many parts of the game to behave abnormally, and you\n"
+     "may not see the game as you are used to it. The point is to test whether\n"
+     "the engine passes a point where it is crashing on you normally.\n"
+     "[Debug flags enabled: 0x%02X]\n"
+     "Press a key to continue.\n",debug_flags);
+    }
+
+  // EXIT HANDLER ***********************************************************************************************
+
+  set_eip(-10);
+  write_log_debug("Install exit handler");
+  atexit(atexit_handler);
+
+  // DEBUG LOG ***********************************************************************************************
+
+  unlink("warnings.log");
+
+  // RAND ***********************************************************************************************
+
+  play.randseed = time(NULL);
+  srand (play.randseed);
+
+
+  // PATH FINDER ***********************************************************************************************
+
+  write_log_debug("Initialize path finder library");
+  init_pathfinder();
+
+
+  // GFX ***********************************************************************************************
+
+  write_log_debug("Initialize gfx");
+  platform->InitialiseAbufAtStartup();
+
+  // TIMING ***********************************************************************************************
+
+  LOCK_VARIABLE(timerloop);
+  LOCK_FUNCTION(dj_timer_handler);
+  set_game_speed(40);
+
+  // UNUSED ***********************************************************************************************
+
+  set_eip(-20);
+  //thisroom.allocall();
+  set_eip(-19);
+  //setup_sierra_interface();   // take this out later
+
+  // GAME DATA ***********************************************************************************************
+
+  result = initeng_load_game_data();
+  if (result) return result;
+
+  // REGISTER GAME ***********************************************************************************************
+
+  if (justRegisterGame) 
+  {
+    platform->RegisterGameWithGameExplorer();
+    proper_exit = 1;
+    return EXIT_NORMAL;
+  }
+
+  if (justUnRegisterGame) 
+  {
+    platform->UnRegisterGameWithGameExplorer();
+    proper_exit = 1;
+    return EXIT_NORMAL;
+  }
+
+  // WINDOW TITLE ***********************************************************************************************
+
+  //platform->DisplayAlert("loaded game");
+  set_eip(-91);
+#if (ALLEGRO_DATE > 19990103)
+  set_window_title(game.gamename);
+#endif
+
+  // LOAD EXTRA GAME DATA ***********************************************************************************************
+
+  initeng_load_extra_game_data();
+
+
+  // DISK SPACE ***********************************************************************************************
+
+  result = initeng_check_disk_space();
+  if (result) return result;
+
+  // FONTS ***********************************************************************************************
+
+  if (fontRenderers[0] == NULL) 
+  {
+    platform->DisplayAlert("No fonts found. If you're trying to run the game "
+      "from the Debug directory, this is not supported. Use the Build EXE "
+      "command to create an executable in the Compiled folder.");
+    proper_exit = 1;
+    return EXIT_NORMAL;
+  }
+
+  // MOD PLAYER ***********************************************************************************************
+
+  initeng_init_mod_player();
+
+  // SCREEN ***********************************************************************************************
+
+  int initasx,initasy;
+  int firstDepth, secondDepth;
+  initeng_init_screen_settings(initasx, initasy, firstDepth, secondDepth);
+
+  // FILTERS ***********************************************************************************************
+
+  write_log_debug("Init gfx filters");
+  if (initialize_graphics_filter(usetup.gfxFilterID, initasx, initasy, firstDepth))
+  {
+    return EXIT_NORMAL;
+  }
+  
+  // GFX DRIVER ***********************************************************************************************
+
+  write_log_debug("Init gfx driver");
+  create_gfx_driver();
+
+  // GFX MODE ***********************************************************************************************
+
+  result = initeng_switch_gfx_mode(initasx, initasy, firstDepth, secondDepth);
+  if (result) return result;
+
+  // GFX SCREEN ***********************************************************************************************
+
+  initeng_prepare_gfx_screen(initasx, initasy, firstDepth, secondDepth);
+
+  // COLOURS ***********************************************************************************************
 
   write_log_debug("Initializing colour conversion");
-
   set_color_conversion(COLORCONV_MOST | COLORCONV_EXPAND_256 | COLORCONV_REDUCE_16_TO_15);
 
-  SetMultitasking(0);
+  // MULTITASKING ***********************************************************************************************
+
+  SetMultitasking(0); // don't run in background
+
+  // PRELOAD IMG ***********************************************************************************************
 
   write_log_debug("Check for preload image");
-
   show_preload ();
+
+  // SPRITES INIT ***********************************************************************************************
 
   write_log_debug("Initialize sprites");
 
@@ -13704,54 +13982,40 @@ int initialize_engine(int argc,char*argv[])
     return EXIT_NORMAL;
   }
 
-  write_log_debug("Set up screen");
+  // SCREEN ***********************************************************************************************
 
-  virtual_screen=create_bitmap_ex(final_col_dep,scrnwid,scrnhit);
-  clear(virtual_screen);
-  gfxDriver->SetMemoryBackBuffer(virtual_screen);
-//  ignore_mouseoff_bitmap = virtual_screen;
-  abuf=screen;
-  our_eip=-7;
+  initeng_init_screen_buffers();
 
-  for (ee = 0; ee < MAX_INIT_SPR + game.numcharacters; ee++)
-    actsps[ee] = NULL;
+  // GAME SETTINGS ***********************************************************************************************
 
   write_log_debug("Initialize game settings");
-
   init_game_settings();
+
+  // START ***********************************************************************************************
 
   write_log_debug("Prepare to start game");
 
-  scsystem.width = final_scrn_wid;
-  scsystem.height = final_scrn_hit;
-  scsystem.coldepth = final_col_dep;
-  scsystem.windowed = 0;
-  scsystem.vsync = 0;
-  scsystem.viewport_width = divide_down_coordinate(scrnwid);
-  scsystem.viewport_height = divide_down_coordinate(scrnhit);
-  strcpy(scsystem.aci_version, ACI_VERSION_TEXT);
-  scsystem.os = platform->GetSystemOSID();
+  // SET SCSYSTEM ***********************************************************************************************
 
-  if (usetup.windowed)
-    scsystem.windowed = 1;
+  initeng_fill_scsystem();
 
-#if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
-  filter->SetMouseArea(0, 0, scrnwid-1, scrnhit-1);
-#else
-  filter->SetMouseArea(0,0,BASEWIDTH-1,BASEHEIGHT-1);
-#endif
-//  mloadwcursor("mouse.spr");
-  //mousecurs[0]=spriteset[2054];
-  currentcursor=0;
-  our_eip=-4;
-  mousey=100;  // stop icon bar popping up
+  // MOUSE CONFIG ***********************************************************************************************
+
+  initeng_configure_mouse();
+
+  // DIRTY RECTS ***********************************************************************************************
+
   init_invalid_regions(final_scrn_hit);
-  wsetscreen(virtual_screen);
-  our_eip = -41;
 
-  gfxDriver->SetRenderOffset(get_screen_x_adjustment(virtual_screen), get_screen_y_adjustment(virtual_screen));
+  // SETUP SCREEN ***********************************************************************************************
+
+  initeng_configure_screen();
+
+  // START ***********************************************************************************************
 
   initialize_start_and_play_game(override_start_room, loadSaveGameOnStartup);
+
+  // END ***********************************************************************************************
 
   quit("|bye!");
   return 0;

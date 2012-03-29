@@ -472,7 +472,11 @@ extern "C"
 
 
   // public: set to datafirst or filefirst to configure the operation of clibfopen
-  int cfopenpriority = PR_DATAFIRST;
+  static int cfopenpriority = PR_DATAFIRST;
+
+  void clib_set_open_priority(int pri) {
+    cfopenpriority = pri;
+  }
 
   // given a filename and mode, attempt to open file either as a normal file
   // or through a clib file.

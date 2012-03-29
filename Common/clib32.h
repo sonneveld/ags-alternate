@@ -18,8 +18,8 @@ extern "C"
     extern long last_opened_size;
 	// set the library to be used.
     extern int  csetlib(char*,char*);
-	// order of file openign, file, or lib
-    extern int  cfopenpriority;
+    // order of file openign, file, or lib
+    extern void clib_set_open_priority(int pri);	
 
 	//extern const char *clibgetoriginalfilename();
 	//extern const char *clibGetFileName(int index);
