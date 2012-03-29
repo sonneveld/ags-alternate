@@ -2530,107 +2530,8 @@ void convert_room_coordinates_to_low_res(roomstruct *rstruc)
 	  rstruc->height /= 2;
 }
 
-
-// forchar = playerchar on NewRoom, or NULL if restore saved game
-void load_new_room(int newnum,CharacterInfo*forchar) {
-
-  platform->WriteDebugString("Loading room %d", newnum);
-
-  char rmfile[20];
-  int cc;
-  done_es_error = 0;
-  play.room_changes ++;
-  set_color_depth(8);
-  displayed_room=newnum;
-
-  sprintf(rmfile,"room%d.crm",newnum);
-  if (newnum == 0) {
-    // support both room0.crm and intro.crm
-    FILE *inpu = clibfopen(rmfile, "rb");
-    if (inpu == NULL)
-      strcpy(rmfile, "intro.crm");
-    else
-      fclose(inpu);
-  }
-  // reset these back, because they might have been changed.
-  if (thisroom.object!=NULL)
-    destroy_bitmap(thisroom.object);
-  thisroom.object=create_bitmap(320,200);
-
-  if (thisroom.ebscene[0]!=NULL)
-    destroy_bitmap(thisroom.ebscene[0]);
-  thisroom.ebscene[0] = create_bitmap(320,200);
-
-  update_polled_stuff();
-
-  // load the room from disk
-  set_eip(200);
-  thisroom.gameId = NO_GAME_ID_IN_ROOM_FILE;
-  load_room(rmfile, &thisroom, (game.default_resolution > 2));
-
-  if ((thisroom.gameId != NO_GAME_ID_IN_ROOM_FILE) &&
-      (thisroom.gameId != game.uniqueid)) {
-    quitprintf("!Unable to load '%s'. This room file is assigned to a different game.", rmfile);
-  }
-
-  if ((game.default_resolution > 2) && (game.options[OPT_NATIVECOORDINATES] == 0))
-  {
-    convert_room_coordinates_to_low_res(&thisroom);
-  }
-
-  update_polled_stuff();
-  set_eip(201);
-/*  // apparently, doing this stops volume spiking between tracks
-  if (thisroom.options[ST_TUNE]>0) {
-    stopmusic();
-    delay(100);
-  }*/
-
-  play.room_width = thisroom.width;
-  play.room_height = thisroom.height;
-  play.anim_background_speed = thisroom.bscene_anim_speed;
-  play.bg_anim_delay = play.anim_background_speed;
-
-  int dd;
-  // do the palette
-  for (cc=0;cc<256;cc++) {
-    if (game.paluses[cc]==PAL_BACKGROUND)
-      palette[cc]=thisroom.pal[cc];
-    else {
-      // copy the gamewide colours into the room palette
-      for (dd = 0; dd < thisroom.num_bscenes; dd++)
-        thisroom.bpalettes[dd][cc] = palette[cc];
-    }
-  }
-
-  if ((bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
-      (final_col_dep > 8))
-    select_palette(palette);
-
-  for (cc=0;cc<thisroom.num_bscenes;cc++) {
-    update_polled_stuff();
-  #ifdef USE_15BIT_FIX
-    // convert down scenes from 16 to 15-bit if necessary
-    if ((final_col_dep != game.color_depth*8) &&
-        (bitmap_color_depth(thisroom.ebscene[cc]) == game.color_depth * 8)) {
-      block oldblock = thisroom.ebscene[cc];
-      thisroom.ebscene[cc] = convert_16_to_15(oldblock);
-      wfreeblock(oldblock);
-    }
-    else if ((bitmap_color_depth (thisroom.ebscene[cc]) == 16) && (convert_16bit_bgr == 1))
-      thisroom.ebscene[cc] = convert_16_to_16bgr (thisroom.ebscene[cc]);
-  #endif
-
-    thisroom.ebscene[cc] = gfxDriver->ConvertBitmapToSupportedColourDepth(thisroom.ebscene[cc]);
-  }
-
-  if ((bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
-      (final_col_dep > 8))
-    unselect_palette();
-
-  update_polled_stuff();
-
-  set_eip(202);
+void load_new_room_screen() 
+{
   if (usetup.want_letterbox) {
     int abscreen=0;
     if (abuf==screen) abscreen=1;
@@ -2671,7 +2572,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       virtual_screen=create_bitmap_ex(cdepth,scrnwid,scrnhit);
       clear(virtual_screen);
       gfxDriver->SetMemoryBackBuffer(virtual_screen);
-//      ignore_mouseoff_bitmap = virtual_screen;
+      //      ignore_mouseoff_bitmap = virtual_screen;
     }
 
     gfxDriver->SetRenderOffset(get_screen_x_adjustment(virtual_screen), get_screen_y_adjustment(virtual_screen));
@@ -2683,50 +2584,10 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   }
   // update the script viewport height
   scsystem.viewport_height = divide_down_coordinate(scrnhit);
+}
 
-  SetMouseBounds (0,0,0,0);
-
-  set_eip(203);
-  in_new_room=1;
-
-  // walkable_areas_temp is used by the pathfinder to generate a
-  // copy of the walkable areas - allocate it here to save time later
-  if (walkable_areas_temp != NULL)
-    wfreeblock (walkable_areas_temp);
-  walkable_areas_temp = create_bitmap_ex (8, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
-
-  // Make a backup copy of the walkable areas prior to
-  // any RemoveWalkableArea commands
-  if (walkareabackup!=NULL) wfreeblock(walkareabackup);
-  walkareabackup=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
-
-  set_eip(204);
-  // copy the walls screen
-  blit(thisroom.walls,walkareabackup,0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
-  update_polled_stuff();
-  redo_walkable_areas();
-  // fix walk-behinds to current screen resolution
-  thisroom.object = fix_bitmap_size(thisroom.object);
-  update_polled_stuff();
-
-  set_color_depth(final_col_dep);
-  // convert backgrounds to current res
-  if (thisroom.resolution != get_fixed_pixel_size(1)) {
-    for (cc=0;cc<thisroom.num_bscenes;cc++)
-      thisroom.ebscene[cc] = fix_bitmap_size(thisroom.ebscene[cc]);
-  }
-
-  if ((BMP_W(thisroom.ebscene[0]) < scrnwid) ||
-      (BMP_H(thisroom.ebscene[0]) < scrnhit))
-  {
-    quitprintf("!The background scene for this room is smaller than the game resolution. If you have recently changed " 
-               "the game resolution, you will need to re-import the background for this room. (Room: %d, BG Size: %d x %d)",
-               newnum, BMP_W(thisroom.ebscene[0]), BMP_H(thisroom.ebscene[0]));
-  }
-
-  recache_walk_behinds();
-
-  set_eip(205);
+void load_new_room_objects( CharacterInfo* forchar, int newnum ) 
+{
   // setup objects
   if (forchar != NULL) {
     // if not restoring a game, always reset this room
@@ -2747,18 +2608,18 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     if (thisroom.roomScripts == NULL)
     {
       thisroom.intrRoom->copy_timesrun_from (&croom->intrRoom);
-      for (cc=0;cc < MAX_HOTSPOTS;cc++)
+      for (int cc=0;cc < MAX_HOTSPOTS;cc++)
         thisroom.intrHotspot[cc]->copy_timesrun_from (&croom->intrHotspot[cc]);
-      for (cc=0;cc < MAX_INIT_SPR;cc++)
+      for (int cc=0;cc < MAX_INIT_SPR;cc++)
         thisroom.intrObject[cc]->copy_timesrun_from (&croom->intrObject[cc]);
-      for (cc=0;cc < MAX_REGIONS;cc++)
+      for (int cc=0;cc < MAX_REGIONS;cc++)
         thisroom.intrRegion[cc]->copy_timesrun_from (&croom->intrRegion[cc]);
     }
   }
   if (croom->beenhere==0) {
     croom->numobj=thisroom.numsprs;
     croom->tsdatasize=0;
-    for (cc=0;cc<croom->numobj;cc++) {
+    for (int cc=0;cc<croom->numobj;cc++) {
       croom->obj[cc].x=thisroom.sprs[cc].x;
       croom->obj[cc].y=thisroom.sprs[cc].y;
 
@@ -2781,23 +2642,23 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       croom->obj[cc].blocking_width = 0;
       croom->obj[cc].blocking_height = 0;
       if (thisroom.objbaseline[cc]>=0)
-//        croom->obj[cc].baseoffs=thisroom.objbaseline[cc]-thisroom.sprs[cc].y;
+        //        croom->obj[cc].baseoffs=thisroom.objbaseline[cc]-thisroom.sprs[cc].y;
         croom->obj[cc].baseline=thisroom.objbaseline[cc];
     }
     memcpy(&croom->walkbehind_base[0],&thisroom.objyval[0],sizeof(short)*MAX_OBJ);
-    for (cc=0;cc<MAX_FLAGS;cc++) croom->flagstates[cc]=0;
+    for (int cc=0;cc<MAX_FLAGS;cc++) croom->flagstates[cc]=0;
 
-/*    // we copy these structs for the Score column to work
+    /*    // we copy these structs for the Score column to work
     croom->misccond=thisroom.misccond;
     for (cc=0;cc<MAX_HOTSPOTS;cc++)
-      croom->hscond[cc]=thisroom.hscond[cc];
+    croom->hscond[cc]=thisroom.hscond[cc];
     for (cc=0;cc<MAX_INIT_SPR;cc++)
-      croom->objcond[cc]=thisroom.objcond[cc];*/
+    croom->objcond[cc]=thisroom.objcond[cc];*/
 
-    for (cc=0;cc < MAX_HOTSPOTS;cc++) {
+    for (int cc=0;cc < MAX_HOTSPOTS;cc++) {
       croom->hotspot_enabled[cc] = 1;
     }
-    for (cc = 0; cc < MAX_REGIONS; cc++) {
+    for (int cc = 0; cc < MAX_REGIONS; cc++) {
       croom->region_enabled[cc] = 1;
     }
     croom->beenhere=1;
@@ -2815,26 +2676,26 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   {
     // copy interactions from room file into our temporary struct
     croom->intrRoom = thisroom.intrRoom[0];
-    for (cc=0;cc<MAX_HOTSPOTS;cc++)
+    for (int cc=0;cc<MAX_HOTSPOTS;cc++)
       croom->intrHotspot[cc] = thisroom.intrHotspot[cc][0];
-    for (cc=0;cc<MAX_INIT_SPR;cc++)
+    for (int cc=0;cc<MAX_INIT_SPR;cc++)
       croom->intrObject[cc] = thisroom.intrObject[cc][0];
-    for (cc=0;cc<MAX_REGIONS;cc++)
+    for (int cc=0;cc<MAX_REGIONS;cc++)
       croom->intrRegion[cc] = thisroom.intrRegion[cc][0];
   }
 
   objs=&croom->obj[0];
 
-  for (cc = 0; cc < MAX_INIT_SPR; cc++) {
+  for (int cc = 0; cc < MAX_INIT_SPR; cc++) {
     scrObj[cc].obj = &croom->obj[cc];
     objectScriptObjNames[cc][0] = 0;
   }
 
-  for (cc = 0; cc < croom->numobj; cc++) {
+  for (int cc = 0; cc < croom->numobj; cc++) {
     // export the object's script object
     if (thisroom.objectscriptnames[cc][0] == 0)
       continue;
-    
+
     if (thisroom.wasversion >= 26) 
     {
       strcpy(objectScriptObjNames[cc], thisroom.objectscriptnames[cc]);
@@ -2850,12 +2711,300 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     ccAddExternalSymbol(objectScriptObjNames[cc], &scrObj[cc]);
   }
 
-  for (cc = 0; cc < MAX_HOTSPOTS; cc++) {
+  for (int cc = 0; cc < MAX_HOTSPOTS; cc++) {
     if (thisroom.hotspotScriptNames[cc][0] == 0)
       continue;
 
     ccAddExternalSymbol(thisroom.hotspotScriptNames[cc], &scrHotspot[cc]);
   }
+}
+
+void load_new_room_player_pos( CharacterInfo* forchar ) 
+{
+  play.entered_edge = -1;
+
+  if ((new_room_x != SCR_NO_VALUE) && (forchar != NULL))
+  {
+    forchar->x = new_room_x;
+    forchar->y = new_room_y;
+  }
+  new_room_x = SCR_NO_VALUE;
+
+  if ((new_room_pos>0) & (forchar!=NULL)) {
+    if (new_room_pos>=4000) {
+      play.entered_edge = 3;
+      forchar->y = thisroom.top + get_fixed_pixel_size(1);
+      forchar->x=new_room_pos%1000;
+      if (forchar->x==0) forchar->x=thisroom.width/2;
+      if (forchar->x <= thisroom.left)
+        forchar->x = thisroom.left + 3;
+      if (forchar->x >= thisroom.right)
+        forchar->x = thisroom.right - 3;
+      forchar->loop=0;
+    }
+    else if (new_room_pos>=3000) {
+      play.entered_edge = 2;
+      forchar->y = thisroom.bottom - get_fixed_pixel_size(1);
+      forchar->x=new_room_pos%1000;
+      if (forchar->x==0) forchar->x=thisroom.width/2;
+      if (forchar->x <= thisroom.left)
+        forchar->x = thisroom.left + 3;
+      if (forchar->x >= thisroom.right)
+        forchar->x = thisroom.right - 3;
+      forchar->loop=3;
+    }
+    else if (new_room_pos>=2000) {
+      play.entered_edge = 1;
+      forchar->x = thisroom.right - get_fixed_pixel_size(1);
+      forchar->y=new_room_pos%1000;
+      if (forchar->y==0) forchar->y=thisroom.height/2;
+      if (forchar->y <= thisroom.top)
+        forchar->y = thisroom.top + 3;
+      if (forchar->y >= thisroom.bottom)
+        forchar->y = thisroom.bottom - 3;
+      forchar->loop=1;
+    }
+    else if (new_room_pos>=1000) {
+      play.entered_edge = 0;
+      forchar->x = thisroom.left + get_fixed_pixel_size(1);
+      forchar->y=new_room_pos%1000;
+      if (forchar->y==0) forchar->y=thisroom.height/2;
+      if (forchar->y <= thisroom.top)
+        forchar->y = thisroom.top + 3;
+      if (forchar->y >= thisroom.bottom)
+        forchar->y = thisroom.bottom - 3;
+      forchar->loop=2;
+    }
+    // if starts on un-walkable area
+    if (get_walkable_area_pixel(forchar->x, forchar->y) == 0) {
+      if (new_room_pos>=3000) { // bottom or top of screen
+        int tryleft=forchar->x - 1,tryright=forchar->x + 1;
+        while (1) {
+          if (get_walkable_area_pixel(tryleft, forchar->y) > 0) {
+            forchar->x=tryleft; break; }
+          if (get_walkable_area_pixel(tryright, forchar->y) > 0) {
+            forchar->x=tryright; break; }
+          int nowhere=0;
+          if (tryleft>thisroom.left) { tryleft--; nowhere++; }
+          if (tryright<thisroom.right) { tryright++; nowhere++; }
+          if (nowhere==0) break;  // no place to go, so leave him
+        }
+      }
+      else if (new_room_pos>=1000) { // left or right
+        int tryleft=forchar->y - 1,tryright=forchar->y + 1;
+        while (1) {
+          if (get_walkable_area_pixel(forchar->x, tryleft) > 0) {
+            forchar->y=tryleft; break; }
+          if (get_walkable_area_pixel(forchar->x, tryright) > 0) {
+            forchar->y=tryright; break; }
+          int nowhere=0;
+          if (tryleft>thisroom.top) { tryleft--; nowhere++; }
+          if (tryright<thisroom.bottom) { tryright++; nowhere++; }
+          if (nowhere==0) break;  // no place to go, so leave him
+        }
+      }
+    }
+    new_room_pos=0;
+  }
+  if (forchar!=NULL) {
+    play.entered_at_x=forchar->x;
+    play.entered_at_y=forchar->y;
+    if (forchar->x >= thisroom.right)
+      play.entered_edge = 1;
+    else if (forchar->x <= thisroom.left)
+      play.entered_edge = 0;
+    else if (forchar->y >= thisroom.bottom)
+      play.entered_edge = 2;
+    else if (forchar->y <= thisroom.top)
+      play.entered_edge = 3;
+  }
+  /*  if ((playerchar->x > thisroom.width) | (playerchar->y > thisroom.height))
+  quit("!NewRoomEx: x/y co-ordinates are invalid");*/
+}
+
+
+// forchar = playerchar on NewRoom, or NULL if restore saved game
+void load_new_room(int newnum,CharacterInfo*forchar) {
+
+  platform->WriteDebugString("Loading room %d", newnum);
+
+  done_es_error = 0;
+  play.room_changes ++;
+  set_color_depth(8);
+  displayed_room=newnum;
+
+  // DETERMINE ROOM FILE NAME ***********************************************************************************************
+
+  char rmfile[20];
+  sprintf(rmfile,"room%d.crm",newnum);
+  if (newnum == 0) {
+    // support both room0.crm and intro.crm
+    FILE *inpu = clibfopen(rmfile, "rb");
+    if (inpu == NULL)
+      strcpy(rmfile, "intro.crm");
+    else
+      fclose(inpu);
+  }
+
+  // RESET BITMAPS ***********************************************************************************************
+
+  // reset these back, because they might have been changed.
+  if (thisroom.object!=NULL)
+    destroy_bitmap(thisroom.object);
+  thisroom.object=create_bitmap(320,200);
+
+  if (thisroom.ebscene[0]!=NULL)
+    destroy_bitmap(thisroom.ebscene[0]);
+  thisroom.ebscene[0] = create_bitmap(320,200);
+
+
+  // POLL ***********************************************************************************************
+
+  update_polled_stuff();
+
+  // LOAD ROOM DATA ***********************************************************************************************
+
+  // load the room from disk
+  set_eip(200);
+  thisroom.gameId = NO_GAME_ID_IN_ROOM_FILE;
+  load_room(rmfile, &thisroom, (game.default_resolution > 2));
+
+  if ((thisroom.gameId != NO_GAME_ID_IN_ROOM_FILE) &&
+      (thisroom.gameId != game.uniqueid)) {
+    quitprintf("!Unable to load '%s'. This room file is assigned to a different game.", rmfile);
+  }
+
+  // ROOM COORDS ***********************************************************************************************
+
+  if ((game.default_resolution > 2) && (game.options[OPT_NATIVECOORDINATES] == 0))
+  {
+    convert_room_coordinates_to_low_res(&thisroom);
+  }
+
+
+  // POLL ***********************************************************************************************
+
+  update_polled_stuff();
+
+  // PROPS ***********************************************************************************************
+
+  set_eip(201);
+/*  // apparently, doing this stops volume spiking between tracks
+  if (thisroom.options[ST_TUNE]>0) {
+    stopmusic();
+    delay(100);
+  }*/
+
+  play.room_width = thisroom.width;
+  play.room_height = thisroom.height;
+  play.anim_background_speed = thisroom.bscene_anim_speed;
+  play.bg_anim_delay = play.anim_background_speed;
+
+  // PALETTE ***********************************************************************************************
+
+  // do the palette
+  for (int cc=0;cc<256;cc++) {
+    if (game.paluses[cc]==PAL_BACKGROUND)
+      palette[cc]=thisroom.pal[cc];
+    else {
+      // copy the gamewide colours into the room palette
+      for (int dd = 0; dd < thisroom.num_bscenes; dd++)
+        thisroom.bpalettes[dd][cc] = palette[cc];
+    }
+  }
+
+  if ((bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
+      (final_col_dep > 8))
+    select_palette(palette);
+
+  for (int cc=0;cc<thisroom.num_bscenes;cc++) {
+    update_polled_stuff();
+  #ifdef USE_15BIT_FIX
+    // convert down scenes from 16 to 15-bit if necessary
+    if ((final_col_dep != game.color_depth*8) &&
+        (bitmap_color_depth(thisroom.ebscene[cc]) == game.color_depth * 8)) {
+      block oldblock = thisroom.ebscene[cc];
+      thisroom.ebscene[cc] = convert_16_to_15(oldblock);
+      wfreeblock(oldblock);
+    }
+    else if ((bitmap_color_depth (thisroom.ebscene[cc]) == 16) && (convert_16bit_bgr == 1))
+      thisroom.ebscene[cc] = convert_16_to_16bgr (thisroom.ebscene[cc]);
+  #endif
+
+    thisroom.ebscene[cc] = gfxDriver->ConvertBitmapToSupportedColourDepth(thisroom.ebscene[cc]);
+  }
+
+  if ((bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
+      (final_col_dep > 8))
+    unselect_palette();
+
+
+  // POLL ***********************************************************************************************
+  update_polled_stuff();
+
+
+  // SCREEN ***********************************************************************************************
+
+  set_eip(202);
+  load_new_room_screen();
+
+
+  // MOUSE ***********************************************************************************************
+
+  SetMouseBounds (0,0,0,0);
+
+  // MISC ***********************************************************************************************
+
+  set_eip(203);
+  in_new_room=1;
+
+  // WALKABLE AREAS ***********************************************************************************************
+
+  // walkable_areas_temp is used by the pathfinder to generate a
+  // copy of the walkable areas - allocate it here to save time later
+  if (walkable_areas_temp != NULL)
+    wfreeblock (walkable_areas_temp);
+  walkable_areas_temp = create_bitmap_ex (8, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
+
+  // Make a backup copy of the walkable areas prior to
+  // any RemoveWalkableArea commands
+  if (walkareabackup!=NULL) wfreeblock(walkareabackup);
+  walkareabackup=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+
+  // WALL SCREEN ***********************************************************************************************
+
+  set_eip(204);
+  // copy the walls screen
+  blit(thisroom.walls,walkareabackup,0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+  update_polled_stuff();
+  redo_walkable_areas();
+  // fix walk-behinds to current screen resolution
+  thisroom.object = fix_bitmap_size(thisroom.object);
+  update_polled_stuff();
+
+  set_color_depth(final_col_dep);
+  // convert backgrounds to current res
+  if (thisroom.resolution != get_fixed_pixel_size(1)) {
+    for (int cc=0;cc<thisroom.num_bscenes;cc++)
+      thisroom.ebscene[cc] = fix_bitmap_size(thisroom.ebscene[cc]);
+  }
+
+  if ((BMP_W(thisroom.ebscene[0]) < scrnwid) ||
+      (BMP_H(thisroom.ebscene[0]) < scrnhit))
+  {
+    quitprintf("!The background scene for this room is smaller than the game resolution. If you have recently changed " 
+               "the game resolution, you will need to re-import the background for this room. (Room: %d, BG Size: %d x %d)",
+               newnum, BMP_W(thisroom.ebscene[0]), BMP_H(thisroom.ebscene[0]));
+  }
+
+  recache_walk_behinds();
+
+  // OBJECTS ***********************************************************************************************
+
+  set_eip(205);
+  load_new_room_objects(forchar, newnum);
+
+  // SHARED PALETTE ***********************************************************************************************
 
   set_eip(206);
 /*  THIS IS DONE IN THE EDITOR NOW
@@ -2871,6 +3020,9 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     thisroom.ebpalShared[0] = 0;*/
 
   update_polled_stuff();
+
+
+  // FIXPALETTE ***********************************************************************************************
 
   set_eip(210);
   if (IS_ANTIALIAS_SPRITES) {
@@ -2888,6 +3040,9 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     create_rgb_table (&rgb_table, palette, NULL);
     rgb_map = &rgb_table;
   }
+
+  // CHARACTER ***********************************************************************************************
+
   set_eip(211);
   if (forchar!=NULL) {
     // if it's not a Restore Game
@@ -2911,12 +3066,17 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     forchar->prevroom=forchar->room;
     forchar->room=newnum;
     // only stop moving if it's a new room, not a restore game
-    for (cc=0;cc<game.numcharacters;cc++)
+    for (int cc=0;cc<game.numcharacters;cc++)
       StopMoving(cc);
 
   }
 
+  // POLL ***********************************************************************************************
+
+
   update_polled_stuff();
+
+  // COMPILED SCRIPTS ***********************************************************************************************
 
   roominst=NULL;
   if (debug_flags & DBG_NOSCRIPT) ;
@@ -2929,108 +3089,19 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       ccUnFlattenGlobalData (roominst);
       }
     }
+
+  // ENTERED POS ***********************************************************************************************
+
   set_eip(207);
-  play.entered_edge = -1;
+  load_new_room_player_pos(forchar);
 
-  if ((new_room_x != SCR_NO_VALUE) && (forchar != NULL))
-  {
-    forchar->x = new_room_x;
-    forchar->y = new_room_y;
-  }
-  new_room_x = SCR_NO_VALUE;
 
-  if ((new_room_pos>0) & (forchar!=NULL)) {
-    if (new_room_pos>=4000) {
-      play.entered_edge = 3;
-      forchar->y = thisroom.top + get_fixed_pixel_size(1);
-      forchar->x=new_room_pos%1000;
-      if (forchar->x==0) forchar->x=thisroom.width/2;
-      if (forchar->x <= thisroom.left)
-        forchar->x = thisroom.left + 3;
-      if (forchar->x >= thisroom.right)
-        forchar->x = thisroom.right - 3;
-      forchar->loop=0;
-      }
-    else if (new_room_pos>=3000) {
-      play.entered_edge = 2;
-      forchar->y = thisroom.bottom - get_fixed_pixel_size(1);
-      forchar->x=new_room_pos%1000;
-      if (forchar->x==0) forchar->x=thisroom.width/2;
-      if (forchar->x <= thisroom.left)
-        forchar->x = thisroom.left + 3;
-      if (forchar->x >= thisroom.right)
-        forchar->x = thisroom.right - 3;
-      forchar->loop=3;
-      }
-    else if (new_room_pos>=2000) {
-      play.entered_edge = 1;
-      forchar->x = thisroom.right - get_fixed_pixel_size(1);
-      forchar->y=new_room_pos%1000;
-      if (forchar->y==0) forchar->y=thisroom.height/2;
-      if (forchar->y <= thisroom.top)
-        forchar->y = thisroom.top + 3;
-      if (forchar->y >= thisroom.bottom)
-        forchar->y = thisroom.bottom - 3;
-      forchar->loop=1;
-      }
-    else if (new_room_pos>=1000) {
-      play.entered_edge = 0;
-      forchar->x = thisroom.left + get_fixed_pixel_size(1);
-      forchar->y=new_room_pos%1000;
-      if (forchar->y==0) forchar->y=thisroom.height/2;
-      if (forchar->y <= thisroom.top)
-        forchar->y = thisroom.top + 3;
-      if (forchar->y >= thisroom.bottom)
-        forchar->y = thisroom.bottom - 3;
-      forchar->loop=2;
-      }
-    // if starts on un-walkable area
-    if (get_walkable_area_pixel(forchar->x, forchar->y) == 0) {
-      if (new_room_pos>=3000) { // bottom or top of screen
-        int tryleft=forchar->x - 1,tryright=forchar->x + 1;
-        while (1) {
-          if (get_walkable_area_pixel(tryleft, forchar->y) > 0) {
-            forchar->x=tryleft; break; }
-          if (get_walkable_area_pixel(tryright, forchar->y) > 0) {
-            forchar->x=tryright; break; }
-          int nowhere=0;
-          if (tryleft>thisroom.left) { tryleft--; nowhere++; }
-          if (tryright<thisroom.right) { tryright++; nowhere++; }
-          if (nowhere==0) break;  // no place to go, so leave him
-          }
-        }
-      else if (new_room_pos>=1000) { // left or right
-        int tryleft=forchar->y - 1,tryright=forchar->y + 1;
-        while (1) {
-          if (get_walkable_area_pixel(forchar->x, tryleft) > 0) {
-            forchar->y=tryleft; break; }
-          if (get_walkable_area_pixel(forchar->x, tryright) > 0) {
-            forchar->y=tryright; break; }
-          int nowhere=0;
-          if (tryleft>thisroom.top) { tryleft--; nowhere++; }
-          if (tryright<thisroom.bottom) { tryright++; nowhere++; }
-          if (nowhere==0) break;  // no place to go, so leave him
-          }
-        }
-      }
-    new_room_pos=0;
-    }
-  if (forchar!=NULL) {
-    play.entered_at_x=forchar->x;
-    play.entered_at_y=forchar->y;
-    if (forchar->x >= thisroom.right)
-      play.entered_edge = 1;
-    else if (forchar->x <= thisroom.left)
-      play.entered_edge = 0;
-    else if (forchar->y >= thisroom.bottom)
-      play.entered_edge = 2;
-    else if (forchar->y <= thisroom.top)
-      play.entered_edge = 3;
-  }
-/*  if ((playerchar->x > thisroom.width) | (playerchar->y > thisroom.height))
-    quit("!NewRoomEx: x/y co-ordinates are invalid");*/
+  // MUSIC ***********************************************************************************************
+
   if (thisroom.options[ST_TUNE]>0)
     PlayMusicResetQueue(thisroom.options[ST_TUNE]);
+
+  // CURSOR ***********************************************************************************************
 
   set_eip(208);
   if (forchar!=NULL) {
@@ -3051,31 +3122,53 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     }
   color_map = NULL;
 
+  // UPDATE STUFF ***********************************************************************************************
+
   set_eip(209);
   update_polled_stuff();
   generate_light_table();
   update_music_volume();
   update_viewport();
+
+  // SCREEN ***********************************************************************************************
+
   set_eip(212);
   invalidate_screen();
-  for (cc=0;cc<croom->numobj;cc++) {
+  for (int cc=0;cc<croom->numobj;cc++) {
     if (objs[cc].on == 2)
       MergeObject(cc);
     }
+
+  // FLAGS ***********************************************************************************************
+
   new_room_flags=0;
   play.gscript_timer=-1;  // avoid screw-ups with changing screens
   play.player_on_region = 0;
+
+  // CLEAR INPUT ***********************************************************************************************
+
   // trash any input which they might have done while it was loading
   while (ac_kbhit()) { if (ac_getch()==0) ac_getch(); }
   while (ac_mgetbutton()!=NONE) ;
+
+  // RESET PALETTE ***********************************************************************************************
+
   // no fade in, so set the palette immediately in case of 256-col sprites
   if (game.color_depth > 1)
     setpal();
+
+  // DONE ***********************************************************************************************
+
   set_eip(220);
   update_polled_stuff();
   DEBUG_CONSOLE("Now in room %d", displayed_room);
   guis_need_update = 1;
+
+  // PLUGINS ***********************************************************************************************
+
   platform->RunPluginHooks(AGSE_ENTERROOM, displayed_room);
+
+
 //  MoveToWalkableArea(game.playercharacter);
 //  MSS_CHECK_ALL_BLOCKS;
   }
