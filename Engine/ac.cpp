@@ -4194,22 +4194,22 @@ void DrawViewFrame(block target, ViewFrame *vframe, int x, int y) {
 // UPDATE STUFF (CHARCS, OBJS, SCRIPTS, etc)
 // ============================================================================
 
-// update_stuff: moves and animates objects, executes repeat scripts, and
-// the like.
-void update_stuff() {
-  int aa;
-  set_eip(20);
-
+void update_stuff_timers() 
+{
   if (play.gscript_timer > 0) play.gscript_timer--;
-  for (aa=0;aa<MAX_TIMERS;aa++) {
+  for (int aa=0;aa<MAX_TIMERS;aa++) {
     if (play.script_timers[aa] > 1) play.script_timers[aa]--;
-    }
+  }
+}
+
+void update_stuff_view_cycle_graphics() 
+{
   // update graphics for object if cycling view
-  for (aa=0;aa<croom->numobj;aa++) {
+  for (int aa=0;aa<croom->numobj;aa++) {
     if (objs[aa].on != 1) continue;
     if (objs[aa].moving>0) {
       do_movelist_move(&objs[aa].moving,&objs[aa].x,&objs[aa].y);
-      }
+    }
     if (objs[aa].cycling==0) continue;
     if (objs[aa].view<0) continue;
     if (objs[aa].wait>0) { objs[aa].wait--; continue; }
@@ -4219,7 +4219,7 @@ void update_stuff() {
       objs[aa].frame--;
       if (objs[aa].frame < 0) {
         if ((objs[aa].loop > 0) && 
-           (views[objs[aa].view].loops[objs[aa].loop - 1].RunNextLoop())) 
+          (views[objs[aa].view].loops[objs[aa].loop - 1].RunNextLoop())) 
         {
           // If it's a Go-to-next-loop on the previous one, then go back
           objs[aa].loop --;
@@ -4249,7 +4249,7 @@ void update_stuff() {
           // leave it on the last frame
           objs[aa].cycling=0;
           objs[aa].frame--;
-          }
+        }
         else {
           if (play.no_multiloop_repeat == 0) {
             // multi-loop anims, go back to start of it
@@ -4273,28 +4273,28 @@ void update_stuff() {
     objs[aa].wait=vfptr->speed+objs[aa].overall_speed;
     CheckViewFrame (objs[aa].view, objs[aa].loop, objs[aa].frame);
   }
-  set_eip(21);
+}
 
+void update_stuff_shadow_areas() 
+{
   // shadow areas
   int onwalkarea = get_walkable_area_at_character (game.playercharacter);
   if (onwalkarea<0) ;
   else if (playerchar->flags & CHF_FIXVIEW) ;
   else { onwalkarea=thisroom.shadinginfo[onwalkarea];
-    if (onwalkarea>0) playerchar->view=onwalkarea-1;
-    else if (thisroom.options[ST_MANVIEW]==0) playerchar->view=playerchar->defview;
-    else playerchar->view=thisroom.options[ST_MANVIEW]-1;
+  if (onwalkarea>0) playerchar->view=onwalkarea-1;
+  else if (thisroom.options[ST_MANVIEW]==0) playerchar->view=playerchar->defview;
+  else playerchar->view=thisroom.options[ST_MANVIEW]-1;
   }
-  set_eip(22);
+}
 
-  #define MAX_SHEEP 30
-  int numSheep = 0;
-  int followingAsSheep[MAX_SHEEP];
-
+void update_stuff_move_anim_chars( int * followingAsSheep, int &numSheep, int MAX_SHEEP ) 
+{
   // move & animate characters
-  for (aa=0;aa<game.numcharacters;aa++) {
+  for (int aa=0;aa<game.numcharacters;aa++) {
     if (game.chars[aa].on != 1) continue;
     CharacterInfo*chi=&game.chars[aa];
-    
+
     // walking
     if (chi->walking >= TURNING_AROUND) {
       // Currently rotating to correct direction
@@ -4311,12 +4311,12 @@ void update_stuff() {
           if (wantloop < 0)
             wantloop = 7;
           if ((turnlooporder[wantloop] >= views[chi->view].numLoops) ||
-              (views[chi->view].loops[turnlooporder[wantloop]].numFrames < 1) ||
-              ((turnlooporder[wantloop] >= 4) && ((chi->flags & CHF_NODIAGONAL)!=0))) {
-            if (chi->walking >= TURNING_BACKWARDS)
-              wantloop--;
-            else
-              wantloop++;
+            (views[chi->view].loops[turnlooporder[wantloop]].numFrames < 1) ||
+            ((turnlooporder[wantloop] >= 4) && ((chi->flags & CHF_NODIAGONAL)!=0))) {
+              if (chi->walking >= TURNING_BACKWARDS)
+                wantloop--;
+              else
+                wantloop++;
           }
           else break;
         }
@@ -4438,8 +4438,8 @@ void update_stuff() {
     // not moving, but animating
     // idleleft is <0 while idle view is playing (.animating is 0)
     if (((chi->animating != 0) || (chi->idleleft < 0)) &&
-        ((chi->walking == 0) || ((chi->flags & CHF_MOVENOTWALK) != 0)) &&
-        (chi->room == displayed_room)) 
+      ((chi->walking == 0) || ((chi->flags & CHF_MOVENOTWALK) != 0)) &&
+      (chi->room == displayed_room)) 
     {
       doing_nothing = 0;
       // idle anim doesn't count as doing something
@@ -4459,7 +4459,7 @@ void update_stuff() {
           chi->frame = fraa;
           CheckViewFrameForCharacter(chi);
         }
-        
+
         continue;
       }
       else {
@@ -4471,8 +4471,8 @@ void update_stuff() {
             if ((chi->loop > 0) && 
               (views[chi->view].loops[chi->loop - 1].RunNextLoop())) {
 
-              chi->loop --;
-              chi->frame = views[chi->view].loops[chi->loop].numFrames - 1;
+                chi->loop --;
+                chi->frame = views[chi->view].loops[chi->loop].numFrames - 1;
             }
             else if (chi->animating & CHANIM_REPEAT) {
 
@@ -4493,16 +4493,16 @@ void update_stuff() {
           chi->frame++;
 
         if ((aa == char_speaking) &&
-            (channels[SCHAN_SPEECH] == NULL) &&
-            (play.close_mouth_speech_time > 0) &&
-            (play.messagetime < play.close_mouth_speech_time)) {
-          // finished talking - stop animation
-          chi->animating = 0;
-          chi->frame = 0;
+          (channels[SCHAN_SPEECH] == NULL) &&
+          (play.close_mouth_speech_time > 0) &&
+          (play.messagetime < play.close_mouth_speech_time)) {
+            // finished talking - stop animation
+            chi->animating = 0;
+            chi->frame = 0;
         }
 
         if (chi->frame >= views[chi->view].loops[chi->loop].numFrames) {
-          
+
           if (views[chi->view].loops[chi->loop].RunNextLoop()) 
           {
             if (chi->loop+1 >= views[chi->view].numLoops)
@@ -4530,7 +4530,7 @@ void update_stuff() {
             // if it's a multi-loop animation, go back to start
             if (play.no_multiloop_repeat == 0) {
               while ((chi->loop > 0) && 
-                  (views[chi->view].loops[chi->loop - 1].RunNextLoop()))
+                (views[chi->view].loops[chi->loop - 1].RunNextLoop()))
                 chi->loop--;
             }
           }
@@ -4572,7 +4572,7 @@ void update_stuff() {
       else if (Random(100) < (chi->followinfo & 0x00ff)) ;
       // the followed character has changed room
       else if ((chi->room != game.chars[chi->following].room)
-            && (game.chars[chi->following].on == 0))
+        && (game.chars[chi->following].on == 0))
         ;  // do nothing if the player isn't visible
       else if (chi->room != game.chars[chi->following].room) {
         chi->prevroom = chi->room;
@@ -4584,19 +4584,19 @@ void update_stuff() {
           if (play.entered_at_x > (thisroom.width - 8)) {
             chi->x = thisroom.width+8;
             chi->y = play.entered_at_y;
-            }
+          }
           else if (play.entered_at_x < 8) {
             chi->x = -8;
             chi->y = play.entered_at_y;
-            }
+          }
           else if (play.entered_at_y > (thisroom.height - 8)) {
             chi->y = thisroom.height+8;
             chi->x = play.entered_at_x;
-            }
+          }
           else if (play.entered_at_y < thisroom.top+8) {
             chi->y = thisroom.top+1;
             chi->x = play.entered_at_x;
-            }
+          }
           else {
             // not at one of the edges
             // delay for a few seconds to let the player move
@@ -4615,14 +4615,14 @@ void update_stuff() {
       else if ((abs(game.chars[chi->following].x - chi->x) > distaway+30) |
         (abs(game.chars[chi->following].y - chi->y) > distaway+30) |
         ((chi->followinfo & 0x00ff) == 0)) {
-        // in same room
-        int goxoffs=(Random(50)-25);
-        // make sure he's not standing on top of the other man
-        if (goxoffs < 0) goxoffs-=distaway;
-        else goxoffs+=distaway;
-        walk_character(aa,game.chars[chi->following].x + goxoffs,
-          game.chars[chi->following].y + (Random(50)-25),0, true);
-        doing_nothing = 0;
+          // in same room
+          int goxoffs=(Random(50)-25);
+          // make sure he's not standing on top of the other man
+          if (goxoffs < 0) goxoffs-=distaway;
+          else goxoffs+=distaway;
+          walk_character(aa,game.chars[chi->following].x + goxoffs,
+            game.chars[chi->following].y + (Random(50)-25),0, true);
+          doing_nothing = 0;
       }
     }
 
@@ -4655,7 +4655,7 @@ void update_stuff() {
         if ((chi->idletime > 0) && (useloop >= maxLoops)) {
           do {
             useloop = rand() % maxLoops;
-          // don't select a loop which is a continuation of a previous one
+            // don't select a loop which is a continuation of a previous one
           } while ((useloop > 0) && (views[chi->idleview].loops[useloop-1].RunNextLoop()));
         }
         // Normal idle anim - just reset to loop 0 if not enough to
@@ -4674,8 +4674,12 @@ void update_stuff() {
     charextra[aa].process_idle_this_time = 0;
   }
 
+}
+
+void update_stuff_following_exactly( int numSheep, int * followingAsSheep ) 
+{
   // update location of all following_exactly characters
-  for (aa = 0; aa < numSheep; aa++) {
+  for (int aa = 0; aa < numSheep; aa++) {
     CharacterInfo *chi = &game.chars[followingAsSheep[aa]];
 
     chi->x = game.chars[chi->following].x;
@@ -4691,25 +4695,29 @@ void update_stuff() {
     else
       chi->baseline = usebase + 1;
   }
+}
 
-  set_eip(23);
-
+void update_stuff_overlay_timers() 
+{
   // update overlay timers
-  for (aa=0;aa<numscreenover;aa++) {
+  for (int aa=0;aa<numscreenover;aa++) {
     if (screenover[aa].timeout > 0) {
       screenover[aa].timeout--;
       if (screenover[aa].timeout == 0)
         remove_screen_overlay(screenover[aa].type);
     }
   }
+}
 
+void update_stuff_speech_text() 
+{
   // determine if speech text should be removed
   if (play.messagetime>=0) {
     play.messagetime--;
     // extend life of text if the voice hasn't finished yet
     if (channels[SCHAN_SPEECH] != NULL) {
       if ((!rec_isSpeechFinished()) && (play.fast_forward == 0)) {
-      //if ((!channels[SCHAN_SPEECH]->done) && (play.fast_forward == 0)) {
+        //if ((!channels[SCHAN_SPEECH]->done) && (play.fast_forward == 0)) {
         if (play.messagetime <= 1)
           play.messagetime = 1;
       }
@@ -4730,11 +4738,13 @@ void update_stuff() {
       }
     }
   }
-  set_eip(24);
+}
 
+void update_stuff_sierra_speech() 
+{
   // update sierra-style speech
   if ((face_talking >= 0) && (play.fast_forward == 0)) 
-{
+  {
     int updatedFrame = 0;
 
     if ((facetalkchar->blinkview > 0) && (facetalkAllowBlink)) {
@@ -4797,9 +4807,9 @@ void update_stuff() {
     else {
       // Close mouth at end of sentence
       if ((play.messagetime < play.close_mouth_speech_time) &&
-          (play.close_mouth_speech_time > 0)) {
-        facetalkframe = 0;
-        facetalkwait = play.messagetime;
+        (play.close_mouth_speech_time > 0)) {
+          facetalkframe = 0;
+          facetalkwait = play.messagetime;
       }
       else if ((game.options[OPT_LIPSYNCTEXT]) && (facetalkrepeat > 0)) {
         // lip-sync speech (and not a thought)
@@ -4812,20 +4822,20 @@ void update_stuff() {
         // normal non-lip-sync
         facetalkframe++;
         if ((facetalkframe >= views[facetalkview].loops[facetalkloop].numFrames) ||
-            ((play.messagetime < 1) && (play.close_mouth_speech_time > 0))) {
+          ((play.messagetime < 1) && (play.close_mouth_speech_time > 0))) {
 
-          if ((facetalkframe >= views[facetalkview].loops[facetalkloop].numFrames) &&
+            if ((facetalkframe >= views[facetalkview].loops[facetalkloop].numFrames) &&
               (views[facetalkview].loops[facetalkloop].RunNextLoop())) 
-          {
-            facetalkloop++;
-          }
-          else 
-          {
-            facetalkloop = 0;
-          }
-          facetalkframe = 0;
-          if (!facetalkrepeat)
-            facetalkwait = 999999;
+            {
+              facetalkloop++;
+            }
+            else 
+            {
+              facetalkloop = 0;
+            }
+            facetalkframe = 0;
+            if (!facetalkrepeat)
+              facetalkwait = 999999;
         }
         if ((facetalkframe != 0) || (facetalkrepeat == 1))
           facetalkwait = views[facetalkview].loops[facetalkloop].frames[facetalkframe].speed + GetCharacterSpeechAnimationDelay(facetalkchar);
@@ -4843,7 +4853,7 @@ void update_stuff() {
 
       int yPos = 0;
       int thisPic = views[facetalkview].loops[facetalkloop].frames[facetalkframe].pic;
-      
+
       if (game.options[OPT_SPEECHTYPE] == 3) {
         // QFG4-style fullscreen dialog
         yPos = (BMP_H(screenover[face_talking].pic) / 2) - (spriteheight[thisPic] / 2);
@@ -4854,22 +4864,50 @@ void update_stuff() {
       }
 
       DrawViewFrame(screenover[face_talking].pic, &views[facetalkview].loops[facetalkloop].frames[facetalkframe], 0, yPos);
-//      draw_sprite(screenover[face_talking].pic, spriteset[thisPic], 0, yPos);
+      //      draw_sprite(screenover[face_talking].pic, spriteset[thisPic], 0, yPos);
 
       if ((facetalkchar->blinkview > 0) && (facetalkchar->blinktimer < 0)) {
         // draw the blinking sprite on top
         DrawViewFrame(screenover[face_talking].pic,
-            &views[facetalkchar->blinkview].loops[facetalkBlinkLoop].frames[facetalkchar->blinkframe],
-            0, yPos);
+          &views[facetalkchar->blinkview].loops[facetalkBlinkLoop].frames[facetalkchar->blinkframe],
+          0, yPos);
 
-/*        draw_sprite(screenover[face_talking].pic,
-          spriteset[views[facetalkchar->blinkview].frames[facetalkloop][facetalkchar->blinkframe].pic],
-          0, yPos);*/
+        /*        draw_sprite(screenover[face_talking].pic,
+        spriteset[views[facetalkchar->blinkview].frames[facetalkloop][facetalkchar->blinkframe].pic],
+        0, yPos);*/
       }
 
       gfxDriver->UpdateDDBFromBitmap(screenover[face_talking].bmp, screenover[face_talking].pic, false);
     }  // end if updatedFrame
   }
+}
+
+
+
+// update_stuff: moves and animates objects, executes repeat scripts, and
+// the like.
+void update_stuff() {
+
+  set_eip(20);
+  update_stuff_timers();
+  update_stuff_view_cycle_graphics();
+
+  set_eip(21);
+  update_stuff_shadow_areas();
+
+  set_eip(22);
+  #define MAX_SHEEP 30
+  int numSheep = 0;
+  int followingAsSheep[MAX_SHEEP];
+  update_stuff_move_anim_chars(followingAsSheep, numSheep, MAX_SHEEP);
+  update_stuff_following_exactly(numSheep, followingAsSheep);
+
+  set_eip(23);
+  update_stuff_overlay_timers();
+  update_stuff_speech_text();
+
+  set_eip(24);
+  update_stuff_sierra_speech();
 
   set_eip(25);
 }
