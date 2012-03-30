@@ -14,6 +14,8 @@
 
 #include "routefnd.h"
 
+#include "allegro_wrapper.h"
+
 #include <string.h>
 #include <math.h>
 
@@ -76,7 +78,7 @@ int lastcx, lastcy;
 void line_callback(block bmpp, int x, int y, int d)
 {
 /*  if ((x>=320) | (y>=200) | (x<0) | (y<0)) line_failed=1;
-  else */ if (getpixel(bmpp, x, y) < 1)
+  else */ if (alw_getpixel(bmpp, x, y) < 1)
     line_failed = 1;
   else if (line_failed == 0) {
     lastcx = x;
@@ -129,7 +131,7 @@ int can_see_from(int x1, int y1, int x2, int y2)
   if ((x1 == x2) && (y1 == y2))
     return 1;
 
-  do_line(wallscreen, x1, y1, x2, y2, 0, line_callback);
+  alw_do_line(wallscreen, x1, y1, x2, y2, 0, line_callback);
   if (line_failed == 0)
     return 1;
 
@@ -178,20 +180,20 @@ int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
   suggestx = -1;
 
   // ensure it's a memory bitmap, so we can use direct access to line[] array
-  if ((wss == NULL) || (!is_memory_bitmap(wss)) || (bitmap_color_depth(wss) != 8))
+  if ((wss == NULL) || (!alw_is_memory_bitmap(wss)) || (alw_bitmap_color_depth(wss) != 8))
     quit("is_route_possible: invalid walkable areas bitmap supplied");
 
-  if (getpixel(wallscreen, fromx, fromy) < 1)
+  if (alw_getpixel(wallscreen, fromx, fromy) < 1)
     return 0;
 
-  block tempw = create_bitmap_ex(8, BMP_W(wallscreen), BMP_H(wallscreen));
+  block tempw = alw_create_bitmap_ex(8, BMP_W(wallscreen), BMP_H(wallscreen));
 
   if (tempw == NULL)
     quit("no memory for route calculation");
-  if (!is_memory_bitmap(tempw))
+  if (!alw_is_memory_bitmap(tempw))
     quit("tempw is not memory bitmap");
 
-  blit(wallscreen, tempw, 0, 0, 0, 0, BMP_W(tempw), BMP_H(tempw));
+  alw_blit(wallscreen, tempw, 0, 0, 0, 0, BMP_W(tempw), BMP_H(tempw));
 
   int dd, ff;
   // initialize array for finding widths of walkable areas
@@ -223,7 +225,7 @@ int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
     for (ff = 0; ff < BMP_H(tempw); ff++) {
       thisar = BMP_LINE(tempw)[ff][dd];
       if (thisar > 0)
-        putpixel(tempw, dd, ff, 1);
+        alw_putpixel(tempw, dd, ff, 1);
       // count how high the area is at this point
       if ((thisar == lastarea) && (thisar > 0))
         inarow++;
@@ -257,8 +259,8 @@ int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
   }
   walk_area_granularity[0] = MAX_GRANULARITY;
 
-  floodfill(tempw, fromx, fromy, 232);
-  if (getpixel(tempw, tox, toy) != 232) 
+  alw_floodfill(tempw, fromx, fromy, 232);
+  if (alw_getpixel(tempw, tox, toy) != 232) 
   {
     // Destination pixel is not walkable
     // Try the 100x100 square around the target first at 3-pixel granularity
@@ -348,7 +350,7 @@ try_again:
   }
 
   if (((nextx < 0) | (nextx >= BMP_W(wallscreen)) | (nexty < 0) | (nexty >= BMP_H(wallscreen))) ||
-      (getpixel(wallscreen, nextx, nexty) == 0) || ((beenhere[srcy][srcx] & (1 << trydir)) != 0)) {
+      (alw_getpixel(wallscreen, nextx, nexty) == 0) || ((beenhere[srcy][srcx] & (1 << trydir)) != 0)) {
 
     if (leftorright == 0) {
       trydir++;
@@ -405,7 +407,7 @@ try_again:
 // and move a bit if this causes them to become non-walkable
 void round_down_coords(int &tmpx, int &tmpy)
 {
-  int startgran = walk_area_granularity[_getpixel(wallscreen, tmpx, tmpy)];
+  int startgran = walk_area_granularity[alw__getpixel(wallscreen, tmpx, tmpy)];
   tmpy = tmpy - tmpy % startgran;
 
   if (tmpy < 0)
@@ -415,12 +417,12 @@ void round_down_coords(int &tmpx, int &tmpy)
   if (tmpx < 0)
     tmpx = 0;
 
-  if (_getpixel(wallscreen, tmpx, tmpy) == 0) {
+  if (alw__getpixel(wallscreen, tmpx, tmpy) == 0) {
     tmpx += startgran;
-    if ((_getpixel(wallscreen, tmpx, tmpy) == 0) && (tmpy < BMP_H(wallscreen) - startgran)) {
+    if ((alw__getpixel(wallscreen, tmpx, tmpy) == 0) && (tmpy < BMP_H(wallscreen) - startgran)) {
       tmpy += startgran;
 
-      if (_getpixel(wallscreen, tmpx, tmpy) == 0)
+      if (alw__getpixel(wallscreen, tmpx, tmpy) == 0)
         tmpx -= startgran;
     }
   }
@@ -526,7 +528,7 @@ int find_route_dijkstra(int fromx, int fromy, int destx, int desty)
       newx = newcell[p] % BMP_W(wallscreen);
       newy = newcell[p] / BMP_W(wallscreen);
       beenhere[newy][newx] = beenhere[cheapest[p] / BMP_W(wallscreen)][cheapest[p] % BMP_W(wallscreen)] + 1;
-//      int wal = walk_area_granularity[getpixel(wallscreen, newx, newy)];
+//      int wal = walk_area_granularity[alw_getpixel(wallscreen, newx, newy)];
 //      beenhere[newy - newy%wal][newx - newx%wal] = beenhere[newy][newx];
       parent[newcell[p]] = cheapest[p];
 
@@ -610,7 +612,7 @@ int find_route_dijkstra(int fromx, int fromy, int destx, int desty)
 
 int __find_route(int srcx, int srcy, short *tox, short *toy, int noredx)
 {
-  if ((noredx == 0) && (getpixel(wallscreen, tox[0], toy[0]) == 0))
+  if ((noredx == 0) && (alw_getpixel(wallscreen, tox[0], toy[0]) == 0))
     return 0; // clicked on a wall
 
   int is_straight = 0;
@@ -667,17 +669,17 @@ void set_route_move_speed(int speed_x, int speed_y)
 {
   // negative move speeds like -2 get converted to 1/2
   if (speed_x < 0) {
-    move_speed_x = itofix(1) / (-speed_x);
+    move_speed_x = alw_itofix(1) / (-speed_x);
   }
   else {
-    move_speed_x = itofix(speed_x);
+    move_speed_x = alw_itofix(speed_x);
   }
 
   if (speed_y < 0) {
-    move_speed_y = itofix(1) / (-speed_y);
+    move_speed_y = alw_itofix(1) / (-speed_y);
   }
   else {
-    move_speed_y = itofix(speed_y);
+    move_speed_y = alw_itofix(speed_y);
   }
 }
 
@@ -716,8 +718,8 @@ void calculate_move_stage(MoveList * mlsp, int aaa)
     return;
   }
 
-  fixed xdist = itofix(abs(ourx - destx));
-  fixed ydist = itofix(abs(oury - desty));
+  fixed xdist = alw_itofix(abs(ourx - destx));
+  fixed ydist = alw_itofix(abs(oury - desty));
 
   fixed useMoveSpeed;
 
@@ -727,27 +729,27 @@ void calculate_move_stage(MoveList * mlsp, int aaa)
   else {
     // different X and Y move speeds
     // the X proportion of the movement is (x / (x + y))
-    fixed xproportion = fixdiv(xdist, (xdist + ydist));
+    fixed xproportion = alw_fixdiv(xdist, (xdist + ydist));
 
     if (move_speed_x > move_speed_y) {
       // speed = y + ((1 - xproportion) * (x - y))
-      useMoveSpeed = move_speed_y + fixmul(xproportion, move_speed_x - move_speed_y);
+      useMoveSpeed = move_speed_y + alw_fixmul(xproportion, move_speed_x - move_speed_y);
     }
     else {
       // speed = x + (xproportion * (y - x))
-      useMoveSpeed = move_speed_x + fixmul(itofix(1) - xproportion, move_speed_y - move_speed_x);
+      useMoveSpeed = move_speed_x + alw_fixmul(alw_itofix(1) - xproportion, move_speed_y - move_speed_x);
     }
   }
 
-  fixed angl = fatan(fdiv(ydist, xdist));
+  fixed angl = alw_fixatan(alw_fixdiv(ydist, xdist));
 
   // now, since new opp=hyp*sin, work out the Y step size
   //fixed newymove = useMoveSpeed * fsin(angl);
-  fixed newymove = fixmul(useMoveSpeed, fsin(angl));
+  fixed newymove = alw_fixmul(useMoveSpeed, alw_fixsin(angl));
 
   // since adj=hyp*cos, work out X step size
   //fixed newxmove = useMoveSpeed * fcos(angl);
-  fixed newxmove = fixmul(useMoveSpeed, fcos(angl));
+  fixed newxmove = alw_fixmul(useMoveSpeed, alw_fixcos(angl));
 
   if (destx < ourx)
     newxmove = -newxmove;

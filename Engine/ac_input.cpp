@@ -1,5 +1,8 @@
 #include "ac_input.h"
 
+#include "allegro_wrapper.h"
+
+
 #include "allegro.h"
 #include "ac.h"
 #include "ac_context.h"
@@ -14,7 +17,7 @@
 // ============================================================================
 
 int my_readkey() {
-  int gott=readkey();
+  int gott=alw_readkey();
   int scancode = ((gott >> 8) & 0x00ff);
 
   if (gott == READKEY_CODE_ALT_TAB)
@@ -29,7 +32,7 @@ int my_readkey() {
 
   /*if ((scancode >= KEY_0_PAD) && (scancode <= KEY_9_PAD)) {
     // fix numeric pad keys if numlock is off (allegro 4.2 changed this behaviour)
-    if ((key_shifts & KB_NUMLOCK_FLAG) == 0)
+    if ((alw_key_shifts & KB_NUMLOCK_FLAG) == 0)
       gott = (gott & 0xff00) | EXTENDED_KEY_CODE;
   }*/
 
@@ -95,13 +98,13 @@ int my_readkey() {
 void keyboard_input_initialise() {
 #ifdef ALLEGRO_KEYBOARD_HANDLER
   write_log_debug("Initializing keyboard");
-  install_keyboard();
+  alw_install_keyboard();
 #endif
 }
 
 //#define getch() my_readkey()
 //#undef kbhit
-//#define kbhit keypressed
+//#define kbhit alw_keypressed
 // END KEYBOARD HANDLER
 
 
@@ -170,7 +173,7 @@ int rec_getch () {
 int rec_kbhit () {
   if ((play.playback) && (recordbuffer != NULL)) {
     // check for real keypresses to abort the replay
-    if (keypressed()) {
+    if (alw_keypressed()) {
       if (my_readkey() == 27) {
         disable_replay_playback();
         return 0;
@@ -183,7 +186,7 @@ int rec_kbhit () {
     }
     return 0;
   }
-  int result = keypressed();
+  int result = alw_keypressed();
   if ((result) && (globalTimerCounter < play.ignore_user_input_until_time))
   {
     // ignoring user input
@@ -363,12 +366,12 @@ int check_mouse_wheel () {
   }
 
   int result = 0;
-  if ((mouse_z != mouse_z_was) && (game.options[OPT_MOUSEWHEEL] != 0)) {
-    if (mouse_z > mouse_z_was)
+  if ((alw_mouse_z != mouse_z_was) && (game.options[OPT_MOUSEWHEEL] != 0)) {
+    if (alw_mouse_z > mouse_z_was)
       result = 1;
     else
       result = -1;
-    mouse_z_was = mouse_z;
+    mouse_z_was = alw_mouse_z;
   }
 
   if ((play.recording) && (result)) {
@@ -411,8 +414,8 @@ int is_key_pressed (int keycode)
   quit("allegro keyboard handler not in use??");
 #endif
 
-  if (keyboard_needs_poll())
-    poll_keyboard();
+  if (alw_keyboard_needs_poll())
+    alw_poll_keyboard();
 
   if (keycode >= 300) {
     // function keys are 12 lower in allegro 4

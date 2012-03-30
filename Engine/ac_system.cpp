@@ -1,5 +1,7 @@
 #include "ac_system.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acsound.h"
@@ -52,31 +54,31 @@ int System_GetHardwareAcceleration()
 /* *** SCRIPT SYMBOL: [System] System::get_NumLock *** */
 int System_GetNumLock()
 {
-  return (key_shifts & KB_NUMLOCK_FLAG) ? 1 : 0;
+  return (alw_key_shifts & KB_NUMLOCK_FLAG) ? 1 : 0;
 }
 
 /* *** SCRIPT SYMBOL: [System] System::get_CapsLock *** */
 int System_GetCapsLock()
 {
-  return (key_shifts & KB_CAPSLOCK_FLAG) ? 1 : 0;
+  return (alw_key_shifts & KB_CAPSLOCK_FLAG) ? 1 : 0;
 }
 
 /* *** SCRIPT SYMBOL: [System] System::get_ScrollLock *** */
 int System_GetScrollLock()
 {
-  return (key_shifts & KB_SCROLOCK_FLAG) ? 1 : 0;
+  return (alw_key_shifts & KB_SCROLOCK_FLAG) ? 1 : 0;
 }
 
 /* *** SCRIPT SYMBOL: [System] System::set_NumLock *** */
 void System_SetNumLock(int newValue)
 {
   // doesn't work ... maybe allegro doesn't implement this on windows
-  int ledState = key_shifts & (KB_SCROLOCK_FLAG | KB_CAPSLOCK_FLAG);
+  int ledState = alw_key_shifts & (KB_SCROLOCK_FLAG | KB_CAPSLOCK_FLAG);
   if (newValue)
   {
     ledState |= KB_NUMLOCK_FLAG;
   }
-  set_leds(ledState);
+  alw_set_leds(ledState);
 }
 
 /* *** SCRIPT SYMBOL: [System] System::get_VSync *** */
@@ -136,7 +138,7 @@ void SetDigitalMasterVolume (int newvol) {
   if ((newvol<0) | (newvol>100))
     quit("!SetDigitalMasterVolume: invalid volume - must be from 0-100");
   play.digital_master_volume = newvol;
-  set_volume ((newvol * 255) / 100, -1);
+  alw_set_volume ((newvol * 255) / 100, -1);
 }
 
 /* *** SCRIPT SYMBOL: [System] System::get_Volume *** */
@@ -155,7 +157,7 @@ void System_SetVolume(int newvol)
     return;
 
   play.digital_master_volume = newvol;
-  set_volume((newvol * 255) / 100, (newvol * 255) / 100);
+  alw_set_volume((newvol * 255) / 100, (newvol * 255) / 100);
 
   // allegro's set_volume can lose the volumes of all the channels
   // if it was previously set low; so restore them

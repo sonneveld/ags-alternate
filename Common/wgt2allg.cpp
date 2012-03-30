@@ -1,3 +1,4 @@
+#include "allegro_wrapper.h"
 #include "wgt2allg.h"
 #include "bmp.h"
 
@@ -26,14 +27,6 @@ block abuf;
 #define GFX_VGA GFX_AUTODETECT
 #endif
 
-static void vga256()
-{
-    allegro_init();
-    set_gfx_mode(GFX_VGA, 320, 200, 320, 200);
-    abuf = screen;
-    vesa_xres = 320;
-    vesa_yres = 200;
-}
 
 #if (!defined(WINDOWS_VERSION) && !defined(LINUX_VERSION) && !defined(MAC_VERSION))
   union REGS r;
@@ -59,7 +52,7 @@ static void vga256()
   void wsetscreen(block nss)
   {
     if (nss == NULL)
-      abuf = screen;
+      abuf = alw_screen;
     else
       abuf = nss;
   }
@@ -121,12 +114,12 @@ static void vga256()
     if (thit < 1)
       thit = 1;
 
-    tempbitm = create_bitmap(twid, thit);
+    tempbitm = alw_create_bitmap(twid, thit);
 
     if (tempbitm == NULL)
       return NULL;
 
-    blit(abuf, tempbitm, x1, y1, 0, 0, BMP_W(tempbitm), BMP_H(tempbitm));
+    alw_blit(abuf, tempbitm, x1, y1, 0, 0, BMP_W(tempbitm), BMP_H(tempbitm));
     return tempbitm;
   }
 
@@ -153,7 +146,7 @@ static void vga256()
 
     widd = getshort(fff);
     hitt = getshort(fff);
-    tempbitm = create_bitmap(widd, hitt);
+    tempbitm = alw_create_bitmap(widd, hitt);
 
     for (ff = 0; ff < hitt; ff++)
       fread(&BMP_LINE(tempbitm)[ff][0], widd, 1, fff);
@@ -333,9 +326,9 @@ static void vga256()
   void wputblock(int xx, int yy, block bll, int xray)
   {
     if (xray)
-      draw_sprite(abuf, bll, xx, yy);
+      alw_draw_sprite(abuf, bll, xx, yy);
     else
-      blit(bll, abuf, 0, 0, xx, yy, BMP_W(bll), BMP_H(bll));
+      alw_blit(bll, abuf, 0, 0, xx, yy, BMP_W(bll), BMP_H(bll));
   }
 
   static const int col_lookups[32] = {
@@ -356,14 +349,14 @@ static void vga256()
     else if ((newcol >= 32) && (wantColDep > 16)) {
       // true-color
 #ifdef SWAP_RB_HICOL
-      ctset[0] = makeacol32(getb16(newcol), getg16(newcol), getr16(newcol), 255);
+      ctset[0] = alw_makeacol32(alw_getb16(newcol), alw_getg16(newcol), alw_getr16(newcol), 255);
 #else
-      ctset[0] = makeacol32(getr16(newcol), getg16(newcol), getb16(newcol), 255);
+      ctset[0] = alw_makeacol32(alw_getr16(newcol), alw_getg16(newcol), alw_getb16(newcol), 255);
 #endif
     }
     else if (newcol >= 32) {
 #ifdef SWAP_RB_HICOL
-      ctset[0] = makecol16(getb16(newcol), getg16(newcol), getr16(newcol));
+      ctset[0] = alw_makecol16(alw_getb16(newcol), alw_getg16(newcol), alw_getr16(newcol));
 #else
       // If it's 15-bit, convert the color
       if (wantColDep == 15)
@@ -374,7 +367,7 @@ static void vga256()
     } 
     else
     {
-      ctset[0] = makecol_depth(wantColDep, col_lookups[newcol] >> 16,
+      ctset[0] = alw_makecol_depth(wantColDep, col_lookups[newcol] >> 16,
                                (col_lookups[newcol] >> 8) & 0x000ff, col_lookups[newcol] & 0x000ff);
 
       // in case it's used on an alpha-channel sprite, make sure it's visible
@@ -413,7 +406,7 @@ static void vga256()
       }
       else
       {
-        color_mapped_table[jj] = bestfit_color(pal2, pal1[jj].r, pal1[jj].g, pal1[jj].b);
+        color_mapped_table[jj] = alw_bestfit_color(pal2, pal1[jj].r, pal1[jj].g, pal1[jj].b);
       }
     }
 
@@ -429,8 +422,8 @@ static void vga256()
 
     for (jj = 0; jj < (BMP_W(picc)) * (BMP_H(picc)); jj++) {
       int xxl = jj % (BMP_W(picc)), yyl = jj / (BMP_W(picc));
-      int rr = getpixel(picc, xxl, yyl);
-      putpixel(picc, xxl, yyl, color_mapped_table[rr]);
+      int rr = alw_getpixel(picc, xxl, yyl);
+      alw_putpixel(picc, xxl, yyl, color_mapped_table[rr]);
     }
   }
 
@@ -484,12 +477,12 @@ static void vga256()
   static void wcopyscreen(int x1, int y1, int x2, int y2, block src, int dx, int dy, block dest)
   {
     if (src == NULL)
-      src = screen;
+      src = alw_screen;
 
     if (dest == NULL)
-      dest = screen;
+      dest = alw_screen;
 
-    blit(src, dest, x1, y1, dx, dy, (x2 - x1) + 1, (y2 - y1) + 1);
+    alw_blit(src, dest, x1, y1, dx, dy, (x2 - x1) + 1, (y2 - y1) + 1);
   }
 
 #ifdef USE_CLIB

@@ -11,6 +11,7 @@
   You MAY NOT compile your own builds of the engine without making it EXPLICITLY
   CLEAR that the code has been altered from the Standard Version.
 */
+#include "allegro_wrapper.h"
 #include <allegro.h>
 #include <winalleg.h>
 #include "ali3d.h"
@@ -69,7 +70,7 @@ public:
     _bmp = bmp;
     _width = bmp->w;
     _height = bmp->h;
-    _colDepth = bitmap_color_depth(bmp);
+    _colDepth = alw_bitmap_color_depth(bmp);
     _flipped = false;
     _stretchToWidth = 0;
     _stretchToHeight = 0;
@@ -192,7 +193,7 @@ private:
   void draw_sprite_with_transparency(BITMAP* piccy, int xxx, int yyy, int transparency);
   void highcolor_fade_out(int speed, int targetColourRed, int targetColourGreen, int targetColourBlue);
   void highcolor_fade_in(BITMAP *bmp_orig, int speed, int targetColourRed, int targetColourGreen, int targetColourBlue);
-  void __fade_from_range(PALLETE source, PALLETE dest, int speed, int from, int to) ;
+  void __fade_from_range(PALETTE source, PALETTE dest, int speed, int from, int to) ;
   void __fade_out_range(int speed, int from, int to, int targetColourRed, int targetColourGreen, int targetColourBlue) ;
   bool IsModeSupported(int driver, int width, int height, int colDepth);
   int  GetAllegroGfxDriverID(bool windowed);
@@ -206,7 +207,7 @@ bool ALSoftwareGraphicsDriver::IsModeSupported(int driver, int width, int height
   }
   if (_gfxModeList == NULL)
   {
-    _gfxModeList = get_gfx_mode_list(driver);
+    _gfxModeList = alw_get_gfx_mode_list(driver);
   }
   if (_gfxModeList != NULL)
   {
@@ -221,7 +222,7 @@ bool ALSoftwareGraphicsDriver::IsModeSupported(int driver, int width, int height
         return true;
       }
     }
-    strcpy(allegro_error, "This graphics mode is not supported");
+    strcpy(alw_allegro_error, "This graphics mode is not supported");
     return false;
   }
   return true;
@@ -231,7 +232,7 @@ int ALSoftwareGraphicsDriver::FindSupportedResolutionWidth(int idealWidth, int h
 {
   if (_gfxModeList == NULL)
   {
-    _gfxModeList = get_gfx_mode_list(GetAllegroGfxDriverID(false));
+    _gfxModeList = alw_get_gfx_mode_list(GetAllegroGfxDriverID(false));
   }
   if (_gfxModeList != NULL)
   {
@@ -295,7 +296,7 @@ bool ALSoftwareGraphicsDriver::Init(int width, int height, int colourDepth, bool
   _loopTimer = loopTimer;
   int driver = GetAllegroGfxDriverID(windowed);
 
-  set_color_depth(colourDepth);
+  alw_set_color_depth(colourDepth);
   int actualInitWid = width, actualInitHit = height;
   _filter->GetRealResolution(&actualInitWid, &actualInitHit);
 
@@ -303,12 +304,12 @@ bool ALSoftwareGraphicsDriver::Init(int width, int height, int colourDepth, bool
     _initGfxCallback(NULL);
 
   if ((IsModeSupported(driver, actualInitWid, actualInitHit, colourDepth)) &&
-      (set_gfx_mode(driver, actualInitWid, actualInitHit, 0, 0) == 0))
+      (alw_set_gfx_mode(driver, actualInitWid, actualInitHit, 0, 0) == 0))
   {
-    clear(screen);
-    screen = _filter->ScreenInitialized(screen, width, height);
+    alw_clear_bitmap(alw_screen);
+    alw_screen = _filter->ScreenInitialized(alw_screen, width, height);
 
-    virtualScreen = screen;
+    virtualScreen = alw_screen;
 
 #ifdef _WIN32
     if (!windowed)
@@ -335,7 +336,7 @@ void ALSoftwareGraphicsDriver::ClearRectangle(int x1, int y1, int x2, int y2, RG
 {
   int color = 0;
   if (colorToUse != NULL) 
-    color = makecol_depth(this->_colorDepth, colorToUse->r, colorToUse->g, colorToUse->b);
+    color = alw_makecol_depth(this->_colorDepth, colorToUse->r, colorToUse->g, colorToUse->b);
   _filter->ClearRect(x1, y1, x2, y2, color);
 }
 
@@ -357,12 +358,12 @@ void ALSoftwareGraphicsDriver::UnInit()
 
   if (_gfxModeList != NULL)
   {
-    destroy_gfx_mode_list(_gfxModeList);
+    alw_destroy_gfx_mode_list(_gfxModeList);
     _gfxModeList = NULL;
   }
 
-  if (screen)
-    screen = _filter->ShutdownAndReturnRealScreen(screen);
+  if (alw_screen)
+    alw_screen = _filter->ShutdownAndReturnRealScreen(alw_screen);
 
   // don't do anything else -- the main app may
   // already have called allegro_exit
@@ -440,45 +441,45 @@ void ALSoftwareGraphicsDriver::ClearDrawList()
 
 void ALSoftwareGraphicsDriver::draw_sprite_with_transparency(BITMAP* piccy, int xxx, int yyy, int transparency)
 {
-  int screen_depth = bitmap_color_depth(virtualScreen);
-  int sprite_depth = bitmap_color_depth(piccy);
+  int screen_depth = alw_bitmap_color_depth(virtualScreen);
+  int sprite_depth = alw_bitmap_color_depth(piccy);
 
   if (sprite_depth < screen_depth) {
 
     if ((sprite_depth == 8) && (screen_depth >= 24)) {
       // 256-col sprite -> truecolor background
       // this is automatically supported by allegro, no twiddling needed
-      draw_sprite(virtualScreen, piccy, xxx, yyy);
+      alw_draw_sprite(virtualScreen, piccy, xxx, yyy);
       return;
     }
     // 256-col spirte -> hi-color background, or
     // 16-bit sprite -> 32-bit background
-    BITMAP* hctemp=create_bitmap_ex(screen_depth, piccy->w, piccy->h);
-    blit(piccy,hctemp,0,0,0,0,hctemp->w,hctemp->h);
-    int bb,cc,mask_col = bitmap_mask_color(virtualScreen);
+    BITMAP* hctemp=alw_create_bitmap_ex(screen_depth, piccy->w, piccy->h);
+    alw_blit(piccy,hctemp,0,0,0,0,hctemp->w,hctemp->h);
+    int bb,cc,mask_col = alw_bitmap_mask_color(virtualScreen);
 
     if (sprite_depth == 8) {
       // only do this for 256-col, cos the blit call converts
       // transparency for 16->32 bit
       for (bb=0;bb<hctemp->w;bb++) {
         for (cc=0;cc<hctemp->h;cc++)
-          if (_getpixel(piccy,bb,cc)==0) putpixel(hctemp,bb,cc,mask_col);
+          if (alw__getpixel(piccy,bb,cc)==0) alw_putpixel(hctemp,bb,cc,mask_col);
       }
     }
 
-    draw_sprite(virtualScreen, hctemp, xxx, yyy);
-    destroy_bitmap(hctemp);
+    alw_draw_sprite(virtualScreen, hctemp, xxx, yyy);
+    alw_destroy_bitmap(hctemp);
   }
   else
   {
     if ((transparency != 0) && (screen_depth > 8) &&
-        (sprite_depth > 8) && (bitmap_color_depth(virtualScreen) > 8)) 
+        (sprite_depth > 8) && (alw_bitmap_color_depth(virtualScreen) > 8)) 
     {
-      set_trans_blender(0,0,0, transparency);
-      draw_trans_sprite(virtualScreen, piccy, xxx, yyy);
+      alw_set_trans_blender(0,0,0, transparency);
+      alw_draw_trans_sprite(virtualScreen, piccy, xxx, yyy);
     }
     else
-      draw_sprite(virtualScreen, piccy, xxx, yyy);
+      alw_draw_sprite(virtualScreen, piccy, xxx, yyy);
   }
   
 }
@@ -511,7 +512,7 @@ void ALSoftwareGraphicsDriver::RenderToBackBuffer()
     { }
     else if (bitmap->_opaque)
     {
-      blit(bitmap->_bmp, virtualScreen, 0, 0, drawAtX, drawAtY, bitmap->_bmp->w, bitmap->_bmp->h);
+      alw_blit(bitmap->_bmp, virtualScreen, 0, 0, drawAtX, drawAtY, bitmap->_bmp->w, bitmap->_bmp->h);
     }
     else if (bitmap->_transparency >= 255)
     {
@@ -520,11 +521,11 @@ void ALSoftwareGraphicsDriver::RenderToBackBuffer()
     else if (bitmap->_hasAlpha)
     {
       if (bitmap->_transparency == 0)
-        set_alpha_blender();
+        alw_set_alpha_blender();
       else
-        set_blender_mode(NULL, NULL, _trans_alpha_blender32, 0, 0, 0, bitmap->_transparency);
+        alw_set_blender_mode(NULL, NULL, _trans_alpha_blender32, 0, 0, 0, bitmap->_transparency);
 
-      draw_trans_sprite(virtualScreen, bitmap->_bmp, drawAtX, drawAtY);
+      alw_draw_trans_sprite(virtualScreen, bitmap->_bmp, drawAtX, drawAtY);
     }
     else
     {
@@ -536,21 +537,21 @@ void ALSoftwareGraphicsDriver::RenderToBackBuffer()
       && (_colorDepth > 8)) {
     // screen tint
     // This slows down the game no end, only experimental ATM
-    set_trans_blender(_tint_red, _tint_green, _tint_blue, 0);
-    draw_lit_sprite(virtualScreen, virtualScreen, 0, 0, 128);
+    alw_set_trans_blender(_tint_red, _tint_green, _tint_blue, 0);
+    alw_draw_lit_sprite(virtualScreen, virtualScreen, 0, 0, 128);
 /*  This alternate method gives the correct (D3D-style) result, but is just too slow!
     if ((_spareTintingScreen != NULL) &&
         ((_spareTintingScreen->w != virtualScreen->w) || (_spareTintingScreen->h != virtualScreen->h)))
     {
-      destroy_bitmap(_spareTintingScreen);
+      alw_destroy_bitmap(_spareTintingScreen);
       _spareTintingScreen = NULL;
     }
     if (_spareTintingScreen == NULL)
     {
-      _spareTintingScreen = create_bitmap_ex(bitmap_color_depth(virtualScreen), virtualScreen->w, virtualScreen->h);
+      _spareTintingScreen = alw_create_bitmap_ex(alw_bitmap_color_depth(virtualScreen), virtualScreen->w, virtualScreen->h);
     }
     tint_image(virtualScreen, _spareTintingScreen, _tint_red, _tint_green, _tint_blue, 100, 255);
-    blit(_spareTintingScreen, virtualScreen, 0, 0, 0, 0, _spareTintingScreen->w, _spareTintingScreen->h);*/
+    alw_blit(_spareTintingScreen, virtualScreen, 0, 0, 0, 0, _spareTintingScreen->w, _spareTintingScreen->h);*/
   }
 
   ClearDrawList();
@@ -576,7 +577,7 @@ void ALSoftwareGraphicsDriver::Render()
 
 void ALSoftwareGraphicsDriver::Vsync()
 {
-  vsync();
+  alw_vsync();
 }
 
 void ALSoftwareGraphicsDriver::GetCopyOfScreenIntoBitmap(BITMAP* destination)
@@ -598,13 +599,13 @@ void ALSoftwareGraphicsDriver::highcolor_fade_in(BITMAP *currentVirtScreen, int 
 
    if ((_global_y_offset != 0) || (_global_x_offset != 0))
    {
-     bmp_orig = create_bitmap(_screenWidth, _screenHeight);
-     clear(bmp_orig);
-     blit(currentVirtScreen, bmp_orig, 0, 0, _global_x_offset, _global_y_offset, currentVirtScreen->w, currentVirtScreen->h);
+     bmp_orig = alw_create_bitmap(_screenWidth, _screenHeight);
+     alw_clear_bitmap(bmp_orig);
+     alw_blit(currentVirtScreen, bmp_orig, 0, 0, _global_x_offset, _global_y_offset, currentVirtScreen->w, currentVirtScreen->h);
    }
 
-   bmp_buff = create_bitmap(bmp_orig->w, bmp_orig->h);
-   int clearColor = makecol_depth(bitmap_color_depth(bmp_buff),
+   bmp_buff = alw_create_bitmap(bmp_orig->w, bmp_orig->h);
+   int clearColor = alw_makecol_depth(alw_bitmap_color_depth(bmp_buff),
 				targetColourRed, targetColourGreen, targetColourBlue);
 
    int a;
@@ -613,9 +614,9 @@ void ALSoftwareGraphicsDriver::highcolor_fade_in(BITMAP *currentVirtScreen, int 
    for (a = 0; a < 256; a+=speed)
    {
        int timerValue = *_loopTimer;
-       clear_to_color(bmp_buff, clearColor);
-       set_trans_blender(0,0,0,a);
-       draw_trans_sprite(bmp_buff, bmp_orig, 0, 0);
+       alw_clear_to_color(bmp_buff, clearColor);
+       alw_set_trans_blender(0,0,0,a);
+       alw_draw_trans_sprite(bmp_buff, bmp_orig, 0, 0);
        this->Vsync();
        _filter->RenderScreen(bmp_buff, 0, 0);
        do
@@ -626,24 +627,24 @@ void ALSoftwareGraphicsDriver::highcolor_fade_in(BITMAP *currentVirtScreen, int 
        }
        while (timerValue == *_loopTimer);
    }
-   destroy_bitmap(bmp_buff);
+   alw_destroy_bitmap(bmp_buff);
 
    _filter->RenderScreen(currentVirtScreen, _global_x_offset, _global_y_offset);
 
    if ((_global_y_offset != 0) || (_global_x_offset != 0))
-     destroy_bitmap(bmp_orig);
+     alw_destroy_bitmap(bmp_orig);
 }
 
 void ALSoftwareGraphicsDriver::highcolor_fade_out(int speed, int targetColourRed, int targetColourGreen, int targetColourBlue)
 {
     BITMAP *bmp_orig, *bmp_buff;
 
-    int clearColor = makecol_depth(bitmap_color_depth(screen),
+    int clearColor = alw_makecol_depth(alw_bitmap_color_depth(alw_screen),
 				targetColourRed, targetColourGreen, targetColourBlue);
 
-    if ((bmp_orig = create_bitmap(_screenWidth, _screenHeight)))
+    if ((bmp_orig = alw_create_bitmap(_screenWidth, _screenHeight)))
     {
-        if ((bmp_buff = create_bitmap(bmp_orig->w, bmp_orig->h)))
+        if ((bmp_buff = alw_create_bitmap(bmp_orig->w, bmp_orig->h)))
         {
             int a;
             _filter->GetCopyOfScreenIntoBitmap(bmp_orig, false);
@@ -652,9 +653,9 @@ void ALSoftwareGraphicsDriver::highcolor_fade_out(int speed, int targetColourRed
             for (a = 255-speed; a > 0; a-=speed)
             {
                 int timerValue = *_loopTimer;
-                clear_to_color(bmp_buff, clearColor);
-                set_trans_blender(0,0,0,a);
-                draw_trans_sprite(bmp_buff, bmp_orig, 0, 0);
+                alw_clear_to_color(bmp_buff, clearColor);
+                alw_set_trans_blender(0,0,0,a);
+                alw_draw_trans_sprite(bmp_buff, bmp_orig, 0, 0);
                 this->Vsync();
                 _filter->RenderScreen(bmp_buff, 0, 0);
                 do
@@ -665,13 +666,13 @@ void ALSoftwareGraphicsDriver::highcolor_fade_out(int speed, int targetColourRed
                 }
                 while (timerValue == *_loopTimer);
             }
-            destroy_bitmap(bmp_buff);
+            alw_destroy_bitmap(bmp_buff);
         }
-        destroy_bitmap(bmp_orig);
+        alw_destroy_bitmap(bmp_orig);
     }
 
-    clear_to_color(screen, clearColor);
-    _filter->RenderScreen(screen, _global_x_offset, _global_y_offset);
+    alw_clear_to_color(alw_screen, clearColor);
+    _filter->RenderScreen(alw_screen, _global_x_offset, _global_y_offset);
 }
 /** END FADE.C **/
 
@@ -686,30 +687,30 @@ void initialize_fade_256(int r, int g, int b) {
   }
 }
 
-void ALSoftwareGraphicsDriver::__fade_from_range(PALLETE source, PALLETE dest, int speed, int from, int to) 
+void ALSoftwareGraphicsDriver::__fade_from_range(PALETTE source, PALETTE dest, int speed, int from, int to) 
 {
-   PALLETE temp;
+   PALETTE temp;
    int c;
 
    for (c=0; c<PAL_SIZE; c++)
       temp[c] = source[c];
 
    for (c=0; c<64; c+=speed) {
-      fade_interpolate(source, dest, temp, c, from, to);
-      set_pallete_range(temp, from, to, TRUE);
+      alw_fade_interpolate(source, dest, temp, c, from, to);
+      alw_set_palette_range(temp, from, to, TRUE);
       if (_callback) _callback();
-      set_pallete_range(temp, from, to, TRUE);
+      alw_set_palette_range(temp, from, to, TRUE);
    }
 
-   set_pallete_range(dest, from, to, TRUE);
+   alw_set_palette_range(dest, from, to, TRUE);
 }
 
 void ALSoftwareGraphicsDriver::__fade_out_range(int speed, int from, int to, int targetColourRed, int targetColourGreen, int targetColourBlue) 
 {
-   PALLETE temp;
+   PALETTE temp;
 
    initialize_fade_256(targetColourRed, targetColourGreen, targetColourBlue);
-   get_pallete(temp);
+   alw_get_palette(temp);
    __fade_from_range(temp, faded_out_palette, speed, from, to);
 }
 
@@ -724,7 +725,7 @@ void ALSoftwareGraphicsDriver::FadeOut(int speed, int targetColourRed, int targe
 
 }
 
-void ALSoftwareGraphicsDriver::FadeIn(int speed, PALLETE p, int targetColourRed, int targetColourGreen, int targetColourBlue) {
+void ALSoftwareGraphicsDriver::FadeIn(int speed, PALETTE p, int targetColourRed, int targetColourGreen, int targetColourBlue) {
   if (_colorDepth > 8) {
 
     highcolor_fade_in(virtualScreen, speed * 4, targetColourRed, targetColourGreen, targetColourBlue);
@@ -777,7 +778,7 @@ unsigned long _trans_alpha_blender32(unsigned long x, unsigned long y, unsigned 
 {
    unsigned long res, g;
 
-   n = (n * geta32(x)) / 256;
+   n = (n * alw_geta32(x)) / 256;
 
    if (n)
       n++;

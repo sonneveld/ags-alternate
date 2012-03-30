@@ -1,5 +1,7 @@
 #include "ac_hotspot.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acgui.h"
@@ -165,7 +167,7 @@ int Hotspot_GetWalkToY(ScriptHotspot *hss) {
 }
 
 int get_hotspot_at(int xpp,int ypp) {
-  int onhs=getpixel(thisroom.lookat, convert_to_low_res(xpp), convert_to_low_res(ypp));
+  int onhs=alw_getpixel(thisroom.lookat, convert_to_low_res(xpp), convert_to_low_res(ypp));
   if (onhs<0) return 0;
   if (croom->hotspot_enabled[onhs]==0) return 0;
   return onhs;
@@ -211,7 +213,7 @@ int __GetLocationType(int xxx,int yyy, int allowHotspot0) {
 
   multiply_up_coordinates(&xxx, &yyy);
 
-  int wbat = getpixel(thisroom.object, xxx, yyy);
+  int wbat = alw_getpixel(thisroom.object, xxx, yyy);
 
   if (wbat <= 0) wbat = 0;
   else wbat = croom->walkbehind_base[wbat];

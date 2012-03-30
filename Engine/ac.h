@@ -212,7 +212,7 @@ extern int convert_gui_disabled_style(int oldStyle);
 extern void convert_guid_from_text_to_binary(const char *guidText, unsigned char *buffer) ;
 extern void safeguard_string (unsigned char *descript);
 extern void save_game_data (FILE *ooo, block screenshot);
-extern long write_screen_shot_for_vista(FILE *ooo, block screenshot) ;
+extern uint64_t write_screen_shot_for_vista(FILE *ooo, block screenshot) ;
 extern void initialize_skippable_cutscene();
 extern void stop_fast_forwarding();
 

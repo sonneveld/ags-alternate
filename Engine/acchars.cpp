@@ -14,6 +14,8 @@
 
 #include "acchars.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "bmp.h"
@@ -209,9 +211,9 @@ void walk_character(int chac,int tox,int toy,int ignwal, bool autoWalkAnims) {
   }
 
   set_route_move_speed(move_speed_x, move_speed_y);
-  set_color_depth(8);
+  alw_set_color_depth(8);
   int mslot=find_route(charX, charY, tox, toy, prepare_walkable_areas(chac), chac+CHMLSOFFS, 1, ignwal);
-  set_color_depth(final_col_dep);
+  alw_set_color_depth(final_col_dep);
   if (mslot>0) {
     chin->walking = mslot;
     mls[mslot].direct = ignwal;
@@ -487,7 +489,7 @@ int find_nearest_walkable_area_within(int *xx, int *yy, int range, int step)
     for (ex = startx; ex < xwidth; ex += step) {
       for (ey = starty; ey < yheight; ey += step) {
         // non-walkalbe, so don't go here
-        if (getpixel(thisroom.walls,ex,ey) == 0) continue;
+        if (alw_getpixel(thisroom.walls,ex,ey) == 0) continue;
         // off a screen edge, don't move them there
         if ((ex <= leftEdge) || (ex >= rightEdge) ||
            (ey <= topEdge) || (ey >= bottomEdge))
@@ -510,7 +512,7 @@ int find_nearest_walkable_area_within(int *xx, int *yy, int range, int step)
 void find_nearest_walkable_area (int *xx, int *yy) {
   
 
-  int pixValue = getpixel(thisroom.walls, convert_to_low_res(xx[0]), convert_to_low_res(yy[0]));
+  int pixValue = alw_getpixel(thisroom.walls, convert_to_low_res(xx[0]), convert_to_low_res(yy[0]));
   // only fix this code if the game was built with 2.61 or above
   if (pixValue == 0 || (engineNeedsAsInt >=261 && pixValue < 1))
   {
@@ -935,8 +937,8 @@ int Character_IsCollidingWithObject(CharacterInfo *chin, ScriptObject *objid) {
     // check if they're on a transparent bit of the object
     int stxp = multiply_up_coordinate(o2x - o1x);
     int styp = multiply_up_coordinate(o2y - o1y);
-    int maskcol = bitmap_mask_color (checkblk);
-    int maskcolc = bitmap_mask_color (charpic);
+    int maskcol = alw_bitmap_mask_color (checkblk);
+    int maskcolc = alw_bitmap_mask_color (charpic);
     int thispix, thispixc;
     // check each pixel of the object along the char's feet
     for (int i = 0; i < charWidth; i += get_fixed_pixel_size(1)) {
@@ -2299,8 +2301,8 @@ void _displayspeech(char*texx, int aschar, int xx, int yy, int widd, int isThoug
       int draw_yp = 0, ovr_yp = get_fixed_pixel_size(20);
       if (game.options[OPT_SPEECHTYPE] == 3) {
         // QFG4-style whole screen picture
-        closeupface = create_bitmap_ex(bitmap_color_depth(spriteset[viptr->loops[0].frames[0].pic]), scrnwid, scrnhit);
-        clear_to_color(closeupface, 0);
+        closeupface = alw_create_bitmap_ex(alw_bitmap_color_depth(spriteset[viptr->loops[0].frames[0].pic]), scrnwid, scrnhit);
+        alw_clear_to_color(closeupface, 0);
         draw_yp = scrnhit/2 - spriteheight[viptr->loops[0].frames[0].pic]/2;
         bigx = scrnwid/2 - get_fixed_pixel_size(20);
         ovr_type = OVER_COMPLETE;
@@ -2314,14 +2316,14 @@ void _displayspeech(char*texx, int aschar, int xx, int yy, int widd, int isThoug
         else
           ovr_yp = yy;
 
-        closeupface = create_bitmap_ex(bitmap_color_depth(spriteset[viptr->loops[0].frames[0].pic]),bigx+1,bigy+1);
-        clear_to_color(closeupface,bitmap_mask_color(closeupface));
+        closeupface = alw_create_bitmap_ex(alw_bitmap_color_depth(spriteset[viptr->loops[0].frames[0].pic]),bigx+1,bigy+1);
+        alw_clear_to_color(closeupface,alw_bitmap_mask_color(closeupface));
         ovr_type = OVER_PICTURE;
 
         if (yy < 0)
           tdyp = ovr_yp + get_textwindow_top_border_height(play.speech_textwindow_gui);
       }
-      //draw_sprite(closeupface,spriteset[viptr->frames[0][0].pic],0,draw_yp);
+      //alw_draw_sprite(closeupface,spriteset[viptr->frames[0][0].pic],0,draw_yp);
       DrawViewFrame(closeupface, &viptr->loops[0].frames[0], 0, draw_yp);
 
       int overlay_x = get_fixed_pixel_size(10);

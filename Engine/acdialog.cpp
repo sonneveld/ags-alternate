@@ -12,6 +12,8 @@
 
 #include <string.h>
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 
@@ -129,13 +131,13 @@ void __my_wbutt(int x1, int y1, int x2, int y2)
 
 void refresh_screen()
 {
-  blit(abuf, windowBuffer, windowPosX, windowPosY, 0, 0, windowPosWidth, windowPosHeight);
+  alw_blit(abuf, windowBuffer, windowPosX, windowPosY, 0, 0, windowPosWidth, windowPosHeight);
   gfxDriver->UpdateDDBFromBitmap(dialogBmp, windowBuffer, false);
 
   render_graphics(dialogBmp, windowPosX, windowPosY);
 
   // Copy it back, because the mouse will have been drawn on top
-  blit(windowBuffer, abuf, 0, 0, windowPosX, windowPosY, windowPosWidth, windowPosHeight);
+  alw_blit(windowBuffer, abuf, 0, 0, windowPosX, windowPosY, windowPosWidth, windowPosHeight);
 }
 
 //  =========  STRUCTS  ========
@@ -736,7 +738,7 @@ int WINAPI _export CSCIWaitMessage(CSCIMessage * cscim)
     }
   }
 
-  windowBuffer = create_bitmap_ex(bitmap_color_depth(abuf), windowPosWidth, windowPosHeight);
+  windowBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth(abuf), windowPosWidth, windowPosHeight);
   windowBuffer = gfxDriver->ConvertBitmapToSupportedColourDepth(windowBuffer);
   dialogBmp = gfxDriver->CreateDDBFromBitmap(windowBuffer, false, true);
 
@@ -792,7 +794,7 @@ int WINAPI _export CSCIWaitMessage(CSCIMessage * cscim)
 
   gfxDriver->DestroyDDB(dialogBmp);
   dialogBmp = NULL;
-  destroy_bitmap(windowBuffer);
+  alw_destroy_bitmap(windowBuffer);
   windowBuffer = NULL;
   return 0;
 }
@@ -870,7 +872,7 @@ void preparesavegamelist(int ctrllist)
   char searchPath[260];
   sprintf(searchPath, "%s""agssave.*%s", saveGameDirectory, saveGameSuffix);
 
-  int don = al_findfirst(searchPath, &ffb, -1);
+  int don = alw_al_findfirst(searchPath, &ffb, -1);
   while (!don) {
     bufix = 0;
     if (numsaves >= MAXSAVEGAMES) {
@@ -880,7 +882,7 @@ void preparesavegamelist(int ctrllist)
 
     // only list games .000 to .099 (to allow higher slots for other purposes)
     if (strstr(ffb.name, ".0") == NULL) {
-      don = al_findnext(&ffb);
+      don = alw_al_findnext(&ffb);
       continue;
     }
 
@@ -899,10 +901,10 @@ void preparesavegamelist(int ctrllist)
     filenumbers[numsaves] = sgNumber;
     filedates[numsaves] = (long int)ffb.time;
     numsaves++;
-    don = al_findnext(&ffb);
+    don = alw_al_findnext(&ffb);
   }
 
-  al_findclose(&ffb);
+  alw_al_findclose(&ffb);
   if (numsaves >= MAXSAVEGAMES)
     toomanygames = 1;
 

@@ -153,7 +153,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".;..\common;..\External\allegro-4.2.2-agspatch\include;..\External\alfont-1.9.1\include;..\External\aastr-0.1.1;..\External\hq2x\include;..\External\xiph\include;..\External\dumb-0.9.2\include;..\External\libcda-0.4\include;..\External\alogg\include;..\External\almp3-2.0.5\include;..\External\apeg-1.2.1\include"
-				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ALLEGRO_NO_COMPATIBILITY"
 				RuntimeLibrary="1"
 				StructMemberAlignment="0"
 				PrecompiledHeaderFile=".\acwin___Win32_DebugWorking/acwin.pch"
@@ -870,6 +870,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\allegro_wrapper.h"
+				>
 			</File>
 			<File
 				RelativePath=".\dynobj\cc_audio_channel.cpp"

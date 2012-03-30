@@ -1,5 +1,7 @@
 #include "ac_script_room.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acroom.h"
@@ -162,7 +164,7 @@ static int Room_GetHeight() {
 
 /* *** SCRIPT SYMBOL: [Room] Room::get_ColorDepth *** */
 static int Room_GetColorDepth() {
-  return bitmap_color_depth(thisroom.ebscene[0]);
+  return alw_bitmap_color_depth(thisroom.ebscene[0]);
 }
 
 /* *** SCRIPT SYMBOL: [Room] Room::get_LeftEdge *** */

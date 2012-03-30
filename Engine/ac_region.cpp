@@ -1,17 +1,19 @@
 #include "ac_region.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "bmp.h"
 
 void generate_light_table() {
   int cc;
-  if ((game.color_depth == 1) && (color_map == NULL)) {
+  if ((game.color_depth == 1) && (alw_color_map == NULL)) {
     // in 256-col mode, check if we need the light table this room
     for (cc=0;cc < MAX_REGIONS;cc++) {
       if (thisroom.regionLightLevel[cc] < 0) {
-        create_light_table(&maincoltable,palette,0,0,0,NULL);
-        color_map=&maincoltable;
+        alw_create_light_table(&maincoltable,palette,0,0,0,NULL);
+        alw_color_map=&maincoltable;
         break;
         }
       }
@@ -130,7 +132,7 @@ int GetRegionAt (int xxx, int yyy) {
   if (yyy < 0)
 	  yyy = 0;
 
-  int hsthere = getpixel (thisroom.regions, xxx, yyy);
+  int hsthere = alw_getpixel (thisroom.regions, xxx, yyy);
   if (hsthere < 0)
     hsthere = 0;
 

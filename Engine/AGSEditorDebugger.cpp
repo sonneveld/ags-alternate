@@ -12,6 +12,8 @@
 
 #include "AGSEditorDebugger.h"
 
+#include "allegro_wrapper.h"
+
 #include <windows.h>
 #include <stdio.h>
 #include <io.h>
@@ -129,7 +131,7 @@ public:
 
   virtual bool Initialize()
   {
-    if (exists(SENT_MESSAGE_FILE_NAME))
+    if (alw_exists(SENT_MESSAGE_FILE_NAME))
     {
       unlink(SENT_MESSAGE_FILE_NAME);
     }
@@ -142,7 +144,7 @@ public:
 
   virtual bool SendMessageToEditor(const char *message) 
   {
-    while (exists(SENT_MESSAGE_FILE_NAME))
+    while (alw_exists(SENT_MESSAGE_FILE_NAME))
     {
       Sleep(1);
     }
@@ -155,7 +157,7 @@ public:
 
   virtual bool IsMessageAvailable()
   {
-    return (exists("dbgsend.tmp") != 0);
+    return (alw_exists("dbgsend.tmp") != 0);
   }
 
   virtual char* GetNextMessage()

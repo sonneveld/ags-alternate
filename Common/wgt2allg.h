@@ -99,7 +99,6 @@ extern int vesa_xres, vesa_yres;
 extern short getshort(FILE * fff);
 extern void putshort(short num, FILE *fff);
 
-extern void vga256();
 extern void wbutt(int, int, int, int);
 extern void wsetmode(int);
 extern int wgetmode();
@@ -127,45 +126,25 @@ extern int get_col8_lookup(int nval);
 }
 #endif
 
-#define tx    abuf->cl
-#define ty    abuf->ct
-//#define bx abuf->cr   // can't do this because of REGS.bx
-#define by    abuf->cb
-#define kbdon key
-
-#define installkbd()          install_keyboard()
-#define uninstallkbd()        remove_keyboard()
-#define wallocblock(wii,hii)  create_bitmap(wii,hii)
-#define wbar(x1, y1, x2, y2)  rectfill(abuf, x1, y1, x2, y2, currentcolor)
+#define wallocblock(wii,hii)  alw_create_bitmap(wii,hii)
+#define wbar(x1, y1, x2, y2)  alw_rectfill(abuf, x1, y1, x2, y2, currentcolor)
 #define wclip(x1, y1, x2, y2) set_clip(abuf, x1, y1, x2, y2)
-#define wcls(coll)            clear_to_color(abuf,coll)
 
-#define wfade_in(from, to, speed, pal)  fade_in_range(pal, 5 /* 64 - speed * 7 */, from, to)
-#define wfade_out(from, to, speed, pal) fade_out_range(5, from, to)
-#define wfastputpixel(x1, y1)           _putpixel(abuf, x1, y1, currentcolor)
-#define wfreeblock(bll)                 destroy_bitmap(bll)
+#define wfastputpixel(x1, y1)           alw__putpixel(abuf, x1, y1, currentcolor)
+#define wfreeblock(bll)                 alw_destroy_bitmap(bll)
 #define wgetblockheight(bll)            BMP_H(bll)
 #define wgetblockwidth(bll)             BMP_W(bll)
-#define wgetpixel(xx, yy)               getpixel(abuf, xx, yy)
-#define whline(x1, x2, yy)              hline(abuf, x1, yy, x2, currentcolor)
-#define wline(x1, y1, x2, y2)           line(abuf,x1,y1,x2,y2,currentcolor)
-#define wloadpcx256(fnm,pall)           load_pcx( fnm, pall)
-#define wnormscreen()                   abuf = screen
-#define wputpixel(x1, y1)               putpixel(abuf, x1, y1, currentcolor)
-#define wreadpalette(from, to, dd)      get_palette_range(dd, from, to)
-#define wrectangle(x1, y1, x2, y2)      rect(abuf, x1, y1, x2, y2, currentcolor)
-#define wregionfill(xx, yy)             floodfill(abuf, xx, yy, currentcolor)
-#define wretrace()                      vsync()
+#define wgetpixel(xx, yy)               alw_getpixel(abuf, xx, yy)
+#define whline(x1, x2, yy)              alw_hline(abuf, x1, yy, x2, currentcolor)
+#define wline(x1, y1, x2, y2)           alw_line(abuf,x1,y1,x2,y2,currentcolor)
+#define wnormscreen()                   abuf = alw_screen
+#define wputpixel(x1, y1)               alw_putpixel(abuf, x1, y1, currentcolor)
+#define wreadpalette(from, to, dd)      alw_get_palette_range(dd, from, to)
+#define wrectangle(x1, y1, x2, y2)      alw_rect(abuf, x1, y1, x2, y2, currentcolor)
+#define wregionfill(xx, yy)             alw_floodfill(abuf, xx, yy, currentcolor)
 #define setlib(lll)                     csetlib(lll, "")
-#define wsetpalette(from, to, pall)     set_palette_range(pall, from, to, 0)
+#define wsetpalette(from, to, pall)     alw_set_palette_range(pall, from, to, 0)
 #define vgadetected()                   1
-
-// now define the wvesa_xxx to the normal names, since we use SVGA normally
-#define wvesa_bar       wbar
-#define wvesa_clip      wclip
-#define wvesa_cls       wcls
-#define wvesa_outtextxy wouttextxy
-#define wvesa_rectangle wrectangle
 
 #define XRAY    1
 #define NORMAL  0

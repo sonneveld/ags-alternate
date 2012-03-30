@@ -12,6 +12,8 @@
 
 #include "acgui.h"
 
+#include "allegro_wrapper.h"
+
 #include "bmp.h"
 
 #pragma unmanaged
@@ -645,12 +647,12 @@ void GUIListBox::Draw()
     xstrt = (x + wid - get_fixed_pixel_size(6)) + (pixel_size - 1);
     ystrt = (y + hit - 3) - get_fixed_pixel_size(5);
 
-    triangle(abuf, xstrt, ystrt, xstrt + get_fixed_pixel_size(4), ystrt, 
+    alw_triangle(abuf, xstrt, ystrt, xstrt + get_fixed_pixel_size(4), ystrt, 
              xstrt + get_fixed_pixel_size(2),
              ystrt + get_fixed_pixel_size(5), get_col8_lookup(textcol));
 
     ystrt = y + 3;
-    triangle(abuf, xstrt, ystrt + get_fixed_pixel_size(5), 
+    alw_triangle(abuf, xstrt, ystrt + get_fixed_pixel_size(5), 
              xstrt + get_fixed_pixel_size(4), 
              ystrt + get_fixed_pixel_size(5),
              xstrt + get_fixed_pixel_size(2), ystrt, get_col8_lookup(textcol));
@@ -805,7 +807,7 @@ void GUIButton::Draw()
   if ((usepic > 0) && (pic > 0)) {
 
     if (flags & GUIF_CLIP)
-      set_clip_rect(abuf, x, y, x + wid - 1, y + hit - 1);
+      alw_set_clip_rect(abuf, x, y, x + wid - 1, y + hit - 1);
 
     if (spriteset[usepic] != NULL)
       draw_sprite_compensate(usepic, x, y, 1);
@@ -830,7 +832,7 @@ void GUIButton::Draw()
       }
 
       if (drawInv == 1)
-        stretch_sprite(abuf, spriteset[gui_inv_pic], x + 3, y + 3, wid - 6, hit - 6);
+        alw_stretch_sprite(abuf, spriteset[gui_inv_pic], x + 3, y + 3, wid - 6, hit - 6);
       else if (drawInv == 2)
         draw_sprite_compensate(gui_inv_pic,
                                x + wid / 2 - get_adjusted_spritewidth(gui_inv_pic) / 2,
@@ -842,11 +844,12 @@ void GUIButton::Draw()
       int jj, kk;             // darken the button when disabled
       for (jj = 0; jj < BMP_W(spriteset[usepic]); jj++) {
         for (kk = jj % 2; kk < BMP_H(spriteset[usepic]); kk += 2)
-          putpixel(abuf, x + jj, y + kk, col8);
+          alw_putpixel(abuf, x + jj, y + kk, col8);
       }
     }
 
-    set_clip(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1);
+    alw_set_clip_rect(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1);
+    alw_set_clip_state(abuf, TRUE);
   } 
   else if (text[0] != 0) {
     // it's a text button
@@ -1178,7 +1181,7 @@ void GUIMain::draw_at(int xx, int yy)
     return;
 
   block abufwas = abuf;
-  block subbmp = create_sub_bitmap(abuf, xx, yy, wid, hit);
+  block subbmp = alw_create_sub_bitmap(abuf, xx, yy, wid, hit);
 
   SET_EIP(376)
   // stop border being transparent, if the whole GUI isn't
@@ -1187,14 +1190,14 @@ void GUIMain::draw_at(int xx, int yy)
 
   abuf = subbmp;
   if (bgcol != 0)
-    clear_to_color(abuf, get_col8_lookup(bgcol));
+    alw_clear_to_color(abuf, get_col8_lookup(bgcol));
 
   SET_EIP(377)
 
   if (fgcol != bgcol) {
-    rect(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1, get_col8_lookup(fgcol));
+    alw_rect(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1, get_col8_lookup(fgcol));
     if (get_fixed_pixel_size(1) > 1)
-      rect(abuf, 1, 1, BMP_W(abuf) - 2, BMP_H(abuf) - 2, get_col8_lookup(fgcol));
+      alw_rect(abuf, 1, 1, BMP_W(abuf) - 2, BMP_H(abuf) - 2, get_col8_lookup(fgcol));
   }
 
   SET_EIP(378)
@@ -1246,7 +1249,7 @@ void GUIMain::draw_at(int xx, int yy)
   }
 
   SET_EIP(380)
-  destroy_bitmap(abuf);
+  alw_destroy_bitmap(abuf);
   abuf = abufwas;
 }
 

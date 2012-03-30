@@ -1,5 +1,7 @@
 #include "ac_screen.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acgfx.h"
@@ -38,9 +40,9 @@ void my_fade_out(int spdd) {
     play.screen_is_faded_out = 1;
 }
 
-void my_fade_in(PALLETE p, int speed) {
+void my_fade_in(PALETTE p, int speed) {
   if (game.color_depth > 1) {
-    set_palette (p);
+    alw_set_palette (p);
 
     play.screen_is_faded_out = 0;
 
@@ -126,7 +128,7 @@ void ShakeScreen(int severe) {
   }
   else
   {
-    block tty = create_bitmap(scrnwid, scrnhit);
+    block tty = alw_create_bitmap(scrnwid, scrnhit);
     gfxDriver->GetCopyOfScreenIntoBitmap(tty);
     for (hh=0;hh<40;hh++) {
       platform->Delay(50);

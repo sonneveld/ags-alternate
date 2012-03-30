@@ -14,6 +14,9 @@
 
 #include "acplatfm.h"
 
+#include "allegro_wrapper.h"
+
+
 #include "bmp.h"
 #include "ac_string.h"
 #include "ac_mouse.h"
@@ -81,7 +84,7 @@ void AGSPlatformDriver::ReadPluginsFromDisk(FILE *iii) {
 void AGSPlatformDriver::InitialiseAbufAtStartup()
 {
   // because loading the game file accesses abuf, it must exist
-  abuf = create_bitmap_ex(8,10,10);
+  abuf = alw_create_bitmap_ex(8,10,10);
 }
 
 void AGSPlatformDriver::FinishedUsingGraphicsMode()
@@ -186,7 +189,7 @@ BITMAP * IAGSEngine::GetScreen ()
   if (!gfxDriver->UsesMemoryBackBuffer())
     quit("!This plugin is not compatible with the Direct3D driver.");
 
-  return screen;
+  return alw_screen;
 }
 BITMAP * IAGSEngine::GetVirtualScreen () 
 {
@@ -255,9 +258,9 @@ void IAGSEngine::GetScreenDimensions (int32 *width, int32 *height, int32 *coldep
     coldepth[0] = final_col_dep;
 }
 unsigned char ** IAGSEngine::GetRawBitmapSurface (BITMAP *bmp) {
-  if (!is_linear_bitmap (bmp))
+  if (!alw_is_linear_bitmap (bmp))
     quit("!IAGSEngine::GetRawBitmapSurface: invalid bitmap for access to surface");
-  acquire_bitmap (bmp);
+  alw_acquire_bitmap (bmp);
 
   if (bmp == virtual_screen)
     plugins[this->pluginId].invalidatedRegion = 0;
@@ -265,7 +268,7 @@ unsigned char ** IAGSEngine::GetRawBitmapSurface (BITMAP *bmp) {
   return BMP_LINE(bmp);
 }
 void IAGSEngine::ReleaseBitmapSurface (BITMAP *bmp) {
-  release_bitmap (bmp);
+  alw_release_bitmap (bmp);
 
   if (bmp == virtual_screen) {
     // plugin does not manaually invalidate stuff, so
@@ -299,7 +302,7 @@ void IAGSEngine::GetBitmapDimensions (BITMAP *bmp, int32 *width, int32 *height, 
   if (height != NULL)
     height[0] = BMP_H(bmp);
   if (coldepth != NULL)
-    coldepth[0] = bitmap_color_depth(bmp);
+    coldepth[0] = alw_bitmap_color_depth(bmp);
 }
 int IAGSEngine::FRead (void *buffer, int32 len, int32 handle) {
   return fread (buffer, 1, len, (FILE*)handle);
@@ -329,11 +332,11 @@ void IAGSEngine::BlitBitmap (int x, int y, BITMAP *bmp, int masked) {
   invalidate_rect(x, y, x + BMP_W(bmp), y + BMP_H(bmp));
 }
 void IAGSEngine::BlitSpriteTranslucent(int x, int y, BITMAP *bmp, int trans) {
-  set_trans_blender(0, 0, 0, trans);
-  draw_trans_sprite(abuf, bmp, x, y);
+  alw_set_trans_blender(0, 0, 0, trans);
+  alw_draw_trans_sprite(abuf, bmp, x, y);
 }
 void IAGSEngine::BlitSpriteRotated(int x, int y, BITMAP *bmp, int angle) {
-  rotate_sprite(abuf, bmp, x, y, itofix(angle));
+  alw_rotate_sprite(abuf, bmp, x, y, alw_itofix(angle));
 }
 
 void IAGSEngine::PollSystem () {
@@ -395,13 +398,13 @@ AGSObject *IAGSEngine::GetObject (int32 num) {
   return (AGSObject*)&croom->obj[num];
 }
 BITMAP *IAGSEngine::CreateBlankBitmap (int32 width, int32 height, int32 coldep) {
-  BITMAP *tempb = create_bitmap_ex(coldep, width, height);
-  clear_to_color(tempb, bitmap_mask_color(tempb));
+  BITMAP *tempb = alw_create_bitmap_ex(coldep, width, height);
+  alw_clear_to_color(tempb, alw_bitmap_mask_color(tempb));
   return tempb;
 }
 void IAGSEngine::FreeBitmap (BITMAP *tofree) {
   if (tofree)
-    destroy_bitmap (tofree);
+    alw_destroy_bitmap (tofree);
 }
 BITMAP *IAGSEngine::GetSpriteGraphic (int32 num) {
   return spriteset[num];
@@ -446,7 +449,7 @@ void* IAGSEngine::GetScriptFunctionAddress (const char *funcName) {
   return ccGetSymbolAddress ((char*)funcName);
 }
 int IAGSEngine::GetBitmapTransparentColor(BITMAP *bmp) {
-  return bitmap_mask_color (bmp);
+  return alw_bitmap_mask_color (bmp);
 }
 // get the character scaling level at a particular point
 int IAGSEngine::GetAreaScaling (int32 x, int32 y) {
@@ -498,7 +501,7 @@ void IAGSEngine::PlaySoundChannel (int32 channel, int32 soundType, int32 volume,
   else if (soundType == PSND_OGGSTATIC)
     newcha = my_load_static_ogg (filename, volume, (loop != 0));
   else if (soundType == PSND_MIDI) {
-    if (midi_pos >= 0)
+    if (alw_midi_pos >= 0)
       quit("!IAGSEngine::PlaySoundChannel: MIDI already in use");
     newcha = my_load_midi (filename, loop);
     newcha->set_volume (volume);
@@ -525,16 +528,16 @@ AGSMouseCursor * IAGSEngine::GetMouseCursor(int32 cursor) {
 }
 void IAGSEngine::GetRawColorComponents(int32 coldepth, int32 color, int32 *red, int32 *green, int32 *blue, int32 *alpha) {
   if (red)
-    *red = getr_depth(coldepth, color);
+    *red = alw_getr_depth(coldepth, color);
   if (green)
-    *green = getg_depth(coldepth, color);
+    *green = alw_getg_depth(coldepth, color);
   if (blue)
-    *blue = getb_depth(coldepth, color);
+    *blue = alw_getb_depth(coldepth, color);
   if (alpha)
-    *alpha = geta_depth(coldepth, color);
+    *alpha = alw_geta_depth(coldepth, color);
 }
 int IAGSEngine::MakeRawColorPixel(int32 coldepth, int32 red, int32 green, int32 blue, int32 alpha) {
-  return makeacol_depth(coldepth, red, green, blue, alpha);
+  return alw_makeacol_depth(coldepth, red, green, blue, alpha);
 }
 int IAGSEngine::GetFontType(int32 fontNum) {
   if ((fontNum < 0) || (fontNum >= game.numfonts))
@@ -555,11 +558,11 @@ int IAGSEngine::CreateDynamicSprite(int32 coldepth, int32 width, int32 height) {
     quit("!IAGSEngine::CreateDynamicSprite: invalid width/height requested by plugin");
 
   // resize the sprite to the requested size
-  block newPic = create_bitmap_ex(coldepth, width, height);
+  block newPic = alw_create_bitmap_ex(coldepth, width, height);
   if (newPic == NULL)
     return 0;
 
-  clear_to_color(newPic, bitmap_mask_color(newPic));
+  alw_clear_to_color(newPic, alw_bitmap_mask_color(newPic));
 
    // add it into the sprite set
   add_dynamic_sprite(gotSlot, newPic);
@@ -579,7 +582,7 @@ void IAGSEngine::DisableSound() {
   shutdown_sound();
   usetup.digicard = DIGI_NONE;
   usetup.midicard = MIDI_NONE;
-  install_sound(usetup.digicard,usetup.midicard,NULL);
+  alw_install_sound(usetup.digicard,usetup.midicard,NULL);
 }
 int IAGSEngine::CanRunScriptFunctionNow() {
   if (inside_script)
@@ -603,7 +606,7 @@ void IAGSEngine::NotifySpriteUpdated(int32 slot) {
   // wipe the character cache when we change rooms
   for (ff = 0; ff < game.numcharacters; ff++) {
     if ((charcache[ff].inUse) && (charcache[ff].sppic == slot)) {
-      destroy_bitmap (charcache[ff].image);
+      alw_destroy_bitmap (charcache[ff].image);
       charcache[ff].image = NULL;
       charcache[ff].inUse = 0;
     }
@@ -612,7 +615,7 @@ void IAGSEngine::NotifySpriteUpdated(int32 slot) {
   // clear the object cache
   for (ff = 0; ff < MAX_INIT_SPR; ff++) {
     if ((objcache[ff].image != NULL) && (objcache[ff].sppic == slot)) {
-      destroy_bitmap (objcache[ff].image);
+      alw_destroy_bitmap (objcache[ff].image);
       objcache[ff].image = NULL;
     }
   }

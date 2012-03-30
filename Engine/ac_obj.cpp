@@ -1,5 +1,7 @@
 #include "ac_obj.h"
 
+#include "allegro_wrapper.h"
+
 #include <aastr.h>
 
 #include "ac.h"
@@ -158,7 +160,7 @@ void apply_tint_or_light(int actspsindex, int light_level,
   }
 
   // we can only do tint/light if the colour depths match
-  if (final_col_dep == bitmap_color_depth(actsps[actspsindex])) {
+  if (final_col_dep == alw_bitmap_color_depth(actsps[actspsindex])) {
     block oldwas;
     // if the caller supplied a source bitmap, blit from it
     // (used as a speed optimisation where possible)
@@ -167,7 +169,7 @@ void apply_tint_or_light(int actspsindex, int light_level,
     // otherwise, make a new target bmp
     else {
       oldwas = actsps[actspsindex];
-      actsps[actspsindex] = create_bitmap_ex(coldept, BMP_W(oldwas), BMP_H(oldwas));
+      actsps[actspsindex] = alw_create_bitmap_ex(coldept, BMP_W(oldwas), BMP_H(oldwas));
     }
 
     if (tint_amount) {
@@ -180,7 +182,7 @@ void apply_tint_or_light(int actspsindex, int light_level,
       // or lighten sprites ( <128=darken, >128=lighten). The parameter passed
       // to draw_lit_sprite defines how much it will be darkened/lightened by.
       int lit_amnt;
-      clear_to_color(actsps[actspsindex], bitmap_mask_color(actsps[actspsindex]));
+      alw_clear_to_color(actsps[actspsindex], alw_bitmap_mask_color(actsps[actspsindex]));
       // It's a light level, not a tint
       if (game.color_depth == 1) {
         // 256-col
@@ -195,7 +197,7 @@ void apply_tint_or_light(int actspsindex, int light_level,
         lit_amnt = abs(light_level) * 2;
       }
 
-      draw_lit_sprite(actsps[actspsindex], oldwas, 0, 0, lit_amnt);
+      alw_draw_lit_sprite(actsps[actspsindex], oldwas, 0, 0, lit_amnt);
     }
 
     if (oldwas != blitFrom)
@@ -205,7 +207,7 @@ void apply_tint_or_light(int actspsindex, int light_level,
   else if (blitFrom) {
     // sprite colour depth != game colour depth, so don't try and tint
     // but we do need to do something, so copy the source
-    blit(blitFrom, actsps[actspsindex], 0, 0, 0, 0, BMP_W(actsps[actspsindex]), BMP_H(actsps[actspsindex]));
+    alw_blit(blitFrom, actsps[actspsindex], 0, 0, 0, 0, BMP_W(actsps[actspsindex]), BMP_H(actsps[actspsindex]));
   }
 
 }
@@ -223,7 +225,7 @@ int scale_and_flip_sprite(int useindx, int coldept, int zoom_level,
 
   // create and blank out the new sprite
   actsps[useindx] = recycle_bitmap(actsps[useindx], coldept, newwidth, newheight);
-  clear_to_color(actsps[useindx],bitmap_mask_color(actsps[useindx]));
+  alw_clear_to_color(actsps[useindx],alw_bitmap_mask_color(actsps[useindx]));
 
   if (zoom_level != 100) {
     // Scaled character
@@ -233,23 +235,23 @@ int scale_and_flip_sprite(int useindx, int coldept, int zoom_level,
     // Ensure that anti-aliasing routines have a palette to
     // use for mapping while faded out
     if (in_new_room)
-      select_palette (palette);
+      alw_select_palette (palette);
 
     
     if (isMirrored) {
-      block tempspr = create_bitmap_ex (coldept, newwidth, newheight);
-      clear_to_color (tempspr, bitmap_mask_color(actsps[useindx]));
+      block tempspr = alw_create_bitmap_ex (coldept, newwidth, newheight);
+      alw_clear_to_color (tempspr, alw_bitmap_mask_color(actsps[useindx]));
       if ((IS_ANTIALIAS_SPRITES) && ((game.spriteflags[sppic] & SPF_ALPHACHANNEL) == 0))
         aa_stretch_sprite (tempspr, spriteset[sppic], 0, 0, newwidth, newheight);
       else
-        stretch_sprite (tempspr, spriteset[sppic], 0, 0, newwidth, newheight);
-      draw_sprite_h_flip (actsps[useindx], tempspr, 0, 0);
+        alw_stretch_sprite (tempspr, spriteset[sppic], 0, 0, newwidth, newheight);
+      alw_draw_sprite_h_flip (actsps[useindx], tempspr, 0, 0);
       wfreeblock (tempspr);
     }
     else if ((IS_ANTIALIAS_SPRITES) && ((game.spriteflags[sppic] & SPF_ALPHACHANNEL) == 0))
       aa_stretch_sprite(actsps[useindx],spriteset[sppic],0,0,newwidth,newheight);
     else
-      stretch_sprite(actsps[useindx],spriteset[sppic],0,0,newwidth,newheight);
+      alw_stretch_sprite(actsps[useindx],spriteset[sppic],0,0,newwidth,newheight);
 
 /*  AASTR2 version of code (doesn't work properly, gives black borders)
     if (IS_ANTIALIAS_SPRITES) {
@@ -263,17 +265,17 @@ int scale_and_flip_sprite(int useindx, int coldept, int zoom_level,
       aa_stretch_sprite(actsps[useindx],spriteset[sppic],0,0,newwidth,newheight);
     }
     else if (isMirrored) {
-      block tempspr = create_bitmap_ex (coldept, newwidth, newheight);
-      clear_to_color (tempspr, bitmap_mask_color(actsps[useindx]));
-      stretch_sprite (tempspr, spriteset[sppic], 0, 0, newwidth, newheight);
-      draw_sprite_h_flip (actsps[useindx], tempspr, 0, 0);
+      block tempspr = alw_create_bitmap_ex (coldept, newwidth, newheight);
+      alw_clear_to_color (tempspr, alw_bitmap_mask_color(actsps[useindx]));
+      alw_stretch_sprite (tempspr, spriteset[sppic], 0, 0, newwidth, newheight);
+      alw_draw_sprite_h_flip (actsps[useindx], tempspr, 0, 0);
       wfreeblock (tempspr);
     }
     else
-      stretch_sprite(actsps[useindx],spriteset[sppic],0,0,newwidth,newheight);
+      alw_stretch_sprite(actsps[useindx],spriteset[sppic],0,0,newwidth,newheight);
 */
     if (in_new_room)
-      unselect_palette();
+      alw_unselect_palette();
 
   } 
   else {
@@ -282,10 +284,10 @@ int scale_and_flip_sprite(int useindx, int coldept, int zoom_level,
     our_eip = 339;
 
     if (isMirrored)
-      draw_sprite_h_flip (actsps[useindx], spriteset[sppic], 0, 0);
+      alw_draw_sprite_h_flip (actsps[useindx], spriteset[sppic], 0, 0);
     else
       actsps_used = 0;
-      //blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
+      //alw_blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
   }
 
   return actsps_used;
@@ -350,7 +352,7 @@ static int construct_object_gfx(int aa, int *drawnWidth, int *drawnHeight, bool 
   if (spriteset[objs[aa].num] == NULL)
     quitprintf("There was an error drawing object %d. Its current sprite, %d, is invalid.", aa, objs[aa].num);
 
-  int coldept = bitmap_color_depth(spriteset[objs[aa].num]);
+  int coldept = alw_bitmap_color_depth(spriteset[objs[aa].num]);
   int sprwidth = spritewidth[objs[aa].num];
   int sprheight = spriteheight[objs[aa].num];
 
@@ -463,7 +465,7 @@ static int construct_object_gfx(int aa, int *drawnWidth, int *drawnHeight, bool 
         (walk_behind_baselines_changed == 0))
       return 1;
     actsps[useindx] = recycle_bitmap(actsps[useindx], coldept, sprwidth, sprheight);
-    blit(objcache[aa].image, actsps[useindx], 0, 0, 0, 0, BMP_W(objcache[aa].image), BMP_H(objcache[aa].image));
+    alw_blit(objcache[aa].image, actsps[useindx], 0, 0, 0, 0, BMP_W(objcache[aa].image), BMP_H(objcache[aa].image));
     return 0;
   }
 
@@ -497,13 +499,13 @@ static int construct_object_gfx(int aa, int *drawnWidth, int *drawnHeight, bool 
                         comeFrom);
   }
   else if (!actspsUsed)
-    blit(spriteset[objs[aa].num],actsps[useindx],0,0,0,0,spritewidth[objs[aa].num],spriteheight[objs[aa].num]);
+    alw_blit(spriteset[objs[aa].num],actsps[useindx],0,0,0,0,spritewidth[objs[aa].num],spriteheight[objs[aa].num]);
 
   // Re-use the bitmap if it's the same size
   objcache[aa].image = recycle_bitmap(objcache[aa].image, coldept, sprwidth, sprheight);
 
   // Create the cached image and store it
-  blit(actsps[useindx], objcache[aa].image, 0, 0, 0, 0, sprwidth, sprheight);
+  alw_blit(actsps[useindx], objcache[aa].image, 0, 0, 0, 0, sprwidth, sprheight);
 
   objcache[aa].sppic = objs[aa].num;
   objcache[aa].tintamntwas = tint_level;
@@ -794,7 +796,7 @@ void MergeObject(int obn) {
 
   block oldabuf = abuf;
   abuf = thisroom.ebscene[play.bg_frame];
-  if (bitmap_color_depth(abuf) != bitmap_color_depth(actsps[obn]))
+  if (alw_bitmap_color_depth(abuf) != alw_bitmap_color_depth(actsps[obn]))
     quit("!MergeObject: unable to merge object due to color depth differences");
 
   int xpos = multiply_up_coordinate(objs[obn].x);
@@ -1133,9 +1135,9 @@ static void move_object(int objj,int tox,int toy,int spee,int ignwal) {
   toy = convert_to_low_res(toy);
 
   set_route_move_speed(spee, spee);
-  set_color_depth(8);
+  alw_set_color_depth(8);
   int mslot=find_route(objX, objY, tox, toy, prepare_walkable_areas(-1), objj+1, 1, ignwal);
-  set_color_depth(final_col_dep);
+  alw_set_color_depth(final_col_dep);
   if (mslot>0) {
     objs[objj].moving = mslot;
     mls[mslot].direct = ignwal;

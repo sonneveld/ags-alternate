@@ -14,6 +14,8 @@
 
 #include "mousew32.h"
 
+#include "allegro_wrapper.h"
+
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #include <dos.h>
 #include <conio.h>
@@ -65,15 +67,15 @@ void msetcallback(IMouseGetPosCallback *gpCallback) {
 
 void mgraphconfine(int x1, int y1, int x2, int y2)
 {
-  set_mouse_range(x1, y1, x2, y2);
+  alw_set_mouse_range(x1, y1, x2, y2);
 }
 
 void mgetgraphpos()
 {
-  poll_mouse();
+  alw_poll_mouse();
   if (!disable_mgetgraphpos) {
-    mousex = mouse_x;
-    mousey = mouse_y;
+    mousex = alw_mouse_x;
+    mousey = alw_mouse_y;
   }
 
   if (!ignore_bounds) {
@@ -113,8 +115,8 @@ void msetcursorlimit(int x1, int y1, int x2, int y2)
 
 static void drawCursor() {
   if (alpha_blend_cursor) {
-    set_alpha_blender();
-    draw_trans_sprite(abuf, mousecurs[currentcursor], mousex, mousey);
+    alw_set_alpha_blender();
+    alw_draw_trans_sprite(abuf, mousecurs[currentcursor], mousex, mousey);
   }
   else
     put_sprite_256(mousex, mousey, mousecurs[currentcursor]);
@@ -142,7 +144,8 @@ void domouse(int str)
   if (mousey + pooh >= vesa_yres)
     pooh = vesa_yres - mousey;
 
-  wclip(0, 0, vesa_xres - 1, vesa_yres - 1);
+  alw_set_clip_rect(abuf, 0, 0, vesa_xres - 1, vesa_yres - 1);
+  alw_set_clip_state(abuf, TRUE);
   if ((str == 0) & (mouseturnedon == TRUE)) {
     if ((mousex != smx) | (mousey != smy)) {    // the mouse has moved
       wputblock(smx, smy, savebk, 0);
@@ -210,8 +213,8 @@ static int butwas = 0;
 int mgetbutton()
 {
   int toret = NONE;
-  poll_mouse();
-  int butis = mouse_b;
+  alw_poll_mouse();
+  int butis = alw_mouse_b;
 
   if ((butis > 0) & (butwas > 0))
     return NONE;  // don't allow holding button down
@@ -230,15 +233,15 @@ int mgetbutton()
 static const int MB_ARRAY[3] = { 1, 2, 4 };
 int misbuttondown(int buno)
 {
-  poll_mouse();
-  if (mouse_b & MB_ARRAY[buno])
+  alw_poll_mouse();
+  if (alw_mouse_b & MB_ARRAY[buno])
     return TRUE;
   return FALSE;
 }
 
  void msetgraphpos(int xa, int ya)
 { 
-  position_mouse(xa, ya); // xa -= hotx; ya -= hoty;
+  alw_position_mouse(xa, ya); // xa -= hotx; ya -= hoty;
 }
 
 // Graphics mode only. Useful for crosshair.
@@ -252,7 +255,7 @@ void msethotspot(int xx, int yy)
 int minstalled()
 {
   int nbuts;
-  if ((nbuts = install_mouse()) < 1)
+  if ((nbuts = alw_install_mouse()) < 1)
     return 0;
 
   mgraphconfine(0, 0, 319, 199);  // use 320x200 co-ord system

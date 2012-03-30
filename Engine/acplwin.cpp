@@ -13,6 +13,8 @@
 #error This file should only be included on the Windows build
 #endif
 
+#include "allegro_wrapper.h"
+
 // ********* WINDOWS *********
 
 #include "acplatfm.h"
@@ -321,12 +323,12 @@ void delete_files_in_directory(const char *directoryName, const char *fileMask)
   char srchBuffer[MAX_PATH];
   sprintf(srchBuffer, "%s\\%s", directoryName, fileMask);
   al_ffblk dfb;
-  int	dun = al_findfirst(srchBuffer, &dfb, FA_SEARCH);
+  int	dun = alw_al_findfirst(srchBuffer, &dfb, FA_SEARCH);
   while (!dun) {
     unlink(dfb.name);
-    dun = al_findnext(&dfb);
+    dun = alw_al_findnext(&dfb);
   }
-  al_findclose(&dfb);
+  alw_al_findclose(&dfb);
 }
 
 void AGSWin32::remove_game_from_game_explorer(IGameExplorer* pFwGameExplorer, GUID *guid, const char *guidAsText, bool allUsers)
@@ -693,8 +695,8 @@ void AGSWin32::PlayVideo(const char *name, int skip, int flags) {
   if (useSound)
   {
     if (opts.mod_player)
-      reserve_voices(NUM_DIGI_VOICES, -1);
-    install_sound(usetup.digicard,usetup.midicard,NULL);
+      alw_reserve_voices(NUM_DIGI_VOICES, -1);
+    alw_install_sound(usetup.digicard,usetup.midicard,NULL);
     if (opts.mod_player)
       init_mod_player(NUM_MOD_DIGI_VOICES);
   }

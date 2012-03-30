@@ -1,5 +1,7 @@
 #include "ac_gui_inv_window.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acgui.h"
@@ -199,22 +201,22 @@ start_actinv:
 
   // Draw Up and Down buttons if required
   const int ARROWBUTTONWID = 11;
-  block arrowblock = create_bitmap (ARROWBUTTONWID, ARROWBUTTONWID);
-  clear_to_color(arrowblock, bitmap_mask_color(arrowblock));
+  block arrowblock = alw_create_bitmap (ARROWBUTTONWID, ARROWBUTTONWID);
+  alw_clear_to_color(arrowblock, alw_bitmap_mask_color(arrowblock));
   int usecol;
   __my_setcolor(&usecol, 0);
   if (play.sierra_inv_color == 0)
     __my_setcolor(&usecol, 14);
 
-  line(arrowblock,ARROWBUTTONWID/2, 2, ARROWBUTTONWID-2, 9, usecol);
-  line(arrowblock,ARROWBUTTONWID/2, 2, 2, 9, usecol);
-  line(arrowblock, 2, 9, ARROWBUTTONWID-2, 9, usecol);
-  floodfill(arrowblock, ARROWBUTTONWID/2, 4, usecol);
+  alw_line(arrowblock,ARROWBUTTONWID/2, 2, ARROWBUTTONWID-2, 9, usecol);
+  alw_line(arrowblock,ARROWBUTTONWID/2, 2, 2, 9, usecol);
+  alw_line(arrowblock, 2, 9, ARROWBUTTONWID-2, 9, usecol);
+  alw_floodfill(arrowblock, ARROWBUTTONWID/2, 4, usecol);
 
   if (top_item > 0)
     wputblock(windowxp+windowwid-ARROWBUTTONWID, buttonyp + get_fixed_pixel_size(2), arrowblock, 1);
   if (top_item + num_visible_items < numitems)
-    draw_sprite_v_flip (abuf, arrowblock, windowxp+windowwid-ARROWBUTTONWID, buttonyp + get_fixed_pixel_size(4) + ARROWBUTTONWID);
+    alw_draw_sprite_v_flip (abuf, arrowblock, windowxp+windowwid-ARROWBUTTONWID, buttonyp + get_fixed_pixel_size(4) + ARROWBUTTONWID);
   wfreeblock(arrowblock);
 
   ac_domouse(1);

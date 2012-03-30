@@ -1,5 +1,7 @@
 #include "ac_script_gui.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acgui.h"
@@ -163,8 +165,8 @@ void SetGUIPosition(int ifn,int xx,int yy) {
 void recreate_guibg_image(GUIMain *tehgui)
 {
   int ifn = tehgui->guiId;
-  destroy_bitmap(guibg[ifn]);
-  guibg[ifn] = create_bitmap_ex (final_col_dep, tehgui->wid, tehgui->hit);
+  alw_destroy_bitmap(guibg[ifn]);
+  guibg[ifn] = alw_create_bitmap_ex (final_col_dep, tehgui->wid, tehgui->hit);
   if (guibg[ifn] == NULL)
     quit("SetGUISize: internal error: unable to reallocate gui cache");
   guibg[ifn] = gfxDriver->ConvertBitmapToSupportedColourDepth(guibg[ifn]);

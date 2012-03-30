@@ -1,5 +1,7 @@
 #include "ac_game.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_types.h"
 #include "ac_context.h"
@@ -413,7 +415,7 @@ int Game_SetSaveGameDirectory(const char *newFolder) {
 
   char newSaveGameDir[260];
   platform->ReplaceSpecialPaths(newFolder, newSaveGameDir);
-  fix_filename_slashes(newSaveGameDir);
+  alw_fix_filename_slashes(newSaveGameDir);
 
 #ifdef LINUX_VERSION
   mkdir(newSaveGameDir, 0);
@@ -421,7 +423,7 @@ int Game_SetSaveGameDirectory(const char *newFolder) {
   mkdir(newSaveGameDir);
 #endif
 
-  put_backslash(newSaveGameDir);
+  alw_put_backslash(newSaveGameDir);
 
   char newFolderTempFile[260];
   strcpy(newFolderTempFile, newSaveGameDir);
@@ -590,7 +592,7 @@ int Game_GetColorFromRGB(int red, int grn, int blu) {
 
   if (game.color_depth == 1)
   {
-    return makecol8(red, grn, blu);
+    return alw_makecol8(red, grn, blu);
   }
 
   int agscolor = ((blu >> 3) & 0x1f);
@@ -708,17 +710,17 @@ int SaveScreenShot(char*namm) {
 
   if (gfxDriver->RequiresFullRedrawEachFrame()) 
   {
-    BITMAP *buffer = create_bitmap_ex(32, scrnwid, scrnhit);
+    BITMAP *buffer = alw_create_bitmap_ex(32, scrnwid, scrnhit);
     gfxDriver->GetCopyOfScreenIntoBitmap(buffer);
 
-    if (save_bitmap(fileName, buffer, palette)!=0)
+    if (alw_save_bitmap(fileName, buffer, palette)!=0)
     {
-      destroy_bitmap(buffer);
+      alw_destroy_bitmap(buffer);
       return 0;
     }
-    destroy_bitmap(buffer);
+    alw_destroy_bitmap(buffer);
   }
-  else if (save_bitmap(fileName, virtual_screen, palette)!=0)
+  else if (alw_save_bitmap(fileName, virtual_screen, palette)!=0)
     return 0; // failed
 
   return 1;  // successful
@@ -811,7 +813,7 @@ int RunAGSGame (char *newgame, unsigned int mode, int data) {
   if (csetlib(game_file_name,""))
     quitprintf("!RunAGSGame: unable to load new game file '%s'", game_file_name);
 
-  clear(abuf);
+  alw_clear_bitmap(abuf);
   show_preload();
 
   if ((result = load_game_file ()) != 0) {
@@ -852,8 +854,8 @@ static void display_switch_out() {
   platform->DisplaySwitchOut();
 
   // allow background running temporarily to halt the sound
-  if (set_display_switch_mode(SWITCH_BACKGROUND) == -1)
-    set_display_switch_mode(SWITCH_BACKAMNESIA);
+  if (alw_set_display_switch_mode(SWITCH_BACKGROUND) == -1)
+    alw_set_display_switch_mode(SWITCH_BACKAMNESIA);
 
   // stop the sound stuttering
   for (int i = 0; i <= MAX_SOUND_CHANNELS; i++) {
@@ -862,7 +864,7 @@ static void display_switch_out() {
     }
   }
 
-  rest(1000);
+  alw_rest(1000);
 
   // restore the callbacks
   SetMultitasking(0);
@@ -894,15 +896,15 @@ void SetMultitasking (int mode) {
     mode = 0;
 
   if (mode == 0) {
-    if (set_display_switch_mode(SWITCH_PAUSE) == -1)
-      set_display_switch_mode(SWITCH_AMNESIA);
+    if (alw_set_display_switch_mode(SWITCH_PAUSE) == -1)
+      alw_set_display_switch_mode(SWITCH_AMNESIA);
     // install callbacks to stop the sound when switching away
-    set_display_switch_callback(SWITCH_IN, display_switch_in);
-    set_display_switch_callback(SWITCH_OUT, display_switch_out);
+    alw_set_display_switch_callback(SWITCH_IN, display_switch_in);
+    alw_set_display_switch_callback(SWITCH_OUT, display_switch_out);
   }
   else {
-    if (set_display_switch_mode (SWITCH_BACKGROUND) == -1)
-      set_display_switch_mode(SWITCH_BACKAMNESIA);
+    if (alw_set_display_switch_mode (SWITCH_BACKGROUND) == -1)
+      alw_set_display_switch_mode(SWITCH_BACKAMNESIA);
   }
 }
 
@@ -1197,8 +1199,8 @@ void Game_SetName(const char *newName) {
   strncpy(play.game_name, newName, 99);
   play.game_name[99] = 0;
 
-#if (ALLEGRO_DATE > 19990103)
-  set_window_title(play.game_name);
+#if (ALW_ALLEGRO_DATE > 19990103)
+  alw_set_window_title(play.game_name);
 #endif
 }
 
@@ -1523,20 +1525,20 @@ void script_debug(int cmdd,int dataa) {
     Display(toDisplay);
 //    Display("shftR: %d  shftG: %d  shftB: %d", _rgb_r_shift_16, _rgb_g_shift_16, _rgb_b_shift_16);
 //    Display("Remaining memory: %d kb",_go32_dpmi_remaining_virtual_memory()/1024);
-//Display("Play char bcd: %d",bitmap_color_depth(spriteset[views[playerchar->view].frames[playerchar->loop][playerchar->frame].pic]));
+//Display("Play char bcd: %d",alw_bitmap_color_depth(spriteset[views[playerchar->view].frames[playerchar->loop][playerchar->frame].pic]));
     }
   else if (cmdd==2) 
   {  // show walkable areas from here
-    block tempw=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
-    blit(prepare_walkable_areas(-1),tempw,0,0,0,0,BMP_W(tempw),BMP_H(tempw));
-    block stretched = create_bitmap(scrnwid, scrnhit);
-    stretch_sprite(stretched, tempw, -offsetx, -offsety, get_fixed_pixel_size(BMP_W(tempw)), get_fixed_pixel_size(BMP_H(tempw)));
+    block tempw=alw_create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+    alw_blit(prepare_walkable_areas(-1),tempw,0,0,0,0,BMP_W(tempw),BMP_H(tempw));
+    block stretched = alw_create_bitmap(scrnwid, scrnhit);
+    alw_stretch_sprite(stretched, tempw, -offsetx, -offsety, get_fixed_pixel_size(BMP_W(tempw)), get_fixed_pixel_size(BMP_H(tempw)));
 
     IDriverDependantBitmap *ddb = gfxDriver->CreateDDBFromBitmap(stretched, false, true);
     render_graphics(ddb, 0, 0);
 
-    destroy_bitmap(tempw);
-    destroy_bitmap(stretched);
+    alw_destroy_bitmap(tempw);
+    alw_destroy_bitmap(stretched);
     gfxDriver->DestroyDDB(ddb);
     while (!ac_kbhit()) ;
     ac_getch();
@@ -1572,21 +1574,21 @@ void script_debug(int cmdd,int dataa) {
       Display("Not currently moving.");
       return;
     }
-    block tempw=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+    block tempw=alw_create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
     int mlsnum = game.chars[dataa].walking;
     if (game.chars[dataa].walking >= TURNING_AROUND)
       mlsnum %= TURNING_AROUND;
     MoveList*cmls = &mls[mlsnum];
-    clear_to_color(tempw, bitmap_mask_color(tempw));
+    alw_clear_to_color(tempw, alw_bitmap_mask_color(tempw));
     for (int i = 0; i < cmls->numstage-1; i++) {
       short srcx=short((cmls->pos[i] >> 16) & 0x00ffff);
       short srcy=short(cmls->pos[i] & 0x00ffff);
       short targetx=short((cmls->pos[i+1] >> 16) & 0x00ffff);
       short targety=short(cmls->pos[i+1] & 0x00ffff);
-      line (tempw, srcx, srcy, targetx, targety, get_col8_lookup(i+1));
+      alw_line (tempw, srcx, srcy, targetx, targety, get_col8_lookup(i+1));
     }
-    stretch_sprite(screen, tempw, -offsetx, -offsety, multiply_up_coordinate(BMP_W(tempw)), multiply_up_coordinate(BMP_H(tempw)));
-    render_to_screen(screen, 0, 0);
+    alw_stretch_sprite(alw_screen, tempw, -offsetx, -offsety, multiply_up_coordinate(BMP_W(tempw)), multiply_up_coordinate(BMP_H(tempw)));
+    render_to_screen(alw_screen, 0, 0);
     wfreeblock(tempw);
     while (!ac_kbhit()) ;
     ac_getch();
@@ -1691,8 +1693,8 @@ void save_game(int slotn, const char*descript) {
   vistaHeader.dwThumbnailOffsetLowerDword = 0;
   vistaHeader.dwThumbnailSize = 0;
   convert_guid_from_text_to_binary(game.guid, &vistaHeader.guidGameId[0]);
-  uconvert(game.gamename, U_ASCII, (char*)&vistaHeader.szGameName[0], U_UNICODE, RM_MAXLENGTH);
-  uconvert(descript, U_ASCII, (char*)&vistaHeader.szSaveName[0], U_UNICODE, RM_MAXLENGTH);
+  alw_uconvert(game.gamename, U_ASCII, (char*)&vistaHeader.szGameName[0], U_UNICODE, RM_MAXLENGTH);
+  alw_uconvert(descript, U_ASCII, (char*)&vistaHeader.szSaveName[0], U_UNICODE, RM_MAXLENGTH);
   vistaHeader.szLevelName[0] = 0;
   vistaHeader.szComments[0] = 0;
 
@@ -1719,23 +1721,23 @@ void save_game(int slotn, const char*descript) {
 
     if (gfxDriver->UsesMemoryBackBuffer())
     {
-      screenShot = create_bitmap_ex(bitmap_color_depth(virtual_screen), usewid, usehit);
+      screenShot = alw_create_bitmap_ex(alw_bitmap_color_depth(virtual_screen), usewid, usehit);
 
-      stretch_blit(virtual_screen, screenShot, 0, 0,
+      alw_stretch_blit(virtual_screen, screenShot, 0, 0,
         BMP_W(virtual_screen), BMP_H(virtual_screen), 0, 0,
         BMP_W(screenShot), BMP_H(screenShot));
     }
     else
     {
-      block tempBlock = create_bitmap_ex(final_col_dep, BMP_W(virtual_screen), BMP_H(virtual_screen));
+      block tempBlock = alw_create_bitmap_ex(final_col_dep, BMP_W(virtual_screen), BMP_H(virtual_screen));
       gfxDriver->GetCopyOfScreenIntoBitmap(tempBlock);
 
-      screenShot = create_bitmap_ex(final_col_dep, usewid, usehit);
-      stretch_blit(tempBlock, screenShot, 0, 0,
+      screenShot = alw_create_bitmap_ex(final_col_dep, usewid, usehit);
+      alw_stretch_blit(tempBlock, screenShot, 0, 0,
         BMP_W(tempBlock), BMP_H(tempBlock), 0, 0,
         BMP_W(screenShot), BMP_H(screenShot));
 
-      destroy_bitmap(tempBlock);
+      alw_destroy_bitmap(tempBlock);
     }
   }
 
@@ -1746,7 +1748,7 @@ void save_game(int slotn, const char*descript) {
   if (screenShot != NULL)
   {
     long screenShotOffset = ftell(ooo) - sizeof(RICH_GAME_MEDIA_HEADER);
-    long screenShotSize = write_screen_shot_for_vista(ooo, screenShot);
+    uint64_t screenShotSize = write_screen_shot_for_vista(ooo, screenShot);
     fclose(ooo);
 
     update_polled_stuff();
@@ -1755,6 +1757,7 @@ void save_game(int slotn, const char*descript) {
     fseek(ooo, 12, SEEK_SET);
     putw(screenShotOffset, ooo);
     fseek(ooo, 4, SEEK_CUR);
+#pragma message ( "TODO: this is not saving the whole file size" )
     putw(screenShotSize, ooo);
   }
 

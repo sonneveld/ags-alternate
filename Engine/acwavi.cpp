@@ -6,6 +6,9 @@
 
 #include "acwavi.h"
 
+#include "allegro_wrapper.h"
+
+
 //#define ALLEGRO_STATICLINK  // already defined in project settings
 #include <allegro.h>
 #include <winalleg.h>
@@ -140,7 +143,7 @@ HRESULT InitRenderToSurface() {
     return E_FAIL;
   }
 
-  vsMemory = create_bitmap_ex(bitmap_color_depth(vscreen), vscreen->w, vscreen->h);
+  vsMemory = alw_create_bitmap_ex(alw_bitmap_color_depth(vscreen), vscreen->w, vscreen->h);
 
   IDirectDrawSurface *g_pDDSOffscreen;
   g_pDDSOffscreen = get_bitmap_surface (vscreen);
@@ -224,28 +227,28 @@ void RenderToSurface(BITMAP *vscreen) {
   }
   else {
     g_bAppactive = TRUE;
-    acquire_screen();
+    alw_acquire_screen();
     // Because vscreen is a DX Video Bitmap, it can be stretched
     // onto the screen (also a Video Bmp) but not onto a memory
     // bitmap (which is what "screen" is when using gfx filters)
-    if (is_video_bitmap(screen))
+    if (alw_is_video_bitmap(alw_screen))
     {
-      stretch_blit(vscreen, screen, 0, 0, vscreen->w, vscreen->h,
-          screen->w / 2 - newWidth / 2,
-          screen->h / 2 - newHeight / 2,
+      alw_stretch_blit(vscreen, alw_screen, 0, 0, vscreen->w, vscreen->h,
+          alw_screen->w / 2 - newWidth / 2,
+          alw_screen->h / 2 - newHeight / 2,
           newWidth, newHeight);
     }
     else
     {
-      blit(vscreen, vsMemory, 0, 0, 0, 0, vscreen->w, vscreen->h);
-      stretch_blit(vsMemory, screen, 0, 0, vscreen->w, vscreen->h,
-          screen->w / 2 - newWidth / 2,
-          screen->h / 2 - newHeight / 2,
+      alw_blit(vscreen, vsMemory, 0, 0, 0, 0, vscreen->w, vscreen->h);
+      alw_stretch_blit(vsMemory, alw_screen, 0, 0, vscreen->w, vscreen->h,
+          alw_screen->w / 2 - newWidth / 2,
+          alw_screen->h / 2 - newHeight / 2,
           newWidth, newHeight);
     }
-    release_screen();
+    alw_release_screen();
 
-    render_to_screen(screen, 0, 0);
+    render_to_screen(alw_screen, 0, 0);
     // if we're not playing AVI sound, poll the game MP3
     if (!useSound)
       update_polled_stuff_and_crossfade();
@@ -279,11 +282,11 @@ void dxmedia_abort_video() {
 
     ExitCode();
     CoUninitialize();
-    destroy_bitmap(vscreen);
+    alw_destroy_bitmap(vscreen);
     vscreen = NULL;
     if (vsMemory != NULL)
     {
-      destroy_bitmap(vsMemory);
+      alw_destroy_bitmap(vsMemory);
       vsMemory = NULL;
     }
     strcpy (lastError, "Played successfully.");
@@ -322,10 +325,10 @@ int dxmedia_play_video(const char* filename, bool pUseSound, int canskip, int st
   newWidth = vscreen->w;
   newHeight = vscreen->h;
 
-  if ((stretch == 1) || (vscreen->w > screen->w) || (vscreen->h > screen->h)) {
+  if ((stretch == 1) || (vscreen->w > alw_screen->w) || (vscreen->h > alw_screen->h)) {
     // If they want to stretch, or if it's bigger than the screen, then stretch
-    float widthRatio = (float)vscreen->w / (float)screen->w;
-    float heightRatio = (float)vscreen->h / (float)screen->h;
+    float widthRatio = (float)vscreen->w / (float)alw_screen->w;
+    float heightRatio = (float)vscreen->h / (float)alw_screen->h;
 
     if (widthRatio > heightRatio) {
       newWidth = vscreen->w / widthRatio;
@@ -345,17 +348,17 @@ int dxmedia_play_video(const char* filename, bool pUseSound, int canskip, int st
     sprintf(lastError, "Unable to play stream: 0x%08X", hr);
     ExitCode();
     CoUninitialize();
-    destroy_bitmap (vscreen);
+    alw_destroy_bitmap (vscreen);
     return -1;
   }
   // in case we're not full screen, clear the background
-  clear(screen);
+  alw_clear_bitmap(alw_screen);
 
   currentlyPlaying = true;
 
   gfxDriver->ClearDrawList();
   BITMAP *savedBackBuffer = gfxDriver->GetMemoryBackBuffer();
-  gfxDriver->SetMemoryBackBuffer(screen);
+  gfxDriver->SetMemoryBackBuffer(alw_screen);
 
   while ((g_bAppactive) && (!want_exit)) {
 
@@ -395,10 +398,10 @@ int WINAPI WinMain(
 
   install_keyboard();
 
-  set_color_depth(16);
-  set_gfx_mode (GFX_DIRECTX_WIN, 640, 480, 0,0);
+  alw_set_color_depth(16);
+  alw_set_gfx_mode (GFX_DIRECTX_WIN, 640, 480, 0,0);
 
-  set_display_switch_mode(SWITCH_BACKGROUND);
+  alw_set_display_switch_mode(SWITCH_BACKGROUND);
 
   dxmedia_play_video ("f:\\download\\Seinfeld S05E04 - The Sniffing Accountant.mpg", 1, 1);
   dxmedia_play_video ("f:\\download\\Family Guy S02E16 - There's Something About Paulie.mpg", 2, 1);

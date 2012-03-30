@@ -15,6 +15,8 @@
 
 #include "bmp.h"
 
+#include "allegro_wrapper.h"
+
 #include "wgt2allg.h"
 #include "acgfx.h"
 #ifdef WINDOWS_VERSION
@@ -32,11 +34,11 @@ unsigned long _blender_trans15(unsigned long x, unsigned long y, unsigned long n
 
 // the allegro "inline" ones are not actually inline, so #define
 // over them to speed it up
-#define getr32(xx) ((xx >> _rgb_r_shift_32) & 0xFF)
+/*#define getr32(xx) ((xx >> _rgb_r_shift_32) & 0xFF)
 #define getg32(xx) ((xx >> _rgb_g_shift_32) & 0xFF)
 #define getb32(xx) ((xx >> _rgb_b_shift_32) & 0xFF)
 #define geta32(xx) ((xx >> _rgb_a_shift_32) & 0xFF)
-#define makeacol32(r,g,b,a) ((r << _rgb_r_shift_32) | (g << _rgb_g_shift_32) | (b << _rgb_b_shift_32) | (a << _rgb_a_shift_32))
+#define makeacol32(r,g,b,a) ((r << _rgb_r_shift_32) | (g << _rgb_g_shift_32) | (b << _rgb_b_shift_32) | (a << _rgb_a_shift_32))*/
 
 // Take hue and saturation of blend colour, luminance of image
 unsigned long _myblender_color15_light(unsigned long x, unsigned long y, unsigned long n)
@@ -45,16 +47,16 @@ unsigned long _myblender_color15_light(unsigned long x, unsigned long y, unsigne
    float yh, ys, yv;
    int r, g, b;
 
-   rgb_to_hsv(getr15(x), getg15(x), getb15(x), &xh, &xs, &xv);
-   rgb_to_hsv(getr15(y), getg15(y), getb15(y), &yh, &ys, &yv);
+   alw_rgb_to_hsv(alw_getr15(x), alw_getg15(x), alw_getb15(x), &xh, &xs, &xv);
+   alw_rgb_to_hsv(alw_getr15(y), alw_getg15(y), alw_getb15(y), &yh, &ys, &yv);
 
    // adjust luminance
    yv -= (1.0 - ((float)n / 250.0));
    if (yv < 0.0) yv = 0.0;
 
-   hsv_to_rgb(xh, xs, yv, &r, &g, &b);
+   alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
 
-   return makecol15(r, g, b);
+   return alw_makecol15(r, g, b);
 }
 
 // Take hue and saturation of blend colour, luminance of image
@@ -65,16 +67,16 @@ unsigned long _myblender_color16_light(unsigned long x, unsigned long y, unsigne
    float yh, ys, yv;
    int r, g, b;
 
-   rgb_to_hsv(getr16(x), getg16(x), getb16(x), &xh, &xs, &xv);
-   rgb_to_hsv(getr16(y), getg16(y), getb16(y), &yh, &ys, &yv);
+   alw_rgb_to_hsv(alw_getr16(x), alw_getg16(x), alw_getb16(x), &xh, &xs, &xv);
+   alw_rgb_to_hsv(alw_getr16(y), alw_getg16(y), alw_getb16(y), &yh, &ys, &yv);
 
    // adjust luminance
    yv -= (1.0 - ((float)n / 250.0));
    if (yv < 0.0) yv = 0.0;
 
-   hsv_to_rgb(xh, xs, yv, &r, &g, &b);
+   alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
 
-   return makecol16(r, g, b);
+   return alw_makecol16(r, g, b);
 }
 
 // Take hue and saturation of blend colour, luminance of image
@@ -84,16 +86,16 @@ unsigned long _myblender_color32_light(unsigned long x, unsigned long y, unsigne
    float yh, ys, yv;
    int r, g, b;
 
-   rgb_to_hsv(getr32(x), getg32(x), getb32(x), &xh, &xs, &xv);
-   rgb_to_hsv(getr32(y), getg32(y), getb32(y), &yh, &ys, &yv);
+   alw_rgb_to_hsv(alw_getr32(x), alw_getg32(x), alw_getb32(x), &xh, &xs, &xv);
+   alw_rgb_to_hsv(alw_getr32(y), alw_getg32(y), alw_getb32(y), &yh, &ys, &yv);
 
    // adjust luminance
    yv -= (1.0 - ((float)n / 250.0));
    if (yv < 0.0) yv = 0.0;
 
-   hsv_to_rgb(xh, xs, yv, &r, &g, &b);
+   alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
 
-   return makeacol32(r, g, b, geta32(y));
+   return alw_makeacol32(r, g, b, alw_geta32(y));
 }
 
 // Take hue and saturation of blend colour, luminance of image
@@ -103,12 +105,12 @@ unsigned long _myblender_color15(unsigned long x, unsigned long y, unsigned long
    float yh, ys, yv;
    int r, g, b;
 
-   rgb_to_hsv(getr15(x), getg15(x), getb15(x), &xh, &xs, &xv);
-   rgb_to_hsv(getr15(y), getg15(y), getb15(y), &yh, &ys, &yv);
+   alw_rgb_to_hsv(alw_getr15(x), alw_getg15(x), alw_getb15(x), &xh, &xs, &xv);
+   alw_rgb_to_hsv(alw_getr15(y), alw_getg15(y), alw_getb15(y), &yh, &ys, &yv);
 
-   hsv_to_rgb(xh, xs, yv, &r, &g, &b);
+   alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
 
-   return makecol15(r, g, b);
+   return alw_makecol15(r, g, b);
 }
 
 // Take hue and saturation of blend colour, luminance of image
@@ -118,12 +120,12 @@ unsigned long _myblender_color16(unsigned long x, unsigned long y, unsigned long
    float yh, ys, yv;
    int r, g, b;
 
-   rgb_to_hsv(getr16(x), getg16(x), getb16(x), &xh, &xs, &xv);
-   rgb_to_hsv(getr16(y), getg16(y), getb16(y), &yh, &ys, &yv);
+   alw_rgb_to_hsv(alw_getr16(x), alw_getg16(x), alw_getb16(x), &xh, &xs, &xv);
+   alw_rgb_to_hsv(alw_getr16(y), alw_getg16(y), alw_getb16(y), &yh, &ys, &yv);
 
-   hsv_to_rgb(xh, xs, yv, &r, &g, &b);
+   alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
 
-   return makecol16(r, g, b);
+   return alw_makecol16(r, g, b);
 }
 
 // Take hue and saturation of blend colour, luminance of image
@@ -133,12 +135,12 @@ unsigned long _myblender_color32(unsigned long x, unsigned long y, unsigned long
    float yh, ys, yv;
    int r, g, b;
 
-   rgb_to_hsv(getr32(x), getg32(x), getb32(x), &xh, &xs, &xv);
-   rgb_to_hsv(getr32(y), getg32(y), getb32(y), &yh, &ys, &yv);
+   alw_rgb_to_hsv(alw_getr32(x), alw_getg32(x), alw_getb32(x), &xh, &xs, &xv);
+   alw_rgb_to_hsv(alw_getr32(y), alw_getg32(y), alw_getb32(y), &yh, &ys, &yv);
 
-   hsv_to_rgb(xh, xs, yv, &r, &g, &b);
+   alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
 
-   return makeacol32(r, g, b, geta32(y));
+   return alw_makeacol32(r, g, b, alw_geta32(y));
 }
 
 
@@ -168,7 +170,7 @@ unsigned long _myblender_alpha_trans24(unsigned long x, unsigned long y, unsigne
 void set_my_trans_blender(int r, int g, int b, int a) {
   // use standard allegro 15 and 16 bit blenders, but customize
   // the 32-bit one to preserve the alpha channel
-  set_blender_mode(_blender_trans15, _blender_trans16, _myblender_alpha_trans24, r, g, b, a);
+  alw_set_blender_mode(_blender_trans15, _blender_trans16, _myblender_alpha_trans24, r, g, b, a);
 }
 
 
@@ -185,7 +187,7 @@ unsigned long _additive_alpha_blender(unsigned long x, unsigned long y, unsigned
 
 void set_additive_alpha_blender() {
   // add the alpha channels together
-  set_blender_mode(NULL, NULL, _additive_alpha_blender, 0, 0, 0, 0);
+  alw_set_blender_mode(NULL, NULL, _additive_alpha_blender, 0, 0, 0, 0);
 }
 
 // sets the alpha channel to opaque. used when drawing a non-alpha sprite onto an alpha-sprite
@@ -195,7 +197,7 @@ unsigned long _opaque_alpha_blender(unsigned long x, unsigned long y, unsigned l
 }
 
 void set_opaque_alpha_blender() {
-  set_blender_mode(NULL, NULL, _opaque_alpha_blender, 0, 0, 0, 0);
+  alw_set_blender_mode(NULL, NULL, _opaque_alpha_blender, 0, 0, 0, 0);
 }
 
 
@@ -401,7 +403,7 @@ AllegroGFXFilter::AllegroGFXFilter(int multiplier, bool justCheckingForSetup) : 
 
 BITMAP* AllegroGFXFilter::ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
   realScreen = screen;
-  return screen;
+  return alw_screen;
 }
 
 BITMAP *AllegroGFXFilter::ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
@@ -411,7 +413,7 @@ BITMAP *AllegroGFXFilter::ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
 void AllegroGFXFilter::RenderScreen(BITMAP *toRender, int x, int y) {
 
   if (toRender != realScreen) 
-    blit(toRender, realScreen, 0, 0, x, y, BMP_W(toRender), BMP_H(toRender));
+    alw_blit(toRender, realScreen, 0, 0, x, y, BMP_W(toRender), BMP_H(toRender));
 
   lastBlitX = x;
   lastBlitY = y;
@@ -423,15 +425,15 @@ void AllegroGFXFilter::RenderScreenFlipped(BITMAP *toRender, int x, int y, int f
     return;
 
   if (flipType == SCR_HFLIP)
-    draw_sprite_h_flip(realScreen, toRender, 0, 0);
+    alw_draw_sprite_h_flip(realScreen, toRender, 0, 0);
   else if (flipType == SCR_VFLIP)
-    draw_sprite_v_flip(realScreen, toRender, 0, 0);
+    alw_draw_sprite_v_flip(realScreen, toRender, 0, 0);
   else if (flipType == SCR_VHFLIP)
-    draw_sprite_vh_flip(realScreen, toRender, 0, 0);
+    alw_draw_sprite_vh_flip(realScreen, toRender, 0, 0);
 }
 
 void AllegroGFXFilter::ClearRect(int x1, int y1, int x2, int y2, int color) {
-  rectfill(realScreen, x1, y1, x2, y2, color);
+  alw_rectfill(realScreen, x1, y1, x2, y2, color);
 }
 
 void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap) 
@@ -442,7 +444,7 @@ void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap)
 void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap, bool copyWithOffset)
 {
   if (copyBitmap != realScreen)
-    blit(realScreen, copyBitmap, (copyWithOffset ? lastBlitX : 0), (copyWithOffset ? lastBlitY : 0), 0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
+    alw_blit(realScreen, copyBitmap, (copyWithOffset ? lastBlitX : 0), (copyWithOffset ? lastBlitY : 0), 0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
 }
 
 
@@ -460,16 +462,16 @@ public:
     lastBlitFrom = NULL;
   }
 
-  virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
-    realScreen = screen;
-    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth(screen), BMP_W(screen), BMP_H(screen));
-    fakeScreen = create_bitmap_ex(bitmap_color_depth(screen), fakeWidth, fakeHeight);
+  virtual BITMAP* ScreenInitialized(BITMAP *alw_screen, int fakeWidth, int fakeHeight) {
+    realScreen = alw_screen;
+    realScreenSizedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth(alw_screen), BMP_W(alw_screen), BMP_H(alw_screen));
+    fakeScreen = alw_create_bitmap_ex(alw_bitmap_color_depth(alw_screen), fakeWidth, fakeHeight);
     return fakeScreen;
   }
 
   virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
-    destroy_bitmap(fakeScreen);
-    destroy_bitmap(realScreenSizedBuffer);
+    alw_destroy_bitmap(fakeScreen);
+    alw_destroy_bitmap(realScreenSizedBuffer);
     fakeScreen = NULL;
     realScreenSizedBuffer = NULL;
     return realScreen;
@@ -477,7 +479,7 @@ public:
 
   virtual void RenderScreen(BITMAP *toRender, int x, int y) 
   {
-    stretch_blit(toRender, realScreen, 0, 0, BMP_W(toRender), BMP_H(toRender), x * MULTIPLIER, y * MULTIPLIER, BMP_W(toRender) * MULTIPLIER, BMP_H(toRender) * MULTIPLIER);
+    alw_stretch_blit(toRender, realScreen, 0, 0, BMP_W(toRender), BMP_H(toRender), x * MULTIPLIER, y * MULTIPLIER, BMP_W(toRender) * MULTIPLIER, BMP_H(toRender) * MULTIPLIER);
     lastBlitX = x;
     lastBlitY = y;
     lastBlitFrom = toRender;
@@ -489,11 +491,11 @@ public:
       return;
 
     if (flipType == SCR_HFLIP)
-      draw_sprite_h_flip(fakeScreen, toRender, 0, 0);
+      alw_draw_sprite_h_flip(fakeScreen, toRender, 0, 0);
     else if (flipType == SCR_VFLIP)
-      draw_sprite_v_flip(fakeScreen, toRender, 0, 0);
+      alw_draw_sprite_v_flip(fakeScreen, toRender, 0, 0);
     else if (flipType == SCR_VHFLIP)
-      draw_sprite_vh_flip(fakeScreen, toRender, 0, 0);
+      alw_draw_sprite_vh_flip(fakeScreen, toRender, 0, 0);
 
     RenderScreen(fakeScreen, x, y);
   }
@@ -503,7 +505,7 @@ public:
     y1 *= MULTIPLIER;
     x2 = x2 * MULTIPLIER + (MULTIPLIER - 1);
     y2 = y2 * MULTIPLIER + (MULTIPLIER - 1);
-    rectfill(realScreen, x1, y1, x2, y2, color);
+    alw_rectfill(realScreen, x1, y1, x2, y2, color);
   }
 
   virtual void GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap) 
@@ -517,15 +519,15 @@ public:
     {
       // Can't stretch_blit from Video Memory to normal memory,
       // so copy the screen to a buffer first.
-      blit(realScreen, realScreenSizedBuffer, 0, 0, 0, 0, BMP_W(realScreen), BMP_H(realScreen));
-      stretch_blit(realScreenSizedBuffer, copyBitmap, 0, 0, 
+      alw_blit(realScreen, realScreenSizedBuffer, 0, 0, 0, 0, BMP_W(realScreen), BMP_H(realScreen));
+      alw_stretch_blit(realScreenSizedBuffer, copyBitmap, 0, 0, 
                   BMP_W(realScreenSizedBuffer), BMP_H(realScreenSizedBuffer), 
                   0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
     }
     else if (lastBlitFrom == NULL)
-      clear(copyBitmap);
+      alw_clear_bitmap(copyBitmap);
     else
-      stretch_blit(lastBlitFrom, copyBitmap, 0, 0, 
+      alw_stretch_blit(lastBlitFrom, copyBitmap, 0, 0, 
                   BMP_W(lastBlitFrom), BMP_H(lastBlitFrom), 
                   0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
   }
@@ -554,25 +556,25 @@ public:
 
   virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
-    realScreenBuffer = create_bitmap(BMP_W( screen), BMP_H( screen));
-    fakeScreen = create_bitmap_ex(bitmap_color_depth( screen), fakeWidth, fakeHeight);
-    Init_2xSaI(bitmap_color_depth( screen));
+    realScreenBuffer = alw_create_bitmap(BMP_W( screen), BMP_H( screen));
+    fakeScreen = alw_create_bitmap_ex(alw_bitmap_color_depth( screen), fakeWidth, fakeHeight);
+    Init_2xSaI(alw_bitmap_color_depth( screen));
     return fakeScreen;
   }
 
   virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
-    destroy_bitmap(fakeScreen);
-    destroy_bitmap(realScreenBuffer);
+    alw_destroy_bitmap(fakeScreen);
+    alw_destroy_bitmap(realScreenBuffer);
     return realScreen;
   }
 
   virtual void RenderScreen(BITMAP *toRender, int x, int y) {
 
-    acquire_bitmap(realScreenBuffer);
+    alw_acquire_bitmap(realScreenBuffer);
     Super2xSaI(toRender, realScreenBuffer, 0, 0, 0, 0, BMP_W(toRender), BMP_H(toRender));
-    release_bitmap(realScreenBuffer);
+    alw_release_bitmap(realScreenBuffer);
 
-    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
+    alw_blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
 
     lastBlitFrom = toRender;
   }
@@ -606,27 +608,27 @@ public:
 
   virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
-    realScreenBuffer = create_bitmap(BMP_W( screen), BMP_H( screen));
-    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth( screen), BMP_W( screen), BMP_H( screen));
-    fakeScreen = create_bitmap_ex(bitmap_color_depth( screen), fakeWidth, fakeHeight);
+    realScreenBuffer = alw_create_bitmap(BMP_W( screen), BMP_H( screen));
+    realScreenSizedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth( screen), BMP_W( screen), BMP_H( screen));
+    fakeScreen = alw_create_bitmap_ex(alw_bitmap_color_depth( screen), fakeWidth, fakeHeight);
     InitLUTs();
     return fakeScreen;
   }
 
   virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
-    destroy_bitmap(fakeScreen);
-    destroy_bitmap(realScreenBuffer);
-    destroy_bitmap(realScreenSizedBuffer);
+    alw_destroy_bitmap(fakeScreen);
+    alw_destroy_bitmap(realScreenBuffer);
+    alw_destroy_bitmap(realScreenSizedBuffer);
     return realScreen;
   }
 
   virtual void RenderScreen(BITMAP *toRender, int x, int y) {
 
-    acquire_bitmap(realScreenBuffer);
-    hq2x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(bitmap_color_depth(realScreenBuffer)));
-    release_bitmap(realScreenBuffer);
+    alw_acquire_bitmap(realScreenBuffer);
+    hq2x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(alw_bitmap_color_depth(realScreenBuffer)));
+    alw_release_bitmap(realScreenBuffer);
 
-    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
+    alw_blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
 
     lastBlitFrom = toRender;
   }
@@ -658,27 +660,27 @@ public:
 
   virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
-    realScreenBuffer = create_bitmap(BMP_W(screen), BMP_H(screen));
-    realScreenSizedBuffer = create_bitmap_ex(bitmap_color_depth(screen), BMP_W(screen), BMP_H(screen));
-    fakeScreen = create_bitmap_ex(bitmap_color_depth(screen), fakeWidth, fakeHeight);
+    realScreenBuffer = alw_create_bitmap(BMP_W(screen), BMP_H(screen));
+    realScreenSizedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth(screen), BMP_W(screen), BMP_H(screen));
+    fakeScreen = alw_create_bitmap_ex(alw_bitmap_color_depth(screen), fakeWidth, fakeHeight);
     InitLUTs();
     return fakeScreen;
   }
 
   virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
-    destroy_bitmap(fakeScreen);
-    destroy_bitmap(realScreenBuffer);
-    destroy_bitmap(realScreenSizedBuffer);
+    alw_destroy_bitmap(fakeScreen);
+    alw_destroy_bitmap(realScreenBuffer);
+    alw_destroy_bitmap(realScreenSizedBuffer);
     return realScreen;
   }
 
   virtual void RenderScreen(BITMAP *toRender, int x, int y) {
 
-    acquire_bitmap(realScreenBuffer);
-    hq3x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(bitmap_color_depth(realScreenBuffer)));
-    release_bitmap(realScreenBuffer);
+    alw_acquire_bitmap(realScreenBuffer);
+    hq3x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(alw_bitmap_color_depth(realScreenBuffer)));
+    alw_release_bitmap(realScreenBuffer);
 
-    blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
+    alw_blit(realScreenBuffer, realScreen, 0, 0, x * MULTIPLIER, y * MULTIPLIER, BMP_W(realScreen), BMP_H(realScreen));
 
     lastBlitFrom = toRender;
   }

@@ -12,6 +12,8 @@
 
 #include "sprcache.h"
 
+#include "allegro_wrapper.h"
+
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL
 #pragma unmanaged
@@ -395,7 +397,7 @@ int SpriteCache::loadSprite(int index)
   _spritewidth[index] = wdd;
   _spriteheight[index] = htt;
 
-  images[index] = create_bitmap_ex(coldep * 8, wdd, htt);
+  images[index] = alw_create_bitmap_ex(coldep * 8, wdd, htt);
   if (images[index] == NULL) {
     offsets[index] = 0;
     return 0;
@@ -452,7 +454,7 @@ const char *spriteFileSig = " Sprite File ";
 
 void SpriteCache::compressSprite(block sprite, FILE *ooo) {
 
-  int depth = bitmap_color_depth(sprite) / 8;
+  int depth = alw_bitmap_color_depth(sprite) / 8;
 
   if (depth == 1) {
     for (int yy = 0; yy < BMP_H(sprite); yy++)
@@ -525,7 +527,7 @@ int SpriteCache::saveToFile(const char *filnam, int lastElement, bool compressOu
     if (images[i] != NULL) {
       // image in memory -- write it out
       pre_save_sprite(i);
-      int bpss = bitmap_color_depth(images[i]) / 8;
+      int bpss = alw_bitmap_color_depth(images[i]) / 8;
       spritewidths[i] = BMP_W(images[i]);
       spriteheights[i] = BMP_H(images[i]);
       putshort(bpss, output);

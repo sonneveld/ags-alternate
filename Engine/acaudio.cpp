@@ -9,6 +9,8 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
+#include "allegro_wrapper.h"
+
 #include "acsound.h"
 #include <math.h>
 #include "ac.h"
@@ -321,15 +323,15 @@ const char* get_audio_clip_file_name(ScriptAudioClip *clip)
   else
   {
     sprintf(acaudio_buffer, "~audio.vox~%s", game.audioClips[clip->id].fileName);
-    PACKFILE *iii = pack_fopen(acaudio_buffer, "rb");
+    PACKFILE *iii = alw_pack_fopen(acaudio_buffer, "rb");
     if (iii != NULL)
     {
-      pack_fclose(iii);
+      alw_pack_fclose(iii);
       return &acaudio_buffer[0];
     }
   }
   sprintf(acaudio_buffer, "AudioCache\\%s", game.audioClips[clip->id].fileName);
-  if (exists(acaudio_buffer))
+  if (alw_exists(acaudio_buffer))
   {
     return &acaudio_buffer[0];
   }
@@ -804,7 +806,7 @@ SOUNDCLIP *load_sound_clip_from_old_style_number(bool isMusic, int indexNumber, 
 void force_audiostream_include() {
   // This should never happen, but the call is here to make it
   // link the audiostream libraries
-  stop_audio_stream(NULL);
+  alw_stop_audio_stream(NULL);
 }
 
 
@@ -1051,9 +1053,9 @@ int IsChannelPlaying(int chan) {
 /* *** SCRIPT SYMBOL: [AudioChannel] SeekMIDIPosition *** */
 void SeekMIDIPosition (int position) {
   if (play.silent_midi)
-    midi_seek (position);
+    alw_midi_seek (position);
   if (current_music_type == MUS_MIDI) {
-    midi_seek(position);
+    alw_midi_seek(position);
     DEBUG_CONSOLE("Seek MIDI position to %d", position);
   }
 }
@@ -1061,13 +1063,13 @@ void SeekMIDIPosition (int position) {
 /* *** SCRIPT SYMBOL: [AudioChannel] GetMIDIPosition *** */
 int GetMIDIPosition () {
   if (play.silent_midi)
-    return midi_pos;
+    return alw_midi_pos;
   if (current_music_type != MUS_MIDI)
     return -1;
   if (play.fast_forward)
     return 99999;
 
-  return midi_pos;
+  return alw_midi_pos;
 }
 
 

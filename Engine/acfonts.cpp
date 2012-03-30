@@ -9,6 +9,9 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
+
+#include "allegro_wrapper.h"
+
 #pragma unmanaged
 #ifndef USE_ALFONT
 #define USE_ALFONT
@@ -297,12 +300,12 @@ int WFNFontRenderer::printchar(int xxx, int yyy, wgtfont foo, int charr)
     for (ss = 0; ss < charWidth; ss++) {
       if (((actdata[tt * bytewid + (ss / 8)] & (0x80 >> (ss % 8))) != 0)) {
         if (wtext_multiply > 1) {
-          rectfill(abuf, xxx + ss, yyy + tt, xxx + ss + (wtext_multiply - 1),
+          alw_rectfill(abuf, xxx + ss, yyy + tt, xxx + ss + (wtext_multiply - 1),
                    yyy + tt + (wtext_multiply - 1), textcol);
         } 
         else
         {
-          putpixel(abuf, xxx + ss, yyy + tt, textcol);
+          alw_putpixel(abuf, xxx + ss, yyy + tt, textcol);
         }
       }
 
@@ -396,7 +399,7 @@ void TTFFontRenderer::RenderText(const char *text, int fontNumber, BITMAP *desti
 
   ALFONT_FONT *alfpt = get_ttf_block(fonts[fontNumber]);
   // Y - 1 because it seems to get drawn down a bit
-  if ((ShouldAntiAliasText()) && (bitmap_color_depth(abuf) > 8))
+  if ((ShouldAntiAliasText()) && (alw_bitmap_color_depth(abuf) > 8))
     alfont_textout_aa(abuf, alfpt, text, x, y - 1, colour);
   else
     alfont_textout(abuf, alfpt, text, x, y - 1, colour);

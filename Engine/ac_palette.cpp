@@ -1,5 +1,7 @@
 #include "ac_palette.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 
@@ -42,7 +44,7 @@ void SetPalRGB(int inndx,int rr,int gg,int bb) {
   wsetpalette(0,255,pptr);
   }
 void scGetPal(color*pptr) {
-  get_palette(pptr);
+  alw_get_palette(pptr);
   }*/
 
 

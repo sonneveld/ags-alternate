@@ -1,5 +1,7 @@
 #include "ac_gui_list_box.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acgui.h"
@@ -42,12 +44,12 @@ void ListBox_FillDirList(GUIListBox *listbox, const char *filemask) {
 
   listbox->Clear();
   al_ffblk dfb;
-  int	dun = al_findfirst(searchPath, &dfb, FA_SEARCH);
+  int	dun = alw_al_findfirst(searchPath, &dfb, FA_SEARCH);
   while (!dun) {
     listbox->AddItem(dfb.name);
-    dun = al_findnext(&dfb);
+    dun = alw_al_findnext(&dfb);
   }
-  al_findclose(&dfb);
+  alw_al_findclose(&dfb);
   guis_need_update = 1;
 }
 
@@ -72,14 +74,14 @@ int ListBox_FillSaveGameList(GUIListBox *listbox) {
   char searchPath[260];
   sprintf(searchPath, "%s""agssave.*", saveGameDirectory);
 
-  int don = al_findfirst(searchPath, &ffb, FA_SEARCH);
+  int don = alw_al_findfirst(searchPath, &ffb, FA_SEARCH);
   while (!don) {
     bufix=0;
     if (numsaves >= MAXSAVEGAMES)
       break;
     // only list games .000 to .099 (to allow higher slots for other perposes)
     if (strstr(ffb.name,".0")==NULL) {
-      don = al_findnext(&ffb);
+      don = alw_al_findnext(&ffb);
       continue;
     }
     const char *numberExtension = strstr(ffb.name, ".0") + 1;
@@ -89,9 +91,9 @@ int ListBox_FillSaveGameList(GUIListBox *listbox) {
     listbox->saveGameIndex[numsaves] = saveGameSlot;
     filedates[numsaves]=(long int)ffb.time;
     numsaves++;
-    don = al_findnext(&ffb);
+    don = alw_al_findnext(&ffb);
   }
-  al_findclose(&ffb);
+  alw_al_findclose(&ffb);
 
   int nn;
   for (nn=0;nn<numsaves-1;nn++) {

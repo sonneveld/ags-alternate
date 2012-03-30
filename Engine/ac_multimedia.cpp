@@ -1,5 +1,7 @@
 #include "ac_multimedia.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acsound.h"
@@ -119,13 +121,13 @@ int fli_callback(...) {
   update_polled_stuff_and_crossfade ();
 
   if (game.color_depth > 1) {
-    blit(fli_buffer,hicol_buf,0,0,0,0,fliwidth,fliheight);
+    alw_blit(fli_buffer,hicol_buf,0,0,0,0,fliwidth,fliheight);
     usebuf=hicol_buf;
   }
   if (stretch_flc == 0)
-    blit(usebuf, fli_target, 0,0,scrnwid/2-fliwidth/2,scrnhit/2-fliheight/2,scrnwid,scrnhit);
+    alw_blit(usebuf, fli_target, 0,0,scrnwid/2-fliwidth/2,scrnhit/2-fliheight/2,scrnwid,scrnhit);
   else 
-    stretch_blit(usebuf, fli_target, 0,0,fliwidth,fliheight,0,0,scrnwid,scrnhit);
+    alw_stretch_blit(usebuf, fli_target, 0,0,fliwidth,fliheight,0,0,scrnwid,scrnhit);
 
   gfxDriver->UpdateDDBFromBitmap(fli_ddb, fli_target, false);
   gfxDriver->DrawSprite(0, 0, fli_ddb);
@@ -171,42 +173,42 @@ void play_flc_file(int numb,int playflags) {
   fread(&fliheight,2,1,iii);
   fclose(iii);
   if (game.color_depth > 1) {
-    hicol_buf=create_bitmap_ex(final_col_dep,fliwidth,fliheight);
-    clear(hicol_buf);
+    hicol_buf=alw_create_bitmap_ex(final_col_dep,fliwidth,fliheight);
+    alw_clear_bitmap(hicol_buf);
     }
   // override the stretch option if necessary
   if ((fliwidth==scrnwid) && (fliheight==scrnhit))
     stretch_flc = 0;
   else if ((fliwidth > scrnwid) || (fliheight > scrnhit))
     stretch_flc = 1;
-  fli_buffer=create_bitmap_ex(8,fliwidth,fliheight); //640,400); //scrnwid,scrnhit);
+  fli_buffer=alw_create_bitmap_ex(8,fliwidth,fliheight); //640,400); //scrnwid,scrnhit);
   if (fli_buffer==NULL) quit("Not enough memory to play animation");
-  clear(fli_buffer);
+  alw_clear_bitmap(fli_buffer);
 
   if (clearScreenAtStart) {
-    clear(screen);
-    render_to_screen(screen, 0, 0);
+    alw_clear_bitmap(alw_screen);
+    render_to_screen(alw_screen, 0, 0);
   }
 
-  fli_target = create_bitmap_ex(final_col_dep, BMP_W(screen), BMP_H(screen));
+  fli_target = alw_create_bitmap_ex(final_col_dep, BMP_W(alw_screen), BMP_H(alw_screen));
   fli_ddb = gfxDriver->CreateDDBFromBitmap(fli_target, false, true);
 
-  if (play_fli(flicnam,fli_buffer,0,fli_callback)==FLI_ERROR)
+  if (alw_play_fli(flicnam,fli_buffer,0,fli_callback)==FLI_ERROR)
     quit("FLI/FLC animation play error");
 
   wfreeblock(fli_buffer);
-  clear(screen);
+  alw_clear_bitmap(alw_screen);
   wsetpalette(0,255,oldpal);
-  render_to_screen(screen, 0, 0);
+  render_to_screen(alw_screen, 0, 0);
 
-  destroy_bitmap(fli_target);
+  alw_destroy_bitmap(fli_target);
   gfxDriver->DestroyDDB(fli_ddb);
   fli_ddb = NULL;
 
   if (hicol_buf!=NULL) {
     wfreeblock(hicol_buf);
     hicol_buf=NULL; }
-//  wsetscreen(screen); wputblock(0,0,backbuffer,0);
+//  wsetscreen(alw_screen); wputblock(0,0,backbuffer,0);
   while (ac_mgetbutton()!=NONE) ;
   invalidate_screen();
 }
@@ -231,7 +233,7 @@ int theora_playing_callback(BITMAP *theoraBuffer)
     drawAtY = scrnhit / 2 - fliTargetHeight / 2;
     if (!gfxDriver->HasAcceleratedStretchAndFlip())
     {
-      stretch_blit(theoraBuffer, fli_target, 0, 0, BMP_W(theoraBuffer), BMP_H(theoraBuffer), 
+      alw_stretch_blit(theoraBuffer, fli_target, 0, 0, BMP_W(theoraBuffer), BMP_H(theoraBuffer), 
                    drawAtX, drawAtY, fliTargetWidth, fliTargetHeight);
       gfxDriver->UpdateDDBFromBitmap(fli_ddb, fli_target, false);
       drawAtX = 0;
@@ -299,7 +301,7 @@ void calculate_destination_size_maintain_aspect_ratio(int vidWidth, int vidHeigh
 
 void play_theora_video(const char *name, int skip, int flags)
 {
-  apeg_set_display_depth(bitmap_color_depth(screen));
+  apeg_set_display_depth(alw_bitmap_color_depth(alw_screen));
   // we must disable length detection, otherwise it takes ages to start
   // playing if the file is large because it seeks through the whole thing
   apeg_disable_length_detection(TRUE);
@@ -325,7 +327,7 @@ void play_theora_video(const char *name, int skip, int flags)
   }
 
   fli_target = NULL;
-  //fli_buffer = create_bitmap_ex(final_col_dep, videoWidth, videoHeight);
+  //fli_buffer = alw_create_bitmap_ex(final_col_dep, videoWidth, videoHeight);
   calculate_destination_size_maintain_aspect_ratio(videoWidth, videoHeight, &fliTargetWidth, &fliTargetHeight);
 
   if ((fliTargetWidth == videoWidth) && (fliTargetHeight == videoHeight) && (stretch_flc))
@@ -336,7 +338,7 @@ void play_theora_video(const char *name, int skip, int flags)
 
   if ((stretch_flc) && (!gfxDriver->HasAcceleratedStretchAndFlip()))
   {
-    fli_target = create_bitmap_ex(final_col_dep, scrnwid, scrnhit);
+    fli_target = alw_create_bitmap_ex(final_col_dep, scrnwid, scrnhit);
     clear(fli_target);
     fli_ddb = gfxDriver->CreateDDBFromBitmap(fli_target, false, true);
   }
@@ -355,9 +357,9 @@ void play_theora_video(const char *name, int skip, int flags)
   }
   apeg_close_stream(oggVid);
 
-  //destroy_bitmap(fli_buffer);
+  //alw_destroy_bitmap(fli_buffer);
   if (fli_target != NULL)
-    destroy_bitmap(fli_target);
+    alw_destroy_bitmap(fli_target);
   gfxDriver->DestroyDDB(fli_ddb);
   fli_ddb = NULL;
   invalidate_screen();
@@ -479,7 +481,7 @@ void PlaySilentMIDI (int mnum) {
   if (current_music_type == MUS_MIDI)
     quit("!PlaySilentMIDI: proper midi music is in progress");
 
-  set_volume (-1, 0);
+  alw_set_volume (-1, 0);
   play.silent_midi = mnum;
   play.silent_midi_channel = SCHAN_SPEECH;
   stop_and_destroy_channel(play.silent_midi_channel);

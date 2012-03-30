@@ -8,6 +8,8 @@
 #include "dynobj/sc_file.h"
 #include "cscomp.h"
 
+#include "allegro_wrapper.h"
+
 #ifdef WINDOWS_VERSION
 #include <shlwapi.h>
 #elif defined(LINUX_VERSION) || defined(MAC_VERSION)
@@ -74,14 +76,14 @@ bool validate_user_file_path(const char *fnmm, char *output, bool currentDirOnly
     if (game.saveGameFolderName[0] != 0)
     {
       sprintf(output, "%s/%s", appDataDir, game.saveGameFolderName);
-      fix_filename_slashes(output);
+      alw_fix_filename_slashes(output);
       mkdir(output);
     }
     else 
     {
       strcpy(output, appDataDir);
     }
-    put_backslash(output);
+    alw_put_backslash(output);
     strcat(output, fnmm);
   }
   else
@@ -394,7 +396,7 @@ extern "C" {
 PACKFILE*_my_temppack;
 extern PACKFILE *__old_pack_fopen(char *,char *);
 
-#if ALLEGRO_DATE > 19991010
+#if ALW_ALLEGRO_DATE > 19991010
 PACKFILE *pack_fopen(const char *filnam1, const char *modd1) {
 #else
 PACKFILE *pack_fopen(char *filnam1, char *modd1) {
@@ -456,9 +458,9 @@ PACKFILE *pack_fopen(char *filnam1, char *modd1) {
     if (_my_temppack == NULL)
       quitprintf("pack_fopen: unable to change datafile: not found: %s", clibgetdatafile(filnam));
 
-    pack_fseek(_my_temppack,cliboffset(filnam));
+    alw_pack_fseek(_my_temppack,cliboffset(filnam));
     
-#if ALLEGRO_DATE < 20050101
+#if ALW_ALLEGRO_DATE < 20050101
     _my_temppack->todo=clibfilesize(filnam);
 #else
     _my_temppack->normal.todo = clibfilesize(filnam);

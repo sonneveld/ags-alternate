@@ -1,6 +1,8 @@
 
 #include "acroom.h"
 
+#include "allegro_wrapper.h"
+
 #include "wgt2allg.h"
 #include "clib32.h"
 #include "compress.h"
@@ -391,11 +393,11 @@ void NewInteractionCommandList::reset () {
 int ff;
 /*void roomstruct::allocall() {
   // These all get recreated when a room is loaded anyway
-  walls = create_bitmap_ex(8, 320, 200);
-  object = create_bitmap_ex(8, 320, 200);
-  lookat = create_bitmap_ex(8, 320, 200);
-  bscene = create_bitmap_ex(8, 320, 200);
-  shading = create_bitmap_ex(8, 320, 200);
+  walls = alw_create_bitmap_ex(8, 320, 200);
+  object = alw_create_bitmap_ex(8, 320, 200);
+  lookat = alw_create_bitmap_ex(8, 320, 200);
+  bscene = alw_create_bitmap_ex(8, 320, 200);
+  shading = alw_create_bitmap_ex(8, 320, 200);
 
   if (shading == NULL)
     quit("roomstruct::allocall: out of memory");
@@ -452,10 +454,10 @@ static int _acroom_bpp = 1;  // bytes per pixel of currently loading room
 
 // returns bytes per pixel for bitmap's color depth
 int bmp_bpp(BITMAP*bmpt) {
-  if (bitmap_color_depth(bmpt) == 15)
+  if (alw_bitmap_color_depth(bmpt) == 15)
     return 2;
 
-  return bitmap_color_depth(bmpt) / 8;
+  return alw_bitmap_color_depth(bmpt) / 8;
 }
 
 #ifdef LOADROOM_DO_POLL
@@ -565,23 +567,23 @@ static long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
 #endif
 
   if (bmm!=NULL)
-    destroy_bitmap(bmm);
+    alw_destroy_bitmap(bmm);
 
   update_polled_stuff();
 
-  bmm = create_bitmap_ex(_acroom_bpp * 8, (loptr[0] / _acroom_bpp), loptr[1]);
+  bmm = alw_create_bitmap_ex(_acroom_bpp * 8, (loptr[0] / _acroom_bpp), loptr[1]);
   if (bmm == NULL)
     quit("!load_room: not enough memory to load room background");
 
   update_polled_stuff();
 
-  acquire_bitmap (bmm);
+  alw_acquire_bitmap (bmm);
   recalced = bmm;
 
   for (arin = 0; arin < loptr[1]; arin++)
     memcpy(&BMP_LINE(bmm)[arin][0], &membuffer[arin * loptr[0]], loptr[0]);
 
-  release_bitmap (bmm);
+  alw_release_bitmap (bmm);
 
   update_polled_stuff();
 
@@ -616,11 +618,11 @@ static long loadcompressed_allegro(FILE *fpp, BITMAP **bimpp, color *pall, long 
 
   BITMAP *bim = *bimpp;
   if (bim != NULL)
-    destroy_bitmap(bim);
+    alw_destroy_bitmap(bim);
 
   fread(&widd,2,1,fpp);
   fread(&hitt,2,1,fpp);
-  bim = create_bitmap_ex(8, widd, hitt);
+  bim = alw_create_bitmap_ex(8, widd, hitt);
   if (bim == NULL)
     quit("!load_room: not enough memory to decompress masks");
   *bimpp = bim;
@@ -1125,10 +1127,10 @@ static void load_main_block(roomstruct *rstruc, char *files, FILE *opty, room_fi
   if (rfh.version < 21) {
     // Old version - copy walkable areas to Regions
     if (rstruc->regions == NULL)
-      rstruc->regions = create_bitmap_ex (8, BMP_W(rstruc->walls), BMP_H(rstruc->walls));
-    clear (rstruc->regions);
+      rstruc->regions = alw_create_bitmap_ex (8, BMP_W(rstruc->walls), BMP_H(rstruc->walls));
+    alw_clear_bitmap (rstruc->regions);
 
-    blit (rstruc->walls, rstruc->regions, 0, 0, 0, 0, BMP_W(rstruc->regions), BMP_H(rstruc->regions));
+    alw_blit (rstruc->walls, rstruc->regions, 0, 0, 0, 0, BMP_W(rstruc->regions), BMP_H(rstruc->regions));
     for (f = 0; f <= 15; f++) {
       rstruc->regionLightLevel[f] = rstruc->walk_area_light[f];
       rstruc->regionTintLevel[f] = 0;

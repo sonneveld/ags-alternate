@@ -68,9 +68,11 @@ extern int our_eip;
 #include "ac_mouse.h"
 #include "ac_script_room.h"
 
+#include "allegro_wrapper.h"
+
 // Allegro 4 has switched 15-bit colour to BGR instead of RGB, so
 // in this case we need to convert the graphics on load
-#if ALLEGRO_DATE > 19991010
+#if ALW_ALLEGRO_DATE > 19991010
 #define USE_15BIT_FIX
 #endif
 
@@ -97,11 +99,11 @@ int sys_getch() {
 }
 #endif  // WINDOWS_VERSION
 
-#define getr32(xx) ((xx >> _rgb_r_shift_32) & 0xFF)
+/*#define getr32(xx) ((xx >> _rgb_r_shift_32) & 0xFF)
 #define getg32(xx) ((xx >> _rgb_g_shift_32) & 0xFF)
 #define getb32(xx) ((xx >> _rgb_b_shift_32) & 0xFF)
 #define geta32(xx) ((xx >> _rgb_a_shift_32) & 0xFF)
-#define makeacol32(r,g,b,a) ((r << _rgb_r_shift_32) | (g << _rgb_g_shift_32) | (b << _rgb_b_shift_32) | (a << _rgb_a_shift_32))
+#define makeacol32(r,g,b,a) ((r << _rgb_r_shift_32) | (g << _rgb_g_shift_32) | (b << _rgb_b_shift_32) | (a << _rgb_a_shift_32))*/
 /*
 #if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
 not needed now that allegro is being built with MSVC solution with no ASM
@@ -192,6 +194,8 @@ extern "C" {
 #include "dynobj/script_date_time.h"
 #include "dynobj/script_view_frame.h"
 #include "dynobj/script_dynamic_sprite.h"
+
+
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
 #define USE_CUSTOM_EXCEPTION_HANDLER
@@ -559,7 +563,7 @@ int cur_cursor;     // what is the current cursor (different from mode)
 
 char alpha_blend_cursor = 0;  // if non-zero, use alphablend when drawing cursor.
 
-// mouse_z provided by allegro.
+// alw_mouse_z provided by allegro.
 int mouse_z_was = 0;  // previous mouse_wheel value.
 
 
@@ -1099,12 +1103,12 @@ void dj_timer_handler(...) {
   globalTimerCounter++;
   if (mvolcounter > 0) mvolcounter++;
   }
-END_OF_FUNCTION(dj_timer_handler);
+ALW_END_OF_FUNCTION(dj_timer_handler);
 
 void set_game_speed(int fps) {
   frames_per_second = fps;
   time_between_timers = 1000 / fps;
-  install_int_ex(dj_timer_handler,MSEC_TO_TIMER(time_between_timers));
+  alw_install_int_ex(dj_timer_handler,MSEC_TO_TIMER(time_between_timers));
 }
 
 
@@ -1125,13 +1129,13 @@ block convert_16_to_15(block iii) {
   int iwid = BMP_W(iii), ihit = BMP_H(iii);
   int x,y;
 
-  if (bitmap_color_depth(iii) > 16) {
+  if (alw_bitmap_color_depth(iii) > 16) {
     // we want a 32-to-24 conversion
-    block tempbl = create_bitmap_ex(final_col_dep,iwid,ihit);
+    block tempbl = alw_create_bitmap_ex(final_col_dep,iwid,ihit);
 
     if (final_col_dep < 24) {
       // 32-to-16
-      blit(iii, tempbl, 0, 0, 0, 0, iwid, ihit);
+      alw_blit(iii, tempbl, 0, 0, 0, 0, iwid, ihit);
       return tempbl;
     }
 
@@ -1160,7 +1164,7 @@ block convert_16_to_15(block iii) {
   unsigned short c,r,g,b;
   // we do this process manually - no allegro color conversion
   // because we store the RGB in a particular order in the data files
-  block tempbl = create_bitmap_ex(15,iwid,ihit);
+  block tempbl = alw_create_bitmap_ex(15,iwid,ihit);
 
 	GFX_VTABLE *vtable = _get_vtable(15);
 
@@ -1179,17 +1183,17 @@ block convert_16_to_15(block iii) {
 			b = _rgb_scale_5[c & 0x1F];
 			g = _rgb_scale_6[(c >> 5) & 0x3F];
 			r = _rgb_scale_5[(c >> 11) & 0x1F];
-			p15[x] = makecol15(r, g, b);
+			p15[x] = alw_makecol15(r, g, b);
 		}
   }
 /*
   // the auto color conversion doesn't seem to work
   for (xx=0;xx<iwid;xx++) {
     for (yy=0;yy<ihit;yy++) {
-      rpix = _getpixel16(iii,xx,yy);
+      rpix = alw__getpixel16(iii,xx,yy);
       rpix = (rpix & 0x001f) | ((rpix >> 1) & 0x7fe0);
       // again putpixel16 because the dest is actually 16bit
-      _putpixel15(tempbl,xx,yy,rpix);
+      alw__putpixel15(tempbl,xx,yy,rpix);
     }
   }*/
 
@@ -1211,7 +1215,7 @@ block convert_16_to_16bgr(block tempbl) {
 
     for (x=0; x < BMP_W(tempbl); x++) {
 			c = p16[x];
-      if (c != MASK_COLOR_16) {
+      if (c != ALW_MASK_COLOR_16) {
         b = _rgb_scale_5[c & 0x1F];
 			  g = _rgb_scale_6[(c >> 5) & 0x3F];
 			  r = _rgb_scale_5[(c >> 11) & 0x1F];
@@ -1377,11 +1381,11 @@ void update_invalid_region(int x, int y, block src, block dest) {
   y = -y;
 
   if (numDirtyRegions == WHOLESCREENDIRTY) {
-    blit(src, dest, x, y, 0, 0, BMP_W(dest), BMP_H(dest));
+    alw_blit(src, dest, x, y, 0, 0, BMP_W(dest), BMP_H(dest));
   }
   else {
-    int k, tx1, tx2, srcdepth = bitmap_color_depth(src);
-    if ((srcdepth == bitmap_color_depth(dest)) && (is_memory_bitmap(dest))) {
+    int k, tx1, tx2, srcdepth = alw_bitmap_color_depth(src);
+    if ((srcdepth == alw_bitmap_color_depth(dest)) && (alw_is_memory_bitmap(dest))) {
       int bypp = bmp_bpp(src);
       // do the fast copy
       for (i = 0; i < scrnhit; i++) {
@@ -1405,7 +1409,7 @@ void update_invalid_region(int x, int y, block src, block dest) {
         for (k = 0; k < dirtyRow[i].numSpans; k++) {
           tx1 = dirtyRow[i].span[k].x1;
           tx2 = dirtyRow[i].span[k].x2;
-          blit(src, dest, tx1 + x, i + y, tx1, i, (tx2 - tx1) + 1, rowsInOne);
+          alw_blit(src, dest, tx1 + x, i + y, tx1, i, (tx2 - tx1) + 1, rowsInOne);
         }
         
         i += (rowsInOne - 1);
@@ -1414,7 +1418,7 @@ void update_invalid_region(int x, int y, block src, block dest) {
    /* else {
       // update the dirty regions
       for (i = 0; i < numDirtyRegions; i++) {
-        blit(src, dest, x + dirtyRegions[i].x1, y + dirtyRegions[i].y1,
+        alw_blit(src, dest, x + dirtyRegions[i].x1, y + dirtyRegions[i].y1,
            dirtyRegions[i].x1, dirtyRegions[i].y1,
            (dirtyRegions[i].x2 - dirtyRegions[i].x1) + 1,
            (dirtyRegions[i].y2 - dirtyRegions[i].y1) + 1);
@@ -1589,7 +1593,7 @@ inline int is_valid_object(int obtest) {
 
 int get_screen_y_adjustment(BITMAP *checkFor) {
 
-  if ((screen == _sub_screen) && (BMP_H(checkFor) < final_scrn_hit))
+  if ((alw_screen == _sub_screen) && (BMP_H(checkFor) < final_scrn_hit))
     return get_fixed_pixel_size(20);
 
   return 0;
@@ -1597,7 +1601,7 @@ int get_screen_y_adjustment(BITMAP *checkFor) {
 
 int get_screen_x_adjustment(BITMAP *checkFor) {
 
-  if (((screen) == _sub_screen) && (BMP_W(checkFor) < final_scrn_wid))
+  if (((alw_screen) == _sub_screen) && (BMP_W(checkFor) < final_scrn_wid))
     return (final_scrn_wid - BMP_W(checkFor)) / 2;
 
   return 0;
@@ -2125,13 +2129,15 @@ block fix_bitmap_size(block todubl) {
   if ((oldw == newWidth) && (oldh == newHeight))
     return todubl;
 
-//  block tempb=create_bitmap(scrnwid,scrnhit);
-  block tempb=create_bitmap_ex(bitmap_color_depth(todubl), newWidth, newHeight);
-  set_clip(tempb,0,0,BMP_W(tempb)-1,BMP_H(tempb)-1);
-  set_clip(todubl,0,0,oldw-1,oldh-1);
-  clear(tempb);
-  stretch_blit(todubl,tempb,0,0,oldw,oldh,0,0,BMP_W(tempb),BMP_H(tempb));
-  destroy_bitmap(todubl); todubl=tempb;
+//  block tempb=alw_create_bitmap(scrnwid,scrnhit);
+  block tempb=alw_create_bitmap_ex(alw_bitmap_color_depth(todubl), newWidth, newHeight);
+  alw_set_clip_rect(tempb,0,0,BMP_W(tempb)-1,BMP_H(tempb)-1);
+  alw_set_clip_state(tempb, TRUE);
+  alw_set_clip_rect(todubl,0,0,oldw-1,oldh-1);
+  alw_set_clip_state(todubl, TRUE);
+  alw_clear_bitmap(tempb);
+  alw_stretch_blit(todubl,tempb,0,0,oldw,oldh,0,0,BMP_W(tempb),BMP_H(tempb));
+  alw_destroy_bitmap(todubl); todubl=tempb;
   return todubl;
 }
 
@@ -2150,7 +2156,7 @@ void current_fade_out_effect () {
 
   if ((theTransition == FADE_INSTANT) || (play.screen_tint >= 0)) {
     if (!play.keep_screen_during_instant_transition)
-      wsetpalette(0,255,black_palette);
+      wsetpalette(0,255,alw_black_palette);
   }
   else if (theTransition == FADE_NORMAL)
   {
@@ -2163,9 +2169,9 @@ void current_fade_out_effect () {
   }
   else 
   {
-    get_palette(old_palette);
-    temp_virtual = create_bitmap_ex(bitmap_color_depth(abuf),BMP_W(virtual_screen),BMP_H(virtual_screen));
-    //blit(abuf,temp_virtual,0,0,0,0,BMP_W(abuf),BMP_H(abuf));
+    alw_get_palette(old_palette);
+    temp_virtual = alw_create_bitmap_ex(alw_bitmap_color_depth(abuf),BMP_W(virtual_screen),BMP_H(virtual_screen));
+    //alw_blit(abuf,temp_virtual,0,0,0,0,BMP_W(abuf),BMP_H(abuf));
     gfxDriver->GetCopyOfScreenIntoBitmap(temp_virtual);
   }
 }
@@ -2201,7 +2207,7 @@ void unload_old_room() {
 
   current_fade_out_effect();
 
-  clear(abuf);
+  alw_clear_bitmap(abuf);
   for (ff=0;ff<croom->numobj;ff++)
     objs[ff].moving = 0;
 
@@ -2245,7 +2251,7 @@ void unload_old_room() {
   // wipe the character cache when we change rooms
   for (ff = 0; ff < game.numcharacters; ff++) {
     if (charcache[ff].inUse) {
-      destroy_bitmap (charcache[ff].image);
+      alw_destroy_bitmap (charcache[ff].image);
       charcache[ff].image = NULL;
       charcache[ff].inUse = 0;
     }
@@ -2273,7 +2279,7 @@ void unload_old_room() {
   // clear the object cache
   for (ff = 0; ff < MAX_INIT_SPR; ff++) {
     if (objcache[ff].image != NULL) {
-      destroy_bitmap (objcache[ff].image);
+      alw_destroy_bitmap (objcache[ff].image);
       objcache[ff].image = NULL;
     }
   }
@@ -2282,7 +2288,7 @@ void unload_old_room() {
   // new screen. this also ensures all cached data is flushed
   for (ff = 0; ff < MAX_INIT_SPR + game.numcharacters; ff++) {
     if (actsps[ff] != NULL)
-      destroy_bitmap(actsps[ff]);
+      alw_destroy_bitmap(actsps[ff]);
     actsps[ff] = NULL;
 
     if (actspsbmp[ff] != NULL)
@@ -2290,7 +2296,7 @@ void unload_old_room() {
     actspsbmp[ff] = NULL;
 
     if (actspswb[ff] != NULL)
-      destroy_bitmap(actspswb[ff]);
+      alw_destroy_bitmap(actspswb[ff]);
     actspswb[ff] = NULL;
 
     if (actspswbbmp[ff] != NULL)
@@ -2318,17 +2324,17 @@ void redo_walkable_areas() {
 
   // since this is an 8-bit memory bitmap, we can just use direct 
   // memory access
-  if ((!is_linear_bitmap(thisroom.walls)) || (bitmap_color_depth(thisroom.walls) != 8))
+  if ((!alw_is_linear_bitmap(thisroom.walls)) || (alw_bitmap_color_depth(thisroom.walls) != 8))
     quit("Walkable areas bitmap not linear");
 
-  blit(walkareabackup, thisroom.walls, 0, 0, 0, 0, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
+  alw_blit(walkareabackup, thisroom.walls, 0, 0, 0, 0, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
 
   int hh,ww;
   for (hh=0;hh<BMP_H(walkareabackup);hh++) {
     for (ww=0;ww<BMP_W(walkareabackup);ww++) {
-//      if (play.walkable_areas_on[_getpixel(thisroom.walls,ww,hh)]==0)
+//      if (play.walkable_areas_on[alw__getpixel(thisroom.walls,ww,hh)]==0)
       if (play.walkable_areas_on[BMP_LINE(thisroom.walls)[hh][ww]]==0)
-        _putpixel(thisroom.walls,ww,hh,0);
+        alw__putpixel(thisroom.walls,ww,hh,0);
     }
   }
 
@@ -2358,7 +2364,7 @@ void run_on_event (int evtype, int wparam) {
 void update_walk_behind_images()
 {
   int ee, rr;
-  int bpp = (bitmap_color_depth(thisroom.ebscene[play.bg_frame]) + 7) / 8;
+  int bpp = (alw_bitmap_color_depth(thisroom.ebscene[play.bg_frame]) + 7) / 8;
   BITMAP *wbbmp;
   for (ee = 1; ee < MAX_OBJ; ee++)
   {
@@ -2366,10 +2372,10 @@ void update_walk_behind_images()
     
     if (walkBehindRight[ee] > 0)
     {
-      wbbmp = create_bitmap_ex(bitmap_color_depth(thisroom.ebscene[play.bg_frame]), 
+      wbbmp = alw_create_bitmap_ex(alw_bitmap_color_depth(thisroom.ebscene[play.bg_frame]), 
                                (walkBehindRight[ee] - walkBehindLeft[ee]) + 1,
                                (walkBehindBottom[ee] - walkBehindTop[ee]) + 1);
-      clear_to_color(wbbmp, bitmap_mask_color(wbbmp));
+      alw_clear_to_color(wbbmp, alw_bitmap_mask_color(wbbmp));
       int yy, startX = walkBehindLeft[ee], startY = walkBehindTop[ee];
       for (rr = startX; rr <= walkBehindRight[ee]; rr++)
       {
@@ -2390,7 +2396,7 @@ void update_walk_behind_images()
         gfxDriver->DestroyDDB(walkBehindBitmap[ee]);
       }
       walkBehindBitmap[ee] = gfxDriver->CreateDDBFromBitmap(wbbmp, false);
-      destroy_bitmap(wbbmp);
+      alw_destroy_bitmap(wbbmp);
     }
   }
 
@@ -2429,14 +2435,14 @@ void recache_walk_behinds () {
 
   // since this is an 8-bit memory bitmap, we can just use direct 
   // memory access
-  if ((!is_linear_bitmap(thisroom.object)) || (bitmap_color_depth(thisroom.object) != 8))
+  if ((!alw_is_linear_bitmap(thisroom.object)) || (alw_bitmap_color_depth(thisroom.object) != 8))
     quit("Walk behinds bitmap not linear");
 
   for (ee=0;ee<BMP_W(thisroom.object);ee++) {
     walkBehindExists[ee] = 0;
     for (rr=0;rr<BMP_H(thisroom.object);rr++) {
       tmm = BMP_LINE(thisroom.object)[rr][ee];
-      //tmm = _getpixel(thisroom.object,ee,rr);
+      //tmm = alw__getpixel(thisroom.object,ee,rr);
       if ((tmm >= 1) && (tmm < MAX_OBJ)) {
         if (!walkBehindExists[ee]) {
           walkBehindStartY[ee] = rr;
@@ -2489,7 +2495,7 @@ void update_viewport()
 
 int get_walkable_area_pixel(int x, int y)
 {
-  return getpixel(thisroom.walls, convert_to_low_res(x), convert_to_low_res(y));
+  return alw_getpixel(thisroom.walls, convert_to_low_res(x), convert_to_low_res(y));
 }
 
 
@@ -2534,7 +2540,7 @@ void load_new_room_screen()
 {
   if (usetup.want_letterbox) {
     int abscreen=0;
-    if (abuf==screen) abscreen=1;
+    if (abuf==alw_screen) abscreen=1;
     else if (abuf==virtual_screen) abscreen=2;
     // if this is a 640x480 room and we're in letterbox mode, full-screen it
     int newScreenHeight = final_scrn_hit;
@@ -2545,21 +2551,21 @@ void load_new_room_screen()
 
     if (newScreenHeight == BMP_H(_sub_screen))
     {
-      screen = _sub_screen;
+      alw_screen = _sub_screen;
     }
     else if (BMP_W(_sub_screen) != final_scrn_wid)
     {
       int subBitmapWidth = BMP_W(_sub_screen);
-      destroy_bitmap(_sub_screen);
-      _sub_screen = create_sub_bitmap(_old_screen, BMP_W(_old_screen) / 2 - subBitmapWidth / 2, BMP_H(_old_screen) / 2 - newScreenHeight / 2, subBitmapWidth, newScreenHeight);
-      screen = _sub_screen;
+      alw_destroy_bitmap(_sub_screen);
+      _sub_screen = alw_create_sub_bitmap(_old_screen, BMP_W(_old_screen) / 2 - subBitmapWidth / 2, BMP_H(_old_screen) / 2 - newScreenHeight / 2, subBitmapWidth, newScreenHeight);
+      alw_screen = _sub_screen;
     }
     else
     {
-      screen = _old_screen;
+      alw_screen = _old_screen;
     }
 
-    scrnhit = BMP_H(screen);
+    scrnhit = BMP_H(alw_screen);
     vesa_yres = scrnhit;
 
 #if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
@@ -2567,17 +2573,17 @@ void load_new_room_screen()
 #endif
 
     if (BMP_H(virtual_screen) != scrnhit) {
-      int cdepth=bitmap_color_depth(virtual_screen);
+      int cdepth=alw_bitmap_color_depth(virtual_screen);
       wfreeblock(virtual_screen);
-      virtual_screen=create_bitmap_ex(cdepth,scrnwid,scrnhit);
-      clear(virtual_screen);
+      virtual_screen=alw_create_bitmap_ex(cdepth,scrnwid,scrnhit);
+      alw_clear_bitmap(virtual_screen);
       gfxDriver->SetMemoryBackBuffer(virtual_screen);
       //      ignore_mouseoff_bitmap = virtual_screen;
     }
 
     gfxDriver->SetRenderOffset(get_screen_x_adjustment(virtual_screen), get_screen_y_adjustment(virtual_screen));
 
-    if (abscreen==1) abuf=screen;
+    if (abscreen==1) abuf=alw_screen;
     else if (abscreen==2) abuf=virtual_screen;
 
     update_polled_stuff();
@@ -2830,7 +2836,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
 
   done_es_error = 0;
   play.room_changes ++;
-  set_color_depth(8);
+  alw_set_color_depth(8);
   displayed_room=newnum;
 
   // DETERMINE ROOM FILE NAME ***********************************************************************************************
@@ -2850,12 +2856,12 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
 
   // reset these back, because they might have been changed.
   if (thisroom.object!=NULL)
-    destroy_bitmap(thisroom.object);
-  thisroom.object=create_bitmap(320,200);
+    alw_destroy_bitmap(thisroom.object);
+  thisroom.object=alw_create_bitmap(320,200);
 
   if (thisroom.ebscene[0]!=NULL)
-    destroy_bitmap(thisroom.ebscene[0]);
-  thisroom.ebscene[0] = create_bitmap(320,200);
+    alw_destroy_bitmap(thisroom.ebscene[0]);
+  thisroom.ebscene[0] = alw_create_bitmap(320,200);
 
 
   // POLL ***********************************************************************************************
@@ -2913,30 +2919,30 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     }
   }
 
-  if ((bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
+  if ((alw_bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
       (final_col_dep > 8))
-    select_palette(palette);
+    alw_select_palette(palette);
 
   for (int cc=0;cc<thisroom.num_bscenes;cc++) {
     update_polled_stuff();
   #ifdef USE_15BIT_FIX
     // convert down scenes from 16 to 15-bit if necessary
     if ((final_col_dep != game.color_depth*8) &&
-        (bitmap_color_depth(thisroom.ebscene[cc]) == game.color_depth * 8)) {
+        (alw_bitmap_color_depth(thisroom.ebscene[cc]) == game.color_depth * 8)) {
       block oldblock = thisroom.ebscene[cc];
       thisroom.ebscene[cc] = convert_16_to_15(oldblock);
       wfreeblock(oldblock);
     }
-    else if ((bitmap_color_depth (thisroom.ebscene[cc]) == 16) && (convert_16bit_bgr == 1))
+    else if ((alw_bitmap_color_depth (thisroom.ebscene[cc]) == 16) && (convert_16bit_bgr == 1))
       thisroom.ebscene[cc] = convert_16_to_16bgr (thisroom.ebscene[cc]);
   #endif
 
     thisroom.ebscene[cc] = gfxDriver->ConvertBitmapToSupportedColourDepth(thisroom.ebscene[cc]);
   }
 
-  if ((bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
+  if ((alw_bitmap_color_depth(thisroom.ebscene[0]) == 8) &&
       (final_col_dep > 8))
-    unselect_palette();
+    alw_unselect_palette();
 
 
   // POLL ***********************************************************************************************
@@ -2964,25 +2970,25 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
   // copy of the walkable areas - allocate it here to save time later
   if (walkable_areas_temp != NULL)
     wfreeblock (walkable_areas_temp);
-  walkable_areas_temp = create_bitmap_ex (8, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
+  walkable_areas_temp = alw_create_bitmap_ex (8, BMP_W(thisroom.walls), BMP_H(thisroom.walls));
 
   // Make a backup copy of the walkable areas prior to
   // any RemoveWalkableArea commands
   if (walkareabackup!=NULL) wfreeblock(walkareabackup);
-  walkareabackup=create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+  walkareabackup=alw_create_bitmap(BMP_W(thisroom.walls),BMP_H(thisroom.walls));
 
   // WALL SCREEN ***********************************************************************************************
 
   set_eip(204);
   // copy the walls screen
-  blit(thisroom.walls,walkareabackup,0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+  alw_blit(thisroom.walls,walkareabackup,0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
   update_polled_stuff();
   redo_walkable_areas();
   // fix walk-behinds to current screen resolution
   thisroom.object = fix_bitmap_size(thisroom.object);
   update_polled_stuff();
 
-  set_color_depth(final_col_dep);
+  alw_set_color_depth(final_col_dep);
   // convert backgrounds to current res
   if (thisroom.resolution != get_fixed_pixel_size(1)) {
     for (int cc=0;cc<thisroom.num_bscenes;cc++)
@@ -3037,8 +3043,8 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
       if (palette[ff].b > 63)
         palette[ff].b = 63;
     }
-    create_rgb_table (&rgb_table, palette, NULL);
-    rgb_map = &rgb_table;
+    alw_create_rgb_table (&rgb_table, palette, NULL);
+    alw_rgb_map = &rgb_table;
   }
 
   // CHARACTER ***********************************************************************************************
@@ -3120,7 +3126,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     else forchar->view=thisroom.options[ST_MANVIEW]-1;
     forchar->frame=0;   // make him standing
     }
-  color_map = NULL;
+  alw_color_map = NULL;
 
   // UPDATE STUFF ***********************************************************************************************
 
@@ -3275,19 +3281,19 @@ IDriverDependantBitmap* prepare_screen_for_transition_in()
   temp_virtual = gfxDriver->ConvertBitmapToSupportedColourDepth(temp_virtual);
   if (BMP_H(temp_virtual) < scrnhit)
   {
-    block enlargedBuffer = create_bitmap_ex(bitmap_color_depth(temp_virtual), BMP_W(temp_virtual), scrnhit);
-    blit(temp_virtual, enlargedBuffer, 0, 0, 0, (scrnhit - BMP_H(temp_virtual)) / 2, BMP_W(temp_virtual), BMP_H(temp_virtual));
-    destroy_bitmap(temp_virtual);
+    block enlargedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth(temp_virtual), BMP_W(temp_virtual), scrnhit);
+    alw_blit(temp_virtual, enlargedBuffer, 0, 0, 0, (scrnhit - BMP_H(temp_virtual)) / 2, BMP_W(temp_virtual), BMP_H(temp_virtual));
+    alw_destroy_bitmap(temp_virtual);
     temp_virtual = enlargedBuffer;
   }
   else if (BMP_H(temp_virtual) > scrnhit)
   {
-    block clippedBuffer = create_bitmap_ex(bitmap_color_depth(temp_virtual), BMP_W(temp_virtual), scrnhit);
-    blit(temp_virtual, clippedBuffer, 0, (BMP_H(temp_virtual) - scrnhit) / 2, 0, 0, BMP_W(temp_virtual), BMP_H(temp_virtual));
-    destroy_bitmap(temp_virtual);
+    block clippedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth(temp_virtual), BMP_W(temp_virtual), scrnhit);
+    alw_blit(temp_virtual, clippedBuffer, 0, (BMP_H(temp_virtual) - scrnhit) / 2, 0, 0, BMP_W(temp_virtual), BMP_H(temp_virtual));
+    alw_destroy_bitmap(temp_virtual);
     temp_virtual = clippedBuffer;
   }
-  acquire_bitmap(temp_virtual);
+  alw_acquire_bitmap(temp_virtual);
   IDriverDependantBitmap *ddb = gfxDriver->CreateDDBFromBitmap(temp_virtual, false);
   return ddb;
 }
@@ -3414,21 +3420,21 @@ void process_event(EventHappened*evp) {
       {
         wsetpalette(0,255,palette);
         gfxDriver->RenderToBackBuffer();
-        gfxDriver->SetMemoryBackBuffer(screen);
-        clear(screen);
-        render_to_screen(screen, 0, 0);
+        gfxDriver->SetMemoryBackBuffer(alw_screen);
+        alw_clear_bitmap(alw_screen);
+        render_to_screen(alw_screen, 0, 0);
 
         int boxwid = get_fixed_pixel_size(16);
         int boxhit = multiply_up_coordinate(GetMaxScreenHeight() / 20);
-        while (boxwid < BMP_W(screen)) {
+        while (boxwid < BMP_W(alw_screen)) {
           timerloop = 0;
           boxwid += get_fixed_pixel_size(16);
           boxhit += multiply_up_coordinate(GetMaxScreenHeight() / 20);
           int lxp = scrnwid / 2 - boxwid / 2, lyp = scrnhit / 2 - boxhit / 2;
           gfxDriver->Vsync();
-          blit(virtual_screen, screen, lxp, lyp, lxp, lyp,
+          alw_blit(virtual_screen, alw_screen, lxp, lyp, lxp, lyp,
             boxwid, boxhit);
-          render_to_screen(screen, 0, 0);
+          render_to_screen(alw_screen, 0, 0);
           acaudio_update_mp3();
           while (timerloop == 0) ;
         }
@@ -3458,12 +3464,12 @@ void process_event(EventHappened*evp) {
           // draw the old screen on top
           gfxDriver->DrawSprite(0, -(BMP_H(temp_virtual) - BMP_H(virtual_screen)), ddb);
         }
-        render_to_screen(screen, 0, 0);
+        render_to_screen(alw_screen, 0, 0);
         update_polled_stuff();
         while (timerloop == 0) ;
         transparency -= 16;
       }
-      release_bitmap(temp_virtual);
+      alw_release_bitmap(temp_virtual);
       
       wfreeblock(temp_virtual);
       temp_virtual = NULL;
@@ -3482,25 +3488,25 @@ void process_event(EventHappened*evp) {
         // merge the palette while dithering
         if (game.color_depth == 1) 
         {
-          fade_interpolate(old_palette,palette,interpal,aa*4,0,255);
+          alw_fade_interpolate(old_palette,palette,interpal,aa*4,0,255);
           wsetpalette(0,255,interpal);
         }
         // do the dissolving
-        int maskCol = bitmap_mask_color(temp_virtual);
+        int maskCol = alw_bitmap_mask_color(temp_virtual);
         for (bb=0;bb<scrnwid;bb+=4) {
           for (cc=0;cc<scrnhit;cc+=4) {
-            putpixel(temp_virtual, bb+pattern[aa]/4, cc+pattern[aa]%4, maskCol);
+            alw_putpixel(temp_virtual, bb+pattern[aa]/4, cc+pattern[aa]%4, maskCol);
           }
         }
         gfxDriver->UpdateDDBFromBitmap(ddb, temp_virtual, false);
         invalidate_screen();
         draw_screen_callback();
         gfxDriver->DrawSprite(0, -(BMP_H(temp_virtual) - BMP_H(virtual_screen)), ddb);
-        render_to_screen(screen, 0, 0);
+        render_to_screen(alw_screen, 0, 0);
         update_polled_stuff();
         while (timerloop == 0) ;
       }
-      release_bitmap(temp_virtual);
+      alw_release_bitmap(temp_virtual);
       
       wfreeblock(temp_virtual);
       temp_virtual = NULL;
@@ -3594,8 +3600,8 @@ void draw_sprite_support_alpha(int xpos, int ypos, block image, int slot) {
 
   if ((game.spriteflags[slot] & SPF_ALPHACHANNEL) && (trans_mode == 0)) 
   {
-    set_alpha_blender();
-    draw_trans_sprite(abuf, image, xpos, ypos);
+    alw_set_alpha_blender();
+    alw_draw_trans_sprite(abuf, image, xpos, ypos);
   }
   else {
     put_sprite_256(xpos, ypos, image);
@@ -4276,9 +4282,9 @@ int wantMoveNow (int chnum, CharacterInfo *chi) {
 // draws a view frame, flipped if appropriate
 void DrawViewFrame(block target, ViewFrame *vframe, int x, int y) {
   if (vframe->flags & VFLG_FLIPSPRITE)
-    draw_sprite_h_flip(target, spriteset[vframe->pic], x, y);
+    alw_draw_sprite_h_flip(target, spriteset[vframe->pic], x, y);
   else
-    draw_sprite(target, spriteset[vframe->pic], x, y);
+    alw_draw_sprite(target, spriteset[vframe->pic], x, y);
 }
 
 
@@ -4950,14 +4956,14 @@ void update_stuff_sierra_speech()
       if (game.options[OPT_SPEECHTYPE] == 3) {
         // QFG4-style fullscreen dialog
         yPos = (BMP_H(screenover[face_talking].pic) / 2) - (spriteheight[thisPic] / 2);
-        clear_to_color(screenover[face_talking].pic, 0);
+        alw_clear_to_color(screenover[face_talking].pic, 0);
       }
       else {
-        clear_to_color(screenover[face_talking].pic, bitmap_mask_color(screenover[face_talking].pic));
+        alw_clear_to_color(screenover[face_talking].pic, alw_bitmap_mask_color(screenover[face_talking].pic));
       }
 
       DrawViewFrame(screenover[face_talking].pic, &views[facetalkview].loops[facetalkloop].frames[facetalkframe], 0, yPos);
-      //      draw_sprite(screenover[face_talking].pic, spriteset[thisPic], 0, yPos);
+      //      alw_draw_sprite(screenover[face_talking].pic, spriteset[thisPic], 0, yPos);
 
       if ((facetalkchar->blinkview > 0) && (facetalkchar->blinktimer < 0)) {
         // draw the blinking sprite on top
@@ -4965,7 +4971,7 @@ void update_stuff_sierra_speech()
           &views[facetalkchar->blinkview].loops[facetalkBlinkLoop].frames[facetalkchar->blinkframe],
           0, yPos);
 
-        /*        draw_sprite(screenover[face_talking].pic,
+        /*        alw_draw_sprite(screenover[face_talking].pic,
         spriteset[views[facetalkchar->blinkview].frames[facetalkloop][facetalkchar->blinkframe].pic],
         0, yPos);*/
       }
@@ -5125,7 +5131,7 @@ void GUIInv::Draw() {
     int jj, kk;   // darken the inventory when disabled
     for (jj = 0; jj < wid; jj++) {
       for (kk = jj % 2; kk < hit; kk += 2)
-        putpixel(abuf, x + jj, y + kk, col8);
+        alw_putpixel(abuf, x + jj, y + kk, col8);
     }
   }
 
@@ -5167,14 +5173,14 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
   if (noWalkBehindsAtAll)
     return 0;
 
-  if ((!is_memory_bitmap(thisroom.object)) ||
-      (!is_memory_bitmap(sprit)))
+  if ((!alw_is_memory_bitmap(thisroom.object)) ||
+      (!alw_is_memory_bitmap(sprit)))
     quit("!sort_out_walk_behinds: wb bitmap not linear");
 
   int rr,tmm, toheight;//,tcol;
   // precalculate this to try and shave some time off
-  int maskcol = bitmap_mask_color(sprit);
-  int spcoldep = bitmap_color_depth(sprit);
+  int maskcol = alw_bitmap_mask_color(sprit);
+  int spcoldep = alw_bitmap_color_depth(sprit);
   int screenhit = BMP_H(thisroom.object);
   short *shptr, *shptr2;
   long *loptr, *loptr2;
@@ -5183,7 +5189,7 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
   if (xx < 0)
     ee = 0 - xx;
 
-  if ((checkPixelsFrom != NULL) && (bitmap_color_depth(checkPixelsFrom) != spcoldep))
+  if ((checkPixelsFrom != NULL) && (alw_bitmap_color_depth(checkPixelsFrom) != spcoldep))
     quit("sprite colour depth does not match background colour depth");
 
   for ( ; ee < BMP_W(sprit); ee++) {
@@ -5215,7 +5221,7 @@ int sort_out_walk_behinds(block sprit,int xx,int yy,int basel, block copyPixelsF
     for ( ; rr < toheight;rr++) {
       
       // we're ok with _getpixel because we've checked the screen edges
-      //tmm = _getpixel(thisroom.object,ee+xx,rr+yy);
+      //tmm = alw__getpixel(thisroom.object,ee+xx,rr+yy);
       // actually, _getpixel is well inefficient, do it ourselves
       // since we know it's 8-bit bitmap
       tmm = BMP_LINE(thisroom.object)[rr+yy][ee+xx];
@@ -5296,10 +5302,10 @@ void sort_out_char_sprite_walk_behind(int actspsIndex, int xx, int yy, int basel
     (actspswbcache[actspsIndex].yWas != yy) ||
     (actspswbcache[actspsIndex].baselineWas != basel))
   {
-    actspswb[actspsIndex] = recycle_bitmap(actspswb[actspsIndex], bitmap_color_depth(thisroom.ebscene[play.bg_frame]), width, height);
+    actspswb[actspsIndex] = recycle_bitmap(actspswb[actspsIndex], alw_bitmap_color_depth(thisroom.ebscene[play.bg_frame]), width, height);
 
     block wbSprite = actspswb[actspsIndex];
-    clear_to_color(wbSprite, bitmap_mask_color(wbSprite));
+    alw_clear_to_color(wbSprite, alw_bitmap_mask_color(wbSprite));
 
     actspswbcache[actspsIndex].isWalkBehindHere = sort_out_walk_behinds(wbSprite, xx, yy, basel, thisroom.ebscene[play.bg_frame], actsps[actspsIndex], zoom);
     actspswbcache[actspsIndex].xWas = xx;
@@ -5385,28 +5391,28 @@ void put_sprite_256(int xxx,int yyy,block piccy) {
     return;
   }
 
-  int screen_depth = bitmap_color_depth(abuf);
+  int screen_depth = alw_bitmap_color_depth(abuf);
 
 #ifdef USE_15BIT_FIX
-  if (bitmap_color_depth(piccy) < screen_depth) {
+  if (alw_bitmap_color_depth(piccy) < screen_depth) {
 
-    if ((bitmap_color_depth(piccy) == 8) && (screen_depth >= 24)) {
+    if ((alw_bitmap_color_depth(piccy) == 8) && (screen_depth >= 24)) {
       // 256-col sprite -> truecolor background
       // this is automatically supported by allegro, no twiddling needed
-      draw_sprite(abuf, piccy, xxx, yyy);
+      alw_draw_sprite(abuf, piccy, xxx, yyy);
       return;
     }
     // 256-col spirte -> hi-color background, or
     // 16-bit sprite -> 32-bit background
-    block hctemp=create_bitmap_ex(screen_depth, BMP_W(piccy), BMP_H(piccy));
-    blit(piccy,hctemp,0,0,0,0,BMP_W(hctemp),BMP_H(hctemp));
-    int bb,cc,mask_col = bitmap_mask_color(abuf);
-    if (bitmap_color_depth(piccy) == 8) {
+    block hctemp=alw_create_bitmap_ex(screen_depth, BMP_W(piccy), BMP_H(piccy));
+    alw_blit(piccy,hctemp,0,0,0,0,BMP_W(hctemp),BMP_H(hctemp));
+    int bb,cc,mask_col = alw_bitmap_mask_color(abuf);
+    if (alw_bitmap_color_depth(piccy) == 8) {
       // only do this for 256-col, cos the blit call converts
       // transparency for 16->32 bit
       for (bb=0;bb<BMP_W(hctemp);bb++) {
         for (cc=0;cc<BMP_H(hctemp);cc++)
-          if (_getpixel(piccy,bb,cc)==0) putpixel(hctemp,bb,cc,mask_col);
+          if (alw__getpixel(piccy,bb,cc)==0) alw_putpixel(hctemp,bb,cc,mask_col);
       }
     }
     wputblock(xxx,yyy,hctemp,1);
@@ -5416,11 +5422,11 @@ void put_sprite_256(int xxx,int yyy,block piccy) {
 #endif
   {
     if ((trans_mode!=0) && (game.color_depth > 1) && (bmp_bpp(piccy) > 1) && (bmp_bpp(abuf) > 1)) {
-      set_trans_blender(0,0,0,trans_mode);
-      draw_trans_sprite(abuf,piccy,xxx,yyy);
+      alw_set_trans_blender(0,0,0,trans_mode);
+      alw_draw_trans_sprite(abuf,piccy,xxx,yyy);
       }
 /*    else if ((lit_mode < 0) && (game.color_depth == 1) && (bmp_bpp(piccy) == 1)) {
-      draw_lit_sprite(abuf,piccy,xxx,yyy,250 - ((-lit_mode) * 5)/2);
+      alw_draw_lit_sprite(abuf,piccy,xxx,yyy,250 - ((-lit_mode) * 5)/2);
       }*/
     else
       wputblock(xxx,yyy,piccy,1);
@@ -5451,14 +5457,14 @@ void draw_sprite_compensate(int picc,int xx,int yy,int useAlpha)
 {
   if ((useAlpha) && 
     (game.options[OPT_NEWGUIALPHA] > 0) &&
-    (bitmap_color_depth(abuf) == 32))
+    (alw_bitmap_color_depth(abuf) == 32))
   {
     if (game.spriteflags[picc] & SPF_ALPHACHANNEL)
       set_additive_alpha_blender();
     else
       set_opaque_alpha_blender();
 
-    draw_trans_sprite(abuf, spriteset[picc], xx, yy);
+    alw_draw_trans_sprite(abuf, spriteset[picc], xx, yy);
   }
   else
   {
@@ -5514,13 +5520,13 @@ void draw_sprite_list() {
 block recycle_bitmap(block bimp, int coldep, int wid, int hit) {
   if (bimp != NULL) {
     // same colour depth, width and height -> reuse
-    if ((bitmap_color_depth(bimp) == coldep) && (BMP_W(bimp) == wid)
+    if ((alw_bitmap_color_depth(bimp) == coldep) && (BMP_W(bimp) == wid)
        && (BMP_H(bimp) == hit))
       return bimp;
 
-    destroy_bitmap(bimp);
+    alw_destroy_bitmap(bimp);
   }
-  bimp = create_bitmap_ex(coldep, wid, hit);
+  bimp = alw_create_bitmap_ex(coldep, wid, hit);
   return bimp;
 }
 
@@ -5530,11 +5536,11 @@ block recycle_bitmap(block bimp, int coldep, int wid, int hit) {
 // Totally overwrites the contents of the destination image
 void tint_image (block srcimg, block destimg, int red, int grn, int blu, int light_level, int luminance) {
 
-  if ((bitmap_color_depth(srcimg) != bitmap_color_depth(destimg)) ||
-      (bitmap_color_depth(srcimg) <= 8)) {
+  if ((alw_bitmap_color_depth(srcimg) != alw_bitmap_color_depth(destimg)) ||
+      (alw_bitmap_color_depth(srcimg) <= 8)) {
     debug_log("Image tint failed - images must both be hi-color");
     // the caller expects something to have been copied
-    blit(srcimg, destimg, 0, 0, 0, 0, BMP_W(srcimg), BMP_H(srcimg));
+    alw_blit(srcimg, destimg, 0, 0, 0, 0, BMP_W(srcimg), BMP_H(srcimg));
     return;
   }
 
@@ -5542,14 +5548,14 @@ void tint_image (block srcimg, block destimg, int red, int grn, int blu, int lig
   // when light is being adjusted and when it is not.
   // If luminance >= 250, then normal brightness, otherwise darken
   if (luminance >= 250)
-    set_blender_mode (_myblender_color15, _myblender_color16, _myblender_color32, red, grn, blu, 0);
+    alw_set_blender_mode (_myblender_color15, _myblender_color16, _myblender_color32, red, grn, blu, 0);
   else
-    set_blender_mode (_myblender_color15_light, _myblender_color16_light, _myblender_color32_light, red, grn, blu, 0);
+    alw_set_blender_mode (_myblender_color15_light, _myblender_color16_light, _myblender_color32_light, red, grn, blu, 0);
 
   if (light_level >= 100) {
     // fully colourised
-    clear_to_color(destimg, bitmap_mask_color(destimg));
-    draw_lit_sprite(destimg, srcimg, 0, 0, luminance);
+    alw_clear_to_color(destimg, alw_bitmap_mask_color(destimg));
+    alw_draw_lit_sprite(destimg, srcimg, 0, 0, luminance);
   }
   else {
     // light_level is between -100 and 100 normally; 0-100 in
@@ -5557,17 +5563,17 @@ void tint_image (block srcimg, block destimg, int red, int grn, int blu, int lig
     light_level = (light_level * 25) / 10;
 
     // Copy the image to the new bitmap
-    blit(srcimg, destimg, 0, 0, 0, 0, BMP_W(srcimg), BMP_H(srcimg));
+    alw_blit(srcimg, destimg, 0, 0, 0, 0, BMP_W(srcimg), BMP_H(srcimg));
     // Render the colourised image to a temporary bitmap,
     // then transparently draw it over the original image
-    block finaltarget = create_bitmap_ex(bitmap_color_depth(srcimg), BMP_W(srcimg), BMP_H(srcimg));
-    clear_to_color(finaltarget, bitmap_mask_color(finaltarget));
-    draw_lit_sprite(finaltarget, srcimg, 0, 0, luminance);
+    block finaltarget = alw_create_bitmap_ex(alw_bitmap_color_depth(srcimg), BMP_W(srcimg), BMP_H(srcimg));
+    alw_clear_to_color(finaltarget, alw_bitmap_mask_color(finaltarget));
+    alw_draw_lit_sprite(finaltarget, srcimg, 0, 0, luminance);
 
     // customized trans blender to preserve alpha channel
     set_my_trans_blender (0, 0, 0, light_level);
-    draw_trans_sprite (destimg, finaltarget, 0, 0);
-    destroy_bitmap (finaltarget);
+    alw_draw_trans_sprite (destimg, finaltarget, 0, 0);
+    alw_destroy_bitmap (finaltarget);
   }
 }
 
@@ -5647,7 +5653,7 @@ void prepare_characters_for_drawing() {
     int isMirrored = 0, specialpic = sppic;
     bool usingCachedImage = false;
 
-    coldept = bitmap_color_depth(spriteset[sppic]);
+    coldept = alw_bitmap_color_depth(spriteset[sppic]);
 
     // adjust the sppic if mirrored, so it doesn't accidentally
     // cache the mirrored frame as the real one
@@ -5672,8 +5678,8 @@ void prepare_characters_for_drawing() {
     {
       if (walkBehindMethod == DrawOverCharSprite)
       {
-        actsps[useindx] = recycle_bitmap(actsps[useindx], bitmap_color_depth(charcache[aa].image), BMP_W(charcache[aa].image), BMP_H(charcache[aa].image));
-        blit (charcache[aa].image, actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
+        actsps[useindx] = recycle_bitmap(actsps[useindx], alw_bitmap_color_depth(charcache[aa].image), BMP_W(charcache[aa].image), BMP_H(charcache[aa].image));
+        alw_blit (charcache[aa].image, actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
       }
       else 
       {
@@ -5687,7 +5693,7 @@ void prepare_characters_for_drawing() {
       usingCachedImage = true;
     }
     else if (charcache[aa].inUse) {
-      //destroy_bitmap (charcache[aa].image);
+      //alw_destroy_bitmap (charcache[aa].image);
       charcache[aa].inUse = 0;
     }
 
@@ -5757,13 +5763,13 @@ void prepare_characters_for_drawing() {
       }
       else if (!actspsUsed)
         // no scaling, flipping or tinting was done, so just blit it normally
-        blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
+        alw_blit (spriteset[sppic], actsps[useindx], 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
 
       // update the character cache with the new image
       charcache[aa].inUse = 1;
-      //charcache[aa].image = create_bitmap_ex (coldept, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
+      //charcache[aa].image = alw_create_bitmap_ex (coldept, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
       charcache[aa].image = recycle_bitmap(charcache[aa].image, coldept, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
-      blit (actsps[useindx], charcache[aa].image, 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
+      alw_blit (actsps[useindx], charcache[aa].image, 0, 0, 0, 0, BMP_W(actsps[useindx]), BMP_H(actsps[useindx]));
 
     } // end if !cache.inUse
 
@@ -5987,10 +5993,10 @@ void draw_fps()
 
   if (fpsDisplay == NULL)
   {
-    fpsDisplay = create_bitmap_ex(final_col_dep, get_fixed_pixel_size(100), (wgetfontheight(FONT_SPEECH) + get_fixed_pixel_size(5)));
+    fpsDisplay = alw_create_bitmap_ex(final_col_dep, get_fixed_pixel_size(100), (wgetfontheight(FONT_SPEECH) + get_fixed_pixel_size(5)));
     fpsDisplay = gfxDriver->ConvertBitmapToSupportedColourDepth(fpsDisplay);
   }
-  clear_to_color(fpsDisplay, bitmap_mask_color(fpsDisplay));
+  alw_clear_to_color(fpsDisplay, alw_bitmap_mask_color(fpsDisplay));
   block oldAbuf = abuf;
   abuf = fpsDisplay;
   char tbuffer[60];
@@ -6058,7 +6064,7 @@ void draw_screen_overlay() {
         if (guis[aa].on<1) continue;
         eip_guinum = aa;
         set_eip(370);
-        clear_to_color (guibg[aa], bitmap_mask_color(guibg[aa]));
+        alw_clear_to_color (guibg[aa], alw_bitmap_mask_color(guibg[aa]));
         abuf = guibg[aa];
         set_eip(372);
         guis[aa].draw_at(0,0);
@@ -6263,7 +6269,7 @@ void update_screen() {
     int barheight = (DEBUG_CONSOLE_NUMLINES - 1) * txtheight + 4;
 
     if (debugConsoleBuffer == NULL)
-      debugConsoleBuffer = create_bitmap_ex(final_col_dep, scrnwid, barheight);
+      debugConsoleBuffer = alw_create_bitmap_ex(final_col_dep, scrnwid, barheight);
 
     push_screen();
     abuf = debugConsoleBuffer;
@@ -6427,7 +6433,7 @@ void quit(char*quitmsg) {
 
   // allegro_exit assumes screen is correct
   if (_old_screen)
-    screen = _old_screen;
+    alw_screen = _old_screen;
 
   platform->FinishedUsingGraphicsMode();
 
@@ -6439,7 +6445,7 @@ void quit(char*quitmsg) {
   stopmusic();
   if (opts.mod_player)
     remove_mod_player();
-  remove_sound();
+  alw_remove_sound();
   set_eip(9901);
 
   char alertis[1500]="\0";
@@ -6482,7 +6488,7 @@ void quit(char*quitmsg) {
 
   // close graphics mode (Win) or return to text mode (DOS)
   if (_sub_screen) {
-    destroy_bitmap(_sub_screen);
+    alw_destroy_bitmap(_sub_screen);
     _sub_screen = NULL;
   }
   
@@ -6497,7 +6503,7 @@ void quit(char*quitmsg) {
     gfxDriver->UnInit();
 
   // Tell Allegro that we are no longer in graphics mode
-  set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
+  alw_set_gfx_mode(GFX_TEXT, 0, 0, 0, 0);
 
   // successful exit displays no messages (because Windoze closes the dos-box
   // if it is empty).
@@ -6511,7 +6517,7 @@ void quit(char*quitmsg) {
   }
 
   // remove the game window
-  allegro_exit();
+  alw_allegro_exit();
 
   if (gfxDriver != NULL)
   {
@@ -6535,12 +6541,12 @@ void quit(char*quitmsg) {
   if ((play.debug_mode!=0) && (qmsg[0]=='|'))
     printf("Last cycle fps: %d\n",fps);*/
   al_ffblk	dfb;
-  int	dun = al_findfirst("~ac*.tmp",&dfb,FA_SEARCH);
+  int	dun = alw_al_findfirst("~ac*.tmp",&dfb,FA_SEARCH);
   while (!dun) {
     unlink(dfb.name);
-    dun = al_findnext(&dfb);
+    dun = alw_al_findnext(&dfb);
   }
-  al_findclose (&dfb);
+  alw_al_findclose (&dfb);
 
   proper_exit=1;
 
@@ -6700,7 +6706,7 @@ void shutdown_sound()
 
   if (opts.mod_player)
     remove_mod_player();
-  remove_sound();
+  alw_remove_sound();
 }
 
 
@@ -7646,8 +7652,8 @@ int get_but_pic(GUIMain*guo,int indx) {
 
 void draw_button_background(int xx1,int yy1,int xx2,int yy2,GUIMain*iep) {
   if (iep==NULL) {  // standard window
-    rectfill(abuf,xx1,yy1,xx2,yy2,get_col8_lookup(15));
-    rect(abuf,xx1,yy1,xx2,yy2,get_col8_lookup(16));
+    alw_rectfill(abuf,xx1,yy1,xx2,yy2,get_col8_lookup(15));
+    alw_rect(abuf,xx1,yy1,xx2,yy2,get_col8_lookup(16));
 /*    wsetcolor(opts.tws.backcol); wbar(xx1,yy1,xx2,yy2);
     wsetcolor(opts.tws.textcol); wrectangle(xx1+1,yy1+1,xx2-1,yy2-1);*/
     }
@@ -7666,7 +7672,8 @@ void draw_button_background(int xx1,int yy1,int xx2,int yy2,GUIMain*iep) {
       // edge
       int bgoffsx = xx1 - leftRightWidth / 2;
       int bgoffsy = yy1 - topBottomHeight / 2;
-      set_clip(abuf, bgoffsx, bgoffsy, xx2 + leftRightWidth / 2, yy2 + topBottomHeight / 2);
+      alw_set_clip_rect(abuf, bgoffsx, bgoffsy, xx2 + leftRightWidth / 2, yy2 + topBottomHeight / 2);
+      alw_set_clip_state(abuf, TRUE);
       int bgfinishx = xx2;
       int bgfinishy = yy2;
       int bgoffsyStart = bgoffsy;
@@ -7681,7 +7688,8 @@ void draw_button_background(int xx1,int yy1,int xx2,int yy2,GUIMain*iep) {
         bgoffsx += spritewidth[iep->bgpic];
       }
       // return to normal clipping rectangle
-      set_clip(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1);
+      alw_set_clip_rect(abuf, 0, 0, BMP_W(abuf) - 1, BMP_H(abuf) - 1);
+      alw_set_clip_state(abuf, TRUE);
     }
     int uu;
     for (uu=yy1;uu <= yy2;uu+=spriteheight[get_but_pic(iep,4)]) {
@@ -7763,9 +7771,9 @@ void draw_text_window(int*xins,int*yins,int*xx,int*yy,int*wii,int ovrheight=0, i
       ovrheight = numlines*texthit;
 
     if ((wantFreeScreenop > 0) && (screenop != NULL))
-      destroy_bitmap(screenop);
-    screenop = create_bitmap_ex(final_col_dep,wii[0],ovrheight+6+spriteheight[tbnum]*2);
-    clear_to_color(screenop, bitmap_mask_color(screenop));
+      alw_destroy_bitmap(screenop);
+    screenop = alw_create_bitmap_ex(final_col_dep,wii[0],ovrheight+6+spriteheight[tbnum]*2);
+    alw_clear_to_color(screenop, alw_bitmap_mask_color(screenop));
     wsetscreen(screenop);
     int xoffs=spritewidth[tbnum],yoffs=spriteheight[tbnum];
     draw_button_background(xoffs,yoffs,(BMP_W(abuf) - xoffs) - 1,(BMP_H(abuf) - yoffs) - 1,&guis[ifnum]);
@@ -7783,18 +7791,18 @@ void draw_text_window_and_bar(int*xins,int*yins,int*xx,int*yy,int*wii,int ovrhei
   if ((topBar.wantIt) && (screenop != NULL)) {
     // top bar on the dialog window with character's name
     // create an enlarged window, then free the old one
-    block newScreenop = create_bitmap_ex(final_col_dep, BMP_W(screenop), BMP_H(screenop) + topBar.height);
-    blit(screenop, newScreenop, 0, 0, 0, topBar.height, BMP_W(screenop), BMP_H(screenop));
+    block newScreenop = alw_create_bitmap_ex(final_col_dep, BMP_W(screenop), BMP_H(screenop) + topBar.height);
+    alw_blit(screenop, newScreenop, 0, 0, 0, topBar.height, BMP_W(screenop), BMP_H(screenop));
     wfreeblock(screenop);
     screenop = newScreenop;
     wsetscreen(screenop);
 
     // draw the top bar
-    rectfill(screenop, 0, 0, BMP_W(screenop) - 1, topBar.height - 1, get_col8_lookup(play.top_bar_backcolor));
+    alw_rectfill(screenop, 0, 0, BMP_W(screenop) - 1, topBar.height - 1, get_col8_lookup(play.top_bar_backcolor));
     if (play.top_bar_backcolor != play.top_bar_bordercolor) {
       // draw the border
       for (int j = 0; j < multiply_up_coordinate(play.top_bar_borderwidth); j++)
-        rect(screenop, j, j, BMP_W(screenop) - (j + 1), topBar.height - (j + 1), get_col8_lookup(play.top_bar_bordercolor));
+        alw_rect(screenop, j, j, BMP_W(screenop) - (j + 1), topBar.height - (j + 1), get_col8_lookup(play.top_bar_bordercolor));
     }
     
     int textcolwas = textcol;
@@ -8075,9 +8083,9 @@ int _display_main(int xx,int yy,int wii,char*todis,int blocking,int usingfont,in
   if (blocking < 2)
     remove_screen_overlay(OVER_TEXTMSG);
 
-  screenop = create_bitmap_ex(final_col_dep, (wii > 0) ? wii : 2, numlines*texthit + extraHeight);
+  screenop = alw_create_bitmap_ex(final_col_dep, (wii > 0) ? wii : 2, numlines*texthit + extraHeight);
   wsetscreen(screenop);
-  clear_to_color(screenop,bitmap_mask_color(screenop));
+  alw_clear_to_color(screenop,alw_bitmap_mask_color(screenop));
 
   // inform draw_text_window to free the old bitmap
   wantFreeScreenop = 1;
@@ -8302,7 +8310,7 @@ int play_speech(int charid,int sndid) {
     strncpy(&finame[12],game.chars[charid].scrname,4);*/
 
   char finame[40] = "~";
-  strcat(finame, get_filename(speech_file));
+  strcat(finame, alw_get_filename(speech_file));
   strcat(finame, "~");
 
   if (charid >= 0) {
@@ -8415,7 +8423,7 @@ int my_getpixel(BITMAP *blk, int x, int y) {
     return -1;
 
   // strip the alpha channel
-  return getpixel(blk, x, y) & 0x00ffffff;
+  return alw_getpixel(blk, x, y) & 0x00ffffff;
 }
 
 
@@ -8479,7 +8487,7 @@ int is_pos_in_sprite(int xx,int yy,int arx,int ary, block sprit, int spww,int sp
 
     int gpcol = my_getpixel(sprit, xpos, ypos);
 
-    if ((gpcol == bitmap_mask_color(sprit)) || (gpcol == -1))
+    if ((gpcol == alw_bitmap_mask_color(sprit)) || (gpcol == -1))
       return FALSE;
   }
   return TRUE;
@@ -8549,7 +8557,7 @@ void remove_walkable_areas_from_temp(int fromx, int cwidth, int starty, int endy
   
   for (; cwidth > 0; cwidth --) {
     for (yyy = starty; yyy <= endy; yyy++)
-      _putpixel (walkable_areas_temp, fromx, yyy, 0);
+      alw__putpixel (walkable_areas_temp, fromx, yyy, 0);
     fromx ++;
   }
 
@@ -8563,7 +8571,7 @@ int is_point_in_rect(int x, int y, int left, int top, int right, int bottom) {
 
 block prepare_walkable_areas (int sourceChar) {
   // copy the walkable areas to the temp bitmap
-  blit (thisroom.walls, walkable_areas_temp, 0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
+  alw_blit (thisroom.walls, walkable_areas_temp, 0,0,0,0,BMP_W(thisroom.walls),BMP_H(thisroom.walls));
   // if the character who's moving doesn't block, don't bother checking
   if (sourceChar < 0) ;
   else if (game.chars[sourceChar].flags & CHF_NOBLOCKING)
@@ -8723,7 +8731,7 @@ int do_movelist_move(short*mlnum,int*xx,int*yy) {
     else if ((ypermove & 0xffff0000) == 0xffff0000)
       targety += adjAmnt;
   }
-  else xps=cmls->fromx+(int)(fixtof(xpermove)*(float)cmls->onpart);
+  else xps=cmls->fromx+(int)(alw_fixtof(xpermove)*(float)cmls->onpart);
 
   if (cmls->doneflag & 2) {
     // Y-movement has finished
@@ -8749,7 +8757,7 @@ int do_movelist_move(short*mlnum,int*xx,int*yy) {
 //    if ((xpmm==0) | (xpmm==0xffff)) cmls->doneflag|=1;
     if (xpmm==0) cmls->doneflag|=1;*/
     }
-  else yps=cmls->fromy+(int)(fixtof(ypermove)*(float)cmls->onpart);
+  else yps=cmls->fromy+(int)(alw_fixtof(ypermove)*(float)cmls->onpart);
   // check if finished horizontal movement
   if (((xpermove > 0) && (xps >= targetx)) ||
       ((xpermove < 0) && (xps <= targetx))) {
@@ -9413,7 +9421,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
 
   update_polled_stuff();
 
-  block tempScrn = create_bitmap_ex(final_col_dep, BMP_W(screen), BMP_H(screen));
+  block tempScrn = alw_create_bitmap_ex(final_col_dep, BMP_W(alw_screen), BMP_H(alw_screen));
 
   set_mouse_cursor(CURS_ARROW);
 
@@ -9514,7 +9522,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
     mouseison=-10;
     
     update_polled_stuff();
-    //blit(virtual_screen, tempScrn, 0, 0, 0, 0, BMP_W(screen), BMP_H(screen));
+    //alw_blit(virtual_screen, tempScrn, 0, 0, 0, 0, BMP_W(alw_screen), BMP_H(alw_screen));
     if (!play.mouse_cursor_hidden)
       ac_domouse(1);
     update_polled_stuff();
@@ -9530,13 +9538,13 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
         multiply_up_coordinate(ccDialogOptionsRendering.height));
     }
 
-    clear_to_color(tempScrn, bitmap_mask_color(tempScrn));
+    alw_clear_to_color(tempScrn, alw_bitmap_mask_color(tempScrn));
     wsetscreen(tempScrn);
 
     dlgxp = orixp;
     dlgyp = oriyp;
     // lengthy drawing to screen, so lock it for speed
-    //acquire_screen();
+    //alw_acquire_screen();
 
     if (usingCustomRendering)
     {
@@ -9688,19 +9696,19 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
 
     update_polled_stuff();
 
-    subBitmap = recycle_bitmap(subBitmap, bitmap_color_depth(tempScrn), dirtywidth, dirtyheight);
+    subBitmap = recycle_bitmap(subBitmap, alw_bitmap_color_depth(tempScrn), dirtywidth, dirtyheight);
     subBitmap = gfxDriver->ConvertBitmapToSupportedColourDepth(subBitmap);
 
     update_polled_stuff();
 
     if (usingCustomRendering)
     {
-      blit(tempScrn, subBitmap, 0, 0, 0, 0, BMP_W(tempScrn), BMP_H(tempScrn));
+      alw_blit(tempScrn, subBitmap, 0, 0, 0, 0, BMP_W(tempScrn), BMP_H(tempScrn));
       invalidate_rect(dirtyx, dirtyy, dirtyx + BMP_W(subBitmap), dirtyy + BMP_H(subBitmap));
     }
     else
     {
-      blit(tempScrn, subBitmap, dirtyx, dirtyy, 0, 0, dirtywidth, dirtyheight);
+      alw_blit(tempScrn, subBitmap, dirtyx, dirtyy, 0, 0, dirtywidth, dirtyheight);
     }
 
     if ((ddb != NULL) && 
@@ -9901,7 +9909,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
   if (ddb != NULL)
     gfxDriver->DestroyDDB(ddb);
   if (subBitmap != NULL)
-    destroy_bitmap(subBitmap);
+    alw_destroy_bitmap(subBitmap);
 
   set_mouse_cursor(curswas);
   // In case it's the QFG4 style dialog, remove the black screen
@@ -10056,25 +10064,25 @@ void serialize_bitmap(block thispic, FILE*ooo) {
   if (thispic != NULL) {
     putw(BMP_W(thispic),ooo);
     putw(BMP_H(thispic),ooo);
-    putw(bitmap_color_depth(thispic),ooo);
+    putw(alw_bitmap_color_depth(thispic),ooo);
     for (int cc=0;cc<BMP_H(thispic);cc++)
-      fwrite(&BMP_LINE(thispic)[cc][0],BMP_W(thispic),bitmap_color_depth(thispic)/8,ooo);
+      fwrite(&BMP_LINE(thispic)[cc][0],BMP_W(thispic),alw_bitmap_color_depth(thispic)/8,ooo);
     }
   }
 
-long write_screen_shot_for_vista(FILE *ooo, block screenshot) 
+uint64_t write_screen_shot_for_vista(FILE *ooo, block screenshot) 
 {
-  long fileSize = 0;
+  uint64_t fileSize = 0;
   char tempFileName[MAX_PATH];
   sprintf(tempFileName, "%s""_tmpscht.bmp", saveGameDirectory);
   
-  save_bitmap(tempFileName, screenshot, palette);
+  alw_save_bitmap(tempFileName, screenshot, palette);
 
   update_polled_stuff();
   
-  if (exists(tempFileName))
+  if (alw_exists(tempFileName))
   {
-    fileSize = file_size(tempFileName);
+    fileSize = alw_file_size_ex(tempFileName);
     char *buffer = (char*)malloc(fileSize);
 
     FILE *input = fopen(tempFileName, "rb");
@@ -10368,7 +10376,7 @@ block read_serialized_bitmap(FILE* ooo) {
   int picwid = getw(ooo);
   int pichit = getw(ooo);
   int piccoldep = getw(ooo);
-  thispic = create_bitmap_ex(piccoldep,picwid,pichit);
+  thispic = alw_create_bitmap_ex(piccoldep,picwid,pichit);
   if (thispic == NULL)
     return NULL;
   for (int vv=0; vv < pichit; vv++)
@@ -10383,7 +10391,7 @@ void first_room_initialization() {
   t1 = time(NULL);
   lastcounter=0;
   loopcounter=0;
-  mouse_z_was = mouse_z;
+  mouse_z_was = alw_mouse_z;
 }
 
 int restore_game_data (FILE *ooo, const char *nametouse) {
@@ -10936,8 +10944,8 @@ int restore_game_data (FILE *ooo, const char *nametouse) {
   // ensure that the current cursor is locked
   spriteset.precache(game.mcurs[sg_cur_cursor].pic);
 
-#if (ALLEGRO_DATE > 19990103)
-  set_window_title(play.game_name);
+#if (ALW_ALLEGRO_DATE > 19990103)
+  alw_set_window_title(play.game_name);
 #endif
 
   update_polled_stuff();
@@ -11010,7 +11018,7 @@ int restore_game_data (FILE *ooo, const char *nametouse) {
   }
 
   for (vv = 0; vv < game.numgui; vv++) {
-    guibg[vv] = create_bitmap_ex (final_col_dep, guis[vv].wid, guis[vv].hit);
+    guibg[vv] = alw_create_bitmap_ex (final_col_dep, guis[vv].wid, guis[vv].hit);
     guibg[vv] = gfxDriver->ConvertBitmapToSupportedColourDepth(guibg[vv]);
   }
 
@@ -11094,7 +11102,7 @@ int do_game_load(const char *nametouse, int slotNumber, char *descrp, int *wantS
       }
       else
       {
-        destroy_bitmap(redin);
+        alw_destroy_bitmap(redin);
       }
     }
     fclose (ooo);
@@ -11124,7 +11132,7 @@ int do_game_load(const char *nametouse, int slotNumber, char *descrp, int *wantS
   // ensure keyboard buffer is clean
   // use the raw versions rather than the rec_ versions so we don't
   // interfere with the replay sync
-  while (keypressed()) readkey();
+  while (alw_keypressed()) alw_readkey();
 
   return 0;
 }
@@ -11296,7 +11304,7 @@ void construct_virtual_screen(bool fullRedraw)
   {
     // if the driver is not going to redraw the screen,
     // black it out so we don't get cursor trails
-    clear(abuf);
+    alw_clear_bitmap(abuf);
   }
 
   // reset the Baselines Changed flag now that we've drawn stuff
@@ -11483,7 +11491,7 @@ void mainloop(bool checkControls, IDriverDependantBitmap *extraBitmap, int extra
 #ifdef MAC_VERSION
     // take a breather after the heavy work
     // cuts down on CPU usage and reduces the fan noise
-    rest(2);
+    alw_rest(2);
 #endif
   }
   set_eip(6);
@@ -11784,7 +11792,7 @@ void set_rgb_mask_using_alpha_channel(block image)
     for (x=0; x < BMP_W(image); x++) 
     {
       if ((psrc[x] & 0xff000000) == 0x00000000)
-        psrc[x] = MASK_COLOR_32;
+        psrc[x] = ALW_MASK_COLOR_32;
 		}
   }
 }
@@ -11793,8 +11801,8 @@ void set_rgb_mask_using_alpha_channel(block image)
 block remove_alpha_channel(block from) {
   int depth = final_col_dep;
 
-  block to = create_bitmap_ex(depth, BMP_W(from), BMP_H(from));
-  int maskcol = bitmap_mask_color(to);
+  block to = alw_create_bitmap_ex(depth, BMP_W(from), BMP_H(from));
+  int maskcol = alw_bitmap_mask_color(to);
   int y,x;
   unsigned long c,b,g,r;
 
@@ -11831,7 +11839,7 @@ block remove_alpha_channel(block from) {
 			    r = (c >> 16) & 0x00ff;
           g = (c >> 8) & 0x00ff;
           b = c & 0x00ff;
-			    pdest[x] = makecol_depth(depth, r, g, b);
+			    pdest[x] = alw_makecol_depth(depth, r, g, b);
         }
 		  }
     }
@@ -11879,16 +11887,16 @@ void initialize_sprite (int ee) {
     eip_guiobj = newwid;
 
     if ((newwid != BMP_W(curspr)) || (newhit != BMP_H(curspr))) {
-      tmpdbl = create_bitmap_ex(bitmap_color_depth(curspr),newwid,newhit);
+      tmpdbl = alw_create_bitmap_ex(alw_bitmap_color_depth(curspr),newwid,newhit);
       if (tmpdbl == NULL)
         quit("Not enough memory to load sprite graphics");
-      acquire_bitmap (tmpdbl);
-      acquire_bitmap (curspr);
-      clear_to_color(tmpdbl,bitmap_mask_color(tmpdbl));
+      alw_acquire_bitmap (tmpdbl);
+      alw_acquire_bitmap (curspr);
+      alw_clear_to_color(tmpdbl,alw_bitmap_mask_color(tmpdbl));
 /*#ifdef USE_CUSTOM_EXCEPTION_HANDLER
       __try {
 #endif*/
-        stretch_sprite(tmpdbl,curspr,0,0,BMP_W(tmpdbl),BMP_H(tmpdbl));
+        alw_stretch_sprite(tmpdbl,curspr,0,0,BMP_W(tmpdbl),BMP_H(tmpdbl));
 /*#ifdef USE_CUSTOM_EXCEPTION_HANDLER
       } __except (1) {
         // I can't trace this fault, but occasionally stretch_sprite
@@ -11898,8 +11906,8 @@ void initialize_sprite (int ee) {
       //MessageBox (allegro_wnd, "ERROR", "FATAL ERROR", MB_OK);
       }
 #endif*/
-      release_bitmap (curspr);
-      release_bitmap (tmpdbl);
+      alw_release_bitmap (curspr);
+      alw_release_bitmap (tmpdbl);
       wfreeblock(curspr);
       spriteset.set (ee, tmpdbl);
     }
@@ -11907,7 +11915,7 @@ void initialize_sprite (int ee) {
     spritewidth[ee]=wgetblockwidth(spriteset[ee]);
     spriteheight[ee]=wgetblockheight(spriteset[ee]);
 
-    int spcoldep = bitmap_color_depth(spriteset[ee]);
+    int spcoldep = alw_bitmap_color_depth(spriteset[ee]);
 
     if (((spcoldep > 16) && (final_col_dep <= 16)) ||
         ((spcoldep == 16) && (final_col_dep > 16))) {
@@ -11919,11 +11927,11 @@ void initialize_sprite (int ee) {
       if (game.spriteflags[ee] & SPF_ALPHACHANNEL)
         newSprite = remove_alpha_channel(oldSprite);
       else {
-        newSprite = create_bitmap_ex(final_col_dep, spritewidth[ee], spriteheight[ee]);
-        blit(oldSprite, newSprite, 0, 0, 0, 0, spritewidth[ee], spriteheight[ee]);
+        newSprite = alw_create_bitmap_ex(final_col_dep, spritewidth[ee], spriteheight[ee]);
+        alw_blit(oldSprite, newSprite, 0, 0, 0, 0, spritewidth[ee], spriteheight[ee]);
       }
       spriteset.set(ee, newSprite);
-      destroy_bitmap(oldSprite);
+      alw_destroy_bitmap(oldSprite);
       spcoldep = final_col_dep;
     }
     else if ((spcoldep == 32) && (final_col_dep == 32) &&
@@ -11942,19 +11950,19 @@ void initialize_sprite (int ee) {
       else
         spriteset.set (ee, convert_16_to_15(oldsprite));
 
-      destroy_bitmap(oldsprite);
+      alw_destroy_bitmap(oldsprite);
     }
-    if ((convert_16bit_bgr == 1) && (bitmap_color_depth(spriteset[ee]) == 16))
+    if ((convert_16bit_bgr == 1) && (alw_bitmap_color_depth(spriteset[ee]) == 16))
       spriteset.set (ee, convert_16_to_16bgr (spriteset[ee]));
 #endif
 
     if ((spcoldep == 8) && (final_col_dep > 8))
-      select_palette(palette);
+      alw_select_palette(palette);
 
     spriteset.set(ee, gfxDriver->ConvertBitmapToSupportedColourDepth(spriteset[ee]));
 
     if ((spcoldep == 8) && (final_col_dep > 8))
-      unselect_palette();
+      alw_unselect_palette();
 
     if (final_col_dep < 32) {
       game.spriteflags[ee] &= ~SPF_ALPHACHANNEL;
@@ -11990,7 +11998,7 @@ int init_gfx_mode(int wid,int hit,int cdep) {
 
 #ifdef ENABLE_THIS_LATER
   if (usetup.refresh >= 50)
-    request_refresh_rate(usetup.refresh);
+    alw_request_refresh_rate(usetup.refresh);
 #endif
 
   final_scrn_wid = wid;
@@ -12001,7 +12009,7 @@ int init_gfx_mode(int wid,int hit,int cdep) {
     final_col_dep = 8;
   }
   else {
-    set_color_depth(cdep);
+    alw_set_color_depth(cdep);
   }
 
   working_gfx_mode_status = (gfxDriver->Init(wid, hit, final_col_dep, usetup.windowed > 0, &timerloop) ? 0 : -1);
@@ -12118,7 +12126,7 @@ void init_game_settings() {
   for (ee=0;ee<game.numgui;ee++) {
     guibgbmp[ee] = NULL;
     GUIMain*cgp=&guis[ee];
-    guibg[ee] = create_bitmap_ex (final_col_dep, cgp->wid, cgp->hit);
+    guibg[ee] = alw_create_bitmap_ex (final_col_dep, cgp->wid, cgp->hit);
     guibg[ee] = gfxDriver->ConvertBitmapToSupportedColourDepth(guibg[ee]);
   }
 
@@ -12365,8 +12373,8 @@ void read_config_file(char *argv0) {
 /*    for (int ee=0;ee<(int)strlen(conffilebuf);ee++) {
       if (conffilebuf[ee]=='/') conffilebuf[ee]='\\';
     }*/
-    fix_filename_case(conffilebuf);
-    fix_filename_slashes(conffilebuf);
+    alw_fix_filename_case(conffilebuf);
+    alw_fix_filename_slashes(conffilebuf);
     
     INIgetdirec(conffilebuf,ac_config_file);
 //    printf("Using config: '%s'\n",conffilebuf);
@@ -12377,8 +12385,8 @@ void read_config_file(char *argv0) {
     // put the full path, or it gets written back to the Windows folder
     _getcwd (ac_config_file, 255);
     strcat (ac_config_file, "\\acsetup.cfg");
-    fix_filename_case(ac_config_file);
-    fix_filename_slashes(ac_config_file);
+    alw_fix_filename_case(ac_config_file);
+    alw_fix_filename_slashes(ac_config_file);
   }
 
   // set default dir if no config file
@@ -12747,7 +12755,7 @@ int try_widescreen_bordered_graphics_mode_if_appropriate(int initasx, int initas
 
   int failed = 1;
   int desktopWidth, desktopHeight;
-  if (get_desktop_resolution(&desktopWidth, &desktopHeight) == 0)
+  if (alw_get_desktop_resolution(&desktopWidth, &desktopHeight) == 0)
   {
     int gameHeight = initasy;
 
@@ -12831,12 +12839,12 @@ void CreateBlankImage()
   // so it's the most likey place for a crash
   try
   {
-    BITMAP *blank = create_bitmap_ex(final_col_dep, 16, 16);
+    BITMAP *blank = alw_create_bitmap_ex(final_col_dep, 16, 16);
     blank = gfxDriver->ConvertBitmapToSupportedColourDepth(blank);
-    clear(blank);
+    alw_clear_bitmap(blank);
     blankImage = gfxDriver->CreateDDBFromBitmap(blank, false, true);
     blankSidebarImage = gfxDriver->CreateDDBFromBitmap(blank, false, true);
-    destroy_bitmap(blank);
+    alw_destroy_bitmap(blank);
   }
   catch (Ali3DException gfxException)
   {
@@ -12854,26 +12862,26 @@ void CreateBlankImage()
 void show_preload () {
   // ** Do the preload graphic if available
   color temppal[256];
-  block splashsc = load_pcx("preload.pcx",temppal);
+  block splashsc = alw_load_pcx("preload.pcx",temppal);
   if (splashsc != NULL) {
-    if (bitmap_color_depth(splashsc) == 8)
+    if (alw_bitmap_color_depth(splashsc) == 8)
       wsetpalette(0,255,temppal);
-    block tsc = create_bitmap_ex(bitmap_color_depth(screen),BMP_W(splashsc),BMP_H(splashsc));
-    blit(splashsc,tsc,0,0,0,0,BMP_W(tsc),BMP_H(tsc));
-    clear(screen);
-    stretch_sprite(screen, tsc, 0, 0, scrnwid,scrnhit);
+    block tsc = alw_create_bitmap_ex(alw_bitmap_color_depth(alw_screen),BMP_W(splashsc),BMP_H(splashsc));
+    alw_blit(splashsc,tsc,0,0,0,0,BMP_W(tsc),BMP_H(tsc));
+    alw_clear_bitmap(alw_screen);
+    alw_stretch_sprite(alw_screen, tsc, 0, 0, scrnwid,scrnhit);
 
     gfxDriver->ClearDrawList();
 
     if (!gfxDriver->UsesMemoryBackBuffer())
     {
-      IDriverDependantBitmap *ddb = gfxDriver->CreateDDBFromBitmap(screen, false, true);
+      IDriverDependantBitmap *ddb = gfxDriver->CreateDDBFromBitmap(alw_screen, false, true);
       gfxDriver->DrawSprite(0, 0, ddb);
-      render_to_screen(screen, 0, 0);
+      render_to_screen(alw_screen, 0, 0);
       gfxDriver->DestroyDDB(ddb);
     }
     else
-      render_to_screen(screen, 0, 0);
+      render_to_screen(alw_screen, 0, 0);
 
     wfreeblock(splashsc);
     wfreeblock(tsc);
@@ -13110,17 +13118,17 @@ int main(int argc, char*argv[]) {
 
 int initeng_init_allegro() 
 {
-  set_uformat(U_ASCII);
+  alw_set_uformat(U_ASCII);
 
   write_log_debug("Initializing allegro");
 
   set_eip(-199);
   // Initialize allegro
 #ifdef WINDOWS_VERSION
-  if (install_allegro(SYSTEM_AUTODETECT,&myerrno,atexit)) {
+  if (alw_install_allegro(SYSTEM_AUTODETECT,&myerrno,atexit)) {
     platform->DisplayAlert("Unable to initialize graphics subsystem. Make sure you have DirectX 5 or above installed.");
 #else
-  if (allegro_init()) {
+  if (alw_allegro_init()) {
     platform->DisplayAlert("Unknown error initializing graphics subsystem.");
 #endif
     return EXIT_NORMAL;
@@ -13135,10 +13143,10 @@ int initeng_init_window( int argc, char* * argv )
   write_log_debug("Setting up window");
 
   set_eip(-198);
-#if (ALLEGRO_DATE > 19990103)
-  set_window_title("Adventure Game Studio");
-#if (ALLEGRO_DATE > 20021115)
-  set_close_button_callback (winclosehook);
+#if (ALW_ALLEGRO_DATE > 19990103)
+  alw_set_window_title("Adventure Game Studio");
+#if (ALW_ALLEGRO_DATE > 20021115)
+  alw_set_close_button_callback (winclosehook);
 #else
   set_window_close_hook (winclosehook);
 #endif
@@ -13165,7 +13173,7 @@ int initeng_init_window( int argc, char* * argv )
 #endif
       // Just re-reading the config file seems to cause a caching
       // problem on Win9x, so let's restart the process.
-      allegro_exit();
+      alw_allegro_exit();
       char quotedpath[255];
       sprintf (quotedpath, "\"%s\"", argv[0]);
       _spawnl (_P_OVERLAY, argv[0], quotedpath, NULL);
@@ -13215,7 +13223,7 @@ int initeng_init_game_data( int argc, char* * argv )
   else {
     // set the data filename to the EXE name
 
-    usetup.main_data_filename = get_filename(game_file_name);
+    usetup.main_data_filename = alw_get_filename(game_file_name);
 
     if (((strchr(game_file_name, '/') != NULL) ||
       (strchr(game_file_name, '\\') != NULL)) &&
@@ -13418,11 +13426,11 @@ int initeng_init_music()
 void initeng_init_sound() 
 {
   platform->WriteConsole("Checking sound inits.\n");
-  if (opts.mod_player) reserve_voices(16,-1);
+  if (opts.mod_player) alw_reserve_voices(16,-1);
   // maybe this line will solve the sound volume?
 
-#if ALLEGRO_DATE > 19991010
-  set_volume_per_voice(1);
+#if ALW_ALLEGRO_DATE > 19991010
+  alw_set_volume_per_voice(1);
 #endif
 
   set_eip(-182);
@@ -13446,18 +13454,18 @@ void initeng_init_sound()
 
   write_log_debug("Initialize sound drivers");
 
-  if (install_sound(usetup.digicard,usetup.midicard,NULL)!=0) {
-    reserve_voices(-1,-1);
+  if (alw_install_sound(usetup.digicard,usetup.midicard,NULL)!=0) {
+    alw_reserve_voices(-1,-1);
     opts.mod_player=0;
     opts.mp3_player=0;
-    if (install_sound(usetup.digicard,usetup.midicard,NULL)!=0) {
+    if (alw_install_sound(usetup.digicard,usetup.midicard,NULL)!=0) {
       if ((usetup.digicard != DIGI_NONE) && (usetup.midicard != MIDI_NONE)) {
         // only flag an error if they wanted a sound card
         platform->DisplayAlert("\nUnable to initialize your audio hardware.\n"
-          "[Problem: %s]\n",allegro_error);
+          "[Problem: %s]\n",alw_allegro_error);
       }
-      reserve_voices(0,0);
-      install_sound(DIGI_NONE, MIDI_NONE, NULL);
+      alw_reserve_voices(0,0);
+      alw_install_sound(DIGI_NONE, MIDI_NONE, NULL);
       usetup.digicard = DIGI_NONE;
       usetup.midicard = MIDI_NONE;
     }
@@ -13473,7 +13481,7 @@ void initeng_init_sound()
     play.seperate_music_lib = 0;
   }
 
-  //set_volume(255,-1);
+  //alw_set_volume(255,-1);
 }
 
 void setup_sierra_interface() {
@@ -13512,7 +13520,7 @@ void initeng_load_extra_game_data()
 
   set_eip(-189);
 
-  if (file_exists("Compiled", FA_ARCH | FA_DIREC, NULL))
+  if (alw_file_exists("Compiled", FA_ARCH | FA_DIREC, NULL))
   {
     // running in debugger
     use_compiled_folder_as_current_dir = 1;
@@ -13750,13 +13758,13 @@ int initeng_switch_gfx_mode(int &initasx, int &initasy, int &firstDepth, int &se
         "Run the game setup program and try the other resolution.\n"
         "* the graphics driver you have selected does not work. Try switching between Direct3D and DirectDraw.\n"
         "* the graphics filter you have selected does not work. Try another filter.",
-        initasx, initasy, firstDepth, allegro_error);
+        initasx, initasy, firstDepth, alw_allegro_error);
       return EXIT_NORMAL;
     }
   }
 
-  //screen = _filter->ScreenInitialized(screen, final_scrn_wid, final_scrn_hit);
-  _old_screen = screen;
+  //alw_screen = _filter->ScreenInitialized(alw_screen, final_scrn_wid, final_scrn_hit);
+  _old_screen = alw_screen;
 
   if (gfxDriver->HasAcceleratedStretchAndFlip()) 
   {
@@ -13776,15 +13784,15 @@ void initeng_prepare_gfx_screen(int &initasx, int &initasy, int &firstDepth, int
   if ((final_scrn_hit != scrnhit) || (final_scrn_wid != scrnwid)) {
     initasx = final_scrn_wid;
     initasy = final_scrn_hit;
-    clear(_old_screen);
-    screen = create_sub_bitmap(_old_screen, initasx / 2 - scrnwid / 2, initasy/2-scrnhit/2, scrnwid, scrnhit);
-    _sub_screen=screen;
+    alw_clear_bitmap(_old_screen);
+    alw_screen = alw_create_sub_bitmap(_old_screen, initasx / 2 - scrnwid / 2, initasy/2-scrnhit/2, scrnwid, scrnhit);
+    _sub_screen=alw_screen;
 
-    scrnhit = BMP_H(screen);
-    vesa_yres = BMP_H(screen);
-    scrnwid = BMP_W(screen);
-    vesa_xres = BMP_W(screen);
-    gfxDriver->SetMemoryBackBuffer(screen);
+    scrnhit = BMP_H(alw_screen);
+    vesa_yres = BMP_H(alw_screen);
+    scrnwid = BMP_W(alw_screen);
+    vesa_xres = BMP_W(alw_screen);
+    gfxDriver->SetMemoryBackBuffer(alw_screen);
 
     platform->WriteDebugString("Screen resolution: %d x %d; game resolution %d x %d", BMP_W(_old_screen), BMP_H(_old_screen), scrnwid, scrnhit);
   }
@@ -13827,11 +13835,11 @@ void initeng_init_screen_buffers()
 {
   write_log_debug("Set up screen");
 
-  virtual_screen=create_bitmap_ex(final_col_dep,scrnwid,scrnhit);
-  clear(virtual_screen);
+  virtual_screen=alw_create_bitmap_ex(final_col_dep,scrnwid,scrnhit);
+  alw_clear_bitmap(virtual_screen);
   gfxDriver->SetMemoryBackBuffer(virtual_screen);
   //  ignore_mouseoff_bitmap = virtual_screen;
-  abuf=screen;
+  abuf=alw_screen;
 
   set_eip(-7);
   for (int ee = 0; ee < MAX_INIT_SPR + game.numcharacters; ee++)
@@ -13944,7 +13952,7 @@ int initialize_engine(int argc,char*argv[])
 
   set_eip(-183);
   write_log_debug("Install timer");
-  install_timer();
+  alw_install_timer();
 
   // SOUND INITS ***********************************************************************************************
 
@@ -13991,8 +13999,8 @@ int initialize_engine(int argc,char*argv[])
 
   // TIMING ***********************************************************************************************
 
-  LOCK_VARIABLE(timerloop);
-  LOCK_FUNCTION(dj_timer_handler);
+  ALW_LOCK_VARIABLE(timerloop);
+  ALW_LOCK_FUNCTION(dj_timer_handler);
   set_game_speed(40);
 
   // UNUSED ***********************************************************************************************
@@ -14027,8 +14035,8 @@ int initialize_engine(int argc,char*argv[])
 
   //platform->DisplayAlert("loaded game");
   set_eip(-91);
-#if (ALLEGRO_DATE > 19990103)
-  set_window_title(game.gamename);
+#if (ALW_ALLEGRO_DATE > 19990103)
+  alw_set_window_title(game.gamename);
 #endif
 
   // LOAD EXTRA GAME DATA ***********************************************************************************************
@@ -14087,7 +14095,7 @@ int initialize_engine(int argc,char*argv[])
   // COLOURS ***********************************************************************************************
 
   write_log_debug("Initializing colour conversion");
-  set_color_conversion(COLORCONV_MOST | COLORCONV_EXPAND_256 | COLORCONV_REDUCE_16_TO_15);
+  alw_set_color_conversion(COLORCONV_MOST | COLORCONV_EXPAND_256 | COLORCONV_REDUCE_16_TO_15);
 
   // MULTITASKING ***********************************************************************************************
 
@@ -14105,7 +14113,7 @@ int initialize_engine(int argc,char*argv[])
   if (spriteset.initFile ("acsprset.spr")) 
   {
     platform->FinishedUsingGraphicsMode();
-    allegro_exit();
+    alw_allegro_exit();
     proper_exit=1;
     platform->DisplayAlert("Could not load sprite set file ACSPRSET.SPR\n"
       "This means that the file is missing or there is not enough free\n"
@@ -14153,7 +14161,7 @@ int initialize_engine(int argc,char*argv[])
 }
 
 #if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
-END_OF_MAIN()
+ALW_END_OF_MAIN()
 #endif
 
 int initialize_engine_with_exception_handling(int argc,char*argv[])

@@ -11,6 +11,7 @@
   CLEAR that the code has been altered from the Standard Version.
 */
 
+#include "allegro_wrapper.h"
 #include "acsound.h"
 
 #include "ac.h"
@@ -30,7 +31,7 @@
 #include <ctype.h>
 #endif
 
-#if ALLEGRO_DATE > 20050101
+#if ALW_ALLEGRO_DATE > 20050101
 // because we have to use Allegro 4.2
 // and the packfile format has changed slightly
 // 'todo' has been put in a structure called 'normal'
@@ -67,7 +68,7 @@ struct MYWAVE:public SOUNDCLIP
       firstTime = 0;
     }
 
-    if (voice_get_position(voice) < 0)
+    if (alw_voice_get_position(voice) < 0)
       done = 1;
     return done;
   }
@@ -80,35 +81,35 @@ struct MYWAVE:public SOUNDCLIP
     {
       newvol += volModifier + directionalVolModifier;
       if (newvol < 0) newvol = 0;
-      voice_set_volume(voice, newvol);
+      alw_voice_set_volume(voice, newvol);
     }
   }
 
   void destroy()
   {
-    destroy_sample(wave);
+    alw_destroy_sample(wave);
     wave = NULL;
   }
 
   void seek(int pos)
   {
-    voice_set_position(voice, pos);
+    alw_voice_set_position(voice, pos);
   }
 
   int get_pos()
   {
-    return voice_get_position(voice);
+    return alw_voice_get_position(voice);
   }
 
   int get_pos_ms()
   {
     // convert the offset in samples into the offset in ms
-    //return ((1000000 / voice_get_frequency(voice)) * voice_get_position(voice)) / 1000;
+    //return ((1000000 / alw_voice_get_frequency(voice)) * alw_voice_get_position(voice)) / 1000;
 
-    if (voice_get_frequency(voice) < 100)
+    if (alw_voice_get_frequency(voice) < 100)
       return 0;
     // (number of samples / (samples per second / 100)) * 10 = ms
-    return (voice_get_position(voice) / (voice_get_frequency(voice) / 100)) * 10;
+    return (alw_voice_get_position(voice) / (alw_voice_get_frequency(voice) / 100)) * 10;
   }
 
   int get_length_ms()
@@ -123,8 +124,8 @@ struct MYWAVE:public SOUNDCLIP
     if (wave != NULL) {
       done = 0;
       paused = 0;
-      stop_sample(wave);
-      voice = play_sample(wave, vol, panning, 1000, 0);
+      alw_stop_sample(wave);
+      voice = alw_play_sample(wave, vol, panning, 1000, 0);
     }
   }
 
@@ -138,7 +139,7 @@ struct MYWAVE:public SOUNDCLIP
   }
 
   int play() {
-    voice = play_sample(wave, vol, panning, 1000, repeat);
+    voice = alw_play_sample(wave, vol, panning, 1000, repeat);
 
     return 1;
   }
@@ -152,9 +153,9 @@ MYWAVE *thiswave;
 SOUNDCLIP *my_load_wave(const char *filename, int voll, int loop)
 {
 #ifdef MAC_VERSION
-  SAMPLE *new_sample = load_wav(filename);
+  SAMPLE *new_sample = alw_load_wav(filename);
 #else
-  SAMPLE *new_sample = load_sample(filename);
+  SAMPLE *new_sample = alw_load_sample(filename);
 #endif
 
   if (new_sample == NULL)
@@ -198,7 +199,7 @@ struct MYMP3:public SOUNDCLIP
           chunksize = in->todo;
           free_val = chunksize;
         }
-        pack_fread(tempbuf, chunksize, in);
+        alw_pack_fread(tempbuf, chunksize, in);
         almp3_free_mp3stream_buffer(stream, free_val);
       }
     }
@@ -234,7 +235,7 @@ struct MYMP3:public SOUNDCLIP
       free(buffer);
 
     buffer = NULL;
-    pack_fclose(in);
+    alw_pack_fclose(in);
   }
 
   void seek(int pos)
@@ -295,13 +296,13 @@ struct MYMP3:public SOUNDCLIP
 MYMP3 *thistune;
 SOUNDCLIP *my_load_mp3(const char *filname, int voll)
 {
-  mp3in = pack_fopen(filname, "rb");
+  mp3in = alw_pack_fopen(filname, "rb");
   if (mp3in == NULL)
     return NULL;
 
   char *tmpbuffer = (char *)malloc(MP3CHUNKSIZE);
   if (tmpbuffer == NULL) {
-    pack_fclose(mp3in);
+    alw_pack_fclose(mp3in);
     return NULL;
   }
   thistune = new MYMP3();
@@ -314,14 +315,14 @@ SOUNDCLIP *my_load_mp3(const char *filname, int voll)
   if (thistune->chunksize > mp3in->todo)
     thistune->chunksize = mp3in->todo;
 
-  pack_fread(tmpbuffer, thistune->chunksize, mp3in);
+  alw_pack_fread(tmpbuffer, thistune->chunksize, mp3in);
 
   thistune->buffer = (char *)tmpbuffer;
   thistune->stream = almp3_create_mp3stream(tmpbuffer, thistune->chunksize, (mp3in->todo < 1));
 
   if (thistune->stream == NULL) {
     free(tmpbuffer);
-    pack_fclose(mp3in);
+    alw_pack_fclose(mp3in);
     delete thistune;
     return NULL;
   }
@@ -440,7 +441,7 @@ SOUNDCLIP *my_load_static_mp3(const char *filname, int voll, bool loop)
 {
 
   // first, read the mp3 into memory
-  PACKFILE *mp3in = pack_fopen(filname, "rb");
+  PACKFILE *mp3in = alw_pack_fopen(filname, "rb");
   if (mp3in == NULL)
     return NULL;
 
@@ -450,8 +451,8 @@ SOUNDCLIP *my_load_static_mp3(const char *filname, int voll, bool loop)
   if (mp3buffer == NULL)
     return NULL;
 
-  pack_fread(mp3buffer, muslen, mp3in);
-  pack_fclose(mp3in);
+  alw_pack_fread(mp3buffer, muslen, mp3in);
+  alw_pack_fclose(mp3in);
 
   // now, create an MP3 structure for it
   thismp3 = new MYSTATICMP3();
@@ -564,7 +565,7 @@ struct MYSTATICOGG:public SOUNDCLIP
       return 0;
 
     AUDIOSTREAM *str = alogg_get_audiostream_ogg(tune);
-    long offs = (voice_get_position(str->voice) * 1000) / str->samp->freq;
+    long offs = (alw_voice_get_position(str->voice) * 1000) / str->samp->freq;
 
     if (last_ms_offs != alogg_get_pos_msecs_ogg(tune)) {
       last_but_one_but_one = last_but_one;
@@ -674,7 +675,7 @@ SOUNDCLIP *my_load_static_ogg(const char *filname, int voll, bool loop)
 {
 
   // first, read the mp3 into memory
-  PACKFILE *mp3in = pack_fopen(filname, "rb");
+  PACKFILE *mp3in = alw_pack_fopen(filname, "rb");
   if (mp3in == NULL)
     return NULL;
 
@@ -684,8 +685,8 @@ SOUNDCLIP *my_load_static_ogg(const char *filname, int voll, bool loop)
   if (mp3buffer == NULL)
     return NULL;
 
-  pack_fread(mp3buffer, muslen, mp3in);
-  pack_fclose(mp3in);
+  alw_pack_fread(mp3buffer, muslen, mp3in);
+  alw_pack_fclose(mp3in);
 
   // now, create an OGG structure for it
   thissogg = new MYSTATICOGG();
@@ -731,7 +732,7 @@ struct MYOGG:public SOUNDCLIP
           chunksize = in->todo;
           free_val = chunksize;
         }
-        pack_fread(tempbuf, chunksize, in);
+        alw_pack_fread(tempbuf, chunksize, in);
         alogg_free_oggstream_buffer(stream, free_val);
       }
     }
@@ -765,7 +766,7 @@ struct MYOGG:public SOUNDCLIP
     if (buffer != NULL)
       free(buffer);
     buffer = NULL;
-    pack_fclose(in);
+    alw_pack_fclose(in);
   }
 
   void seek(int pos)
@@ -792,7 +793,7 @@ struct MYOGG:public SOUNDCLIP
       return 0;
 
     AUDIOSTREAM *str = alogg_get_audiostream_oggstream(stream);
-    long offs = (voice_get_position(str->voice) * 1000) / str->samp->freq;
+    long offs = (alw_voice_get_position(str->voice) * 1000) / str->samp->freq;
 
     if (last_ms_offs != alogg_get_pos_msecs_oggstream(stream)) {
       last_but_one_but_one = last_but_one;
@@ -875,13 +876,13 @@ MYOGG *thisogg;
 SOUNDCLIP *my_load_ogg(const char *filname, int voll)
 {
 
-  mp3in = pack_fopen(filname, "rb");
+  mp3in = alw_pack_fopen(filname, "rb");
   if (mp3in == NULL)
     return NULL;
 
   char *tmpbuffer = (char *)malloc(MP3CHUNKSIZE);
   if (tmpbuffer == NULL) {
-    pack_fclose(mp3in);
+    alw_pack_fclose(mp3in);
     return NULL;
   }
 
@@ -897,14 +898,14 @@ SOUNDCLIP *my_load_ogg(const char *filname, int voll)
   if (thisogg->chunksize > mp3in->todo)
     thisogg->chunksize = mp3in->todo;
 
-  pack_fread(tmpbuffer, thisogg->chunksize, mp3in);
+  alw_pack_fread(tmpbuffer, thisogg->chunksize, mp3in);
 
   thisogg->buffer = (char *)tmpbuffer;
   thisogg->stream = alogg_create_oggstream(tmpbuffer, thisogg->chunksize, (mp3in->todo < 1));
 
   if (thisogg->stream == NULL) {
     free(tmpbuffer);
-    pack_fclose(mp3in);
+    alw_pack_fclose(mp3in);
     delete thisogg;
     return NULL;
   }
@@ -923,7 +924,7 @@ struct MYMIDI:public SOUNDCLIP
     if (done)
       return done;
 
-    if (midi_pos < 0)
+    if (alw_midi_pos < 0)
       done = 1;
 
     return done;
@@ -939,19 +940,19 @@ struct MYMIDI:public SOUNDCLIP
 
   void destroy()
   {
-    stop_midi();
-    destroy_midi(tune);
+    alw_stop_midi();
+    alw_destroy_midi(tune);
     tune = NULL;
   }
 
   void seek(int pos)
   {
-    midi_seek(pos);
+    alw_midi_seek(pos);
   }
 
   int get_pos()
   {
-    return midi_pos;
+    return alw_midi_pos;
   }
 
   int get_pos_ms()
@@ -967,9 +968,9 @@ struct MYMIDI:public SOUNDCLIP
   void restart()
   {
     if (tune != NULL) {
-      stop_midi();
+      alw_stop_midi();
       done = 0;
-      play_midi(tune, 0);
+      alw_play_midi(tune, 0);
     }
   }
 
@@ -980,11 +981,11 @@ struct MYMIDI:public SOUNDCLIP
   }
 
   virtual void pause() {
-    midi_pause();
+    alw_midi_pause();
   }
 
   virtual void resume() {
-    midi_resume();
+    alw_midi_resume();
   }
 
   int get_sound_type() {
@@ -992,7 +993,7 @@ struct MYMIDI:public SOUNDCLIP
   }
 
   int play() {
-    lengthInSeconds = get_midi_length(tune);
+    lengthInSeconds = alw_get_midi_length(tune);
     if (::play_midi(tune, repeat)) {
       delete this;
       return 0;
@@ -1009,7 +1010,7 @@ struct MYMIDI:public SOUNDCLIP
 MYMIDI *thismidi;
 SOUNDCLIP *my_load_midi(const char *filname, int repet)
 {
-  MIDI *midiPtr = load_midi(filname);
+  MIDI *midiPtr = alw_load_midi(filname);
   if (midiPtr == NULL)
     return NULL;
 

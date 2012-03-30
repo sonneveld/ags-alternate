@@ -27,6 +27,8 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#include "allegro_wrapper.h"
+
 #include "allegro.h"
 #include "misc.h"
 
@@ -45,10 +47,10 @@ char *ci_find_file(char *dir_name, char *file_name)
     strcpy(diamond, file_name);
   } else {
     diamond = (char *)malloc(strlen(dir_name) + strlen(file_name) + 2);
-    append_filename(diamond, dir_name, file_name, strlen(dir_name) + strlen(file_name) + 2);
+    alw_append_filename(diamond, dir_name, file_name, strlen(dir_name) + strlen(file_name) + 2);
   }
-  fix_filename_case(diamond);
-  fix_filename_slashes(diamond);
+  alw_fix_filename_case(diamond);
+  alw_fix_filename_slashes(diamond);
   return diamond;
 }
 
@@ -68,19 +70,19 @@ char *ci_find_file(char *dir_name, char *file_name)
       return NULL;
 
   if (!(dir_name == NULL)) {
-    fix_filename_case(dir_name);
-    fix_filename_slashes(dir_name);
+    alw_fix_filename_case(dir_name);
+    alw_fix_filename_slashes(dir_name);
   }
 
-  fix_filename_case(file_name);
-  fix_filename_slashes(file_name);
+  alw_fix_filename_case(file_name);
+  alw_fix_filename_slashes(file_name);
 
   if (dir_name == NULL) {
     char  *match = NULL;
     int   match_len = NULL;
     int   dir_len = NULL;
 
-    match = get_filename(file_name);
+    match = alw_get_filename(file_name);
     if (match == NULL)
       return NULL;
 
@@ -130,7 +132,7 @@ char *ci_find_file(char *dir_name, char *file_name)
         fprintf(stderr, "ci_find_file: Looked for %s in rough %s, found diamond %s.\n", filename, directory, entry->d_name);
 #endif _DEBUG
         diamond = (char *)malloc(strlen(directory) + strlen(entry->d_name) + 2);
-        append_filename(diamond, directory, entry->d_name, strlen(directory) + strlen(entry->d_name) + 2);
+        alw_append_filename(diamond, directory, entry->d_name, strlen(directory) + strlen(entry->d_name) + 2);
         break;
       }
     }

@@ -1,5 +1,7 @@
 #include "ac_overlay.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "ac_string.h"
@@ -102,9 +104,9 @@ void Overlay_Remove(ScriptOverlay *sco) {
 int CreateGraphicOverlay(int xx,int yy,int slott,int trans) {
   multiply_up_coordinates(&xx, &yy);
 
-  block screeno=create_bitmap_ex(final_col_dep, spritewidth[slott],spriteheight[slott]);
+  block screeno=alw_create_bitmap_ex(final_col_dep, spritewidth[slott],spriteheight[slott]);
   wsetscreen(screeno);
-  clear_to_color(screeno,bitmap_mask_color(screeno));
+  alw_clear_to_color(screeno,alw_bitmap_mask_color(screeno));
   wputblock(0,0,spriteset[slott],trans);
 
   bool hasAlpha = (game.spriteflags[slott] & SPF_ALPHACHANNEL) != 0;

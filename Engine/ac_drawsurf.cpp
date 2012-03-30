@@ -1,5 +1,7 @@
 #include "ac_drawsurf.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "sprcache.h"
@@ -64,7 +66,7 @@ void DrawingSurface_Release(ScriptDrawingSurface* sds)
   }
   if (sds->dynamicSurfaceNumber >= 0)
   {
-    destroy_bitmap(dynamicallyCreatedSurfaces[sds->dynamicSurfaceNumber]);
+    alw_destroy_bitmap(dynamicallyCreatedSurfaces[sds->dynamicSurfaceNumber]);
     dynamicallyCreatedSurfaces[sds->dynamicSurfaceNumber] = NULL;
     sds->dynamicSurfaceNumber = -1;
   }
@@ -80,8 +82,8 @@ ScriptDrawingSurface* DrawingSurface_CreateCopy(ScriptDrawingSurface *sds)
   {
     if (dynamicallyCreatedSurfaces[i] == NULL)
     {
-      dynamicallyCreatedSurfaces[i] = create_bitmap_ex(bitmap_color_depth(sourceBitmap), BMP_W(sourceBitmap), BMP_H(sourceBitmap));
-      blit(sourceBitmap, dynamicallyCreatedSurfaces[i], 0, 0, 0, 0, BMP_W(sourceBitmap), BMP_H(sourceBitmap));
+      dynamicallyCreatedSurfaces[i] = alw_create_bitmap_ex(alw_bitmap_color_depth(sourceBitmap), BMP_W(sourceBitmap), BMP_H(sourceBitmap));
+      alw_blit(sourceBitmap, dynamicallyCreatedSurfaces[i], 0, 0, 0, 0, BMP_W(sourceBitmap), BMP_H(sourceBitmap));
       ScriptDrawingSurface *newSurface = new ScriptDrawingSurface();
       newSurface->dynamicSurfaceNumber = i;
       newSurface->hasAlphaChannel = sds->hasAlphaChannel;
@@ -107,12 +109,12 @@ void DrawingSurface_DrawSurface(ScriptDrawingSurface* target, ScriptDrawingSurfa
 
   if (translev == 0) {
     // just draw it over the top, no transparency
-    blit(surfaceToDraw, abuf, 0, 0, 0, 0, BMP_W(surfaceToDraw), BMP_H(surfaceToDraw));
+    alw_blit(surfaceToDraw, abuf, 0, 0, 0, 0, BMP_W(surfaceToDraw), BMP_H(surfaceToDraw));
     target->FinishedDrawing();
     return;
   }
 
-  if (bitmap_color_depth(surfaceToDraw) <= 8)
+  if (alw_bitmap_color_depth(surfaceToDraw) <= 8)
     quit("!DrawingSurface.DrawSurface: 256-colour surfaces cannot be drawn transparently");
 
   // Draw it transparently
@@ -147,9 +149,9 @@ void DrawingSurface_DrawImage(ScriptDrawingSurface* sds, int xx, int yy, int slo
     sds->MultiplyCoordinates(&width, &height);
 
     // resize the sprite to the requested size
-    block newPic = create_bitmap_ex(bitmap_color_depth(sourcePic), width, height);
+    block newPic = alw_create_bitmap_ex(alw_bitmap_color_depth(sourcePic), width, height);
 
-    stretch_blit(sourcePic, newPic,
+    alw_stretch_blit(sourcePic, newPic,
                  0, 0, spritewidth[slot], spriteheight[slot],
                  0, 0, width, height);
 
@@ -161,8 +163,8 @@ void DrawingSurface_DrawImage(ScriptDrawingSurface* sds, int xx, int yy, int slo
   sds->StartDrawing();
   sds->MultiplyCoordinates(&xx, &yy);
 
-  if (bitmap_color_depth(sourcePic) != bitmap_color_depth(abuf)) {
-    debug_log("RawDrawImage: Sprite %d colour depth %d-bit not same as background depth %d-bit", slot, bitmap_color_depth(spriteset[slot]), bitmap_color_depth(abuf));
+  if (alw_bitmap_color_depth(sourcePic) != alw_bitmap_color_depth(abuf)) {
+    debug_log("RawDrawImage: Sprite %d colour depth %d-bit not same as background depth %d-bit", slot, alw_bitmap_color_depth(spriteset[slot]), alw_bitmap_color_depth(abuf));
   }
 
   if (trans > 0)
@@ -175,7 +177,7 @@ void DrawingSurface_DrawImage(ScriptDrawingSurface* sds, int xx, int yy, int slo
   sds->FinishedDrawing();
 
   if (needToFreeBitmap)
-    destroy_bitmap(sourcePic);
+    alw_destroy_bitmap(sourcePic);
 }
 
 
@@ -188,7 +190,7 @@ void DrawingSurface_SetDrawingColor(ScriptDrawingSurface *sds, int newColour)
   sds->StartDrawing();
   if (newColour == SCR_COLOR_TRANSPARENT)
   {
-    sds->currentColour = bitmap_mask_color(abuf);
+    sds->currentColour = alw_bitmap_mask_color(abuf);
   }
   else
   {
@@ -242,13 +244,13 @@ void DrawingSurface_Clear(ScriptDrawingSurface *sds, int colour)
   int allegroColor;
   if ((colour == -SCR_NO_VALUE) || (colour == SCR_COLOR_TRANSPARENT))
   {
-    allegroColor = bitmap_mask_color(abuf);
+    allegroColor = alw_bitmap_mask_color(abuf);
   }
   else
   {
     allegroColor = get_col8_lookup(colour);
   }
-  clear_to_color(abuf, allegroColor);
+  alw_clear_to_color(abuf, allegroColor);
   sds->FinishedDrawing();
 }
 
@@ -259,7 +261,7 @@ void DrawingSurface_DrawCircle(ScriptDrawingSurface *sds, int x, int y, int radi
   sds->MultiplyThickness(&radius);
 
   sds->StartDrawing();
-  circlefill(abuf, x, y, radius, sds->currentColour);
+  alw_circlefill(abuf, x, y, radius, sds->currentColour);
   sds->FinishedDrawing();
 }
 
@@ -270,7 +272,7 @@ void DrawingSurface_DrawRectangle(ScriptDrawingSurface *sds, int x1, int y1, int
   sds->MultiplyCoordinates(&x2, &y2);
 
   sds->StartDrawing();
-  rectfill(abuf, x1,y1,x2,y2, sds->currentColour);
+  alw_rectfill(abuf, x1,y1,x2,y2, sds->currentColour);
   sds->FinishedDrawing();
 }
 
@@ -282,7 +284,7 @@ void DrawingSurface_DrawTriangle(ScriptDrawingSurface *sds, int x1, int y1, int 
   sds->MultiplyCoordinates(&x3, &y3);
 
   sds->StartDrawing();
-  triangle(abuf, x1,y1,x2,y2,x3,y3, sds->currentColour);
+  alw_triangle(abuf, x1,y1,x2,y2,x3,y3, sds->currentColour);
   sds->FinishedDrawing();
 }
 
@@ -300,7 +302,7 @@ void DrawingSurface_DrawString(ScriptDrawingSurface *sds, int xx, int yy, int fo
   sds->MultiplyCoordinates(&xx, &yy);
   sds->StartDrawing();
   wtexttransparent(TEXTFG);
-  if ((bitmap_color_depth(abuf) <= 8) && (play.raw_color > 255)) {
+  if ((alw_bitmap_color_depth(abuf) <= 8) && (play.raw_color > 255)) {
     wtextcolor(1);
     debug_log ("RawPrint: Attempted to use hi-color on 256-col background");
   }
@@ -365,7 +367,7 @@ void DrawingSurface_DrawLine(ScriptDrawingSurface *sds, int fromx, int fromy, in
     for (jj = 0; jj < thickness; jj++)
     {
       yy = (jj - (thickness / 2));
-      line (abuf, fromx + xx, fromy + yy, tox + xx, toy + yy, sds->currentColour);
+      alw_line (abuf, fromx + xx, fromy + yy, tox + xx, toy + yy, sds->currentColour);
     }
   }
   sds->FinishedDrawing();
@@ -383,7 +385,7 @@ void DrawingSurface_DrawPixel(ScriptDrawingSurface *sds, int x, int y) {
   {
     for (jj = 0; jj < thickness; jj++)
     {
-      putpixel(abuf, x + ii, y + jj, sds->currentColour);
+      alw_putpixel(abuf, x + ii, y + jj, sds->currentColour);
     }
   }
   sds->FinishedDrawing();
@@ -393,9 +395,9 @@ void DrawingSurface_DrawPixel(ScriptDrawingSurface *sds, int x, int y) {
 int DrawingSurface_GetPixel(ScriptDrawingSurface *sds, int x, int y) {
   sds->MultiplyCoordinates(&x, &y);
   sds->StartDrawing();
-  unsigned int rawPixel = getpixel(abuf, x, y);
-  unsigned int maskColor = bitmap_mask_color(abuf);
-  int colDepth = bitmap_color_depth(abuf);
+  unsigned int rawPixel = alw_getpixel(abuf, x, y);
+  unsigned int maskColor = alw_bitmap_mask_color(abuf);
+  int colDepth = alw_bitmap_color_depth(abuf);
 
   if (rawPixel == maskColor)
   {
@@ -403,9 +405,9 @@ int DrawingSurface_GetPixel(ScriptDrawingSurface *sds, int x, int y) {
   }
   else if (colDepth > 8)
   {
-    int r = getr_depth(colDepth, rawPixel);
-    int g = getg_depth(colDepth, rawPixel);
-    int b = getb_depth(colDepth, rawPixel);
+    int r = alw_getr_depth(colDepth, rawPixel);
+    int g = alw_getg_depth(colDepth, rawPixel);
+    int b = alw_getb_depth(colDepth, rawPixel);
 
     rawPixel = Game_GetColorFromRGB(r, g, b);
   }
@@ -426,7 +428,7 @@ void RawSaveScreen () {
     wfreeblock(raw_saved_screen);
   block source = thisroom.ebscene[play.bg_frame];
   raw_saved_screen = wallocblock(BMP_W(source), BMP_H(source));
-  blit(source, raw_saved_screen, 0, 0, 0, 0, BMP_W(source), BMP_H(source));
+  alw_blit(source, raw_saved_screen, 0, 0, 0, 0, BMP_W(source), BMP_H(source));
 }
 // RawRestoreScreen: copy backup bitmap back to screen; we
 // deliberately don't free the block cos they can multiple restore
@@ -438,7 +440,7 @@ void RawRestoreScreen() {
     return;
   }
   block deston = thisroom.ebscene[play.bg_frame];
-  blit(raw_saved_screen, deston, 0, 0, 0, 0, BMP_W(deston), BMP_H(deston));
+  alw_blit(raw_saved_screen, deston, 0, 0, 0, 0, BMP_W(deston), BMP_H(deston));
   invalidate_screen();
   mark_current_background_dirty();
 }
@@ -468,7 +470,7 @@ void RawDrawFrameTransparent (int frame, int translev) {
       (translev < 0) || (translev > 99))
     quit("!RawDrawFrameTransparent: invalid parameter (transparency must be 0-99, frame a valid BG frame)");
 
-  if (bitmap_color_depth(thisroom.ebscene[frame]) <= 8)
+  if (alw_bitmap_color_depth(thisroom.ebscene[frame]) <= 8)
     quit("!RawDrawFrameTransparent: 256-colour backgrounds not supported");
 
   if (frame == play.bg_frame)
@@ -476,7 +478,7 @@ void RawDrawFrameTransparent (int frame, int translev) {
 
   if (translev == 0) {
     // just draw it over the top, no transparency
-    blit(thisroom.ebscene[frame], thisroom.ebscene[play.bg_frame], 0, 0, 0, 0, BMP_W(thisroom.ebscene[frame]), BMP_H(thisroom.ebscene[frame]));
+    alw_blit(thisroom.ebscene[frame], thisroom.ebscene[play.bg_frame], 0, 0, 0, 0, BMP_W(thisroom.ebscene[frame]), BMP_H(thisroom.ebscene[frame]));
     play.raw_modified[play.bg_frame] = 1;
     return;
   }
@@ -493,7 +495,7 @@ void RawDrawFrameTransparent (int frame, int translev) {
 void RawClear (int clr) {
   play.raw_modified[play.bg_frame] = 1;
   clr = get_col8_lookup(clr);
-  clear_to_color (thisroom.ebscene[play.bg_frame], clr);
+  alw_clear_to_color (thisroom.ebscene[play.bg_frame], clr);
   invalidate_screen();
   mark_current_background_dirty();
 }
@@ -518,7 +520,7 @@ void RawPrint (int xx, int yy, char*texx, ...) {
   textcol = play.raw_color;
   RAW_START();
   wtexttransparent(TEXTFG);
-  if ((bitmap_color_depth(abuf) <= 8) && (play.raw_color > 255)) {
+  if ((alw_bitmap_color_depth(abuf) <= 8) && (play.raw_color > 255)) {
     wtextcolor(1);
     debug_log ("RawPrint: Attempted to use hi-color on 256-col background");
   }
@@ -558,8 +560,8 @@ void RawDrawImageCore(int xx, int yy, int slot) {
     quit("!RawDrawImage: invalid sprite slot number specified");
   RAW_START();
 
-  if (bitmap_color_depth(spriteset[slot]) != bitmap_color_depth(abuf)) {
-    debug_log("RawDrawImage: Sprite %d colour depth %d-bit not same as background depth %d-bit", slot, bitmap_color_depth(spriteset[slot]), bitmap_color_depth(abuf));
+  if (alw_bitmap_color_depth(spriteset[slot]) != alw_bitmap_color_depth(abuf)) {
+    debug_log("RawDrawImage: Sprite %d colour depth %d-bit not same as background depth %d-bit", slot, alw_bitmap_color_depth(spriteset[slot]), alw_bitmap_color_depth(abuf));
   }
 
   draw_sprite_support_alpha(xx, yy, spriteset[slot], slot);
@@ -615,18 +617,18 @@ void RawDrawImageResized(int xx, int yy, int gotSlot, int width, int height) {
   multiply_up_coordinates(&width, &height);
 
   // resize the sprite to the requested size
-  block newPic = create_bitmap_ex(bitmap_color_depth(spriteset[gotSlot]), width, height);
+  block newPic = alw_create_bitmap_ex(alw_bitmap_color_depth(spriteset[gotSlot]), width, height);
 
-  stretch_blit(spriteset[gotSlot], newPic,
+  alw_stretch_blit(spriteset[gotSlot], newPic,
                0, 0, spritewidth[gotSlot], spriteheight[gotSlot],
                0, 0, width, height);
 
   RAW_START();
-  if (bitmap_color_depth(newPic) != bitmap_color_depth(abuf))
+  if (alw_bitmap_color_depth(newPic) != alw_bitmap_color_depth(abuf))
     quit("!RawDrawImageResized: image colour depth mismatch: the background image must have the same colour depth as the sprite being drawn");
 
   put_sprite_256(xx, yy, newPic);
-  destroy_bitmap(newPic);
+  alw_destroy_bitmap(newPic);
   invalidate_screen();
   mark_current_background_dirty();
   update_polled_stuff();  // this operation can be slow so stop music skipping
@@ -642,7 +644,7 @@ void RawDrawLine (int fromx, int fromy, int tox, int toy) {
   // draw a line thick enough to look the same at all resolutions
   for (ii = 0; ii < get_fixed_pixel_size(1); ii++) {
     for (jj = 0; jj < get_fixed_pixel_size(1); jj++)
-      line (thisroom.ebscene[play.bg_frame], fromx+ii, fromy+jj, tox+ii, toy+jj, play.raw_color);
+      alw_line (thisroom.ebscene[play.bg_frame], fromx+ii, fromy+jj, tox+ii, toy+jj, play.raw_color);
   }
   invalidate_screen();
   mark_current_background_dirty();
@@ -653,7 +655,7 @@ void RawDrawCircle (int xx, int yy, int rad) {
   rad = multiply_up_coordinate(rad);
 
   play.raw_modified[play.bg_frame] = 1;
-  circlefill (thisroom.ebscene[play.bg_frame], xx, yy, rad, play.raw_color);
+  alw_circlefill (thisroom.ebscene[play.bg_frame], xx, yy, rad, play.raw_color);
   invalidate_screen();
   mark_current_background_dirty();
 }
@@ -663,7 +665,7 @@ void RawDrawRectangle(int x1, int y1, int x2, int y2) {
   multiply_up_coordinates(&x1, &y1);
   multiply_up_coordinates_round_up(&x2, &y2);
 
-  rectfill(thisroom.ebscene[play.bg_frame], x1,y1,x2,y2, play.raw_color);
+  alw_rectfill(thisroom.ebscene[play.bg_frame], x1,y1,x2,y2, play.raw_color);
   invalidate_screen();
   mark_current_background_dirty();
 }
@@ -674,7 +676,7 @@ void RawDrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3) {
   multiply_up_coordinates(&x2, &y2);
   multiply_up_coordinates(&x3, &y3);
 
-  triangle (thisroom.ebscene[play.bg_frame], x1,y1,x2,y2,x3,y3, play.raw_color);
+  alw_triangle (thisroom.ebscene[play.bg_frame], x1,y1,x2,y2,x3,y3, play.raw_color);
   invalidate_screen();
   mark_current_background_dirty();
 }
@@ -684,7 +686,7 @@ void RawSetColorRGB(int red, int grn, int blu) {
       (blu < 0) || (blu > 255))
     quit("!RawSetColorRGB: colour values must be 0-255");
 
-  play.raw_color = makecol_depth(bitmap_color_depth(thisroom.ebscene[play.bg_frame]), red, grn, blu);
+  play.raw_color = alw_makecol_depth(alw_bitmap_color_depth(thisroom.ebscene[play.bg_frame]), red, grn, blu);
 }
 
 void register_drawing_surface_script_functions() {

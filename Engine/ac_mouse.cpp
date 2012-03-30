@@ -1,5 +1,7 @@
 #include "ac_mouse.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "acgui.h"
@@ -83,8 +85,8 @@ void set_new_cursor_graphic (int spriteslot) {
   {
     if (global_mouse_state.blank_mouse_cursor == NULL)
     {
-      global_mouse_state.blank_mouse_cursor = create_bitmap_ex(final_col_dep, 1, 1);
-      clear_to_color(global_mouse_state.blank_mouse_cursor, bitmap_mask_color(global_mouse_state.blank_mouse_cursor));
+      global_mouse_state.blank_mouse_cursor = alw_create_bitmap_ex(final_col_dep, 1, 1);
+      alw_clear_to_color(global_mouse_state.blank_mouse_cursor, alw_bitmap_mask_color(global_mouse_state.blank_mouse_cursor));
     }
     mousecurs[0] = global_mouse_state.blank_mouse_cursor;
   }
@@ -99,12 +101,12 @@ void set_new_cursor_graphic (int spriteslot) {
 
 
 static void putpixel_compensate (block onto, int xx,int yy, int col) {
-  if ((bitmap_color_depth(onto) == 32) && (col != 0)) {
+  if ((alw_bitmap_color_depth(onto) == 32) && (col != 0)) {
     // ensure the alpha channel is preserved if it has one
-    int alphaval = geta32(getpixel(onto, xx, yy));
-    col = makeacol32(getr32(col), getg32(col), getb32(col), alphaval);
+    int alphaval = alw_geta32(alw_getpixel(onto, xx, yy));
+    col = alw_makeacol32(alw_getr32(col), alw_getg32(col), alw_getb32(col), alphaval);
   }
-  rectfill(onto, xx, yy, xx + get_fixed_pixel_size(1) - 1, yy + get_fixed_pixel_size(1) - 1, col);
+  alw_rectfill(onto, xx, yy, xx + get_fixed_pixel_size(1) - 1, yy + get_fixed_pixel_size(1) - 1, col);
 }
 
 // mouse cursor functions:
@@ -124,8 +126,8 @@ void set_mouse_cursor(int newcurs) {
       ((game.hotdot > 0) || (game.invhotdotsprite > 0)) ) {
     // If necessary, create a copy of the cursor and put the hotspot
     // dot onto it
-    global_mouse_state.dotted_mouse_cursor = create_bitmap_ex (bitmap_color_depth(mousecurs[0]), BMP_W(mousecurs[0]),BMP_H(mousecurs[0]));
-    blit (mousecurs[0], global_mouse_state.dotted_mouse_cursor, 0, 0, 0, 0, BMP_W(mousecurs[0]), BMP_H(mousecurs[0]));
+    global_mouse_state.dotted_mouse_cursor = alw_create_bitmap_ex (alw_bitmap_color_depth(mousecurs[0]), BMP_W(mousecurs[0]),BMP_H(mousecurs[0]));
+    alw_blit (mousecurs[0], global_mouse_state.dotted_mouse_cursor, 0, 0, 0, 0, BMP_W(mousecurs[0]), BMP_H(mousecurs[0]));
 
     if (game.invhotdotsprite > 0) {
       block abufWas = abuf;
@@ -141,11 +143,11 @@ void set_mouse_cursor(int newcurs) {
     }
     else {
       putpixel_compensate (global_mouse_state.dotted_mouse_cursor, hotspotx, hotspoty,
-        (bitmap_color_depth(global_mouse_state.dotted_mouse_cursor) > 8) ? get_col8_lookup (game.hotdot) : game.hotdot);
+        (alw_bitmap_color_depth(global_mouse_state.dotted_mouse_cursor) > 8) ? get_col8_lookup (game.hotdot) : game.hotdot);
 
       if (game.hotdotouter > 0) {
         int outercol = game.hotdotouter;
-        if (bitmap_color_depth (global_mouse_state.dotted_mouse_cursor) > 8)
+        if (alw_bitmap_color_depth (global_mouse_state.dotted_mouse_cursor) > 8)
           outercol = get_col8_lookup(game.hotdotouter);
 
         putpixel_compensate (global_mouse_state.dotted_mouse_cursor, hotspotx + get_fixed_pixel_size(1), hotspoty, outercol);
