@@ -149,7 +149,7 @@ extern char *moduleRepExecAddr[];
 extern int numScriptModules;
 
 extern ViewStruct*views;
-extern COLOR_MAP maincoltable;
+extern ALW_COLOR_MAP maincoltable;
 extern ScriptSystem scsystem;
 extern block _old_screen;
 extern block _sub_screen;
@@ -325,7 +325,7 @@ extern ScriptRegion scrRegion[];
 extern ScriptInvItem scrInv[];
 extern ScriptDialog scrDialog[];
 
-extern RGB_MAP rgb_table;
+extern ALW_RGB_MAP rgb_table;
 extern char* game_file_name;
 extern int want_quit;
 extern int screen_reset;

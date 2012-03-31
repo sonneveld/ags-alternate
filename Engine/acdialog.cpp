@@ -864,7 +864,7 @@ void preparesavegamelist(int ctrllist)
 {
   numsaves = 0;
   toomanygames = 0;
-  al_ffblk ffb;
+  alw_al_ffblk ffb;
   int bufix = 0;
   char curdir[255];
   _getcwd(curdir, 255);

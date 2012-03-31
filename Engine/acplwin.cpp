@@ -322,7 +322,7 @@ void delete_files_in_directory(const char *directoryName, const char *fileMask)
 {
   char srchBuffer[MAX_PATH];
   sprintf(srchBuffer, "%s\\%s", directoryName, fileMask);
-  al_ffblk dfb;
+  alw_al_ffblk dfb;
   int	dun = alw_al_findfirst(srchBuffer, &dfb, FA_SEARCH);
   while (!dun) {
     unlink(dfb.name);
@@ -803,7 +803,7 @@ LPDIRECTDRAW2 IAGSEngine::GetDirectDraw2 () {
 
   return directdraw;
 }
-LPDIRECTDRAWSURFACE2 IAGSEngine::GetBitmapSurface (BITMAP *bmp) 
+LPDIRECTDRAWSURFACE2 IAGSEngine::GetBitmapSurface (ALW_BITMAP *bmp) 
 {
   if (directdraw == NULL)
     quit("!This plugin is not compatible with the Direct3D driver.");

@@ -323,7 +323,7 @@ const char* get_audio_clip_file_name(ScriptAudioClip *clip)
   else
   {
     sprintf(acaudio_buffer, "~audio.vox~%s", game.audioClips[clip->id].fileName);
-    PACKFILE *iii = alw_pack_fopen(acaudio_buffer, "rb");
+    ALW_PACKFILE *iii = alw_pack_fopen(acaudio_buffer, "rb");
     if (iii != NULL)
     {
       alw_pack_fclose(iii);

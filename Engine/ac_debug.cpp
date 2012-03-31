@@ -1,6 +1,9 @@
 #include "ac_debug.h"
 
+
 #define UNICODE
+
+#include "allegro_wrapper.h"
 
 #include "ac.h"
 #include "ac_context.h"

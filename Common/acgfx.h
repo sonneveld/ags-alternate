@@ -10,6 +10,8 @@
 #ifndef __ACGFX_H
 #define __ACGFX_H
 
+#include "allegro_wrapper.h"
+
 extern unsigned long _myblender_color15(unsigned long x, unsigned long y, unsigned long n);
 extern unsigned long _myblender_color16(unsigned long x, unsigned long y, unsigned long n);
 extern unsigned long _myblender_color32(unsigned long x, unsigned long y, unsigned long n);
@@ -66,7 +68,7 @@ public:
 
 struct AllegroGFXFilter : ScalingGFXFilter {
 protected:
-  BITMAP *realScreen;
+  ALW_BITMAP *realScreen;
   int lastBlitX;
   int lastBlitY;
 
@@ -75,13 +77,13 @@ public:
   AllegroGFXFilter(bool justCheckingForSetup);
   AllegroGFXFilter(int multiplier, bool justCheckingForSetup);
 
-  virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight);
-  virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen);
-  virtual void RenderScreen(BITMAP *toRender, int x, int y);
-  virtual void RenderScreenFlipped(BITMAP *toRender, int x, int y, int flipType);
+  virtual ALW_BITMAP* ScreenInitialized(ALW_BITMAP *screen, int fakeWidth, int fakeHeight);
+  virtual ALW_BITMAP *ShutdownAndReturnRealScreen(ALW_BITMAP *currentScreen);
+  virtual void RenderScreen(ALW_BITMAP *toRender, int x, int y);
+  virtual void RenderScreenFlipped(ALW_BITMAP *toRender, int x, int y, int flipType);
   virtual void ClearRect(int x1, int y1, int x2, int y2, int color);
-  virtual void GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap);
-  virtual void GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap, bool copyWithYOffset);
+  virtual void GetCopyOfScreenIntoBitmap(ALW_BITMAP *copyBitmap);
+  virtual void GetCopyOfScreenIntoBitmap(ALW_BITMAP *copyBitmap, bool copyWithYOffset);
 };
 
 struct D3DGFXFilter : ScalingGFXFilter {

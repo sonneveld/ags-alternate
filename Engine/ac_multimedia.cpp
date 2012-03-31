@@ -94,7 +94,7 @@ short fliwidth,fliheight;
 int canabort=0, stretch_flc = 1;
 block hicol_buf=NULL;
 IDriverDependantBitmap *fli_ddb;
-BITMAP *fli_target;
+ALW_BITMAP *fli_target;
 int fliTargetWidth, fliTargetHeight;
 int check_if_user_input_should_cancel_video()
 {
@@ -214,7 +214,7 @@ void play_flc_file(int numb,int playflags) {
 }
 // FLIC player end
 
-int theora_playing_callback(BITMAP *theoraBuffer)
+int theora_playing_callback(ALW_BITMAP *theoraBuffer)
 {
   if (theoraBuffer == NULL)
   {

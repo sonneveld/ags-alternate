@@ -1,5 +1,7 @@
 #include "dynobj/script_string.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "ac_string.h"

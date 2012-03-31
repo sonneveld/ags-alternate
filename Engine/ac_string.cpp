@@ -1,5 +1,7 @@
 #include "ac_string.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "acruntim.h"
 #include "ac_maths.h"

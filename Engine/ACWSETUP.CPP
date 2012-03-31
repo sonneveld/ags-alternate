@@ -9,12 +9,13 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
+#include "acgfx.h"
+
 #include <windows.h>
 #include <stdio.h>
 #include <io.h>
 #include <stdlib.h>
 #include "resource.h"
-#include "acgfx.h"
 
 #define AL_ID(a,b,c,d)     (((a)<<24) | ((b)<<16) | ((c)<<8) | (d))
 

@@ -1,3 +1,5 @@
+#include "allegro_wrapper.h"
+
 #include "dynobj/script_drawing_surface.h"
 
 #include "ac.h"
@@ -70,7 +72,7 @@ void ScriptDrawingSurface::UnMultiplyThickness(int *valueToAdjust)
 }
 
 
-BITMAP* ScriptDrawingSurface::GetBitmapSurface()
+ALW_BITMAP* ScriptDrawingSurface::GetBitmapSurface()
 {
   if (roomBackgroundNumber >= 0)
     return thisroom.ebscene[roomBackgroundNumber];

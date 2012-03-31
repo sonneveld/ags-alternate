@@ -1,5 +1,7 @@
 #include "dynobj/script_overlay.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "cscomp.h"

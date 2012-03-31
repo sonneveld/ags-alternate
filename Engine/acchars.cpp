@@ -328,8 +328,8 @@ void start_character_turning (CharacterInfo *chinf, int useloop, int no_diagonal
 void fix_player_sprite(MoveList*cmls,CharacterInfo*chinf) {
   int view_num=chinf->view;
   int want_horiz=1,useloop = 1,no_diagonal=0;
-  fixed xpmove = cmls->xpermove[cmls->onstage];
-  fixed ypmove = cmls->ypermove[cmls->onstage];
+  alw_fixed xpmove = cmls->xpermove[cmls->onstage];
+  alw_fixed ypmove = cmls->ypermove[cmls->onstage];
 
   // if not moving, do nothing
   if ((xpmove == 0) && (ypmove == 0))

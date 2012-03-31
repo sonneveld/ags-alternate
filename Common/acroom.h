@@ -26,6 +26,7 @@
 //#define color RGB           // wgt2allh.h
 #include "wgt2allg.h"         // include, for VTA_ defs.
 struct ccScript;              // cscomp.h
+typedef fixed alw_fixed;
 
 // MACPORT FIX: endian support
 #include "bigend.h"
@@ -1458,7 +1459,7 @@ struct ScriptModule {
 struct MoveList {
   int   pos[MAXNEEDSTAGES];
   int   numstage;
-  fixed xpermove[MAXNEEDSTAGES], ypermove[MAXNEEDSTAGES];
+  alw_fixed xpermove[MAXNEEDSTAGES], ypermove[MAXNEEDSTAGES];
   int   fromx, fromy;
   int   onstage, onpart;
   int   lastx, lasty;
@@ -1469,7 +1470,7 @@ struct MoveList {
 
 // externs
 extern void read_string_decrypt(FILE *ooo, char *sss);
-extern int bmp_bpp(BITMAP*bmpt);
+extern int bmp_bpp(ALW_BITMAP*bmpt);
 extern void load_room(char *files, roomstruct *rstruc, bool gameIsHighRes);
 extern int ff; // !
 extern void deserialize_interaction_scripts(FILE *iii, InteractionScripts *scripts);

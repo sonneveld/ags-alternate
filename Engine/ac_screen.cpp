@@ -1,6 +1,7 @@
-#include "ac_screen.h"
 
 #include "allegro_wrapper.h"
+
+#include "ac_screen.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -40,7 +41,7 @@ void my_fade_out(int spdd) {
     play.screen_is_faded_out = 1;
 }
 
-void my_fade_in(PALETTE p, int speed) {
+void my_fade_in(ALW_PALETTE p, int speed) {
   if (game.color_depth > 1) {
     alw_set_palette (p);
 

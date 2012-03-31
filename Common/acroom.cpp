@@ -1,7 +1,6 @@
+#include "allegro_wrapper.h"
 
 #include "acroom.h"
-
-#include "allegro_wrapper.h"
 
 #include "wgt2allg.h"
 #include "clib32.h"
@@ -453,7 +452,7 @@ struct room_file_header {
 static int _acroom_bpp = 1;  // bytes per pixel of currently loading room
 
 // returns bytes per pixel for bitmap's color depth
-int bmp_bpp(BITMAP*bmpt) {
+int bmp_bpp(ALW_BITMAP*bmpt) {
   if (alw_bitmap_color_depth(bmpt) == 15)
     return 2;
 
@@ -473,7 +472,7 @@ extern unsigned char *lzwexpand_to_mem(FILE *);
 extern long maxsize, outbytes, putbytes;
 static char *lztempfnm = "~aclzw.tmp";
 
-static long save_lzw(char *fnn, BITMAP *bmpp, color *pall, long offe) {
+static long save_lzw(char *fnn, ALW_BITMAP *bmpp, color *pall, long offe) {
   FILE  *ooo, *iii;
   long  fll, toret, gobacto;
 
@@ -506,13 +505,13 @@ static long save_lzw(char *fnn, BITMAP *bmpp, color *pall, long offe) {
   return toret;
 }
 
-static BITMAP *recalced;
-/*long load_lzw(char*fnn,BITMAP*bmm,color*pall,long ooff) {
+static ALW_BITMAP *recalced;
+/*long load_lzw(char*fnn,ALW_BITMAP*bmm,color*pall,long ooff) {
   recalced=bmm;
   FILE*iii=clibfopen(fnn,"rb");
   fseek(iii,ooff,SEEK_SET);*/
 
-static long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
+static long load_lzw(FILE *iii, ALW_BITMAP *bmm, color *pall) {
   long          uncompsiz, *loptr;
   unsigned char *membuffer;
   int           arin;
@@ -597,7 +596,7 @@ static long load_lzw(FILE *iii, BITMAP *bmm, color *pall) {
   return uncompsiz;
 }
 
-static long savecompressed_allegro(char *fnn, BITMAP *bmpp, color *pall, long ooo) {
+static long savecompressed_allegro(char *fnn, ALW_BITMAP *bmpp, color *pall, long ooo) {
   unsigned char *wgtbl = (unsigned char *)malloc(BMP_W(bmpp) * BMP_H(bmpp) + 4);
   short         *sss = (short *)wgtbl;
   long          toret;
@@ -612,11 +611,11 @@ static long savecompressed_allegro(char *fnn, BITMAP *bmpp, color *pall, long oo
   return toret;
 }
 
-static long loadcompressed_allegro(FILE *fpp, BITMAP **bimpp, color *pall, long ooo) {
+static long loadcompressed_allegro(FILE *fpp, ALW_BITMAP **bimpp, color *pall, long ooo) {
   short widd,hitt;
   int   ii;
 
-  BITMAP *bim = *bimpp;
+  ALW_BITMAP *bim = *bimpp;
   if (bim != NULL)
     alw_destroy_bitmap(bim);
 

@@ -1,3 +1,6 @@
+#ifndef _ALLEGRO_WRAPPER_H
+#define _ALLEGRO_WRAPPER_H
+
 #include "allegro.h"
 #include "winalleg.h"
 
@@ -6,7 +9,23 @@
 // ignore stuff in the graphics drivers since we'd probably have to write from scratch
 // ignore external libraries, they'd have to be rewritten anyway.
 
-// init
+// TYPES
+#define ALW_BITMAP BITMAP
+#define ALW_SAMPLE SAMPLE
+#define ALW_COLOR_MAP COLOR_MAP
+#define ALW_RGB_MAP RGB_MAP
+#define ALW_PALETTE PALETTE
+#define ALW_PAL_SIZE PAL_SIZE
+#define ALW_RGB RGB
+#define ALW_PACKFILE PACKFILE
+#define ALW_AUDIOSTREAM AUDIOSTREAM
+#define ALW_MIDI MIDI
+#define ALW_GFX_MODE_LIST GFX_MODE_LIST
+#define alw_al_ffblk al_ffblk
+#define alw_fixed fixed
+
+
+// INIT
 #define ALW_ALLEGRO_DATE ALLEGRO_DATE
 #define alw_allegro_exit allegro_exit
 #define alw_set_window_title set_window_title
@@ -233,3 +252,6 @@
 #define alw_fixcos fixcos
 #define alw_fixatan fixatan
 #define alw_fixtof fixtof
+
+
+#endif

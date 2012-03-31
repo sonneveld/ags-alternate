@@ -12,10 +12,9 @@
 
 */
 
-#include "acplatfm.h"
-
 #include "allegro_wrapper.h"
 
+#include "acplatfm.h"
 
 #include "bmp.h"
 #include "ac_string.h"
@@ -184,14 +183,14 @@ const char* IAGSEngine::GetGraphicsDriverID()
   return gfxDriver->GetDriverID();
 }
 
-BITMAP * IAGSEngine::GetScreen () 
+ALW_BITMAP * IAGSEngine::GetScreen () 
 {
   if (!gfxDriver->UsesMemoryBackBuffer())
     quit("!This plugin is not compatible with the Direct3D driver.");
 
   return alw_screen;
 }
-BITMAP * IAGSEngine::GetVirtualScreen () 
+ALW_BITMAP * IAGSEngine::GetVirtualScreen () 
 {
   if (!gfxDriver->UsesMemoryBackBuffer())
     quit("!This plugin is not compatible with the Direct3D driver.");
@@ -257,7 +256,7 @@ void IAGSEngine::GetScreenDimensions (int32 *width, int32 *height, int32 *coldep
   if (coldepth != NULL)
     coldepth[0] = final_col_dep;
 }
-unsigned char ** IAGSEngine::GetRawBitmapSurface (BITMAP *bmp) {
+unsigned char ** IAGSEngine::GetRawBitmapSurface (ALW_BITMAP *bmp) {
   if (!alw_is_linear_bitmap (bmp))
     quit("!IAGSEngine::GetRawBitmapSurface: invalid bitmap for access to surface");
   alw_acquire_bitmap (bmp);
@@ -267,7 +266,7 @@ unsigned char ** IAGSEngine::GetRawBitmapSurface (BITMAP *bmp) {
 
   return BMP_LINE(bmp);
 }
-void IAGSEngine::ReleaseBitmapSurface (BITMAP *bmp) {
+void IAGSEngine::ReleaseBitmapSurface (ALW_BITMAP *bmp) {
   alw_release_bitmap (bmp);
 
   if (bmp == virtual_screen) {
@@ -290,10 +289,10 @@ int IAGSEngine::GetNumBackgrounds () {
 int IAGSEngine::GetCurrentBackground () {
   return play.bg_frame;
 }
-BITMAP *IAGSEngine::GetBackgroundScene (int index) {
+ALW_BITMAP *IAGSEngine::GetBackgroundScene (int index) {
   return thisroom.ebscene[index];
 }
-void IAGSEngine::GetBitmapDimensions (BITMAP *bmp, int32 *width, int32 *height, int32 *coldepth) {
+void IAGSEngine::GetBitmapDimensions (ALW_BITMAP *bmp, int32 *width, int32 *height, int32 *coldepth) {
   if (bmp == NULL)
     return;
   
@@ -321,21 +320,21 @@ void IAGSEngine::DrawTextWrapped (int32 xx, int32 yy, int32 wid, int32 font, int
   for (int i = 0; i < numlines; i++)
     draw_and_invalidate_text(xx, yy + texthit*i, font, lines[i]);
 }
-void IAGSEngine::SetVirtualScreen (BITMAP *bmp) {
+void IAGSEngine::SetVirtualScreen (ALW_BITMAP *bmp) {
   wsetscreen (bmp);
 }
 int IAGSEngine::LookupParserWord (const char *word) {
   return find_word_in_dictionary ((char*)word);
 }
-void IAGSEngine::BlitBitmap (int x, int y, BITMAP *bmp, int masked) {
+void IAGSEngine::BlitBitmap (int x, int y, ALW_BITMAP *bmp, int masked) {
   wputblock (x, y, bmp, masked);
   invalidate_rect(x, y, x + BMP_W(bmp), y + BMP_H(bmp));
 }
-void IAGSEngine::BlitSpriteTranslucent(int x, int y, BITMAP *bmp, int trans) {
+void IAGSEngine::BlitSpriteTranslucent(int x, int y, ALW_BITMAP *bmp, int trans) {
   alw_set_trans_blender(0, 0, 0, trans);
   alw_draw_trans_sprite(abuf, bmp, x, y);
 }
-void IAGSEngine::BlitSpriteRotated(int x, int y, BITMAP *bmp, int angle) {
+void IAGSEngine::BlitSpriteRotated(int x, int y, ALW_BITMAP *bmp, int angle) {
   alw_rotate_sprite(abuf, bmp, x, y, alw_itofix(angle));
 }
 
@@ -397,19 +396,19 @@ AGSObject *IAGSEngine::GetObject (int32 num) {
 
   return (AGSObject*)&croom->obj[num];
 }
-BITMAP *IAGSEngine::CreateBlankBitmap (int32 width, int32 height, int32 coldep) {
-  BITMAP *tempb = alw_create_bitmap_ex(coldep, width, height);
+ALW_BITMAP *IAGSEngine::CreateBlankBitmap (int32 width, int32 height, int32 coldep) {
+  ALW_BITMAP *tempb = alw_create_bitmap_ex(coldep, width, height);
   alw_clear_to_color(tempb, alw_bitmap_mask_color(tempb));
   return tempb;
 }
-void IAGSEngine::FreeBitmap (BITMAP *tofree) {
+void IAGSEngine::FreeBitmap (ALW_BITMAP *tofree) {
   if (tofree)
     alw_destroy_bitmap (tofree);
 }
-BITMAP *IAGSEngine::GetSpriteGraphic (int32 num) {
+ALW_BITMAP *IAGSEngine::GetSpriteGraphic (int32 num) {
   return spriteset[num];
 }
-BITMAP *IAGSEngine::GetRoomMask (int index) {
+ALW_BITMAP *IAGSEngine::GetRoomMask (int index) {
   if (index == MASK_WALKABLE)
     return thisroom.walls;
   else if (index == MASK_WALKBEHIND)
@@ -448,7 +447,7 @@ int IAGSEngine::GetWalkbehindBaseline (int32 wa) {
 void* IAGSEngine::GetScriptFunctionAddress (const char *funcName) {
   return ccGetSymbolAddress ((char*)funcName);
 }
-int IAGSEngine::GetBitmapTransparentColor(BITMAP *bmp) {
+int IAGSEngine::GetBitmapTransparentColor(ALW_BITMAP *bmp) {
   return alw_bitmap_mask_color (bmp);
 }
 // get the character scaling level at a particular point

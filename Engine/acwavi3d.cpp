@@ -3,6 +3,8 @@
 */
 //#define ALLEGRO_STATICLINK  // already defined in project settings
 #include <stdio.h>
+#include "allegro_wrapper.h"
+
 #include <allegro.h>
 #include <winalleg.h>
 #include <allegro/platform/aintwin.h>

@@ -9,19 +9,19 @@ struct ScriptDrawingSurface : AGSCCDynamicObject {
   int dynamicSpriteNumber;
   int dynamicSurfaceNumber;
   bool isLinkedBitmapOnly;
-  BITMAP *linkedBitmapOnly;
+  ALW_BITMAP *linkedBitmapOnly;
   int currentColour;
   int currentColourScript;
   int highResCoordinates;
   int modified;
   int hasAlphaChannel;
-  BITMAP* abufBackup;
+  ALW_BITMAP* abufBackup;
 
   virtual int Dispose(const char *address, bool force);
   virtual const char *GetType();
   virtual int Serialize(const char *address, char *buffer, int bufsize);
   virtual void Unserialize(int index, const char *serializedData, int dataSize);
-  BITMAP* GetBitmapSurface();
+  ALW_BITMAP* GetBitmapSurface();
   void StartDrawing();
   void MultiplyThickness(int *adjustValue);
   void UnMultiplyThickness(int *adjustValue);

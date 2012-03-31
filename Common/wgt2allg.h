@@ -58,7 +58,7 @@ typedef unsigned char *wgtmap;
 typedef short *wgtmap;
 #endif
 
-#define color RGB
+#define color ALW_RGB
 #define TEXTFG    0
 #define TEXTBG    1
 

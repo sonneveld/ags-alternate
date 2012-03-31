@@ -544,7 +544,7 @@ public:
   virtual bool SupportsExtendedCharacters(int fontNumber) = 0;
   virtual int GetTextWidth(const char *text, int fontNumber) = 0;
   virtual int GetTextHeight(const char *text, int fontNumber) = 0;
-  virtual void RenderText(const char *text, int fontNumber, BITMAP *destination, int x, int y, int colour) = 0;
+  virtual void RenderText(const char *text, int fontNumber, ALW_BITMAP *destination, int x, int y, int colour) = 0;
   virtual void AdjustYCoordinateForFont(int *ycoord, int fontNumber) = 0;
   virtual void EnsureTextValidForFont(char *text, int fontNumber) = 0;
 };
@@ -763,7 +763,7 @@ extern void debug_log(char*texx, ...);
 extern int  GetCharacterWidth(int ww);
 extern block GetObjectImage(int obj, int *isFlipped);
 extern block GetCharacterImage(int charid, int *isFlipped);
-extern int  my_getpixel(BITMAP *blk, int x, int y);
+extern int  my_getpixel(ALW_BITMAP *blk, int x, int y);
 extern void update_invorder();
 extern int  GetRegionAt (int xxx, int yyy);
 extern void SetActiveInventory(int iit);

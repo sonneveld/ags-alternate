@@ -1,6 +1,8 @@
 
 #include "ac_dialog_render.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "dynobj/script_dialog_options_rendering.h"

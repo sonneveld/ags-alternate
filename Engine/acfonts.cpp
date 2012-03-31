@@ -39,7 +39,7 @@ public:
   virtual bool SupportsExtendedCharacters(int fontNumber) { return false; }
   virtual int GetTextWidth(const char *text, int fontNumber);
   virtual int GetTextHeight(const char *text, int fontNumber);
-  virtual void RenderText(const char *text, int fontNumber, BITMAP *destination, int x, int y, int colour) ;
+  virtual void RenderText(const char *text, int fontNumber, ALW_BITMAP *destination, int x, int y, int colour) ;
   virtual void AdjustYCoordinateForFont(int *ycoord, int fontNumber);
   virtual void EnsureTextValidForFont(char *text, int fontNumber);
 
@@ -54,7 +54,7 @@ public:
   virtual bool SupportsExtendedCharacters(int fontNumber) { return true; }
   virtual int GetTextWidth(const char *text, int fontNumber);
   virtual int GetTextHeight(const char *text, int fontNumber);
-  virtual void RenderText(const char *text, int fontNumber, BITMAP *destination, int x, int y, int colour) ;
+  virtual void RenderText(const char *text, int fontNumber, ALW_BITMAP *destination, int x, int y, int colour) ;
   virtual void AdjustYCoordinateForFont(int *ycoord, int fontNumber);
   virtual void EnsureTextValidForFont(char *text, int fontNumber);
 };
@@ -255,7 +255,7 @@ int WFNFontRenderer::GetTextHeight(const char *texx, int fontNumber)
   return highest * wtext_multiply;
 }
 
-void WFNFontRenderer::RenderText(const char *text, int fontNumber, BITMAP *destination, int x, int y, int colour)
+void WFNFontRenderer::RenderText(const char *text, int fontNumber, ALW_BITMAP *destination, int x, int y, int colour)
 {
   unsigned int ee;
 
@@ -392,7 +392,7 @@ int TTFFontRenderer::GetTextHeight(const char *text, int fontNumber)
   return alfont_text_height(get_ttf_block(fonts[fontNumber]));
 }
 
-void TTFFontRenderer::RenderText(const char *text, int fontNumber, BITMAP *destination, int x, int y, int colour)
+void TTFFontRenderer::RenderText(const char *text, int fontNumber, ALW_BITMAP *destination, int x, int y, int colour)
 {
   if (y > destination->cb)  // optimisation
     return;

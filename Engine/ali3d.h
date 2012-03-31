@@ -7,6 +7,7 @@
 #ifndef __ALI3D_H
 #define __ALI3D_H
 
+#include "allegro_wrapper.h"
 #include "allegro.h"
 
 // forward declarations:
@@ -91,9 +92,9 @@ public:
   virtual void SetCallbackForNullSprite(ALI3DCLIENTCALLBACKXY callback) = 0;
   virtual void UnInit() = 0;
   virtual void ClearRectangle(int x1, int y1, int x2, int y2, RGB *colorToUse) = 0;
-  virtual BITMAP* ConvertBitmapToSupportedColourDepth(BITMAP *allegroBitmap) = 0;
-  virtual IDriverDependantBitmap* CreateDDBFromBitmap(BITMAP *allegroBitmap, bool hasAlpha, bool opaque = false) = 0;
-  virtual void UpdateDDBFromBitmap(IDriverDependantBitmap* bitmapToUpdate, BITMAP *allegroBitmap, bool hasAlpha) = 0;
+  virtual ALW_BITMAP* ConvertBitmapToSupportedColourDepth(ALW_BITMAP *allegroBitmap) = 0;
+  virtual IDriverDependantBitmap* CreateDDBFromBitmap(ALW_BITMAP *allegroBitmap, bool hasAlpha, bool opaque = false) = 0;
+  virtual void UpdateDDBFromBitmap(IDriverDependantBitmap* bitmapToUpdate, ALW_BITMAP *allegroBitmap, bool hasAlpha) = 0;
   virtual void DestroyDDB(IDriverDependantBitmap* bitmap) = 0;
   virtual void ClearDrawList() = 0;
   virtual void DrawSprite(int x, int y, IDriverDependantBitmap* bitmap) = 0;
@@ -102,7 +103,7 @@ public:
   virtual void RenderToBackBuffer() = 0;
   virtual void Render() = 0;
   virtual void Render(GlobalFlipType flip) = 0;
-  virtual void GetCopyOfScreenIntoBitmap(BITMAP* destination) = 0;
+  virtual void GetCopyOfScreenIntoBitmap(ALW_BITMAP* destination) = 0;
   virtual void EnableVsyncBeforeRender(bool enabled) = 0;
   virtual void Vsync() = 0;
   virtual void FadeOut(int speed, int targetColourRed, int targetColourGreen, int targetColourBlue) = 0;
@@ -112,8 +113,8 @@ public:
   virtual void UseSmoothScaling(bool enabled) = 0;
   virtual bool SupportsGammaControl() = 0;
   virtual void SetGamma(int newGamma) = 0;
-  virtual BITMAP* GetMemoryBackBuffer() = 0;
-  virtual void SetMemoryBackBuffer(BITMAP *backBuffer) = 0;
+  virtual ALW_BITMAP* GetMemoryBackBuffer() = 0;
+  virtual void SetMemoryBackBuffer(ALW_BITMAP *backBuffer) = 0;
   virtual bool RequiresFullRedrawEachFrame() = 0;
   virtual bool HasAcceleratedStretchAndFlip() = 0;
   virtual bool UsesMemoryBackBuffer() = 0;

@@ -1,6 +1,8 @@
 
 #include "ac_datetime.h"
 
+#include "allegro_wrapper.h"
+
 #include "ac.h"
 #include "ac_context.h"
 #include "dynobj/script_date_time.h"

@@ -43,7 +43,7 @@ void ListBox_FillDirList(GUIListBox *listbox, const char *filemask) {
   validate_user_file_path(filemask, searchPath, false);
 
   listbox->Clear();
-  al_ffblk dfb;
+  alw_al_ffblk dfb;
   int	dun = alw_al_findfirst(searchPath, &dfb, FA_SEARCH);
   while (!dun) {
     listbox->AddItem(dfb.name);
@@ -67,7 +67,7 @@ int ListBox_FillSaveGameList(GUIListBox *listbox) {
 
   int numsaves=0;
   int bufix=0;
-  al_ffblk ffb; 
+  alw_al_ffblk ffb; 
   long filedates[MAXSAVEGAMES];
   char buff[200];
 

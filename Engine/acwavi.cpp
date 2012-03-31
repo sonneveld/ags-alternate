@@ -34,7 +34,7 @@
 // I'm not sure where these are defined... allegro somewhere?
 extern "C" extern LPDIRECTDRAW2 directdraw;
 //extern "C" extern IUnknown* directsound;
-extern "C" extern BITMAP *gfx_directx_create_system_bitmap(int width, int height);
+extern "C" extern ALW_BITMAP *gfx_directx_create_system_bitmap(int width, int height);
 
 //int errno;
 char lastError[300];
@@ -53,8 +53,8 @@ IMediaStream			*g_pPrimaryVidStream=NULL;
 IDirectDrawMediaStream	*g_pDDStream=NULL;
 IDirectDrawStreamSample *g_pSample=NULL;
 
-BITMAP *vscreen = NULL;
-BITMAP *vsMemory = NULL;
+ALW_BITMAP *vscreen = NULL;
+ALW_BITMAP *vsMemory = NULL;
 
 //Function prototypes
 HRESULT RenderFileToMMStream(LPCTSTR szFilename);	
@@ -89,13 +89,13 @@ typedef struct BMP_EXTRA_INFO {
    int lock_nesting;
 } BMP_EXTRA_INFO;
 
-LPDIRECTDRAWSURFACE get_bitmap_surface (BITMAP *bmp) {
+LPDIRECTDRAWSURFACE get_bitmap_surface (ALW_BITMAP *bmp) {
   BMP_EXTRA_INFO *bei = (BMP_EXTRA_INFO*)bmp->extra;
 
   // convert the DDSurface2 back to a standard DDSurface
   return (LPDIRECTDRAWSURFACE)bei->surf;
 }
-LPDIRECTDRAWSURFACE2 get_bitmap_surface2 (BITMAP *bmp) {
+LPDIRECTDRAWSURFACE2 get_bitmap_surface2 (ALW_BITMAP *bmp) {
   BMP_EXTRA_INFO *bei = (BMP_EXTRA_INFO*)bmp->extra;
 
   return bei->surf;
@@ -219,7 +219,7 @@ int newWidth, newHeight;
 
 //Perform frame by frame updates and blits. Set the stream 
 //state to STOP if there are no more frames to update.
-void RenderToSurface(BITMAP *vscreen) {
+void RenderToSurface(ALW_BITMAP *vscreen) {
   //update each frame
   if (g_pSample->Update(0, NULL, NULL, 0) != S_OK) {
     g_bAppactive = FALSE;
@@ -357,7 +357,7 @@ int dxmedia_play_video(const char* filename, bool pUseSound, int canskip, int st
   currentlyPlaying = true;
 
   gfxDriver->ClearDrawList();
-  BITMAP *savedBackBuffer = gfxDriver->GetMemoryBackBuffer();
+  ALW_BITMAP *savedBackBuffer = gfxDriver->GetMemoryBackBuffer();
   gfxDriver->SetMemoryBackBuffer(alw_screen);
 
   while ((g_bAppactive) && (!want_exit)) {

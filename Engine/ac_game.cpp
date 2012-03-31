@@ -710,7 +710,7 @@ int SaveScreenShot(char*namm) {
 
   if (gfxDriver->RequiresFullRedrawEachFrame()) 
   {
-    BITMAP *buffer = alw_create_bitmap_ex(32, scrnwid, scrnhit);
+    ALW_BITMAP *buffer = alw_create_bitmap_ex(32, scrnwid, scrnhit);
     gfxDriver->GetCopyOfScreenIntoBitmap(buffer);
 
     if (alw_save_bitmap(fileName, buffer, palette)!=0)

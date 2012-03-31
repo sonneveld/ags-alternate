@@ -45,12 +45,12 @@ extern "C" {
   extern int alogg_get_ogg_stereo(ALOGG_OGG *ogg);
 }
 
-PACKFILE *mp3in;
+ALW_PACKFILE *mp3in;
 
 // My new MP3STREAM wrapper
 struct MYWAVE:public SOUNDCLIP
 {
-  SAMPLE *wave;
+  ALW_SAMPLE *wave;
   int voice;
   int firstTime;
   int repeat;
@@ -153,9 +153,9 @@ MYWAVE *thiswave;
 SOUNDCLIP *my_load_wave(const char *filename, int voll, int loop)
 {
 #ifdef MAC_VERSION
-  SAMPLE *new_sample = alw_load_wav(filename);
+  ALW_SAMPLE *new_sample = alw_load_wav(filename);
 #else
-  SAMPLE *new_sample = alw_load_sample(filename);
+  ALW_SAMPLE *new_sample = alw_load_sample(filename);
 #endif
 
   if (new_sample == NULL)
@@ -178,7 +178,7 @@ SOUNDCLIP *my_load_wave(const char *filename, int voll, int loop)
 struct MYMP3:public SOUNDCLIP
 {
   ALMP3_MP3STREAM *stream;
-  PACKFILE *in;
+  ALW_PACKFILE *in;
   long  filesize;
   char *buffer;
   int chunksize;
@@ -272,7 +272,7 @@ struct MYMP3:public SOUNDCLIP
 
   int get_voice()
   {
-    AUDIOSTREAM *ast = almp3_get_audiostream_mp3stream(stream);
+    ALW_AUDIOSTREAM *ast = almp3_get_audiostream_mp3stream(stream);
     if (ast)
       return ast->voice;
     return -1;
@@ -410,7 +410,7 @@ struct MYSTATICMP3:public SOUNDCLIP
 
   int get_voice()
   {
-    AUDIOSTREAM *ast = almp3_get_audiostream_mp3(tune);
+    ALW_AUDIOSTREAM *ast = almp3_get_audiostream_mp3(tune);
     if (ast)
       return ast->voice;
     return -1;
@@ -441,7 +441,7 @@ SOUNDCLIP *my_load_static_mp3(const char *filname, int voll, bool loop)
 {
 
   // first, read the mp3 into memory
-  PACKFILE *mp3in = alw_pack_fopen(filname, "rb");
+  ALW_PACKFILE *mp3in = alw_pack_fopen(filname, "rb");
   if (mp3in == NULL)
     return NULL;
 
@@ -564,7 +564,7 @@ struct MYSTATICOGG:public SOUNDCLIP
     if ((done) || (!alogg_is_playing_ogg(tune)))
       return 0;
 
-    AUDIOSTREAM *str = alogg_get_audiostream_ogg(tune);
+    ALW_AUDIOSTREAM *str = alogg_get_audiostream_ogg(tune);
     long offs = (alw_voice_get_position(str->voice) * 1000) / str->samp->freq;
 
     if (last_ms_offs != alogg_get_pos_msecs_ogg(tune)) {
@@ -625,7 +625,7 @@ struct MYSTATICOGG:public SOUNDCLIP
 
   int get_voice()
   {
-    AUDIOSTREAM *ast = alogg_get_audiostream_ogg(tune);
+    ALW_AUDIOSTREAM *ast = alogg_get_audiostream_ogg(tune);
     if (ast)
       return ast->voice;
     return -1;
@@ -675,7 +675,7 @@ SOUNDCLIP *my_load_static_ogg(const char *filname, int voll, bool loop)
 {
 
   // first, read the mp3 into memory
-  PACKFILE *mp3in = alw_pack_fopen(filname, "rb");
+  ALW_PACKFILE *mp3in = alw_pack_fopen(filname, "rb");
   if (mp3in == NULL)
     return NULL;
 
@@ -709,7 +709,7 @@ SOUNDCLIP *my_load_static_ogg(const char *filname, int voll, bool loop)
 struct MYOGG:public SOUNDCLIP
 {
   ALOGG_OGGSTREAM *stream;
-  PACKFILE *in;
+  ALW_PACKFILE *in;
   char *buffer;
   int chunksize;
 
@@ -792,7 +792,7 @@ struct MYOGG:public SOUNDCLIP
     if ((done) || (!alogg_is_playing_oggstream(stream)))
       return 0;
 
-    AUDIOSTREAM *str = alogg_get_audiostream_oggstream(stream);
+    ALW_AUDIOSTREAM *str = alogg_get_audiostream_oggstream(stream);
     long offs = (alw_voice_get_position(str->voice) * 1000) / str->samp->freq;
 
     if (last_ms_offs != alogg_get_pos_msecs_oggstream(stream)) {
@@ -851,7 +851,7 @@ struct MYOGG:public SOUNDCLIP
 
   int get_voice()
   {
-    AUDIOSTREAM *ast = alogg_get_audiostream_oggstream(stream);
+    ALW_AUDIOSTREAM *ast = alogg_get_audiostream_oggstream(stream);
     if (ast)
       return ast->voice;
     return -1;
@@ -916,7 +916,7 @@ SOUNDCLIP *my_load_ogg(const char *filname, int voll)
 // MIDI
 struct MYMIDI:public SOUNDCLIP
 {
-  MIDI *tune;
+  ALW_MIDI *tune;
   int lengthInSeconds;
 
   int poll()
@@ -1010,7 +1010,7 @@ struct MYMIDI:public SOUNDCLIP
 MYMIDI *thismidi;
 SOUNDCLIP *my_load_midi(const char *filname, int repet)
 {
-  MIDI *midiPtr = alw_load_midi(filname);
+  ALW_MIDI *midiPtr = alw_load_midi(filname);
   if (midiPtr == NULL)
     return NULL;
 

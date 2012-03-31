@@ -58,6 +58,8 @@ extern void * memcpy_amd(void *dest, const void *src, size_t n);
 #define USE_CLIB
 
 extern int our_eip;
+
+#include "allegro_wrapper.h"
 #include "wgt2allg.h"
 #include "sprcache.h"
 #include "routefnd.h"
@@ -68,7 +70,6 @@ extern int our_eip;
 #include "ac_mouse.h"
 #include "ac_script_room.h"
 
-#include "allegro_wrapper.h"
 
 // Allegro 4 has switched 15-bit colour to BGR instead of RGB, so
 // in this case we need to convert the graphics on load
@@ -109,8 +110,8 @@ int sys_getch() {
 not needed now that allegro is being built with MSVC solution with no ASM
 // The assembler stretch routine seems to GPF
 extern "C" {
-	void Cstretch_sprite(BITMAP *dst, BITMAP *src, int x, int y, int w, int h);
-	void Cstretch_blit(BITMAP *src, BITMAP *dst, int sx, int sy, int sw, int sh, int dx, int dy, int dw, int dh);
+	void Cstretch_sprite(ALW_BITMAP *dst, ALW_BITMAP *src, int x, int y, int w, int h);
+	void Cstretch_blit(ALW_BITMAP *src, ALW_BITMAP *dst, int sx, int sy, int sw, int sh, int dx, int dy, int dw, int dh);
 }
 
 #define stretch_sprite Cstretch_sprite
@@ -373,9 +374,9 @@ int force_letterbox = 0;  // if 1, allow borders to run in a different resolutio
 IDriverDependantBitmap *blankImage = NULL;  // used for drawing letterbox borders.
 IDriverDependantBitmap *blankSidebarImage = NULL;   // used for drawing side borders for wide screens.
 
-COLOR_MAP maincoltable;  // allegro lighting table, used for 256 lighting effects.
+ALW_COLOR_MAP maincoltable;  // allegro lighting table, used for 256 lighting effects.
 // created for allegro to speed up mapping 32bit colour to palette
-RGB_MAP rgb_table;  // for 256-col antialiasing
+ALW_RGB_MAP rgb_table;  // for 256-col antialiasing
 
 // overlays
 ScreenOverlay screenover[MAX_SCREEN_OVERLAYS];  // buffer of overlays
@@ -1591,7 +1592,7 @@ inline int is_valid_object(int obtest) {
 // SCREEN RENDERING
 // ============================================================================
 
-int get_screen_y_adjustment(BITMAP *checkFor) {
+int get_screen_y_adjustment(ALW_BITMAP *checkFor) {
 
   if ((alw_screen == _sub_screen) && (BMP_H(checkFor) < final_scrn_hit))
     return get_fixed_pixel_size(20);
@@ -1599,7 +1600,7 @@ int get_screen_y_adjustment(BITMAP *checkFor) {
   return 0;
 }
 
-int get_screen_x_adjustment(BITMAP *checkFor) {
+int get_screen_x_adjustment(ALW_BITMAP *checkFor) {
 
   if (((alw_screen) == _sub_screen) && (BMP_W(checkFor) < final_scrn_wid))
     return (final_scrn_wid - BMP_W(checkFor)) / 2;
@@ -1628,7 +1629,7 @@ void render_black_borders(int atx, int aty)
   }
 }
 
-void render_to_screen(BITMAP *toRender, int atx, int aty) {
+void render_to_screen(ALW_BITMAP *toRender, int atx, int aty) {
 
   atx += get_screen_x_adjustment(toRender);
   aty += get_screen_y_adjustment(toRender);
@@ -2365,7 +2366,7 @@ void update_walk_behind_images()
 {
   int ee, rr;
   int bpp = (alw_bitmap_color_depth(thisroom.ebscene[play.bg_frame]) + 7) / 8;
-  BITMAP *wbbmp;
+  ALW_BITMAP *wbbmp;
   for (ee = 1; ee < MAX_OBJ; ee++)
   {
     update_polled_stuff();
@@ -5144,7 +5145,7 @@ void GUIInv::Draw() {
 // ============================================================================
 
 // Avoid freeing and reallocating the memory if possible
-IDriverDependantBitmap* recycle_ddb_bitmap(IDriverDependantBitmap *bimp, BITMAP *source, bool hasAlpha) {
+IDriverDependantBitmap* recycle_ddb_bitmap(IDriverDependantBitmap *bimp, ALW_BITMAP *source, bool hasAlpha) {
   if (bimp != NULL) {
     // same colour depth, width and height -> reuse
     if (((bimp->GetColorDepth() + 1) / 8 == bmp_bpp(source)) && 
@@ -6540,7 +6541,7 @@ void quit(char*quitmsg) {
 /*  // print the FPS if there wasn't an error
   if ((play.debug_mode!=0) && (qmsg[0]=='|'))
     printf("Last cycle fps: %d\n",fps);*/
-  al_ffblk	dfb;
+  alw_al_ffblk	dfb;
   int	dun = alw_al_findfirst("~ac*.tmp",&dfb,FA_SEARCH);
   while (!dun) {
     unlink(dfb.name);
@@ -8418,7 +8419,7 @@ void stop_speech() {
 // GRAPHICS
 // ============================================================================
 
-int my_getpixel(BITMAP *blk, int x, int y) {
+int my_getpixel(ALW_BITMAP *blk, int x, int y) {
   if ((x < 0) || (y < 0) || (x >= BMP_W(blk)) || (y >= BMP_H(blk)))
     return -1;
 
@@ -8699,7 +8700,7 @@ int do_movelist_move(short*mlnum,int*xx,int*yy) {
   int need_to_fix_sprite=0;
   if (mlnum[0]<1) quit("movelist_move: attempted to move on a non-exist movelist");
   MoveList*cmls; cmls=&mls[mlnum[0]];
-  fixed xpermove=cmls->xpermove[cmls->onstage],ypermove=cmls->ypermove[cmls->onstage];
+  alw_fixed xpermove=cmls->xpermove[cmls->onstage],ypermove=cmls->ypermove[cmls->onstage];
 
   short targetx=short((cmls->pos[cmls->onstage+1] >> 16) & 0x00ffff);
   short targety=short(cmls->pos[cmls->onstage+1] & 0x00ffff);
@@ -9397,7 +9398,7 @@ int show_dialog_options(int dlgnum, int sayChosenOption, bool runGameLoopsInBack
   int curswas=cur_cursor;
   int bullet_wid = 0, needheight;
   IDriverDependantBitmap *ddb = NULL;
-  BITMAP *subBitmap = NULL;
+  ALW_BITMAP *subBitmap = NULL;
   GUITextBox *parserInput = NULL;
   DialogTopic*dtop = NULL;
 
@@ -12839,7 +12840,7 @@ void CreateBlankImage()
   // so it's the most likey place for a crash
   try
   {
-    BITMAP *blank = alw_create_bitmap_ex(final_col_dep, 16, 16);
+    ALW_BITMAP *blank = alw_create_bitmap_ex(final_col_dep, 16, 16);
     blank = gfxDriver->ConvertBitmapToSupportedColourDepth(blank);
     alw_clear_bitmap(blank);
     blankImage = gfxDriver->CreateDDBFromBitmap(blank, false, true);

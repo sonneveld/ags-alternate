@@ -18,6 +18,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "agsio.h"
+
+#include "allegro_wrapper.h"
+
 #include "routefnd.h"
 
 #include "wgt2allg.h"

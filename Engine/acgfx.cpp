@@ -401,16 +401,16 @@ AllegroGFXFilter::AllegroGFXFilter(int multiplier, bool justCheckingForSetup) : 
   lastBlitY = 0;
 }
 
-BITMAP* AllegroGFXFilter::ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
+ALW_BITMAP* AllegroGFXFilter::ScreenInitialized(ALW_BITMAP *screen, int fakeWidth, int fakeHeight) {
   realScreen = screen;
   return alw_screen;
 }
 
-BITMAP *AllegroGFXFilter::ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
+ALW_BITMAP *AllegroGFXFilter::ShutdownAndReturnRealScreen(ALW_BITMAP *currentScreen) {
   return currentScreen;
 }
 
-void AllegroGFXFilter::RenderScreen(BITMAP *toRender, int x, int y) {
+void AllegroGFXFilter::RenderScreen(ALW_BITMAP *toRender, int x, int y) {
 
   if (toRender != realScreen) 
     alw_blit(toRender, realScreen, 0, 0, x, y, BMP_W(toRender), BMP_H(toRender));
@@ -419,7 +419,7 @@ void AllegroGFXFilter::RenderScreen(BITMAP *toRender, int x, int y) {
   lastBlitY = y;
 }
 
-void AllegroGFXFilter::RenderScreenFlipped(BITMAP *toRender, int x, int y, int flipType) {
+void AllegroGFXFilter::RenderScreenFlipped(ALW_BITMAP *toRender, int x, int y, int flipType) {
 
   if (toRender == realScreen) 
     return;
@@ -436,12 +436,12 @@ void AllegroGFXFilter::ClearRect(int x1, int y1, int x2, int y2, int color) {
   alw_rectfill(realScreen, x1, y1, x2, y2, color);
 }
 
-void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap) 
+void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(ALW_BITMAP *copyBitmap) 
 {
   GetCopyOfScreenIntoBitmap(copyBitmap, true);
 }
 
-void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap, bool copyWithOffset)
+void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(ALW_BITMAP *copyBitmap, bool copyWithOffset)
 {
   if (copyBitmap != realScreen)
     alw_blit(realScreen, copyBitmap, (copyWithOffset ? lastBlitX : 0), (copyWithOffset ? lastBlitY : 0), 0, 0, BMP_W(copyBitmap), BMP_H(copyBitmap));
@@ -450,9 +450,9 @@ void AllegroGFXFilter::GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap, bool copyWi
 
 struct ScalingAllegroGFXFilter : public AllegroGFXFilter {
 protected:
-  BITMAP *fakeScreen;
-  BITMAP *realScreenSizedBuffer;
-  BITMAP *lastBlitFrom;
+  ALW_BITMAP *fakeScreen;
+  ALW_BITMAP *realScreenSizedBuffer;
+  ALW_BITMAP *lastBlitFrom;
 
 public:
 
@@ -462,14 +462,14 @@ public:
     lastBlitFrom = NULL;
   }
 
-  virtual BITMAP* ScreenInitialized(BITMAP *alw_screen, int fakeWidth, int fakeHeight) {
+  virtual ALW_BITMAP* ScreenInitialized(ALW_BITMAP *alw_screen, int fakeWidth, int fakeHeight) {
     realScreen = alw_screen;
     realScreenSizedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth(alw_screen), BMP_W(alw_screen), BMP_H(alw_screen));
     fakeScreen = alw_create_bitmap_ex(alw_bitmap_color_depth(alw_screen), fakeWidth, fakeHeight);
     return fakeScreen;
   }
 
-  virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
+  virtual ALW_BITMAP *ShutdownAndReturnRealScreen(ALW_BITMAP *currentScreen) {
     alw_destroy_bitmap(fakeScreen);
     alw_destroy_bitmap(realScreenSizedBuffer);
     fakeScreen = NULL;
@@ -477,7 +477,7 @@ public:
     return realScreen;
   }
 
-  virtual void RenderScreen(BITMAP *toRender, int x, int y) 
+  virtual void RenderScreen(ALW_BITMAP *toRender, int x, int y) 
   {
     alw_stretch_blit(toRender, realScreen, 0, 0, BMP_W(toRender), BMP_H(toRender), x * MULTIPLIER, y * MULTIPLIER, BMP_W(toRender) * MULTIPLIER, BMP_H(toRender) * MULTIPLIER);
     lastBlitX = x;
@@ -485,7 +485,7 @@ public:
     lastBlitFrom = toRender;
   }
 
-  virtual void RenderScreenFlipped(BITMAP *toRender, int x, int y, int flipType) {
+  virtual void RenderScreenFlipped(ALW_BITMAP *toRender, int x, int y, int flipType) {
 
     if (toRender == fakeScreen)
       return;
@@ -508,12 +508,12 @@ public:
     alw_rectfill(realScreen, x1, y1, x2, y2, color);
   }
 
-  virtual void GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap) 
+  virtual void GetCopyOfScreenIntoBitmap(ALW_BITMAP *copyBitmap) 
   {
     GetCopyOfScreenIntoBitmap(copyBitmap, true);
   }
 
-  virtual void GetCopyOfScreenIntoBitmap(BITMAP *copyBitmap, bool copyWithYOffset)
+  virtual void GetCopyOfScreenIntoBitmap(ALW_BITMAP *copyBitmap, bool copyWithYOffset)
   {
     if (!copyWithYOffset)
     {
@@ -541,7 +541,7 @@ public:
 
 struct Super2xSAIGFXFilter : public ScalingGFXFilter {
 private:
-  BITMAP *realScreenBuffer;
+  ALW_BITMAP *realScreenBuffer;
 
 public:
 
@@ -554,7 +554,7 @@ public:
     return ScalingGFXFilter::Initialize(width, height, colDepth);
   }
 
-  virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
+  virtual ALW_BITMAP* ScreenInitialized(ALW_BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
     realScreenBuffer = alw_create_bitmap(BMP_W( screen), BMP_H( screen));
     fakeScreen = alw_create_bitmap_ex(alw_bitmap_color_depth( screen), fakeWidth, fakeHeight);
@@ -562,13 +562,13 @@ public:
     return fakeScreen;
   }
 
-  virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
+  virtual ALW_BITMAP *ShutdownAndReturnRealScreen(ALW_BITMAP *currentScreen) {
     alw_destroy_bitmap(fakeScreen);
     alw_destroy_bitmap(realScreenBuffer);
     return realScreen;
   }
 
-  virtual void RenderScreen(BITMAP *toRender, int x, int y) {
+  virtual void RenderScreen(ALW_BITMAP *toRender, int x, int y) {
 
     alw_acquire_bitmap(realScreenBuffer);
     Super2xSaI(toRender, realScreenBuffer, 0, 0, 0, 0, BMP_W(toRender), BMP_H(toRender));
@@ -592,7 +592,7 @@ public:
 
 struct Hq2xGFXFilter : public ScalingAllegroGFXFilter {
 private:
-  BITMAP *realScreenBuffer;
+  ALW_BITMAP *realScreenBuffer;
 
 public:
 
@@ -606,7 +606,7 @@ public:
   }
 
 
-  virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
+  virtual ALW_BITMAP* ScreenInitialized(ALW_BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
     realScreenBuffer = alw_create_bitmap(BMP_W( screen), BMP_H( screen));
     realScreenSizedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth( screen), BMP_W( screen), BMP_H( screen));
@@ -615,14 +615,14 @@ public:
     return fakeScreen;
   }
 
-  virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
+  virtual ALW_BITMAP *ShutdownAndReturnRealScreen(ALW_BITMAP *currentScreen) {
     alw_destroy_bitmap(fakeScreen);
     alw_destroy_bitmap(realScreenBuffer);
     alw_destroy_bitmap(realScreenSizedBuffer);
     return realScreen;
   }
 
-  virtual void RenderScreen(BITMAP *toRender, int x, int y) {
+  virtual void RenderScreen(ALW_BITMAP *toRender, int x, int y) {
 
     alw_acquire_bitmap(realScreenBuffer);
     hq2x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(alw_bitmap_color_depth(realScreenBuffer)));
@@ -644,7 +644,7 @@ public:
 
 struct Hq3xGFXFilter : public ScalingAllegroGFXFilter {
 private:
-  BITMAP *realScreenBuffer;
+  ALW_BITMAP *realScreenBuffer;
 
 public:
 
@@ -658,7 +658,7 @@ public:
   }
 
 
-  virtual BITMAP* ScreenInitialized(BITMAP *screen, int fakeWidth, int fakeHeight) {
+  virtual ALW_BITMAP* ScreenInitialized(ALW_BITMAP *screen, int fakeWidth, int fakeHeight) {
     realScreen = screen;
     realScreenBuffer = alw_create_bitmap(BMP_W(screen), BMP_H(screen));
     realScreenSizedBuffer = alw_create_bitmap_ex(alw_bitmap_color_depth(screen), BMP_W(screen), BMP_H(screen));
@@ -667,14 +667,14 @@ public:
     return fakeScreen;
   }
 
-  virtual BITMAP *ShutdownAndReturnRealScreen(BITMAP *currentScreen) {
+  virtual ALW_BITMAP *ShutdownAndReturnRealScreen(ALW_BITMAP *currentScreen) {
     alw_destroy_bitmap(fakeScreen);
     alw_destroy_bitmap(realScreenBuffer);
     alw_destroy_bitmap(realScreenSizedBuffer);
     return realScreen;
   }
 
-  virtual void RenderScreen(BITMAP *toRender, int x, int y) {
+  virtual void RenderScreen(ALW_BITMAP *toRender, int x, int y) {
 
     alw_acquire_bitmap(realScreenBuffer);
     hq3x_32(&BMP_LINE(toRender)[0][0], &BMP_LINE(realScreenBuffer)[0][0], BMP_W(toRender), BMP_H(toRender), BMP_W(realScreenBuffer) * BYTES_PER_PIXEL(alw_bitmap_color_depth(realScreenBuffer)));

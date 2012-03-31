@@ -394,11 +394,11 @@ ScriptDynamicSprite* DynamicSprite_CreateFromScreenShot(int width, int height) {
   else
     height = multiply_up_coordinate(height);
 
-  BITMAP *newPic;
+  ALW_BITMAP *newPic;
   if (!gfxDriver->UsesMemoryBackBuffer()) 
   {
     // D3D driver
-    BITMAP *scrndump = alw_create_bitmap_ex(final_col_dep, scrnwid, scrnhit);
+    ALW_BITMAP *scrndump = alw_create_bitmap_ex(final_col_dep, scrnwid, scrnhit);
     gfxDriver->GetCopyOfScreenIntoBitmap(scrndump);
 
     update_polled_stuff();

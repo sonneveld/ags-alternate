@@ -76,7 +76,7 @@ void DrawingSurface_Release(ScriptDrawingSurface* sds)
 /* *** SCRIPT SYMBOL: [DrawingSurface] DrawingSurface::CreateCopy^0 *** */
 ScriptDrawingSurface* DrawingSurface_CreateCopy(ScriptDrawingSurface *sds)
 {
-  BITMAP *sourceBitmap = sds->GetBitmapSurface();
+  ALW_BITMAP *sourceBitmap = sds->GetBitmapSurface();
 
   for (int i = 0; i < MAX_DYNAMIC_SURFACES; i++)
   {
@@ -102,7 +102,7 @@ void DrawingSurface_DrawSurface(ScriptDrawingSurface* target, ScriptDrawingSurfa
     quit("!DrawingSurface.DrawSurface: invalid parameter (transparency must be 0-99)");
 
   target->StartDrawing();
-  BITMAP *surfaceToDraw = source->GetBitmapSurface();
+  ALW_BITMAP *surfaceToDraw = source->GetBitmapSurface();
 
   if (surfaceToDraw == abuf)
     quit("!DrawingSurface.DrawSurface: cannot draw surface onto itself");
@@ -136,7 +136,7 @@ void DrawingSurface_DrawImage(ScriptDrawingSurface* sds, int xx, int yy, int slo
   if (trans == 100)
     return;
 
-  BITMAP *sourcePic = spriteset[slot];
+  ALW_BITMAP *sourcePic = spriteset[slot];
   bool needToFreeBitmap = false;
 
   if (width != SCR_NO_VALUE)

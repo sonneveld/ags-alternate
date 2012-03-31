@@ -65,7 +65,7 @@ extern void update_polled_stuff();
 
 // for acsound.cpp
 extern void write_log(char*msg) ;
-//extern void sample_update_callback(SAMPLE *sample, int voice);
+//extern void sample_update_callback(ALW_SAMPLE *sample, int voice);
 
 // for acwavi3d.cpp
 extern void update_polled_stuff_and_crossfade();

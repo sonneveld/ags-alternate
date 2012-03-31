@@ -32,7 +32,7 @@ int *pathbackx, *pathbacky;
 int waspossible = 1;
 int routex1, routey1;
 int suggestx, suggesty;
-fixed move_speed_x, move_speed_y;
+alw_fixed move_speed_x, move_speed_y;
 
 
 
@@ -718,10 +718,10 @@ void calculate_move_stage(MoveList * mlsp, int aaa)
     return;
   }
 
-  fixed xdist = alw_itofix(abs(ourx - destx));
-  fixed ydist = alw_itofix(abs(oury - desty));
+  alw_fixed xdist = alw_itofix(abs(ourx - destx));
+  alw_fixed ydist = alw_itofix(abs(oury - desty));
 
-  fixed useMoveSpeed;
+  alw_fixed useMoveSpeed;
 
   if (move_speed_x == move_speed_y) {
     useMoveSpeed = move_speed_x;
@@ -729,7 +729,7 @@ void calculate_move_stage(MoveList * mlsp, int aaa)
   else {
     // different X and Y move speeds
     // the X proportion of the movement is (x / (x + y))
-    fixed xproportion = alw_fixdiv(xdist, (xdist + ydist));
+    alw_fixed xproportion = alw_fixdiv(xdist, (xdist + ydist));
 
     if (move_speed_x > move_speed_y) {
       // speed = y + ((1 - xproportion) * (x - y))
@@ -741,15 +741,15 @@ void calculate_move_stage(MoveList * mlsp, int aaa)
     }
   }
 
-  fixed angl = alw_fixatan(alw_fixdiv(ydist, xdist));
+  alw_fixed angl = alw_fixatan(alw_fixdiv(ydist, xdist));
 
   // now, since new opp=hyp*sin, work out the Y step size
-  //fixed newymove = useMoveSpeed * fsin(angl);
-  fixed newymove = alw_fixmul(useMoveSpeed, alw_fixsin(angl));
+  //alw_fixed newymove = useMoveSpeed * fsin(angl);
+  alw_fixed newymove = alw_fixmul(useMoveSpeed, alw_fixsin(angl));
 
   // since adj=hyp*cos, work out X step size
-  //fixed newxmove = useMoveSpeed * fcos(angl);
-  fixed newxmove = alw_fixmul(useMoveSpeed, alw_fixcos(angl));
+  //alw_fixed newxmove = useMoveSpeed * fcos(angl);
+  alw_fixed newxmove = alw_fixmul(useMoveSpeed, alw_fixcos(angl));
 
   if (destx < ourx)
     newxmove = -newxmove;
