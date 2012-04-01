@@ -200,14 +200,6 @@ static void mnewcursor(char cursno)
 }
 
 
-static void mloadwcursor(char *namm)
-{
-  color dummypal[256];
-  if (wloadsprites(&dummypal[0], namm, mousecurs, 0, MAXCURSORS)) {
-    //printf("C_Load_wCursor: Error reading mouse cursor file\n"); 
-    exit(1);
-  }
-}
 
 static int butwas = 0;
 int mgetbutton()

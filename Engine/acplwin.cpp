@@ -767,7 +767,7 @@ int AGSWin32::RunPluginDebugHooks(const char *scriptfile, int linenum) {
   return pl_run_plugin_debug_hooks(scriptfile, linenum);
 }
 
-extern "C" const unsigned char hw_to_mycode[256]; // allegro
+extern "C" const unsigned char alw_hw_to_mycode[256]; // allegro
 #ifndef VS2005
 #define MAPVK_VK_TO_VSC 0
 #endif
@@ -781,7 +781,7 @@ int AGSWin32::ConvertKeycodeToScanCode(int keycode)
   int vkey = VkKeyScan(keycode);
   int scancode = MapVirtualKey(vkey, MAPVK_VK_TO_VSC);
   if ((scancode >= 0) && (scancode < 256))
-    keycode = hw_to_mycode[scancode];
+    keycode = alw_hw_to_mycode[scancode];
   return keycode;
 }
 
@@ -822,9 +822,9 @@ LPDIRECTSOUND IAGSEngine::GetDirectSound() {
 }
 
 LPDIRECTINPUTDEVICE IAGSEngine::GetDirectInputKeyboard() {
-  return key_dinput_device;
+  return alw_key_dinput_device;
 }
 
 LPDIRECTINPUTDEVICE IAGSEngine::GetDirectInputMouse() {
-  return mouse_dinput_device;
+  return alw_mouse_dinput_device;
 }

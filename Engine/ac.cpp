@@ -1109,7 +1109,7 @@ ALW_END_OF_FUNCTION(dj_timer_handler);
 void set_game_speed(int fps) {
   frames_per_second = fps;
   time_between_timers = 1000 / fps;
-  alw_install_int_ex(dj_timer_handler,MSEC_TO_TIMER(time_between_timers));
+  alw_install_int_ex(dj_timer_handler,ALW_MSEC_TO_TIMER(time_between_timers));
 }
 
 

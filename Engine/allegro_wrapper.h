@@ -43,23 +43,25 @@
 #define alw_set_uformat set_uformat
 
 // MOUSE
-#define alw_mouse_z mouse_z
 #define alw_mouse_x mouse_x
 #define alw_mouse_y mouse_y
+#define alw_mouse_z mouse_z
 #define alw_mouse_b mouse_b
 #define alw_poll_mouse poll_mouse
 #define alw_set_mouse_range set_mouse_range
 #define alw_position_mouse position_mouse
 #define alw_install_mouse install_mouse
+#define alw_mouse_dinput_device mouse_dinput_device
 
 
 // TIMER
+#define alw_install_timer install_timer
+#define alw_install_int_ex install_int_ex
+#define alw_rest rest
 #define ALW_END_OF_FUNCTION END_OF_FUNCTION
 #define ALW_LOCK_FUNCTION LOCK_FUNCTION
 #define ALW_LOCK_VARIABLE LOCK_VARIABLE
-#define alw_install_int_ex install_int_ex
-#define alw_install_timer install_timer
-#define alw_rest rest
+#define ALW_MSEC_TO_TIMER MSEC_TO_TIMER
 
 // KEYBOARD
 #define alw_keypressed keypressed
@@ -70,35 +72,47 @@
 #define alw_key_shifts key_shifts
 #define alw_set_leds set_leds
 
+#define alw_key_dinput_device key_dinput_device
+#define alw_hw_to_mycode hw_to_mycode
+
 
 // GRAPHICS MODES
 #define alw_set_color_depth set_color_depth
-#define alw_set_display_switch_callback set_display_switch_callback
-#define alw_set_display_switch_mode set_display_switch_mode
 #define alw_set_gfx_mode set_gfx_mode
+
 #define alw_get_gfx_mode_list get_gfx_mode_list
 #define alw_destroy_gfx_mode_list destroy_gfx_mode_list
+
+#define alw_set_display_switch_callback set_display_switch_callback
+#define alw_set_display_switch_mode set_display_switch_mode
+
 #define alw_vsync vsync
 
 
 
 // BITMAP
-#define alw_bitmap_color_depth bitmap_color_depth
-#define alw_destroy_bitmap destroy_bitmap
+#define alw_screen screen
+
+#define alw_create_bitmap create_bitmap
 #define alw_create_bitmap_ex create_bitmap_ex
+#define alw_create_sub_bitmap create_sub_bitmap
+#define alw_destroy_bitmap destroy_bitmap
+
+#define alw_bitmap_color_depth bitmap_color_depth
+#define alw_bitmap_mask_color bitmap_mask_color
+#define alw_is_linear_bitmap is_linear_bitmap
+#define alw_is_memory_bitmap is_memory_bitmap
+#define alw_is_video_bitmap is_video_bitmap
+
 #define alw_acquire_bitmap acquire_bitmap
 #define alw_release_bitmap release_bitmap
 #define alw_acquire_screen acquire_screen
-#define alw_is_video_bitmap is_video_bitmap
 #define alw_release_screen release_screen
-#define alw_is_linear_bitmap is_linear_bitmap
-#define alw_bitmap_mask_color bitmap_mask_color
+
 #define alw_set_clip_rect set_clip_rect
+// i think the default is always clip:
 #define alw_set_clip_state set_clip_state
-#define alw_create_sub_bitmap create_sub_bitmap
-#define alw_is_memory_bitmap is_memory_bitmap
-#define alw_create_bitmap create_bitmap
-#define alw_screen screen
+
 
 // IMAGE FILES
 #define alw_save_bitmap save_bitmap
@@ -117,44 +131,51 @@
 #define alw_black_palette black_palette
 
 // TRUE COLOUR PIXELS
+#define alw_makecol8 makecol8
+#define alw_makecol15 makecol15
+#define alw_makecol16 makecol16
 #define alw_makeacol32 makeacol32
+
+#define alw_makecol_depth makecol_depth
+#define alw_makeacol_depth makeacol_depth
+
 #define alw_getr16 getr16
 #define alw_getg16 getg16
 #define alw_getb16 getb16
-#define alw_makeacol_depth makeacol_depth
+
+#define alw_getr15 getr15
+#define alw_getg15 getg15
+#define alw_getb15 getb15
+
+#define alw_getr32 getr32
+#define alw_getg32 getg32
+#define alw_getb32 getb32
 #define alw_geta32 geta32
-#define alw_makecol_depth makecol_depth
+
 #define alw_geta_depth geta_depth
 #define alw_getr_depth getr_depth
 #define alw_getg_depth getg_depth
 #define alw_getb_depth getb_depth
-#define alw_getr15 getr15
-#define alw_getg15 getg15
-#define alw_getb15 getb15
-#define alw_makecol15 makecol15
-#define alw_makecol16 makecol16
-#define alw_getr32 getr32
-#define alw_getg32 getg32
-#define alw_getb32 getb32
-#define alw_makecol8 makecol8
+
 #define ALW_MASK_COLOR_16 MASK_COLOR_16
 #define ALW_MASK_COLOR_32 MASK_COLOR_32
 
 // DRAWING
 #define alw_getpixel getpixel
 #define alw_putpixel putpixel
-#define alw_rectfill rectfill
+#define alw__getpixel getpixel
+#define alw__putpixel putpixel
+#define alw_clear_to_color clear_to_color
+#define alw_clear_bitmap clear_bitmap
+
 #define alw_hline hline
 #define alw_line line
 #define alw_do_line do_line
-#define alw_floodfill floodfill
-#define alw_clear_to_color clear_to_color
 #define alw_rect rect
+#define alw_floodfill floodfill
+#define alw_rectfill rectfill
 #define alw_triangle triangle
 #define alw_circlefill circlefill
-#define alw__getpixel _getpixel
-#define alw__putpixel _putpixel
-#define alw_clear_bitmap clear_bitmap
 
 // BLITTING AND SPRITES
 #define alw_blit blit
@@ -179,7 +200,6 @@
 
 
 // COLOUR FORMATS
-#define alw_bestfit_color bestfit_color
 #define alw_rgb_to_hsv rgb_to_hsv
 #define alw_hsv_to_rgb hsv_to_rgb
 #define alw_create_rgb_table create_rgb_table
@@ -230,18 +250,25 @@
 #define alw_append_filename append_filename
 #define alw_fix_filename_case fix_filename_case
 #define alw_fix_filename_slashes fix_filename_slashes
+#define alw_put_backslash put_backslash
+#define alw_get_filename get_filename
+
+// also involve pack files.
+#define alw_file_exists file_exists
 #define alw_exists exists
-#define alw_pack_fread pack_fread
-#define alw_pack_fclose pack_fclose
-#define alw_pack_fopen pack_fopen
-#define alw_al_findclose al_findclose
+#define alw_file_size_ex file_size_ex
+
+// could probably stub
 #define alw_al_findfirst al_findfirst
 #define alw_al_findnext al_findnext
-#define alw_put_backslash put_backslash
+#define alw_al_findclose al_findclose
+
+// used only by audio.  stub?
+#define alw_pack_fopen pack_fopen
+#define alw_pack_fread pack_fread
 #define alw_pack_fseek pack_fseek
-#define alw_get_filename get_filename
-#define alw_file_exists file_exists
-#define alw_file_size_ex file_size_ex
+#define alw_pack_fclose pack_fclose
+
 
 
 // FIXED

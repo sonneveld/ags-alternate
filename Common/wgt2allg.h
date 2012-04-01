@@ -52,12 +52,6 @@
 
 typedef BITMAP *block;
 
-#if (WGTMAP_SIZE == 1)
-typedef unsigned char *wgtmap;
-#else
-typedef short *wgtmap;
-#endif
-
 #define color ALW_RGB
 #define TEXTFG    0
 #define TEXTBG    1
@@ -76,21 +70,8 @@ extern "C"
   };
 #endif
 
-#define is_ttf(fontptr)  (fontptr[0] == 'T')
-
 extern const char *spindexid;
 extern const char *spindexfilename ;
-
-extern fpos_t lfpos;
-extern FILE *libf;
-extern short lresult;
-extern int lsize;
-extern char password[16];
-extern char *wgtlibrary;
-
-extern void readheader();
-extern void findfile(char *);
-extern int checkpassword(char *);
 
 extern int currentcolor;
 extern block abuf;
@@ -99,28 +80,14 @@ extern int vesa_xres, vesa_yres;
 extern short getshort(FILE * fff);
 extern void putshort(short num, FILE *fff);
 
-extern void wbutt(int, int, int, int);
-extern void wsetmode(int);
-extern int wgetmode();
 extern void wsetscreen(block);
-extern void wnormscreen();
-extern void wcopyscreen(int, int, int, int, block, int, int, block);
 extern void wsetrgb(int, int, int, int, color *);
-extern int wloadpalette(char *, color *);
 extern void wcolrotate(unsigned char, unsigned char, int, color *);
 extern block wnewblock(int, int, int, int);
-extern void wfreesprites(block *, int, int);
-extern block wloadblock(char *);
-extern int wloadsprites(color *, char *, block *, int, int);
 extern void wputblock(int, int, block, int);
-extern void wremap(color *, block, color *);
 extern void wsetcolor(int);
-extern long wtimer(struct time, struct time);
-extern void gettime(struct time *);
 extern void __my_setcolor(int *ctset, int newcol);
 extern int get_col8_lookup(int nval);
-
-
 
 #ifdef __cplusplus
 }
@@ -128,26 +95,16 @@ extern int get_col8_lookup(int nval);
 
 #define wallocblock(wii,hii)  alw_create_bitmap(wii,hii)
 #define wbar(x1, y1, x2, y2)  alw_rectfill(abuf, x1, y1, x2, y2, currentcolor)
-#define wclip(x1, y1, x2, y2) set_clip(abuf, x1, y1, x2, y2)
 
-#define wfastputpixel(x1, y1)           alw__putpixel(abuf, x1, y1, currentcolor)
 #define wfreeblock(bll)                 alw_destroy_bitmap(bll)
 #define wgetblockheight(bll)            BMP_H(bll)
 #define wgetblockwidth(bll)             BMP_W(bll)
-#define wgetpixel(xx, yy)               alw_getpixel(abuf, xx, yy)
 #define whline(x1, x2, yy)              alw_hline(abuf, x1, yy, x2, currentcolor)
 #define wline(x1, y1, x2, y2)           alw_line(abuf,x1,y1,x2,y2,currentcolor)
-#define wnormscreen()                   abuf = alw_screen
 #define wputpixel(x1, y1)               alw_putpixel(abuf, x1, y1, currentcolor)
 #define wreadpalette(from, to, dd)      alw_get_palette_range(dd, from, to)
 #define wrectangle(x1, y1, x2, y2)      alw_rect(abuf, x1, y1, x2, y2, currentcolor)
-#define wregionfill(xx, yy)             alw_floodfill(abuf, xx, yy, currentcolor)
-#define setlib(lll)                     csetlib(lll, "")
 #define wsetpalette(from, to, pall)     alw_set_palette_range(pall, from, to, 0)
-#define vgadetected()                   1
-
-#define XRAY    1
-#define NORMAL  0
 
 struct IMouseGetPosCallback {
 public:

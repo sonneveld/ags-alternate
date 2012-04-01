@@ -28,17 +28,17 @@
 #define MANOBJNUM 99
 
 #define MAXPATHBACK 1000
-int *pathbackx, *pathbacky;
-int waspossible = 1;
-int routex1, routey1;
-int suggestx, suggesty;
+static int *pathbackx, *pathbacky;
+static int waspossible = 1;
+static int routex1, routey1;
+static int suggestx, suggesty;
 alw_fixed move_speed_x, move_speed_y;
 
 
 
 #define COPYRIGHT_CRC 172668
 // stupid name, to deter hackers
-int get_route_composition()
+static int get_route_composition()
 {
   int aaa, crctotal = 0;
   for (aaa = 0; aaa < 66; aaa++) {
@@ -71,11 +71,11 @@ void init_pathfinder()
 
 block wallscreen;
 //#define DEBUG_PATHFINDER
-char *movelibcopyright = "PathFinder library v3.1 (c) 1998, 1999, 2001, 2002 Chris Jones.";
-int line_failed = 0;
+static char *movelibcopyright = "PathFinder library v3.1 (c) 1998, 1999, 2001, 2002 Chris Jones.";
+static int line_failed = 0;
 int lastcx, lastcy;
 
-void line_callback(block bmpp, int x, int y, int d)
+static void line_callback(block bmpp, int x, int y, int d)
 {
 /*  if ((x>=320) | (y>=200) | (x<0) | (y<0)) line_failed=1;
   else */ if (alw_getpixel(bmpp, x, y) < 1)
@@ -91,7 +91,7 @@ void line_callback(block bmpp, int x, int y, int d)
 extern void winalert(char *, ...);
 #endif
 // whether the message has been printed, deter hackers
-int walk_area_zone5 = 0;
+static int walk_area_zone5 = 0;
 
 void print_welcome_text(char *verno, char *aciverno)
 {
@@ -173,8 +173,8 @@ int find_nearest_walkable_area(block tempw, int fromX, int fromY, int toX, int t
 }
 
 #define MAX_GRANULARITY 3
-int walk_area_granularity[MAX_WALK_AREAS + 1];
-int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
+static int walk_area_granularity[MAX_WALK_AREAS + 1];
+static int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
 {
   wallscreen = wss;
   suggestx = -1;
@@ -282,20 +282,20 @@ int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
 }
 
 #include "mousew32.h"
-int leftorright = 0;
-int nesting = 0;
-int pathbackstage = 0;
-int finalpartx = 0, finalparty = 0;
-short **beenhere = NULL;     //[200][320];
-int beenhere_array_size = 0;
-const int BEENHERE_SIZE = 2;
+static int leftorright = 0;
+static int nesting = 0;
+static int pathbackstage = 0;
+static int finalpartx = 0, finalparty = 0;
+static short **beenhere = NULL;     //[200][320];
+static int beenhere_array_size = 0;
+static const int BEENHERE_SIZE = 2;
 
 #define DIR_LEFT  0
 #define DIR_RIGHT 2
 #define DIR_UP    1
 #define DIR_DOWN  3
 
-int try_this_square(int srcx, int srcy, int tox, int toy)
+static int try_this_square(int srcx, int srcy, int tox, int toy)
 {
   if (beenhere[srcy][srcx] & 0x80)
     return 0;
@@ -405,7 +405,7 @@ try_again:
 
 // Round down the supplied co-ordinates to the area granularity,
 // and move a bit if this causes them to become non-walkable
-void round_down_coords(int &tmpx, int &tmpy)
+static void round_down_coords(int &tmpx, int &tmpy)
 {
   int startgran = walk_area_granularity[alw__getpixel(wallscreen, tmpx, tmpy)];
   tmpy = tmpy - tmpy % startgran;
@@ -428,7 +428,7 @@ void round_down_coords(int &tmpx, int &tmpy)
   }
 }
 
-int find_route_dijkstra(int fromx, int fromy, int destx, int desty)
+static int find_route_dijkstra(int fromx, int fromy, int destx, int desty)
 {
   int i, j;
 
@@ -610,7 +610,7 @@ int find_route_dijkstra(int fromx, int fromy, int destx, int desty)
   return 1;
 }
 
-int __find_route(int srcx, int srcy, short *tox, short *toy, int noredx)
+static int __find_route(int srcx, int srcy, short *tox, short *toy, int noredx)
 {
   if ((noredx == 0) && (alw_getpixel(wallscreen, tox[0], toy[0]) == 0))
     return 0; // clicked on a wall
