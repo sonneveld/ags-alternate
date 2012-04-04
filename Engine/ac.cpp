@@ -17,6 +17,7 @@
 //#define THIS_IS_THE_ENGINE   now defined in the VC Project so that it's defined in all files
 
 #define UNICODE
+#include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
@@ -59,7 +60,7 @@ extern void * memcpy_amd(void *dest, const void *src, size_t n);
 
 extern int our_eip;
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 #include "wgt2allg.h"
 #include "sprcache.h"
 #include "routefnd.h"
@@ -79,8 +80,9 @@ extern int our_eip;
 
 #ifdef WINDOWS_VERSION
 #include <crtdbg.h>
-#include "winalleg.h"
+//#include "winalleg.h"
 #include <shlwapi.h>
+#include <shellapi.h>
 #elif defined(LINUX_VERSION) || defined(MAC_VERSION)
 #define HWND long
 #define _getcwd getcwd
@@ -100,11 +102,6 @@ int sys_getch() {
 }
 #endif  // WINDOWS_VERSION
 
-/*#define getr32(xx) ((xx >> _rgb_r_shift_32) & 0xFF)
-#define getg32(xx) ((xx >> _rgb_g_shift_32) & 0xFF)
-#define getb32(xx) ((xx >> _rgb_b_shift_32) & 0xFF)
-#define geta32(xx) ((xx >> _rgb_a_shift_32) & 0xFF)
-#define makeacol32(r,g,b,a) ((r << _rgb_r_shift_32) | (g << _rgb_g_shift_32) | (b << _rgb_b_shift_32) | (a << _rgb_a_shift_32))*/
 /*
 #if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
 not needed now that allegro is being built with MSVC solution with no ASM
@@ -132,8 +129,10 @@ extern "C" {
 #define INI_READONLY
 //#include <myini.H>
 
+#define BITMAP ALW_BITMAP
 #include "agsplugin.h"
-#include <apeg.h>
+#undef BITMAP
+//#include <apeg.h>
 
 #include "clib32.h"
 #include "mousew32.h"
@@ -202,7 +201,7 @@ extern "C" {
 #define USE_CUSTOM_EXCEPTION_HANDLER
 #endif
 
-extern "C" HWND allegro_wnd;
+//extern "C" HWND allegro_wnd;
 
 
 
@@ -907,13 +906,13 @@ const char *load_game_errors[9] =
   "Colour depth mismatch", ""};
 
 // We need COLOR_DEPTH_24 to allow it to load the preload PCX in hi-col
-BEGIN_COLOR_DEPTH_LIST
-  COLOR_DEPTH_8
-  COLOR_DEPTH_15
-  COLOR_DEPTH_16
-  COLOR_DEPTH_24
-  COLOR_DEPTH_32
-END_COLOR_DEPTH_LIST
+//BEGIN_COLOR_DEPTH_LIST
+//  COLOR_DEPTH_8
+//  COLOR_DEPTH_15
+//  COLOR_DEPTH_16
+//  COLOR_DEPTH_24
+//  COLOR_DEPTH_32
+//END_COLOR_DEPTH_LIST
 
 
 
@@ -1036,12 +1035,12 @@ void wouttext_outline(int xxp, int yyp, int usingfont, char *texx);
   
 
 // setup separate errno
-#if defined(LINUX_VERSION) || defined(MAC_VERSION)
+/*#if defined(LINUX_VERSION) || defined(MAC_VERSION)
 int myerrno;
 #else
 int errno;
 #define myerrno errno
-#endif
+#endif*/
 
 // for external modules to call
 void next_iteration() {
@@ -1120,7 +1119,7 @@ void set_game_speed(int fps) {
 
 #ifdef USE_15BIT_FIX
 extern "C" {
-    extern GFX_VTABLE *_get_vtable(int color_depth);
+    extern ALW_GFX_VTABLE *_get_vtable(int color_depth);
 }
 
 // xref: load_new_room, initialize_sprite
@@ -1181,9 +1180,9 @@ block convert_16_to_15(block iii) {
 
     for (x=0; x < BMP_W(tempbl); x++) {
 			c = p16[x];
-			b = _rgb_scale_5[c & 0x1F];
-			g = _rgb_scale_6[(c >> 5) & 0x3F];
-			r = _rgb_scale_5[(c >> 11) & 0x1F];
+			b = alw_get_rgb_scale_5(c & 0x1F);
+			g = alw_get_rgb_scale_6((c >> 5) & 0x3F);
+			r = alw_get_rgb_scale_5((c >> 11) & 0x1F);
 			p15[x] = alw_makecol15(r, g, b);
 		}
   }
@@ -1217,13 +1216,13 @@ block convert_16_to_16bgr(block tempbl) {
     for (x=0; x < BMP_W(tempbl); x++) {
 			c = p16[x];
       if (c != ALW_MASK_COLOR_16) {
-        b = _rgb_scale_5[c & 0x1F];
-			  g = _rgb_scale_6[(c >> 5) & 0x3F];
-			  r = _rgb_scale_5[(c >> 11) & 0x1F];
+        b = alw_get_rgb_scale_5(c & 0x1F);
+		g = alw_get_rgb_scale_6((c >> 5) & 0x3F);
+        r = alw_get_rgb_scale_5((c >> 11) & 0x1F);
         // allegro assumes 5-6-5 for 16-bit
-        p16[x] = (((r >> _places_r) << _rgb_r_shift_16) |
-            ((g >> _places_g) << _rgb_g_shift_16) |
-            ((b >> _places_b) << _rgb_b_shift_16));
+        p16[x] = (((r >> _places_r) << alw_get_rgb_r_shift_16()) |
+            ((g >> _places_g) << alw_get_rgb_g_shift_16()) |
+            ((b >> _places_b) << alw_get_rgb_b_shift_16()));
 
       }
 		}
@@ -3127,7 +3126,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
     else forchar->view=thisroom.options[ST_MANVIEW]-1;
     forchar->frame=0;   // make him standing
     }
-  alw_color_map = NULL;
+  alw_set_color_map(NULL);
 
   // UPDATE STUFF ***********************************************************************************************
 
@@ -12412,26 +12411,26 @@ void read_config_file(char *argv0) {
     else if (idx == 1)
       idx = DIGI_WAVOUTID(0);
     else if (idx == 2)
-      idx = DIGI_NONE;
+      idx = ALW_DIGI_NONE;
     else if (idx == 3) 
       idx = DIGI_DIRECTX(0);
     else 
-      idx = DIGI_AUTODETECT;
+      idx = ALW_DIGI_AUTODETECT;
     usetup.digicard = idx;
 
     idx = INIreadint("sound","midiwinindx", 0);
     if (idx == 1)
-      idx = MIDI_NONE;
+      idx = ALW_MIDI_NONE;
     else if (idx == 2)
       idx = MIDI_WIN32MAPPER;
     else
-      idx = MIDI_AUTODETECT;
+      idx = ALW_MIDI_AUTODETECT;
     usetup.midicard = idx;
 
     if (usetup.digicard < 0)
-      usetup.digicard = DIGI_AUTODETECT;
+      usetup.digicard = ALW_DIGI_AUTODETECT;
     if (usetup.midicard < 0)
-      usetup.midicard = MIDI_AUTODETECT;
+      usetup.midicard = ALW_MIDI_AUTODETECT;
 #endif
 
 #if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
@@ -13126,7 +13125,7 @@ int initeng_init_allegro()
   set_eip(-199);
   // Initialize allegro
 #ifdef WINDOWS_VERSION
-  if (alw_install_allegro(SYSTEM_AUTODETECT,&myerrno,atexit)) {
+  if (alw_install_allegro(SYSTEM_AUTODETECT,&errno,atexit)) {
     platform->DisplayAlert("Unable to initialize graphics subsystem. Make sure you have DirectX 5 or above installed.");
 #else
   if (alw_allegro_init()) {
@@ -13438,7 +13437,7 @@ void initeng_init_sound()
 
 #ifdef WINDOWS_VERSION
   // don't let it use the hardware mixer verion, crashes some systems
-  //if ((usetup.digicard == DIGI_AUTODETECT) || (usetup.digicard == DIGI_DIRECTX(0)))
+  //if ((usetup.digicard == ALW_DIGI_AUTODETECT) || (usetup.digicard == DIGI_DIRECTX(0)))
   //    usetup.digicard = DIGI_DIRECTAMX(0);
 
   if (usetup.digicard == DIGI_DIRECTX(0)) {
@@ -13460,21 +13459,21 @@ void initeng_init_sound()
     opts.mod_player=0;
     opts.mp3_player=0;
     if (alw_install_sound(usetup.digicard,usetup.midicard,NULL)!=0) {
-      if ((usetup.digicard != DIGI_NONE) && (usetup.midicard != MIDI_NONE)) {
+      if ((usetup.digicard != ALW_DIGI_NONE) && (usetup.midicard != ALW_MIDI_NONE)) {
         // only flag an error if they wanted a sound card
         platform->DisplayAlert("\nUnable to initialize your audio hardware.\n"
           "[Problem: %s]\n",alw_allegro_error);
       }
       alw_reserve_voices(0,0);
-      alw_install_sound(DIGI_NONE, MIDI_NONE, NULL);
-      usetup.digicard = DIGI_NONE;
-      usetup.midicard = MIDI_NONE;
+      alw_install_sound(ALW_DIGI_NONE, ALW_MIDI_NONE, NULL);
+      usetup.digicard = ALW_DIGI_NONE;
+      usetup.midicard = ALW_MIDI_NONE;
     }
   }
 
   set_eip(-181);
 
-  if (usetup.digicard == DIGI_NONE) {
+  if (usetup.digicard == ALW_DIGI_NONE) {
     // disable speech and music if no digital sound
     // therefore the MIDI soundtrack will be used if present,
     // and the voice mode should not go to Voice Only
@@ -13580,15 +13579,15 @@ void initeng_init_screen_settings(int &initasx, int &initasy, int &firstDepth, i
   write_log_debug("Initializing screen settings");
 
   // default shifts for how we store the sprite data
-  _rgb_r_shift_32 = 16;
-  _rgb_g_shift_32 = 8;
-  _rgb_b_shift_32 = 0;
-  _rgb_r_shift_16 = 11;
-  _rgb_g_shift_16 = 5;
-  _rgb_b_shift_16 = 0;
-  _rgb_r_shift_15 = 10;
-  _rgb_g_shift_15 = 5;
-  _rgb_b_shift_15 = 0;
+  alw_set_rgb_r_shift_32(16);
+  alw_set_rgb_g_shift_32(8);
+  alw_set_rgb_b_shift_32(0);
+  alw_set_rgb_r_shift_16(11);
+  alw_set_rgb_g_shift_16(5);
+  alw_set_rgb_b_shift_16(0);
+  alw_set_rgb_r_shift_15(10);
+  alw_set_rgb_g_shift_15(5);
+  alw_set_rgb_b_shift_15(0);
 
   usetup.base_width = 320;
   usetup.base_height = 200;
@@ -13801,9 +13800,9 @@ void initeng_prepare_gfx_screen(int &initasx, int &initasy, int &firstDepth, int
 
   // Most cards do 5-6-5 RGB, which is the format the files are saved in
   // Some do 5-6-5 BGR, or  6-5-5 RGB, in which case convert the gfx
-  if ((final_col_dep == 16) && ((_rgb_b_shift_16 != 0) || (_rgb_r_shift_16 != 11))) {
+  if ((final_col_dep == 16) && ((alw_get_rgb_b_shift_16() != 0) || (alw_get_rgb_r_shift_16() != 11))) {
     convert_16bit_bgr = 1;
-    if (_rgb_r_shift_16 == 10) {
+    if (alw_get_rgb_r_shift_16() == 10) {
       // some very old graphics cards lie about being 16-bit when they
       // are in fact 15-bit ... get around this
       _places_r = 3;
@@ -13813,16 +13812,16 @@ void initeng_prepare_gfx_screen(int &initasx, int &initasy, int &firstDepth, int
   if (final_col_dep > 16) {
     // when we're using 32-bit colour, it converts hi-color images
     // the wrong way round - so fix that
-    _rgb_r_shift_16 = 11;
-    _rgb_g_shift_16 = 5;
-    _rgb_b_shift_16 = 0;
+    alw_set_rgb_r_shift_16(11);
+    alw_set_rgb_g_shift_16(5);
+    alw_set_rgb_b_shift_16(0);
   }
   else if (final_col_dep <= 16) {
     // ensure that any 32-bit graphics displayed are converted
     // properly to the current depth
-    _rgb_r_shift_32 = 16;
-    _rgb_g_shift_32 = 8;
-    _rgb_b_shift_32 = 0;
+    alw_set_rgb_r_shift_32(16);
+    alw_set_rgb_g_shift_32(8);
+    alw_set_rgb_b_shift_32(0);
   }
 
   platform->PostAllegroInit((usetup.windowed > 0) ? true : false);
@@ -14187,7 +14186,7 @@ int initialize_engine_with_exception_handling(int argc,char*argv[])
       excinfo.ExceptionCode, excinfo.ExceptionAddress, tempmsg, our_eip, eip_guinum, eip_guiobj, get_cur_script(5),
       (miniDumpResultCode == 0) ? "An error file CrashInfo.dmp has been created. You may be asked to upload this file when reporting this problem on the AGS Forums." : 
       "Unable to create an error dump file.", miniDumpResultCode);
-    MessageBoxA(allegro_wnd, printfworkingspace, "Illegal exception", MB_ICONSTOP | MB_OK);
+    MessageBoxA(alw_get_allegro_wnd(), printfworkingspace, "Illegal exception", MB_ICONSTOP | MB_OK);
     proper_exit = 1;
   }
   return EXIT_CRASH;

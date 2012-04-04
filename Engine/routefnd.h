@@ -2,8 +2,8 @@
 #define _ROUTEFND_H_HEADER
 
 // forward declarations:
-#include "allegro.h"        // for BITMAP
-typedef BITMAP *block;      // wgt2allh.h
+#include "sdlwrap/allegro.h"        // for BITMAP
+typedef ALW_BITMAP *block;      // wgt2allh.h
 
 extern int route_script_link();
 extern int find_route(short , short , short , short , block , int , int, int);

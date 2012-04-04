@@ -33,6 +33,7 @@ void lzwexpand(FILE *, FILE *);
 #define N 4096
 #define F 16
 #define THRESHOLD 3
+#undef min
 #define min(xx,yy) ((yy<xx) ? yy : xx)
 
 #define dad (node+1)

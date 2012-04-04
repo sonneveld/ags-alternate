@@ -33,7 +33,7 @@
 #include <io.h>
 #else
 #include "djcompat.h"
-#include "allegro.h"
+#include "sdlwrap/allegro.h"
 #endif
 #include "misc.h"
 

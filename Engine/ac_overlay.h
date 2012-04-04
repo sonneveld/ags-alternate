@@ -2,8 +2,8 @@
 #define _AC_OVERLAY_H_HEADER
 
 // forward declarations:
-#include "allegro.h"        // for BITMAP
-typedef BITMAP *block;      // wgt2allg.h
+#include "sdlwrap/allegro.h"        // for BITMAP
+typedef ALW_BITMAP *block;      // wgt2allg.h
 struct ScriptOverlay;       // acruntim.h
 
 extern void remove_screen_overlay_index(int cc);

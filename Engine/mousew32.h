@@ -2,8 +2,8 @@
 #define _MOUSEW32_H_HEADER
 
 // forward declarations:
-#include "allegro.h"        // for BITMAP
-typedef BITMAP *block;      // wgt2allg.h
+#include "sdlwrap/allegro.h"        // for BITMAP
+typedef ALW_BITMAP *block;      // wgt2allg.h
 struct IMouseGetPosCallback; // wgt2allg.h
 
 #define DOMOUSE_NOCURSOR 5

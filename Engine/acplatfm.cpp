@@ -12,7 +12,7 @@
 
 */
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "acplatfm.h"
 
@@ -579,8 +579,8 @@ int IAGSEngine::IsSpriteAlphaBlended(int32 slot) {
 // disable AGS's sound engine
 void IAGSEngine::DisableSound() {
   shutdown_sound();
-  usetup.digicard = DIGI_NONE;
-  usetup.midicard = MIDI_NONE;
+  usetup.digicard = ALW_DIGI_NONE;
+  usetup.midicard = ALW_MIDI_NONE;
   alw_install_sound(usetup.digicard,usetup.midicard,NULL);
 }
 int IAGSEngine::CanRunScriptFunctionNow() {

@@ -1,4 +1,4 @@
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 #include "wgt2allg.h"
 #include "bmp.h"
 
@@ -104,7 +104,7 @@ block abuf;
 
   void __my_setcolor(int *ctset, int newcol)
   {
-    int wantColDep = bitmap_color_depth(abuf);
+    int wantColDep = alw_bitmap_color_depth(abuf);
     if (wantColDep == 8)
       ctset[0] = newcol;
     else if (newcol & 0x40000000) // already calculated it

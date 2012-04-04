@@ -11,9 +11,9 @@
   You MAY NOT compile your own builds of the engine without making it EXPLICITLY
   CLEAR that the code has been altered from the Standard Version.
 */
-#include "allegro_wrapper.h"
-#include <allegro.h>
-#include <winalleg.h>
+#include "sdlwrap/allegro.h"
+//#include "winalleg.h"
+
 #include "ali3d.h"
 #include "acgfx.h"
 
@@ -21,17 +21,17 @@
 extern int dxmedia_play_video (const char*, bool, int, int);
 #include <ddraw.h>
 
-typedef struct DDRAW_SURFACE {
-   LPDIRECTDRAWSURFACE2 id;
-   int flags;
-   int lock_nesting;
-   ALW_BITMAP *parent_bmp;  
-   struct DDRAW_SURFACE *next;
-   struct DDRAW_SURFACE *prev;
-} DDRAW_SURFACE;
+//typedef struct DDRAW_SURFACE {
+   //LPDIRECTDRAWSURFACE2 id;
+   //int flags;
+   //int lock_nesting;
+   //ALW_BITMAP *parent_bmp;  
+   //struct DDRAW_SURFACE *next;
+   //struct DDRAW_SURFACE *prev;
+//} DDRAW_SURFACE;
 
-extern "C" extern LPDIRECTDRAW2 directdraw;
-extern "C" DDRAW_SURFACE *gfx_directx_primary_surface;
+//extern "C" extern LPDIRECTDRAW2 directdraw;
+//extern "C" DDRAW_SURFACE *gfx_directx_primary_surface;
 #endif
 
 #define MAX_DRAW_LIST_SIZE 200
@@ -316,10 +316,10 @@ bool ALSoftwareGraphicsDriver::Init(int width, int height, int colourDepth, bool
     {
       memset(&ddrawCaps, 0, sizeof(ddrawCaps));
       ddrawCaps.dwSize = sizeof(ddrawCaps);
-      IDirectDraw2_GetCaps(directdraw, &ddrawCaps, NULL);
+      IDirectDraw2_GetCaps(alw_get_directdraw(), &ddrawCaps, NULL);
 
       if ((ddrawCaps.dwCaps2 & DDCAPS2_PRIMARYGAMMA) == 0) { }
-      else if (IDirectDrawSurface2_QueryInterface(gfx_directx_primary_surface->id, IID_IDirectDrawGammaControl, (void **)&dxGammaControl) == 0) 
+      else if (IDirectDrawSurface2_QueryInterface(alw_get_gfx_directx_primary_surface()->id, IID_IDirectDrawGammaControl, (void **)&dxGammaControl) == 0) 
       {
         dxGammaControl->GetGammaRamp(0, &defaultGammaRamp);
       }

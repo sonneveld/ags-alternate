@@ -1,6 +1,6 @@
 #include "ac_multimedia.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -34,7 +34,7 @@ int IsMusicPlaying() {
   if ((play.fast_forward) && (play.skip_until_char_stops < 0))
     return 0;
 
-  if (usetup.midicard == MIDI_NONE)
+  if (usetup.midicard == ALW_MIDI_NONE)
     return 0;
 
   if (current_music_type != 0) {
@@ -193,7 +193,7 @@ void play_flc_file(int numb,int playflags) {
   fli_target = alw_create_bitmap_ex(final_col_dep, BMP_W(alw_screen), BMP_H(alw_screen));
   fli_ddb = gfxDriver->CreateDDBFromBitmap(fli_target, false, true);
 
-  if (alw_play_fli(flicnam,fli_buffer,0,fli_callback)==FLI_ERROR)
+  if (alw_play_fli(flicnam,fli_buffer,0,fli_callback)==ALW_FLI_ERROR)
     quit("FLI/FLC animation play error");
 
   wfreeblock(fli_buffer);

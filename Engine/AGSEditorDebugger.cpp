@@ -12,12 +12,12 @@
 
 #include "AGSEditorDebugger.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include <windows.h>
 #include <stdio.h>
 #include <io.h>
-#include "allegro/file.h"
+#include <malloc.h>
 
 
 struct DummyAGSDebugger : IAGSEditorDebugger

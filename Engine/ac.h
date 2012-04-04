@@ -3,8 +3,8 @@
 
 // forward declarations:
 #include <stdio.h>          // for FILE
-#include "allegro.h"        // for BITMAP
-typedef BITMAP *block;      // wgt2allh.h
+#include "sdlwrap/allegro.h"        // for ALW_BITMAP
+typedef ALW_BITMAP *block;      // wgt2allh.h
 class IDriverDependantBitmap; // ali3d.h
 struct CharacterInfo;       // acroom.h
 struct CustomProperties;    // acroom.h
@@ -52,7 +52,7 @@ extern void update_polled_stuff_and_crossfade();
 extern void update_polled_stuff();
 extern void next_iteration();
 extern void update_music_volume();
-extern void render_to_screen(BITMAP *toRender, int atx, int aty);
+extern void render_to_screen(ALW_BITMAP *toRender, int atx, int aty);
 
 // for acfonts.cpp
 extern bool ShouldAntiAliasText();

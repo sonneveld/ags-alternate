@@ -3,7 +3,7 @@
 
 #define UNICODE
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -166,7 +166,7 @@ bool send_message_to_editor(const char *msg, const char *errorMsg)
 
   char messageToSend[STD_BUFFER_SIZE];
   sprintf(messageToSend, "<?xml version=\"1.0\" encoding=\"Windows-1252\"?><Debugger Command=\"%s\">", msg);
-  sprintf(&messageToSend[strlen(messageToSend)], "  <EngineWindow>%d</EngineWindow> ", win_get_window());
+  sprintf(&messageToSend[strlen(messageToSend)], "  <EngineWindow>%d</EngineWindow> ", alw_win_get_window());
   sprintf(&messageToSend[strlen(messageToSend)], "  <ScriptState><![CDATA[%s]]></ScriptState> ", callStack);
   if (errorMsg != NULL)
   {
@@ -373,9 +373,9 @@ void check_debug_keys() {
     if (play.debug_mode) {
       // do the run-time script debugging
 
-      if ((!key[KEY_SCRLOCK]) && (scrlockWasDown))
+      if ((!alw_key[KEY_SCRLOCK]) && (scrlockWasDown))
         scrlockWasDown = 0;
-      else if ((key[KEY_SCRLOCK]) && (!scrlockWasDown)) {
+      else if ((alw_key[KEY_SCRLOCK]) && (!scrlockWasDown)) {
 
         break_on_next_script_step = 1;
         scrlockWasDown = 1;

@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL

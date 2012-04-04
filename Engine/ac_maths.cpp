@@ -41,7 +41,7 @@ static int FloatToInt(SCRIPT_FLOAT(value), int roundDirection) {
 
 /* *** SCRIPT SYMBOL: [Maths] IntToFloat *** */
 static FLOAT_RETURN_TYPE IntToFloat(int value) {
-  float fval = value;
+  float fval = (float)value;
 
   RETURN_FLOAT(fval);
 }

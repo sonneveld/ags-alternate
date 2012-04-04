@@ -10,7 +10,7 @@
 
 */
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #pragma unmanaged
 #ifndef USE_ALFONT
@@ -22,7 +22,7 @@
 #include "acruntim.h"
 
 #ifdef USE_ALFONT
-#include "alfont.h"
+//#include "alfont.h"
 #endif
 
 #ifdef THIS_IS_THE_ENGINE
@@ -122,8 +122,8 @@ int wgettextheight(const char *text, int fontNumber)
 
 void wouttextxy(int xxx, int yyy, int fontNumber, const char *texx)
 {
-  if (yyy > abuf->cb)
-    return;                   // each char is clipped but this speeds it up
+  //if (yyy > abuf->cb)
+  //  return;                   // each char is clipped but this speeds it up
 
   if (fontRenderers[fontNumber] != NULL)
   {
@@ -394,8 +394,8 @@ int TTFFontRenderer::GetTextHeight(const char *text, int fontNumber)
 
 void TTFFontRenderer::RenderText(const char *text, int fontNumber, ALW_BITMAP *destination, int x, int y, int colour)
 {
-  if (y > destination->cb)  // optimisation
-    return;
+  //if (y > destination->cb)  // optimisation
+  //  return;
 
   ALFONT_FONT *alfpt = get_ttf_block(fonts[fontNumber]);
   // Y - 1 because it seems to get drawn down a bit

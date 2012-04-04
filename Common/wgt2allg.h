@@ -24,11 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef USE_ALLEGRO3
-#include <allegro3.h>
-#else
-#include "allegro.h"
-#endif
+#include "sdlwrap/allegro.h"
 
 #if defined(LINUX_VERSION) || defined(MAC_VERSION)
 #include "djcompat.h"
@@ -40,17 +36,9 @@
 
 #include <stdarg.h>
 
-#ifdef WINDOWS_VERSION
-#include "winalleg.h"
-#elif defined(MAC_VERSION)
-#include <Allegro/osxalleg.h>
-#elif defined(LINUX_VERSION)
-#include "linalleg.h"
-#endif
-
 #include "bigend.h"
 
-typedef BITMAP *block;
+typedef ALW_BITMAP *block;
 
 #define color ALW_RGB
 #define TEXTFG    0

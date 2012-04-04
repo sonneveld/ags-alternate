@@ -6,12 +6,8 @@
 
 #include "acwavi.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
-
-//#define ALLEGRO_STATICLINK  // already defined in project settings
-#include <allegro.h>
-#include <winalleg.h>
 #include <windows.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -32,9 +28,9 @@
 
 //DirectDrawEx Global interfaces
 // I'm not sure where these are defined... allegro somewhere?
-extern "C" extern LPDIRECTDRAW2 directdraw;
+//extern "C" extern LPDIRECTDRAW2 directdraw;
 //extern "C" extern IUnknown* directsound;
-extern "C" extern ALW_BITMAP *gfx_directx_create_system_bitmap(int width, int height);
+//extern "C" extern ALW_BITMAP *gfx_directx_create_system_bitmap(int width, int height);
 
 //int errno;
 char lastError[300];
@@ -136,7 +132,7 @@ HRESULT InitRenderToSurface() {
   rect.right = ddsd.dwWidth;
 
   if (vscreen == NULL)
-    vscreen = gfx_directx_create_system_bitmap(ddsd.dwWidth, ddsd.dwHeight);
+    vscreen = alw_gfx_directx_create_system_bitmap(ddsd.dwWidth, ddsd.dwHeight);
 
   if (vscreen == NULL) {
     strcpy(lastError, "Unable to create the DX Video System Bitmap");
@@ -185,7 +181,7 @@ HRESULT RenderFileToMMStream(LPCTSTR szFilename) {
     return E_FAIL;
   }
   //Add primary video stream
-  hr = pAMStream->AddMediaStream(directdraw, &MSPID_PrimaryVideo, 0, NULL);
+  hr = pAMStream->AddMediaStream(alw_get_directdraw(), &MSPID_PrimaryVideo, 0, NULL);
   if (FAILED(hr)) {
     strcpy(lastError, "AddMediaStream failed.");
     return E_FAIL;
@@ -298,7 +294,7 @@ int dxmedia_play_video(const char* filename, bool pUseSound, int canskip, int st
   HRESULT hr;
   
   useSound = pUseSound;
-  ghWnd = win_get_window();
+  ghWnd = alw_win_get_window();
 
   CoInitialize(NULL);
    

@@ -1,6 +1,6 @@
 #include "ac_file.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -9,8 +9,6 @@
 #include "misc.h"
 #include "dynobj/sc_file.h"
 #include "cscomp.h"
-
-#include "allegro_wrapper.h"
 
 #ifdef WINDOWS_VERSION
 #include <shlwapi.h>
@@ -395,13 +393,13 @@ void change_to_directory_of_file(LPCWSTR fileName)
 // override packfile functions to allow it to load from our
 // custom CLIB datafiles
 extern "C" {
-PACKFILE*_my_temppack;
-extern PACKFILE *__old_pack_fopen(char *,char *);
+ALW_PACKFILE*_my_temppack;
+extern ALW_PACKFILE *__old_pack_fopen(char *,char *);
 
 #if ALW_ALLEGRO_DATE > 19991010
-PACKFILE *pack_fopen(const char *filnam1, const char *modd1) {
+ALW_PACKFILE *pack_fopen(const char *filnam1, const char *modd1) {
 #else
-PACKFILE *pack_fopen(char *filnam1, char *modd1) {
+ALW_PACKFILE *pack_fopen(char *filnam1, char *modd1) {
 #endif
       
     char msg[2000];

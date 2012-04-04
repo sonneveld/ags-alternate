@@ -1,6 +1,6 @@
 #include "ac_dynspr.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include <math.h>
 #include "ac.h"

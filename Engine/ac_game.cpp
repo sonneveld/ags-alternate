@@ -1,6 +1,6 @@
 #include "ac_game.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "ac.h"
 #include "ac_types.h"
@@ -27,7 +27,9 @@
 #include "cscomp.h"
 #include "dynobj/script_view_frame.h"
 
+#define BITMAP ALW_BITMAP
 #include "agsplugin.h"
+#undef BITMAP
 
 // forward declarations
 void SetSpeechFont (int fontnum);
@@ -1523,7 +1525,7 @@ void script_debug(int cmdd,int dataa) {
     if (opts.mod_player == 0)
       strcat(toDisplay,"[(mod/xm player discarded)");
     Display(toDisplay);
-//    Display("shftR: %d  shftG: %d  shftB: %d", _rgb_r_shift_16, _rgb_g_shift_16, _rgb_b_shift_16);
+//    Display("shftR: %d  shftG: %d  shftB: %d", alw_get_rgb_r_shift_16(), alw_get_rgb_g_shift_16(), alw_get_rgb_b_shift_16());
 //    Display("Remaining memory: %d kb",_go32_dpmi_remaining_virtual_memory()/1024);
 //Display("Play char bcd: %d",alw_bitmap_color_depth(spriteset[views[playerchar->view].frames[playerchar->loop][playerchar->frame].pic]));
     }

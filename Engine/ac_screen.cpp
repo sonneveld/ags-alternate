@@ -1,5 +1,5 @@
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "ac_screen.h"
 

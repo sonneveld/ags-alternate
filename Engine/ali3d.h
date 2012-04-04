@@ -7,8 +7,7 @@
 #ifndef __ALI3D_H
 #define __ALI3D_H
 
-#include "allegro_wrapper.h"
-#include "allegro.h"
+#include "sdlwrap/allegro.h"
 
 // forward declarations:
 struct GFXFilter; // acgfx.h
@@ -107,7 +106,7 @@ public:
   virtual void EnableVsyncBeforeRender(bool enabled) = 0;
   virtual void Vsync() = 0;
   virtual void FadeOut(int speed, int targetColourRed, int targetColourGreen, int targetColourBlue) = 0;
-  virtual void FadeIn(int speed, PALETTE p, int targetColourRed, int targetColourGreen, int targetColourBlue) = 0;
+  virtual void FadeIn(int speed, ALW_PALETTE p, int targetColourRed, int targetColourGreen, int targetColourBlue) = 0;
   virtual void BoxOutEffect(bool blackingOut, int speed, int delay) = 0;
   virtual bool PlayVideo(const char *filename, bool useAVISound, VideoSkipType skipType, bool stretchToFullScreen) = 0;
   virtual void UseSmoothScaling(bool enabled) = 0;

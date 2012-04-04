@@ -1,6 +1,6 @@
 #include "dynobj/cc_audio_channel.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "acruntim.h"
 #include "acsound.h"

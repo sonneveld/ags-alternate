@@ -15,7 +15,7 @@
 
 #include "bmp.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "wgt2allg.h"
 #include "acgfx.h"
@@ -32,14 +32,6 @@ unsigned long _blender_trans16(unsigned long x, unsigned long y, unsigned long n
 unsigned long _blender_trans15(unsigned long x, unsigned long y, unsigned long n);
 }
 
-// the allegro "inline" ones are not actually inline, so #define
-// over them to speed it up
-/*#define getr32(xx) ((xx >> _rgb_r_shift_32) & 0xFF)
-#define getg32(xx) ((xx >> _rgb_g_shift_32) & 0xFF)
-#define getb32(xx) ((xx >> _rgb_b_shift_32) & 0xFF)
-#define geta32(xx) ((xx >> _rgb_a_shift_32) & 0xFF)
-#define makeacol32(r,g,b,a) ((r << _rgb_r_shift_32) | (g << _rgb_g_shift_32) | (b << _rgb_b_shift_32) | (a << _rgb_a_shift_32))*/
-
 // Take hue and saturation of blend colour, luminance of image
 unsigned long _myblender_color15_light(unsigned long x, unsigned long y, unsigned long n)
 {
@@ -51,7 +43,7 @@ unsigned long _myblender_color15_light(unsigned long x, unsigned long y, unsigne
    alw_rgb_to_hsv(alw_getr15(y), alw_getg15(y), alw_getb15(y), &yh, &ys, &yv);
 
    // adjust luminance
-   yv -= (1.0 - ((float)n / 250.0));
+   yv -= (1.0f - ((float)n / 250.0f));
    if (yv < 0.0) yv = 0.0;
 
    alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
@@ -71,7 +63,7 @@ unsigned long _myblender_color16_light(unsigned long x, unsigned long y, unsigne
    alw_rgb_to_hsv(alw_getr16(y), alw_getg16(y), alw_getb16(y), &yh, &ys, &yv);
 
    // adjust luminance
-   yv -= (1.0 - ((float)n / 250.0));
+   yv -= (1.0f - ((float)n / 250.0f));
    if (yv < 0.0) yv = 0.0;
 
    alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);
@@ -90,7 +82,7 @@ unsigned long _myblender_color32_light(unsigned long x, unsigned long y, unsigne
    alw_rgb_to_hsv(alw_getr32(y), alw_getg32(y), alw_getb32(y), &yh, &ys, &yv);
 
    // adjust luminance
-   yv -= (1.0 - ((float)n / 250.0));
+   yv -= (1.0f - ((float)n / 250.0f));
    if (yv < 0.0) yv = 0.0;
 
    alw_hsv_to_rgb(xh, xs, yv, &r, &g, &b);

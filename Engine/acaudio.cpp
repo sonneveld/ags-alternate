@@ -9,7 +9,7 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "acsound.h"
 #include <math.h>
@@ -401,7 +401,7 @@ int find_free_audio_channel(ScriptAudioClip *clip, int priority, bool interruptE
 SOUNDCLIP *load_sound_clip(ScriptAudioClip *audioClip, bool repeat)
 {
   const char *clipFileName = get_audio_clip_file_name(audioClip);
-  if ((clipFileName == NULL) || (usetup.digicard == DIGI_NONE))
+  if ((clipFileName == NULL) || (usetup.digicard == ALW_DIGI_NONE))
   {
     return NULL;
   }
@@ -965,7 +965,7 @@ void PlayAmbientSound (int channel, int sndnum, int vol, int x, int y) {
   if ((vol < 1) || (vol > 255))
     quit("!PlayAmbientSound: volume must be 1 to 255");
 
-  if (usetup.digicard == DIGI_NONE)
+  if (usetup.digicard == ALW_DIGI_NONE)
     return;
 
   // only play the sound if it's not already playing
@@ -1273,7 +1273,7 @@ int PlaySoundEx(int val1, int channel) {
     return -1;
 
   // if no sound, ignore it
-  if (usetup.digicard == DIGI_NONE)
+  if (usetup.digicard == ALW_DIGI_NONE)
     return -1;
 
   if ((channel < SCHAN_NORMAL) || (channel >= MAX_SOUND_CHANNELS))
@@ -1616,7 +1616,7 @@ SOUNDCLIP *load_music_from_disk(int mnum, bool doRepeat) {
 void play_new_music(int mnum, SOUNDCLIP *music) {
   if (debug_flags & DBG_NOMUSIC)
     return;
-  if (usetup.midicard == MIDI_NONE)
+  if (usetup.midicard == ALW_MIDI_NONE)
     return;
 
   if ((play.cur_music_number == mnum) && (music == NULL)) {

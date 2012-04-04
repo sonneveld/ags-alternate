@@ -11,14 +11,14 @@
   CLEAR that the code has been altered from the Standard Version.
 */
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 #include "acsound.h"
 
 #include "ac.h"
 #include "ac_context.h"
 #include "wgt2allg.h"
-#include "alogg.h"
-#include "almp3.h"
+//#include "alogg.h"
+//#include "almp3.h"
 
 #if (defined(LINUX_VERSION) || defined(WINDOWS_VERSION) || defined(MAC_VERSION))
 #define DUMB_MOD_PLAYER
@@ -39,10 +39,10 @@
 #endif
 
 extern "C" {
-  extern int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg);
-  extern int alogg_is_end_of_ogg(ALOGG_OGG *ogg);
-  extern int alogg_get_ogg_freq(ALOGG_OGG *ogg);
-  extern int alogg_get_ogg_stereo(ALOGG_OGG *ogg);
+  //extern int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg);
+  //extern int alogg_is_end_of_ogg(ALOGG_OGG *ogg);
+  //extern int alogg_get_ogg_freq(ALOGG_OGG *ogg);
+  //extern int alogg_get_ogg_stereo(ALOGG_OGG *ogg);
 }
 
 ALW_PACKFILE *mp3in;
@@ -935,7 +935,7 @@ struct MYMIDI:public SOUNDCLIP
     vol = newvol;
     newvol += volModifier + directionalVolModifier;
     if (newvol < 0) newvol = 0;
-    ::set_volume(-1, newvol);
+    ::alw_set_volume(-1, newvol);
   }
 
   void destroy()
@@ -994,7 +994,7 @@ struct MYMIDI:public SOUNDCLIP
 
   int play() {
     lengthInSeconds = alw_get_midi_length(tune);
-    if (::play_midi(tune, repeat)) {
+    if (::alw_play_midi(tune, repeat)) {
       delete this;
       return 0;
     }
@@ -1139,9 +1139,9 @@ void remove_mod_player() {
 
 #ifdef DUMB_MOD_PLAYER
 
-#include "aldumb.h"
+//#include "aldumb.h"
 
-#define VOLUME_TO_DUMB_VOL(vol) ((float)vol) / 256.0
+#define VOLUME_TO_DUMB_VOL(vol) (((float)vol) / 256.0f)
 
 void al_duh_set_loop(AL_DUH_PLAYER *dp, int loop) {
   DUH_SIGRENDERER *sr = al_duh_get_sigrenderer(dp);

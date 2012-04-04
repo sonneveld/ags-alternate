@@ -327,34 +327,17 @@ typedef struct GFX_VTABLE        /* functions for drawing onto bitmaps */
 } GFX_VTABLE;
 
 
-extern volatile long midi_pos;
-extern PALETTE black_palette;
 extern char allegro_error[1000];
 extern volatile int key_shifts;
 extern volatile int mouse_z;
 extern RGB_MAP * rgb_map;
-extern  COLOR_MAP * color_map;
 extern BITMAP * screen;
-extern int  _rgb_r_shift_15;
-extern int  _rgb_g_shift_15;
-extern int  _rgb_b_shift_15;
-extern int  _rgb_r_shift_16;
-extern int  _rgb_g_shift_16;
-extern int  _rgb_b_shift_16;
-extern int  _rgb_r_shift_24;
-extern int  _rgb_g_shift_24;
-extern int  _rgb_b_shift_24;
-extern int  _rgb_r_shift_32;
-extern int  _rgb_g_shift_32;
-extern int  _rgb_b_shift_32;
-extern int  _rgb_a_shift_32;
+
 
 // from ac.cpp
 extern char dataDirectory[512];
 extern char appDirectory[512];
 extern long int filelength(int fhandle);
-extern int _rgb_scale_5[];
-extern int _rgb_scale_6[];
 
 // mouse
 // ================================================================
@@ -369,8 +352,6 @@ extern int install_mouse();
 
 // drawing
 // ================================================================
-extern void set_alpha_blender() ;
-extern void draw_trans_sprite(BITMAP *bmp, BITMAP *sprite, int x, int y) ;
 extern void set_clip (BITMAP *bitmap, int x1, int y_1, int x2, int y2);
 extern void set_clip_rect (BITMAP *bitmap, int x1, int y_1, int x2, int y2);
 extern void destroy_bitmap(BITMAP *bitmap);
@@ -411,15 +392,9 @@ inline unsigned char **BMP_LINE(BITMAP *bmp) {
 // misc externs
 // ================================================================
 
-extern void blit(BITMAP *source, BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height) ;
-extern void draw_sprite_h_flip(BITMAP *bmp, BITMAP *sprite, int x, int y) ;
-extern void draw_sprite_v_flip(BITMAP *bmp, BITMAP *sprite, int x, int y) ;
-extern void draw_sprite_vh_flip(BITMAP *bmp, BITMAP *sprite, int x, int y) ;
-extern void stretch_blit(BITMAP *source, BITMAP *dest, int source_x, int source_y, int source_width, int source_height, 
-  int dest_x, int dest_y, int dest_width, int dest_height);
-extern void clear_bitmap(BITMAP *bitmap);
-extern void clear(BITMAP *bitmap);
-extern void clear_to_color(BITMAP *bitmap, int color);
+
+
+
 extern BITMAP * create_bitmap (int width, int height);
 extern int _bitmap_get_cb(BITMAP *bitmap);
 extern int osx_sys_question(AL_CONST char *msg, AL_CONST char *but1, AL_CONST char *but2);
@@ -446,36 +421,6 @@ inline char *strupr(char *str) {
     return str;
 }
   
-inline char *fix_filename_case(char *path) {
-    // do nothing if not DOS
-    return path;
-}
-
-inline char *fix_filename_slashes(char *path) {
-    for(char *p = path; *p; p++) {
-        if (*p == '\\')
-            *p = '/';
-    }
-    return path;
-}
-
-inline char *get_filename( char *path) {
-     char *filename = path;
-    for(;;) {
-        char *result = strpbrk(path, "\\/");
-        if (result != NULL)
-            filename = result;
-    }
-    return filename;
-}
-
-inline char *append_filename (char *dest, const char *path, const char *filename, int size) {
-    // hack, barely works, no checks
-    char buffer[500];
-    sprintf(buffer, "%s/%s", path, filename);
-    strcpy(dest, buffer);
-}
-
 inline void hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b) {
     float rf, gf, bf;
     al_color_hsv_to_rgb(h, s, v , &rf, &gf, &bf);
@@ -492,112 +437,39 @@ inline void rgb_to_hsv(int r, int g, int b, float *h, float *s, float *v) {
    al_color_rgb_to_hsv(rf, gf, bf, h, s, v);
 }
 
-inline void rectfill ( BITMAP *bmp, int x1, int y_1, int x2, int y2, int color) { printf("stub.h@%d\n", __LINE__); }
-inline void putpixel ( BITMAP *bmp, int x, int y, int color){ printf("stub.h@%d\n", __LINE__); }
-#define _putpixel putpixel
-inline int getpixel ( BITMAP *bmp, int x, int y){ printf("stub.h@%d\n", __LINE__); return 0;}
-inline int _getpixel ( BITMAP *bmp, int x, int y){ printf("stub.h@%d\n", __LINE__); return 0;}
+
 inline void acquire_bitmap(BITMAP *bmp) { printf("stub.h@%d\n", __LINE__); }
 inline void release_bitmap(BITMAP *bmp) { printf("stub.h@%d\n", __LINE__); }
 inline PACKFILE *pack_fopen(char *name, char *mode) { printf("stub.h@%d\n", __LINE__); return  NULL; }
 inline void pack_fclose(PACKFILE*file) { }
 inline int exists(const char *filename) {    return al_filename_exists(filename);}
-inline void do_line(BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(BITMAP *bmp, int x, int y, int d)) { printf("stub.h@%d\n", __LINE__); }
-inline int is_memory_bitmap(BITMAP *bmp) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void floodfill(BITMAP *bmp, int x, int y, int color) { printf("stub.h@%d\n", __LINE__); }
-inline fixed itofix(int x ) { return  al_itofix(x);}
-inline fixed fixdiv(int x, int y) { return al_fixdiv(x,y);}
-inline fixed fdiv(int x, int y) { return al_fixdiv(x,y);}
-inline fixed fixmul(int x, int y) { return al_fixmul(x,y);}
-inline fixed fmul(int x, int y) { return al_fixmul(x,y);}
-inline fixed fsin(int x) { return al_fixsin(x);}
-inline fixed fcos(int x) { return al_fixcos(x);}
-inline fixed fatan(int x) { return al_fixatan(x);}
-inline int is_linear_bitmap(BITMAP *bmp) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void set_trans_blender(int r, int g, int b, int a) { }
-inline void rotate_sprite(BITMAP *bmp, BITMAP *sprite, int x, int y, fixed angle) {  }
-inline void set_palette_range(const PALETTE p, int from, int to, int vsync) { }
-inline int bitmap_mask_color(BITMAP *bmp) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getr_depth(int color_depth, int c){ printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getg_depth(int color_depth, int c){ printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getb_depth(int color_depth, int c){ printf("stub.h@%d\n", __LINE__); return  0; }
-inline int geta_depth(int color_depth, int c){ printf("stub.h@%d\n", __LINE__); return  0; }
-inline int makecol_depth(int color_depth, int r, int g, int b) { printf("stub.h@%d\n", __LINE__); return  0;}
-inline int install_sound(int digi, int midi, const char *cfg_path) { return al_install_audio(); }
-inline int makeacol_depth(int color_depth, int r, int g, int b, int a) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void line(BITMAP *bmp, int x1, int y1, int x2, int y2, int color) { printf("stub.h@%d\n", __LINE__); }
-inline void rect(BITMAP *bmp, int x1, int y1, int x2, int y2, int color) { printf("stub.h@%d\n", __LINE__); }
-inline int al_findfirst(const char *pattern, struct al_ffblk *info, int attrib) { printf("stub.h@%d\n", __LINE__); return  1;}
-inline int al_findnext(struct al_ffblk *info) { printf("stub.h@%d\n", __LINE__); return  1;}
-inline void al_findclose(struct al_ffblk *info) { printf("stub.h@%d\n", __LINE__); }
-inline void triangle(BITMAP *bmp, int x1,int y1,int x2,int y2,int x3,int y3, int color) { printf("stub.h@%d\n", __LINE__); }
-inline BITMAP *create_sub_bitmap(BITMAP *parent, int x, int y, int width, int height) {
-    return al_create_sub_bitmap(parent, x, y, width, height);
-}
-inline void set_color_depth(int depth) { printf("stub.h@%d\n", __LINE__); }
-inline void unselect_palette() { printf("stub.h@%d\n", __LINE__); }
-inline void hline(BITMAP *bmp, int x1, int y, int x2, int color) { printf("stub.h@%d\n", __LINE__); }
 inline void set_window_title(const char *name) { printf("stub.h@%d\n", __LINE__); }
-inline void set_volume_per_voice(int scale) { printf("stub.h@%d\n", __LINE__); }
-inline void set_volume(int digi_volume, int midi_volume) { printf("stub.h@%d\n", __LINE__); }
+
 inline void set_leds(int leds) { printf("stub.h@%d\n", __LINE__); }
 inline int set_close_button_callback(void (*proc)(void)) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void select_palette(const PALETTE p) { printf("stub.h@%d\n", __LINE__); }
-inline int save_bitmap(const char *filename, BITMAP *bmp, const ALLEGRO_COLOR *pal) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void reserve_voices(int digi_voices, int midi_voices) { printf("stub.h@%d\n", __LINE__); }
 inline void request_refresh_rate(int rate);
-inline void remove_sound() { printf("stub.h@%d\n", __LINE__); }
-inline void put_backslash(char *filename) { printf("stub.h@%d\n", __LINE__); }
 inline int poll_keyboard() { printf("stub.h@%d\n", __LINE__); return  0;}
 inline int play_fli(const char *filename, BITMAP *bmp, int loop, int (*callback)()) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void pivot_sprite(BITMAP *bmp, BITMAP *sprite, int x, int y, int cx, int cy, fixed angle) { printf("stub.h@%d\n", __LINE__); }
 inline int pack_fseek(PACKFILE *f, int offset) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int midi_seek(int target) { printf("stub.h@%d\n", __LINE__); return  1;}
 inline int makecol8(int r, int g, int b) { printf("stub.h@%d\n", __LINE__); return  0;}
 inline int makecol15(int r, int g, int b) { printf("stub.h@%d\n", __LINE__); return  0;}
 inline int makecol16(int r, int g, int b) { printf("stub.h@%d\n", __LINE__); return  0;}
 inline int makecol24(int r, int g, int b){ printf("stub.h@%d\n", __LINE__); return  0;}
 inline int makecol32(int r, int g, int b){ printf("stub.h@%d\n", __LINE__); return  0;}
-inline BITMAP *load_pcx(const char *filename, ALLEGRO_COLOR *pal) { printf("stub.h@%d\n", __LINE__); return  NULL; }
-inline BITMAP *load_bitmap(const char *filename, ALLEGRO_COLOR *pal) {printf("stub.h@%d\n", __LINE__); return  NULL; }
+
 inline int keyboard_needs_poll() { printf("stub.h@%d\n", __LINE__); return  FALSE ;}
 inline int install_timer() { printf("stub.h@%d\n", __LINE__); return  0; }
 inline int install_keyboard() { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getr8(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getg8(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getb8(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getr15(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getg15(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getb15(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getr16(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getg16(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getb16(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getr24(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getg24(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getb24(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getr32(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getg32(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline int getb32(int c) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void get_palette_range(PALETTE p, int from, int to) { printf("stub.h@%d\n", __LINE__); }
-inline void get_palette(PALETTE p) { printf("stub.h@%d\n", __LINE__); }
 inline int get_desktop_resolution(int *width, int *height) { printf("stub.h@%d\n", __LINE__); return  0; }
 inline double fixtof(fixed x) { return al_fixtof(x); }
 inline int file_exists(const char *filename, int attrib, int *aret) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void fade_interpolate(const PALETTE source, const PALETTE dest, PALETTE output, int pos, int from, int to) { printf("stub.h@%d\n", __LINE__); }
-inline void draw_sprite(BITMAP *bmp, BITMAP *sprite, int x, int y) { printf("stub.h@%d\n", __LINE__); }
-inline void draw_lit_sprite(BITMAP *bmp, BITMAP *sprite, int x, int y, int color) { printf("stub.h@%d\n", __LINE__); }
-inline void circlefill(BITMAP *bmp, int x, int y, int radius, int color) { printf("stub.h@%d\n", __LINE__); }
 inline int bestfit_color(const PALETTE pal, int r, int g, int b) { printf("stub.h@%d\n", __LINE__); return  0; }
 inline int allegro_init() { printf("stub.h@%d\n", __LINE__); return  0; }
 inline void allegro_exit() { printf("stub.h@%d\n", __LINE__); }
 inline void stop_audio_stream(AUDIOSTREAM *stream) { printf("stub.h@%d\n", __LINE__); }
 inline BITMAP *screen_bitmap(ALLEGRO_DISPLAY *display) { return al_get_backbuffer(display); }
-inline int set_gfx_mode(int card, int w, int h, int v_w, int v_h) { printf("stub.h@%d\n", __LINE__); return  0; }
 inline int makeacol32(int r, int g, int b, int a) { printf("stub.h@%d\n", __LINE__); return  0; }
-inline void set_palette(const PALETTE p) { printf("stub.h@%d\n", __LINE__); }
-inline void create_light_table(COLOR_MAP *table, const PALETTE pal, int r, int g, int b, void (*callback)(int pos)) { printf("stub.h@%d\n", __LINE__); }
 inline long file_size(const char *filename) { printf("stub.h@%d\n", __LINE__); return  0L; }
-inline void stretch_sprite(BITMAP *bmp, BITMAP *sprite, int x, int y, int w, int h) { printf("stub.h@%d\n", __LINE__); }
 //inline int install_sound(int digi, int midi, const char *cfg_path) { return 0; }
 inline int isdigit(char ch) {    return ch >= '0' && ch <= '9';}
 inline void voice_set_pan(int voice, int pan) { printf("stub.h@%d\n", __LINE__); }
@@ -605,8 +477,6 @@ inline void voice_start(int voice) { printf("stub.h@%d\n", __LINE__); }
 inline void voice_stop(int voice) { printf("stub.h@%d\n", __LINE__); }
 inline void cd_exit(void) { printf("stub.h@%d\n", __LINE__); }
 
-typedef unsigned long (*BLENDER_FUNC)(unsigned long x, unsigned long y, unsigned long n);
-inline void set_blender_mode (BLENDER_FUNC b15, BLENDER_FUNC b16, BLENDER_FUNC b24, int r, int g, int b, int a) { printf("stub.h@%d\n", __LINE__); }
 
 inline unsigned long _blender_trans15(unsigned long x, unsigned long y, unsigned long n) { printf("stub.h@%d\n", __LINE__); }
 inline unsigned long _blender_trans16(unsigned long x, unsigned long y, unsigned long n) { printf("stub.h@%d\n", __LINE__); }
@@ -627,14 +497,11 @@ inline int win_get_window(void){ printf("%s@%d\n", __FILE__, __LINE__);  return 
 
 inline void aa_stretch_sprite (BITMAP* dst, BITMAP* src,
 			  int dx, int dy, int dw, int dh)  { printf("%s@%d\n", __FILE__, __LINE__); }
-inline int set_display_switch_mode(int mode) { printf("%s@%d\n", __FILE__, __LINE__);  return 0; } 
-inline int set_display_switch_callback(int dir, void (*cb)()) { printf("%s@%d\n", __FILE__, __LINE__);  return 0; } 
+
 
 inline int get_uformat(void) { printf("%s@%d\n", __FILE__, __LINE__); }
-inline char *uconvert(const char *s, int type, char *buf, int newtype, int size){ printf("%s@%d\n", __FILE__, __LINE__);  return 0; } 
-inline void set_uformat(int type){ printf("%s@%d\n", __FILE__, __LINE__); }
 
-inline void set_color_conversion(int mode) { printf("%s@%d\n", __FILE__, __LINE__); }
+
 inline void create_rgb_table(RGB_MAP *table, const PALETTE pal, void (*callback)(int pos)) { printf("%s@%d\n", __FILE__, __LINE__); } 
 inline int install_int_ex(void (*proc)(), int speed) { printf("stub@%s:%d\n", __FILE__, __LINE__);  return 0; } 
 

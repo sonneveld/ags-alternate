@@ -2,8 +2,8 @@
 #define _AC_MOUSE_H_HEADER
 
 // forward declarations:
-#include "allegro.h"        // for BITMAP
-typedef BITMAP *block;      // wgt2allh.h
+#include "sdlwrap/allegro.h"        // for BITMAP
+typedef ALW_BITMAP *block;      // wgt2allh.h
 class IDriverDependantBitmap; // ali3d.h
 
 // The text script's "mouse" struct

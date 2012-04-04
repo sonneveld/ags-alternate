@@ -3,11 +3,10 @@
 */
 //#define ALLEGRO_STATICLINK  // already defined in project settings
 #include <stdio.h>
-#include "allegro_wrapper.h"
 
-#include <allegro.h>
-#include <winalleg.h>
-#include <allegro/platform/aintwin.h>
+#include "sdlwrap/allegro.h"
+
+//#include <allegro/platform/aintwin.h>
 #include <d3d9.h>
 #include <strmif.h>
 #define DWORD_PTR DWORD*
@@ -96,7 +95,7 @@ void dxmedia_shutdown_3d()
 
 int dxmedia_play_video_3d(const char* filename, IDirect3DDevice9 *device, bool useAVISound, int canskip, int stretch) 
 {
-  HWND gameWindow = win_get_window();
+  HWND gameWindow = alw_win_get_window();
 
   if (graph == NULL)
   {
@@ -651,7 +650,7 @@ BOOL CVMR9Graph::SetMediaFile(const char* pszFileName, bool withSound, int nLaye
   UseAVISound = withSound;
   m_pszFileName = pszFileName;
 
-  if (!wnd_call_proc(wndproc_build_filter_graph))
+  if (!alw_wnd_call_proc(wndproc_build_filter_graph))
     return FALSE;
 
 

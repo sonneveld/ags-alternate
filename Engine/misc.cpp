@@ -27,9 +27,9 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
-#include "allegro.h"
+#include "sdlwrap/allegro.h"
 #include "misc.h"
 
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)

@@ -13,7 +13,7 @@
 #error This file should only be included on the Windows build
 #endif
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 // ********* WINDOWS *********
 
@@ -42,15 +42,15 @@ typedef struct BMP_EXTRA_INFO {
 } BMP_EXTRA_INFO;
 
 // from Allegro DDraw driver
-extern "C" extern LPDIRECTDRAW2 directdraw;
-extern "C" extern LPDIRECTSOUND directsound;
-extern "C" extern LPDIRECTINPUTDEVICE mouse_dinput_device;
-extern "C" extern LPDIRECTINPUTDEVICE key_dinput_device;
+//extern "C" extern LPDIRECTDRAW2 directdraw;
+//extern "C" extern LPDIRECTSOUND directsound;
+//extern "C" extern LPDIRECTINPUTDEVICE mouse_dinput_device;
+//extern "C" extern LPDIRECTINPUTDEVICE key_dinput_device;
 
 char win32SavedGamesDirectory[MAX_PATH] = "\0";
 char win32AppDataDirectory[MAX_PATH] = "\0";
 
-extern "C" HWND allegro_wnd;
+//extern "C" HWND allegro_wnd;
 #include "acwavi.h"
 #include "acwsetup.h"
 #include "ac.h"
@@ -103,7 +103,7 @@ private:
 };
 
 AGSWin32::AGSWin32() {
-  allegro_wnd = NULL;
+  alw_set_allegro_wnd(NULL);
 }
 
 void check_parental_controls() {
@@ -599,7 +599,7 @@ void AGSWin32::DisplayAlert(const char *text, ...) {
   va_start(ap, text);
   vsprintf(displbuf, text, ap);
   va_end(ap);
-  MessageBox(allegro_wnd, displbuf, "Adventure Game Studio", MB_OK | MB_ICONEXCLAMATION);
+  MessageBox(alw_get_allegro_wnd(), displbuf, "Adventure Game Studio", MB_OK | MB_ICONEXCLAMATION);
 }
 
 void AGSWin32::Delay(int millis) 
@@ -618,8 +618,6 @@ void AGSWin32::Delay(int millis)
 }
 
 unsigned long AGSWin32::GetDiskFreeSpaceMB() {
-  DWORD returnMb = 0;
-  BOOL fResult;
   our_eip = -1891;
 
   // On Win9x, the last 3 params cannot be null, so need to supply values for all
@@ -628,7 +626,7 @@ unsigned long AGSWin32::GetDiskFreeSpaceMB() {
   // Win95 OSR2 or higher - use GetDiskFreeSpaceEx, since the
   // normal GetDiskFreeSpace returns erroneous values if the
   // free space is > 2 GB
-  fResult = GetDiskFreeSpaceEx(NULL,
+  BOOL fResult = GetDiskFreeSpaceEx(NULL,
              (PULARGE_INTEGER)&i64FreeBytesToCaller,
              (PULARGE_INTEGER)&i64Unused1,
              (PULARGE_INTEGER)&i64Unused2);
@@ -637,7 +635,7 @@ unsigned long AGSWin32::GetDiskFreeSpaceMB() {
 
   // convert down to MB so we can fit it in a 32-bit long
   i64FreeBytesToCaller /= 1000000;
-  returnMb = i64FreeBytesToCaller;
+  long returnMb = i64FreeBytesToCaller;
 
   return returnMb;
 }
@@ -710,7 +708,7 @@ void AGSWin32::AboutToQuitGame()
 }
 
 void AGSWin32::PostAllegroExit() {
-  allegro_wnd = NULL;
+  alw_set_allegro_wnd(NULL);
 }
 
 int AGSWin32::RunSetup() {
@@ -795,17 +793,17 @@ AGSPlatformDriver* AGSPlatformDriver::GetDriver() {
 // *********** WINDOWS-SPECIFIC PLUGIN API FUNCTIONS *************
 
 HWND IAGSEngine::GetWindowHandle () {
-  return allegro_wnd;
+  return alw_get_allegro_wnd();
 }
 LPDIRECTDRAW2 IAGSEngine::GetDirectDraw2 () {
-  if (directdraw == NULL)
+  if (alw_get_directdraw() == NULL)
     quit("!This plugin is not compatible with the Direct3D driver.");
 
-  return directdraw;
+  return alw_get_directdraw();
 }
 LPDIRECTDRAWSURFACE2 IAGSEngine::GetBitmapSurface (ALW_BITMAP *bmp) 
 {
-  if (directdraw == NULL)
+  if (alw_get_directdraw() == NULL)
     quit("!This plugin is not compatible with the Direct3D driver.");
 
   BMP_EXTRA_INFO *bei = (BMP_EXTRA_INFO*)bmp->extra;
@@ -818,7 +816,7 @@ LPDIRECTDRAWSURFACE2 IAGSEngine::GetBitmapSurface (ALW_BITMAP *bmp)
 }
 
 LPDIRECTSOUND IAGSEngine::GetDirectSound() {
-  return directsound;
+  return alw_get_directsound();
 }
 
 LPDIRECTINPUTDEVICE IAGSEngine::GetDirectInputKeyboard() {

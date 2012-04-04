@@ -12,7 +12,7 @@
 
 #include "acgui.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "bmp.h"
 

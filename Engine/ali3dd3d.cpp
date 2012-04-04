@@ -14,7 +14,7 @@
 */
 #define WINVER 0x0500  // for GetWindowInfo
 #include <stdio.h>
-#include <allegro.h>
+#include "sdlwrap/allegro.h"
 #include <winalleg.h>
 #include <allegro/platform/aintwin.h>
 #include <d3d9.h>

@@ -14,7 +14,7 @@
 
 #include "routefnd.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include <string.h>
 #include <math.h>

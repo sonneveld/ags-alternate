@@ -25,11 +25,11 @@
 #define DIGI_DIRECTX(n)          AL_ID('D','X','A'+(n),' ')
 #define DIGI_WAVOUTID(n)         AL_ID('W','O','A'+(n),' ')
 #define DIGI_NONE  0
-#define MIDI_AUTODETECT       -1 
+#define ALW_MIDI_AUTODETECT       -1 
 #define MIDI_NONE             0 
 #define MIDI_WIN32MAPPER         AL_ID('W','3','2','M')
 
-extern "C" HWND allegro_wnd;
+//extern "C" HWND allegro_wnd;
 extern int  INIreadint(const char*, const char*, int=0);
 extern void fgetstring_limit (char *, FILE *, int);
 extern char* ac_config_file;
@@ -386,7 +386,7 @@ void InitializeDialog(HWND hDlg) {
   update_resolution_texts (hDlg);
 
   SendMessage(hDlg, WM_SETTEXT, NULL, (LPARAM)gameNameForTitleBar);
-  SendMessage(allegro_wnd, WM_SETTEXT, NULL, (LPARAM)gameNameForTitleBar);
+  SendMessage(alw_get_allegro_wnd(), WM_SETTEXT, NULL, (LPARAM)gameNameForTitleBar);
 }
 
 // handler for Settings dialog
@@ -472,7 +472,7 @@ LRESULT CALLBACK callback_settings(HWND hDlg, UINT message, WPARAM wParam, LPARA
           sprintf(tbuf,"%d",idx);
           WritePrivateProfileString("sound","midiwinindx",tbuf,ac_config_file);
           if (idx == 0)
-            idx = MIDI_AUTODETECT;
+            idx = ALW_MIDI_AUTODETECT;
           else if (idx == 1)
             idx = MIDI_NONE;
           else idx = MIDI_WIN32MAPPER;
@@ -631,12 +631,12 @@ int acwsetup(const char*vername, const char*enbuild) {
     GetPrivateProfileString("misc", "gfxdriver", "D3D9", curGfxDriver, 100, ac_config_file);
     GetPrivateProfileString("misc", "titletext", "Game Setup", gameNameForTitleBar, 200, ac_config_file);
   }
-  if (DialogBox(GetModuleHandle(NULL), (LPCTSTR)IDD_DIALOG1,allegro_wnd,(DLGPROC)callback_settings) == IDOKRUN)
+  if (DialogBox(GetModuleHandle(NULL), (LPCTSTR)IDD_DIALOG1,alw_get_allegro_wnd(),(DLGPROC)callback_settings) == IDOKRUN)
     return 1;
   return 0;
 }
 
 void set_icon() {
-  SetClassLong(allegro_wnd,GCL_HICON,
+  SetClassLong(alw_get_allegro_wnd(),GCL_HICON,
     (LONG) LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON2)) ); 
 }

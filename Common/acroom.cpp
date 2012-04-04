@@ -1,4 +1,4 @@
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "acroom.h"
 

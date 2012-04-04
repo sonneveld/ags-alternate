@@ -1,6 +1,6 @@
 #include "dynobj/cc_region.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

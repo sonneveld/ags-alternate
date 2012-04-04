@@ -2,8 +2,8 @@
 #define _AC_SCR_OBJ_H_HEADER
 
 // forward declarations:
-#include "allegro.h"    // for BITMAP
-typedef BITMAP *block;  // wgt2allh.h
+#include "sdlwrap/allegro.h"    // for BITMAP
+typedef ALW_BITMAP *block;  // wgt2allh.h
 struct MoveList;        // acroom.h
 
 extern int check_click_on_object(int xx,int yy,int mood);

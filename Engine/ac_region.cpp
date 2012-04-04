@@ -1,6 +1,6 @@
 #include "ac_region.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -8,12 +8,12 @@
 
 void generate_light_table() {
   int cc;
-  if ((game.color_depth == 1) && (alw_color_map == NULL)) {
+  if ((game.color_depth == 1) && (alw_get_color_map() == NULL)) {
     // in 256-col mode, check if we need the light table this room
     for (cc=0;cc < MAX_REGIONS;cc++) {
       if (thisroom.regionLightLevel[cc] < 0) {
         alw_create_light_table(&maincoltable,palette,0,0,0,NULL);
-        alw_color_map=&maincoltable;
+		alw_set_color_map(&maincoltable);
         break;
         }
       }

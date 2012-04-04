@@ -21,12 +21,12 @@
 #include <stdio.h>
 
 // forward declarations:
-//#include "allegro.h"        // for BITMAP
+//#include "sdlwrap/allegro.h"        // for BITMAP
 //typedef BITMAP *block;      // wgt2allh.h
 //#define color RGB           // wgt2allh.h
 #include "wgt2allg.h"         // include, for VTA_ defs.
 struct ccScript;              // cscomp.h
-typedef fixed alw_fixed;
+//typedef fixed alw_fixed;
 
 // MACPORT FIX: endian support
 #include "bigend.h"

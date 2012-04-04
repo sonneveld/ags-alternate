@@ -249,7 +249,7 @@ struct GameSetup {
   char *gfxFilterID;
   char *gfxDriverID;
   GameSetup() {
-    digicard=DIGI_AUTODETECT; midicard=MIDI_AUTODETECT;
+    digicard=ALW_DIGI_AUTODETECT; midicard=ALW_MIDI_AUTODETECT;
     mod_player=1; mp3_player=1;
     want_letterbox=0; windowed = 0;
     no_speech_pack = 0;

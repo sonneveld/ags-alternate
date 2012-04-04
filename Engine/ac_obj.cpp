@@ -1,8 +1,8 @@
 #include "ac_obj.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
-#include <aastr.h>
+//#include <aastr.h>
 
 #include "ac.h"
 #include "ac_context.h"

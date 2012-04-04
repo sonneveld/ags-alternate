@@ -1,9 +1,9 @@
 #include "ac_input.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 
-#include "allegro.h"
+#include "sdlwrap/allegro.h"
 #include "ac.h"
 #include "ac_context.h"
 
@@ -212,7 +212,7 @@ int rec_iskeypressed (int keycode) {
     return playback_keystate[keycode];
   }
 
-  int toret = key[keycode];
+  int toret = alw_key[keycode];
 
   if (play.recording) {
     if (toret != playback_keystate[keycode]) {

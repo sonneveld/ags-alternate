@@ -12,7 +12,7 @@
 
 #include "sprcache.h"
 
-#include "allegro_wrapper.h"
+#include "sdlwrap/allegro.h"
 
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL

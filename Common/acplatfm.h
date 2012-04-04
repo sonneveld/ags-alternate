@@ -22,13 +22,14 @@ class IGraphicsDriver; // ali3d.h
 
 #ifdef WINDOWS_VERSION
 #include <ddraw.h>
-#include <dsound.h>
 #endif
 
+#define BITMAP ALW_BITMAP
 #include "agsplugin.h"
+#undef BITMAP
 
 #if !defined(BSD_VERSION) && (defined(LINUX_VERSION) || defined(WINDOWS_VERSION))
-#include "libcda.h"
+//#include "libcda.h"
 #endif
 
 struct AGS32BitOSDriver : AGSPlatformDriver {

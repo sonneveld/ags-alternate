@@ -2,7 +2,7 @@
 #define _SCRIPT_DRAWING_SURFACE_H_HEADER
 
 #include "dynobj/ags_cc_dynamic_object.h" 
-#include "allegro.h"
+#include "sdlwrap/allegro.h"
 
 struct ScriptDrawingSurface : AGSCCDynamicObject {
   int roomBackgroundNumber;
