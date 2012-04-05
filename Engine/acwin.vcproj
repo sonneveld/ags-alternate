@@ -991,6 +991,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\sdlwrap\spr\cspr8.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\CSRUN.CPP"
 				>
 				<FileConfiguration
@@ -1020,6 +1024,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\cstretch.cpp"
+				>
 			</File>
 			<File
 				RelativePath="..\common\lzw.cpp"
@@ -1113,6 +1121,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\rotate.cpp"
+				>
 			</File>
 			<File
 				RelativePath="routefnd.cpp"
@@ -1494,6 +1506,26 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sdlwrap\spr\cdefs15.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cdefs16.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cdefs24.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cdefs32.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cdefs8.h"
+				>
+			</File>
+			<File
 				RelativePath=".\cdplaylib.h"
 				>
 			</File>
@@ -1507,6 +1539,10 @@
 			</File>
 			<File
 				RelativePath="..\Common\cscomp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cspr.h"
 				>
 			</File>
 			<File

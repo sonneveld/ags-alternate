@@ -6,13 +6,227 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <sys/stat.h>
-
+#include <assert.h>
 
 int *alw_allegro_errno = NULL;
 
 char _debug_str[10000];
 
 #define PRINT_STUB sprintf(_debug_str, "STUB %s:%d %s\n", __FILE__, __LINE__, __FUNCSIG__); OutputDebugString(_debug_str)
+
+// INIT
+// ============================================================================
+
+char alw_allegro_error[ALW_ALLEGRO_ERROR_SIZE];
+
+static void (*_on_close_callback)(void) = 0;
+
+int alw_install_allegro(int system_id, int *errno_ptr, int (*atexit_ptr)( void (__cdecl *func )( void ))) { 
+  SDL_Init(SDL_INIT_EVERYTHING);
+  return 0;
+}
+
+void alw_allegro_exit() { 
+  SDL_Quit(); 
+}
+void alw_set_window_title(const char *name){
+  SDL_WM_SetCaption(name, 0);
+}
+
+int alw_set_close_button_callback(void (*proc)(void)){
+  _on_close_callback = proc;
+  return 0;
+}
+
+int alw_get_desktop_resolution(int *width, int *height){
+
+  const SDL_VideoInfo *vidinfo;
+  vidinfo = SDL_GetVideoInfo();
+  *width = vidinfo->current_w;
+  *height = vidinfo->current_h;
+  return 0;
+}
+
+
+
+
+// ALW_BITMAP
+// ============================================================================
+
+ALW_COLOR_MAP * color_map;
+
+ALW_BITMAP *alw_screen;
+
+static int _colour_depth = 0;
+
+void alw_set_color_depth(int depth) {
+	// depth (8, 15, 16, 24 or 32 bits per pixel)
+	_colour_depth = depth;
+}
+
+GFX_VTABLE _default_vtable = {0};
+
+static ALW_BITMAP *wrap_sdl_surface(SDL_Surface *surf) {
+	ALW_BITMAP *x = (ALW_BITMAP *)malloc(sizeof(ALW_BITMAP));
+	x->surf = surf;
+	x->w = surf->w;
+	x->h = surf->h;
+
+  x->vtable = &_default_vtable;
+
+  x->clip = 0;
+
+	x->line = (unsigned char **)malloc(x->h * sizeof(unsigned char*));
+	int hcount = surf->h;
+	unsigned char **l = x->line;
+	unsigned char *p = (unsigned char*)surf->pixels;
+	while(hcount) {
+		*l = p;
+		p += surf->pitch;
+		l += 1;
+		hcount -= 1;
+	}
+
+	return x;
+}
+
+static void _add_palette_to_surface(SDL_Surface *surf) {
+  SDL_Surface* videoSurf = SDL_GetVideoSurface();
+  if (videoSurf) {
+    SDL_SetColors(surf, videoSurf->format->palette->colors, 0, videoSurf->format->palette->ncolors);
+  }
+
+}
+
+ALW_BITMAP *alw_create_bitmap_ex(int color_depth, int width, int height) {
+	// depth (8, 15, 16, 24 or 32 bits per pixel)
+	SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, color_depth, 0,0,0,0);
+  SDL_SetColorKey(surf, SDL_SRCCOLORKEY, 0);
+
+  _add_palette_to_surface(surf);
+
+	return wrap_sdl_surface(surf);
+}
+
+
+
+ALW_BITMAP *alw_create_bitmap(int width, int height) {
+  return alw_create_bitmap_ex(_colour_depth, width, height);
+
+  //SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, _colour_depth, 0,0,0,0);
+  //SDL_SetColorKey(surf, SDL_SRCCOLORKEY, 0);
+  //_add_palette_to_surface(surf);
+  //return wrap_sdl_surface(surf);
+}
+
+ALW_BITMAP *alw_create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, int height) {
+
+	// from http://lists.libsdl.org/pipermail/sdl-libsdl.org/2005-June/050556.html
+
+	SDL_Surface *pParent = parent->surf;
+	int nTop = y;
+	int nLeft = x;
+	int nWidth = width;
+	int nHeight = height;
+
+	SDL_LockSurface(pParent);
+
+	byte* pPixels = (byte*)pParent->pixels + pParent->pitch*nTop + pParent->format->BytesPerPixel * nLeft;
+
+	SDL_Surface *m_pSurface = SDL_CreateRGBSurfaceFrom(pPixels, nWidth, nHeight, pParent->format->BitsPerPixel, pParent->pitch, pParent->format->Rmask, pParent->format->Gmask, pParent->format->Bmask, pParent->format->Amask);
+
+	if (pParent->format->palette)
+		SDL_SetColors(m_pSurface, pParent->format->palette->colors, 0, pParent->format->palette->ncolors);
+
+	SDL_UnlockSurface(pParent);
+
+	return wrap_sdl_surface(m_pSurface);
+}
+
+void alw_destroy_bitmap(ALW_BITMAP *bitmap) {
+	SDL_FreeSurface(bitmap->surf);
+	free(bitmap->line);
+	bitmap->line = 0;
+	bitmap->surf =0 ;
+	free(bitmap);
+}
+
+int alw_bitmap_color_depth(ALW_BITMAP *bmp) {
+	// depth (8, 15, 16, 24 or 32 bits per pixel)
+	return bmp->surf->format->BitsPerPixel;
+}
+
+int alw_bitmap_mask_color(ALW_BITMAP *bmp) {
+	// not supported ?
+	PRINT_STUB;
+	return 0;
+}
+
+int alw_is_linear_bitmap(ALW_BITMAP *bmp) {
+	PRINT_STUB;
+	return 1;
+}
+int alw_is_memory_bitmap(ALW_BITMAP *bmp) {
+	PRINT_STUB;
+	return 1;
+}
+int alw_is_video_bitmap(ALW_BITMAP *bmp) {
+	PRINT_STUB;
+	return 0;
+}
+
+void alw_acquire_bitmap(ALW_BITMAP *bmp) {
+	SDL_LockSurface(bmp->surf);
+}
+void alw_release_bitmap(ALW_BITMAP *bmp) {
+	SDL_UnlockSurface(bmp->surf);
+}
+void alw_acquire_screen() {
+	SDL_LockSurface(alw_screen->surf);
+}
+void alw_release_screen() {
+	SDL_UnlockSurface(alw_screen->surf);
+}
+void alw_set_clip_rect(ALW_BITMAP *bitmap, int x1, int y1, int x2, int y2) {
+	SDL_Rect rect = {x1, y1, x2-x1+1, y2-y1+1};
+	SDL_SetClipRect(bitmap->surf, &rect);
+}
+void alw_set_clip_state(ALW_BITMAP *bitmap, int state) {
+	PRINT_STUB;
+	// i think the default is always clip:
+}
+
+
+
+// GRAPHICS MODES
+// ============================================================================
+
+static SDL_Surface *_actual_sdl_screen;
+
+//void alw_set_color_depth(int depth) { PRINT_STUB;}
+int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
+	assert(v_w == 0);
+	assert(v_h == 0);
+
+	_actual_sdl_screen = SDL_SetVideoMode(w, h, _colour_depth, SDL_SWSURFACE|SDL_HWPALETTE);
+	if (_actual_sdl_screen == NULL)
+		return 1;
+
+	alw_screen = wrap_sdl_surface(_actual_sdl_screen);
+
+	return 0;
+}
+
+ALW_GFX_MODE_LIST *alw_get_gfx_mode_list(int card){ PRINT_STUB; return 0;}
+void alw_destroy_gfx_mode_list(ALW_GFX_MODE_LIST *mode_list) { PRINT_STUB;}
+
+int alw_set_display_switch_mode(int mode) { PRINT_STUB; return 0;}
+int alw_set_display_switch_callback(int dir, void (*cb)()){ PRINT_STUB; return 0;}
+
+void alw_vsync(){
+	SDL_Flip(_actual_sdl_screen);
+}
+
 
 // ALW_PALETTE
 // ============================================================================
@@ -24,7 +238,21 @@ ALW_PALETTE alw_black_palette;
 void alw_set_palette(const ALW_PALETTE p) { PRINT_STUB; }
 void alw_get_palette(ALW_PALETTE p) { PRINT_STUB; }
 
-void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) { PRINT_STUB; }
+void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
+  SDL_Surface *surface = _actual_sdl_screen;
+  int flags = SDL_PHYSPAL;
+  int firstcolor = from;
+  int ncolors = to-from+1;
+
+  SDL_Color *colors = (SDL_Color *)malloc(sizeof(SDL_Color)*ncolors);
+  for (int i = 0; i< ncolors; i++) {
+    ALW_RGB alcol = p[from+i];
+    SDL_Color sdlcol = {alcol.r*4, alcol.g*4, alcol.b*4};
+    colors[i] = sdlcol;
+  }
+
+  SDL_SetPalette(surface, flags, colors, firstcolor, ncolors);
+}
 void alw_get_palette_range(ALW_PALETTE p, int from, int to) { PRINT_STUB; }
 
 void alw_fade_interpolate(const ALW_PALETTE source, const ALW_PALETTE dest, ALW_PALETTE output, int pos, int from, int to) {PRINT_STUB; }
@@ -180,121 +408,75 @@ ALW_PACKFILE *__old_pack_fopen(char *,char *) {	PRINT_STUB; return 0;}
 }
 
 
-// ALW_BITMAP
-// ============================================================================
-
-ALW_BITMAP *alw_screen;
-
-static int _colour_depth = 0;
-
-void alw_set_color_depth(int depth) {
-	// depth (8, 15, 16, 24 or 32 bits per pixel)
-	_colour_depth = depth;
-}
-
-static ALW_BITMAP *wrap_sdl_surface(SDL_Surface *surf) {
-	ALW_BITMAP *x = (ALW_BITMAP *)malloc(sizeof(ALW_BITMAP));
-	x->surf = surf;
-	x->w = surf->w;
-	x->h = surf->h;
-
-	x->line = (unsigned char **)malloc(x->h * sizeof(unsigned char*));
-	int hcount = surf->h;
-	unsigned char **l = x->line;
-	unsigned char *p = (unsigned char*)surf->pixels;
-	while(hcount) {
-		*l = p;
-		p += x->surf->w * x->surf->pitch;
-		l += 1;
-		hcount -= 1;
-	}
-
-	return x;
-}
-
-ALW_BITMAP *alw_create_bitmap(int width, int height) {
-	SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, _colour_depth, 0,0,0,0);
-	return wrap_sdl_surface(surf);
-}
-ALW_BITMAP *alw_create_bitmap_ex(int color_depth, int width, int height) {
-	// depth (8, 15, 16, 24 or 32 bits per pixel)
-	SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, color_depth, 0,0,0,0);
-	return wrap_sdl_surface(surf);
-}
-
-ALW_BITMAP *alw_create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, int height) {
-	PRINT_STUB;
-	return 0;
-}
-
-void alw_destroy_bitmap(ALW_BITMAP *bitmap) {
-	SDL_FreeSurface(bitmap->surf);
-	free(bitmap->line);
-	bitmap->line = 0;
-	bitmap->surf =0 ;
-	free(bitmap);
-}
-
-int alw_bitmap_color_depth(ALW_BITMAP *bmp) {
-	// depth (8, 15, 16, 24 or 32 bits per pixel)
-	return bmp->surf->format->BitsPerPixel;
-}
-
-int alw_bitmap_mask_color(ALW_BITMAP *bmp) {
-	// not supported ?
-	PRINT_STUB;
-	return 0;
-}
-
-int alw_is_linear_bitmap(ALW_BITMAP *bmp) {
-	PRINT_STUB;
-	return 1;
-}
-int alw_is_memory_bitmap(ALW_BITMAP *bmp) {
-	PRINT_STUB;
-	return 1;
-}
-int alw_is_video_bitmap(ALW_BITMAP *bmp) {
-	PRINT_STUB;
-	return 0;
-}
-
-void alw_acquire_bitmap(ALW_BITMAP *bmp) {
-	SDL_LockSurface(bmp->surf);
-}
-void alw_release_bitmap(ALW_BITMAP *bmp) {
-	SDL_UnlockSurface(bmp->surf);
-}
-void alw_acquire_screen() {
-	SDL_LockSurface(alw_screen->surf);
-}
-void alw_release_screen() {
-	SDL_UnlockSurface(alw_screen->surf);
-}
-void alw_set_clip_rect(ALW_BITMAP *bitmap, int x1, int y1, int x2, int y2) {
-	SDL_Rect rect = {x1, y1, x2-x1+1, y2-y1+1};
-	SDL_SetClipRect(bitmap->surf, &rect);
-}
-void alw_set_clip_state(ALW_BITMAP *bitmap, int state) {
-	PRINT_STUB;
-	// i think the default is always clip:
-}
-
-
 // BLITS
 // ============================================================================
 
-void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height)  { PRINT_STUB; }
-void alw_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { PRINT_STUB; }
-void alw_draw_lit_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int color) { PRINT_STUB; }
-void alw_draw_trans_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { PRINT_STUB; }
-void alw_draw_sprite_h_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { PRINT_STUB; }
-void alw_draw_sprite_v_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { PRINT_STUB; }
-void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { PRINT_STUB; }
-void alw_stretch_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int source_width, int source_height, int dest_x, int dest_y, int dest_width, int dest_height){ PRINT_STUB; }
-void alw_stretch_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int w, int h) { PRINT_STUB; }
-void alw_rotate_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, alw_fixed angle) { PRINT_STUB; }
-void alw_pivot_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int cx, int cy, alw_fixed angle) { PRINT_STUB; }
+
+void _linear_draw_sprite_v_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_h_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_vh_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_trans_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_lit_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
+
+
+unsigned char _my_blit_col = 16;
+
+void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height) {
+	PRINT_STUB; 
+	SDL_Surface *src = source->surf;
+	SDL_Surface *dst = dest->surf;
+	//dst = _actual_sdl_screen;
+
+	void *srcpixels = source->surf->pixels;
+	void *destpixels = dest->surf->pixels;
+
+	SDL_Rect srcrect = {source_x, source_y, width, height};
+	SDL_Rect dstrect = {dest_x, dest_y, width, height};
+
+	SDL_BlitSurface(src, &srcrect, dst, &dstrect);
+
+  //if (dest_x != 0 || dest_y != 0) {
+//    SDL_FillRect(dst, &dstrect, _my_blit_col);
+    //_my_blit_col = (_my_blit_col +1)% 40;
+  //}
+
+	SDL_Flip(_actual_sdl_screen);
+
+  //void;
+}
+void alw_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
+	PRINT_STUB;
+	alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+}
+void alw_draw_lit_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int color) { 
+	PRINT_STUB;
+  _linear_draw_lit_sprite8(bmp, sprite, x, y, color);
+  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+}
+void alw_draw_trans_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
+	PRINT_STUB;
+  _linear_draw_trans_sprite8(bmp, sprite, x, y);
+  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+}
+void alw_draw_sprite_h_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
+	PRINT_STUB;
+  _linear_draw_sprite_h_flip8(bmp, sprite, x, y);
+  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+}
+void alw_draw_sprite_v_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
+	PRINT_STUB;
+  _linear_draw_sprite_v_flip8(bmp, sprite, x, y);
+	//alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+}
+void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
+	PRINT_STUB;
+  _linear_draw_sprite_vh_flip8(bmp, sprite, x, y);
+  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+}
+//void alw_stretch_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int source_width, int source_height, int dest_x, int dest_y, int dest_width, int dest_height){ PRINT_STUB; }
+//void alw_stretch_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int w, int h) { PRINT_STUB;   alw_blit(sprite, bmp, 0, 0, x, y, w, h); }
+//void alw_rotate_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, alw_fixed angle) { PRINT_STUB; }
+//void alw_pivot_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int cx, int cy, alw_fixed angle) { PRINT_STUB; }
 
 // COLOURS
 // ============================================================================
@@ -417,6 +599,7 @@ static int _custom_filter(const SDL_Event *event) {
 
 int alw_install_mouse() {
 	SDL_SetEventFilter(&_custom_filter);
+  SDL_ShowCursor(SDL_DISABLE);
 	return 0;
 }
 
@@ -494,8 +677,10 @@ static int _poll_everything() {
 		case SDL_MOUSEBUTTONUP:
 			_handle_mouse_button_up_event(&event.button);
 			break;
-		//case SDL_QUIT:
-		//	game_running =0;
+		case SDL_QUIT:
+      if (_on_close_callback)
+        _on_close_callback();
+      break;
 		}
 	}
 	return 0;
@@ -685,19 +870,6 @@ ALW_BITMAP *alw_load_pcx(const char *filename, ALW_RGB *pal) { PRINT_STUB; retur
 void alw_set_color_conversion(int mode) { PRINT_STUB;}
 
 
-// GRAPHICS MODES
-// ============================================================================
-//void alw_set_color_depth(int depth) { PRINT_STUB;}
-int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){ PRINT_STUB; return 0;}
-
-ALW_GFX_MODE_LIST *alw_get_gfx_mode_list(int card){ PRINT_STUB; return 0;}
-void alw_destroy_gfx_mode_list(ALW_GFX_MODE_LIST *mode_list) { PRINT_STUB;}
-
-int alw_set_display_switch_mode(int mode) { PRINT_STUB; return 0;}
-int alw_set_display_switch_callback(int dir, void (*cb)()){ PRINT_STUB; return 0;}
-
-void alw_vsync(){ PRINT_STUB;}
-
 
 // UNICODE
 // ============================================================================
@@ -742,17 +914,6 @@ int alw_install_int_ex(void (*proc)(), int speed) {
 void alw_rest(unsigned int time) {
 	SDL_Delay(time);
 }
-
-
-// INIT
-// ============================================================================
-
-int alw_install_allegro(int system_id, int *errno_ptr, int (*atexit_ptr)( void (__cdecl *func )( void ))) { PRINT_STUB; return 0;}
-void alw_allegro_exit() { PRINT_STUB;}
-void alw_set_window_title(const char *name){ PRINT_STUB;}
-int alw_set_close_button_callback(void (*proc)(void)){ PRINT_STUB; return 0;}
-int alw_get_desktop_resolution(int *width, int *height){ PRINT_STUB; return 0;}
-char alw_allegro_error[ALW_ALLEGRO_ERROR_SIZE];
 
 
 

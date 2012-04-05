@@ -39,7 +39,7 @@ extern int *alw_allegro_errno;
 typedef struct ALW_GFX_VTABLE        /* functions for drawing onto bitmaps */
 {
 	//int color_depth;
-	//int mask_color;
+	int mask_color;
 	//void *unwrite_bank;  /* C function on some machines, asm on i386 */
 } GFX_VTABLE;
 
@@ -64,8 +64,8 @@ struct alw_al_ffblk {
 
 struct ALW_BITMAP {
 	int w, h;                     /* width and height in pixels */
-	//int clip;                     /* flag if clipping is turned on */
-	//int cl, cr, ct, cb;           /* clip left, right, top and bottom values */
+	int clip;                     /* flag if clipping is turned on */
+	int cl, cr, ct, cb;           /* clip left, right, top and bottom values */
 	GFX_VTABLE *vtable;           /* drawing functions */
 	//void *write_bank;             /* C func on some machines, asm on i386 */
 	//void *read_bank;              /* C func on some machines, asm on i386 */
@@ -165,7 +165,7 @@ typedef int32_t alw_fixed;
 #define ALW_MIDI_NONE             0
 
 
-
+typedef unsigned long(BLENDER_FUNC)(unsigned long x, unsigned long y, unsigned long n);
 
 // MISC
 
@@ -388,6 +388,41 @@ int alw_geta_depth(int color_depth, int c);
 #define alw_getg32(c) alw_getg_depth(32,c)
 #define alw_getb32(c) alw_getb_depth(32,c)
 #define alw_geta32(c) alw_geta_depth(32,c)
+
+extern ALW_COLOR_MAP *color_map;
+
+#define ALLEGRO_COLOR8
+#define ALLEGRO_COLOR15
+#define ALLEGRO_COLOR16
+#define ALLEGRO_COLOR24
+#define ALLEGRO_COLOR32
+
+
+#define MASK_COLOR_8       0
+#define MASK_COLOR_15      0x7C1F
+#define MASK_COLOR_16      0xF81F
+#define MASK_COLOR_24      0xFF00FF
+#define MASK_COLOR_32      0xFF00FF
+
+#define bmp_write8(addr, c)         (*((uint8_t  *)(addr)) = (c))
+#define bmp_write15(addr, c)        (*((uint16_t *)(addr)) = (c))
+#define bmp_write16(addr, c)        (*((uint16_t *)(addr)) = (c))
+#define bmp_write32(addr, c)        (*((uint32_t *)(addr)) = (c))
+
+#define bmp_read8(addr)             (*((uint8_t  *)(addr)))
+#define bmp_read15(addr)            (*((uint16_t *)(addr)))
+#define bmp_read16(addr)            (*((uint16_t *)(addr)))
+#define bmp_read32(addr)            (*((uint32_t *)(addr)))
+
+
+#define READ3BYTES(p)  ((*(unsigned char *)(p))               \
+  | (*((unsigned char *)(p) + 1) << 8)  \
+  | (*((unsigned char *)(p) + 2) << 16))
+
+#define WRITE3BYTES(p,c)  ((*(unsigned char *)(p) = (c)),             \
+  (*((unsigned char *)(p) + 1) = (c) >> 8),  \
+  (*((unsigned char *)(p) + 2) = (c) >> 16))
+
 
 // DRAWING
 
