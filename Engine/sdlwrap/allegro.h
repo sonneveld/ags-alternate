@@ -33,8 +33,11 @@
 
 #include "stdint.h"
 
-extern int *alw_allegro_errno;
-
+#define MASK_COLOR_8       0
+#define MASK_COLOR_15      0x7C1F
+#define MASK_COLOR_16      0xF81F
+#define MASK_COLOR_24      0xFF00FF
+#define MASK_COLOR_32      0xFF00FF
 
 typedef struct ALW_GFX_VTABLE        /* functions for drawing onto bitmaps */
 {
@@ -164,8 +167,6 @@ typedef int32_t alw_fixed;
 #define ALW_MIDI_AUTODETECT       -1
 #define ALW_MIDI_NONE             0
 
-
-typedef unsigned long(BLENDER_FUNC)(unsigned long x, unsigned long y, unsigned long n);
 
 // MISC
 
@@ -373,6 +374,7 @@ int alw_geta_depth(int color_depth, int c);
 #define alw_makecol8(r,g,b) alw_makecol_depth(8,r,g,b)
 #define alw_makecol15(r,g,b) alw_makecol_depth(15,r,g,b)
 #define alw_makecol16(r,g,b) alw_makecol_depth(16,r,g,b)
+#define alw_makecol24(r,g,b) alw_makecol_depth(24,r,g,b)
 #define alw_makecol32(r,g,b) alw_makecol_depth(32,r,g,b)
 #define alw_makeacol32(r,g,b,a) alw_makeacol_depth(32,r,g,b,a)
 
@@ -383,6 +385,10 @@ int alw_geta_depth(int color_depth, int c);
 #define alw_getr16(c) alw_getr_depth(16,c)
 #define alw_getg16(c) alw_getg_depth(16,c)
 #define alw_getb16(c) alw_getb_depth(16,c)
+
+#define alw_getr24(c) alw_getr_depth(24,c)
+#define alw_getg24(c) alw_getg_depth(24,c)
+#define alw_getb24(c) alw_getb_depth(24,c)
 
 #define alw_getr32(c) alw_getr_depth(32,c)
 #define alw_getg32(c) alw_getg_depth(32,c)
@@ -414,6 +420,8 @@ extern ALW_COLOR_MAP *color_map;
 #define bmp_read16(addr)            (*((uint16_t *)(addr)))
 #define bmp_read32(addr)            (*((uint32_t *)(addr)))
 
+int bmp_read24 (uintptr_t addr);
+void bmp_write24 (uintptr_t addr, int c);
 
 #define READ3BYTES(p)  ((*(unsigned char *)(p))               \
   | (*((unsigned char *)(p) + 1) << 8)  \
@@ -422,6 +430,13 @@ extern ALW_COLOR_MAP *color_map;
 #define WRITE3BYTES(p,c)  ((*(unsigned char *)(p) = (c)),             \
   (*((unsigned char *)(p) + 1) = (c) >> 8),  \
   (*((unsigned char *)(p) + 2) = (c) >> 16))
+
+// DIRECT ACCESS
+
+unsigned long alw_bmp_write_line(ALW_BITMAP *bmp, int line);
+unsigned long alw_bmp_read_line(ALW_BITMAP *bmp, int line);
+void alw_bmp_unwrite_line(ALW_BITMAP *bmp);
+void alw_bmp_select(ALW_BITMAP *bmp);
 
 
 // DRAWING
@@ -438,6 +453,7 @@ void alw_floodfill(ALW_BITMAP *bmp, int x, int y, int color);
 void alw_rectfill ( ALW_BITMAP *bmp, int x1, int y_1, int x2, int y2, int color) ;
 void alw_triangle(ALW_BITMAP *bmp, int x1,int y1,int x2,int y2,int x3,int y3, int color) ;
 void alw_circlefill(ALW_BITMAP *bmp, int x, int y, int radius, int color) ;
+void alw_hfill(ALW_BITMAP *dst, int dx1, int dy, int dx2, int color);
 
 #define alw__getpixel alw_getpixel
 #define alw__putpixel alw_putpixel
@@ -458,22 +474,37 @@ void alw_pivot_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int cx,
 
 
 // TRANSPARENCY
-typedef unsigned long (*ALW_BLENDER_FUNC)(unsigned long x, unsigned long y, unsigned long n);
 
+// 256-color transparency
+void alw_create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos)) ;
 void alw_set_color_map(ALW_COLOR_MAP *alw_color_map);
-ALW_COLOR_MAP * alw_get_color_map();
+int alw_has_color_map();
 
+// truecolor transparency
+typedef unsigned long (*ALW_BLENDER_FUNC)(unsigned long x, unsigned long y, unsigned long n);
 void alw_set_alpha_blender() ;
 void alw_set_trans_blender(int r, int g, int b, int a) ;
 void alw_set_blender_mode (ALW_BLENDER_FUNC b15, ALW_BLENDER_FUNC b16, ALW_BLENDER_FUNC b24, int r, int g, int b, int a) ;
-void alw_create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos)) ;
-extern "C" {
-	unsigned long _blender_trans16(unsigned long x, unsigned long y, unsigned long n);
-	unsigned long _blender_trans15(unsigned long x, unsigned long y, unsigned long n);
-}
+void alw_set_blender_mode_ex(ALW_BLENDER_FUNC b15,ALW_BLENDER_FUNC b16,ALW_BLENDER_FUNC b24,ALW_BLENDER_FUNC b32,ALW_BLENDER_FUNC b15x,ALW_BLENDER_FUNC b16x,ALW_BLENDER_FUNC b24x, int r, int g,int b,int a);
+
+extern ALW_BLENDER_FUNC _blender_func15;
+extern ALW_BLENDER_FUNC _blender_func16;
+extern ALW_BLENDER_FUNC _blender_func24;
+extern ALW_BLENDER_FUNC _blender_func32;
+extern ALW_BLENDER_FUNC _blender_func15x;
+extern ALW_BLENDER_FUNC _blender_func16x;
+extern ALW_BLENDER_FUNC _blender_func24x;
+
+extern int _blender_col_15;
+extern int _blender_col_16;
+extern int _blender_col_24;
+extern int _blender_col_32;
+extern int _blender_alpha;
+
 
 // COLOUR FORMATS
-extern ALW_RGB_MAP *alw_rgb_map;
+//extern ALW_RGB_MAP *_alw_rgb_map;
+void alw_set_rgb_map(ALW_RGB_MAP *rgb_map);
 void alw_rgb_to_hsv(int r, int g, int b, float *h, float *s, float *v);
 void alw_hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b);
 void alw_create_rgb_table(ALW_RGB_MAP *table, const ALW_PALETTE pal, void (*callback)(int pos));

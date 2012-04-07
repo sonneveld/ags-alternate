@@ -187,17 +187,21 @@ void apply_tint_or_light(int actspsindex, int light_level,
       if (game.color_depth == 1) {
         // 256-col
         lit_amnt = (250 - ((-light_level) * 5)/2);
+        alw_draw_lit_sprite(actsps[actspsindex], oldwas, 0, 0, lit_amnt);
       }
       else {
         // hi-color
-        if (light_level < 0)
-          set_my_trans_blender(8,8,8,0);
-        else
-          set_my_trans_blender(248,248,248,0);
         lit_amnt = abs(light_level) * 2;
+        if (light_level < 0) {
+          set_my_trans_blender(8,8,8,0);
+          alw_draw_lit_sprite(actsps[actspsindex], oldwas, 0, 0, lit_amnt);
+        }
+        else {
+          set_my_trans_blender(248,248,248,0);
+          alw_draw_lit_sprite(actsps[actspsindex], oldwas, 0, 0, lit_amnt);
+        }
       }
 
-      alw_draw_lit_sprite(actsps[actspsindex], oldwas, 0, 0, lit_amnt);
     }
 
     if (oldwas != blitFrom)

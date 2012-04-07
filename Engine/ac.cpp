@@ -3044,7 +3044,7 @@ void load_new_room(int newnum,CharacterInfo*forchar) {
         palette[ff].b = 63;
     }
     alw_create_rgb_table (&rgb_table, palette, NULL);
-    alw_rgb_map = &rgb_table;
+    alw_set_rgb_map(&rgb_table);
   }
 
   // CHARACTER ***********************************************************************************************
@@ -5459,12 +5459,14 @@ void draw_sprite_compensate(int picc,int xx,int yy,int useAlpha)
     (game.options[OPT_NEWGUIALPHA] > 0) &&
     (alw_bitmap_color_depth(abuf) == 32))
   {
-    if (game.spriteflags[picc] & SPF_ALPHACHANNEL)
+    if (game.spriteflags[picc] & SPF_ALPHACHANNEL) {
       set_additive_alpha_blender();
-    else
+      alw_draw_trans_sprite(abuf, spriteset[picc], xx, yy);
+    }
+    else {
       set_opaque_alpha_blender();
-
-    alw_draw_trans_sprite(abuf, spriteset[picc], xx, yy);
+      alw_draw_trans_sprite(abuf, spriteset[picc], xx, yy);
+    }
   }
   else
   {
@@ -11234,6 +11236,7 @@ void setup_script_exports() {
   register_screen_script_functions();
   register_palette_script_functions();
   register_recording_script_functions();
+  register_multimedia_script_functions();
 
 //scAdd_External_Symbol("GetLanguageString",(void *)GetLanguageString);
 

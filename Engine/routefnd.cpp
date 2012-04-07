@@ -30,11 +30,51 @@
 #define MAXPATHBACK 1000
 static int *pathbackx, *pathbacky;
 static int waspossible = 1;
-static int routex1, routey1;
 static int suggestx, suggesty;
 alw_fixed move_speed_x, move_speed_y;
 
+extern "C"
+{
+  // for djgpp, stack size.
+  int _stklen = 2048000;
+}
 
+block wallscreen;
+//#define DEBUG_PATHFINDER
+static char *movelibcopyright = "PathFinder library v3.1 (c) 1998, 1999, 2001, 2002 Chris Jones.";
+static int line_failed = 0;
+int lastcx, lastcy;
+
+#define MAX_GRANULARITY (3)  /* is_route_possible */
+static int walk_area_granularity[MAX_WALK_AREAS + 1];
+
+#include "mousew32.h"
+static int leftorright = 0;
+static int nesting = 0;
+static int pathbackstage = 0;
+static int finalpartx = 0, finalparty = 0;
+static short **beenhere = NULL;     //[200][320];
+static int beenhere_array_size = 0;
+static const int BEENHERE_SIZE = 2;
+
+#define DIR_LEFT  0
+#define DIR_RIGHT 2
+#define DIR_UP    1
+#define DIR_DOWN  3
+
+#define MAX_TRAIL_LENGTH (5000) /* find_route_dijkstra */
+
+
+// EMBEDDED COPYRIGHT CODE
+// ============================================================================
+
+// check the copyright message is intact
+#ifdef _MSC_VER
+extern void winalert(char *, ...);
+#endif
+
+static int walk_area_zone5 = 0;
+static int routex1, routey1;
 
 #define COPYRIGHT_CRC 172668
 // stupid name, to deter hackers
@@ -58,41 +98,7 @@ int route_script_link()
 
 #define get_copyright_crc get_route_composition
 
-extern "C"
-{
-  int _stklen = 2048000;
-}
-
-void init_pathfinder()
-{
-  pathbackx = (int *)malloc(sizeof(int) * MAXPATHBACK);
-  pathbacky = (int *)malloc(sizeof(int) * MAXPATHBACK);
-}
-
-block wallscreen;
-//#define DEBUG_PATHFINDER
-static char *movelibcopyright = "PathFinder library v3.1 (c) 1998, 1999, 2001, 2002 Chris Jones.";
-static int line_failed = 0;
-int lastcx, lastcy;
-
-static void line_callback(block bmpp, int x, int y, int d)
-{
-/*  if ((x>=320) | (y>=200) | (x<0) | (y<0)) line_failed=1;
-  else */ if (alw_getpixel(bmpp, x, y) < 1)
-    line_failed = 1;
-  else if (line_failed == 0) {
-    lastcx = x;
-    lastcy = y;
-  }
-}
-
-// check the copyright message is intact
-#ifdef _MSC_VER
-extern void winalert(char *, ...);
-#endif
 // whether the message has been printed, deter hackers
-static int walk_area_zone5 = 0;
-
 void print_welcome_text(char *verno, char *aciverno)
 {
 #ifndef _MSC_VER
@@ -120,6 +126,44 @@ void print_welcome_text(char *verno, char *aciverno)
   }
 
   routex1 = -10;
+}
+
+void findroute_copyright_check_1() {
+  if ((get_copyright_crc() != COPYRIGHT_CRC) || (walk_area_zone5 != 1633)) {
+    quit("My name is there for all to see.");
+    exit(95);
+    abort();
+  }
+}
+
+void findroute_copyright_check_2() {
+  if (routex1 != -10) {
+    quit("Don't even try it.");
+    exit(99);
+    abort();
+  }
+}
+
+
+
+// ROUTING
+// ============================================================================
+
+void init_pathfinder()
+{
+  pathbackx = (int *)malloc(sizeof(int) * MAXPATHBACK);
+  pathbacky = (int *)malloc(sizeof(int) * MAXPATHBACK);
+}
+
+static void line_callback(block bmpp, int x, int y, int d)
+{
+/*  if ((x>=320) | (y>=200) | (x<0) | (y<0)) line_failed=1;
+  else */ if (alw_getpixel(bmpp, x, y) < 1)
+    line_failed = 1;
+  else if (line_failed == 0) {
+    lastcx = x;
+    lastcy = y;
+  }
 }
 
 int can_see_from(int x1, int y1, int x2, int y2)
@@ -150,7 +194,12 @@ int find_nearest_walkable_area(block tempw, int fromX, int fromY, int toX, int t
   {
     for (ey = fromY; ey < toY; ey += granularity) 
     {
-      if (BMP_LINE(tempw)[ey][ex] != 232)
+      int px = BMP_LINE(tempw)[ey][ex];
+      int px2 = alw_getpixel(tempw, ex, ey);
+      if (px != px) {
+        printf("hrmm");
+      }
+      if (px != 232)
         continue;
 
       thisis = (int)::sqrt((double)((ex - destX) * (ex - destX) + (ey - destY) * (ey - destY)));
@@ -172,8 +221,7 @@ int find_nearest_walkable_area(block tempw, int fromX, int fromY, int toX, int t
   return 0;
 }
 
-#define MAX_GRANULARITY 3
-static int walk_area_granularity[MAX_WALK_AREAS + 1];
+
 static int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
 {
   wallscreen = wss;
@@ -281,20 +329,6 @@ static int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
   return 1;
 }
 
-#include "mousew32.h"
-static int leftorright = 0;
-static int nesting = 0;
-static int pathbackstage = 0;
-static int finalpartx = 0, finalparty = 0;
-static short **beenhere = NULL;     //[200][320];
-static int beenhere_array_size = 0;
-static const int BEENHERE_SIZE = 2;
-
-#define DIR_LEFT  0
-#define DIR_RIGHT 2
-#define DIR_UP    1
-#define DIR_DOWN  3
-
 static int try_this_square(int srcx, int srcy, int tox, int toy)
 {
   if (beenhere[srcy][srcx] & 0x80)
@@ -401,7 +435,6 @@ try_again:
     } \
   }}
 
-#define MAX_TRAIL_LENGTH 5000
 
 // Round down the supplied co-ordinates to the area granularity,
 // and move a bit if this causes them to become non-walkable
@@ -620,11 +653,8 @@ static int __find_route(int srcx, int srcy, short *tox, short *toy, int noredx)
     is_straight = 1;
 
   pathbackstage = 0;
-  if (routex1 != -10) {
-    quit("Don't even try it.");
-    exit(99);
-    abort();
-  }
+
+  findroute_copyright_check_2();
 
   if (leftorright == 0) {
     waspossible = 1;
@@ -811,11 +841,7 @@ int find_route(short srcx, short srcy, short xx, short yy, block onscreen, int m
     free(beenhere[0]);
   }
 
-  if ((get_copyright_crc() != COPYRIGHT_CRC) || (walk_area_zone5 != 1633)) {
-    quit("My name is there for all to see.");
-    exit(95);
-    abort();
-  }
+  findroute_copyright_check_1();
 
   if (pathbackstage >= 0) {
     int nearestpos = 0, nearestindx;

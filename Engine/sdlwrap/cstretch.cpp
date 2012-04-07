@@ -23,12 +23,6 @@
 typedef ALW_BITMAP BITMAP;
 
 
-void bmp_write24 (uintptr_t addr, int c)
-{
-  unsigned char *p = (unsigned char *)addr;
-
-  WRITE3BYTES(p, c);
-}
 
 /* Information for stretching line */
 static struct {

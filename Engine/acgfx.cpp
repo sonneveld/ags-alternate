@@ -27,10 +27,10 @@
 
 #include "mousew32.h"
 
-extern "C" {
+//extern "C" {
 unsigned long _blender_trans16(unsigned long x, unsigned long y, unsigned long n);
 unsigned long _blender_trans15(unsigned long x, unsigned long y, unsigned long n);
-}
+//}
 
 // Take hue and saturation of blend colour, luminance of image
 unsigned long _myblender_color15_light(unsigned long x, unsigned long y, unsigned long n)

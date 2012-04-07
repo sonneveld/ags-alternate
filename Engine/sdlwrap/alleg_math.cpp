@@ -135,12 +135,12 @@ double alw_fixtof (alw_fixed x)
 static alw_fixed alw_ftofix (double x)
 {
 	if (x > 32767.0) {
-		*alw_allegro_errno = ERANGE;
+		errno = ERANGE;
 		return 0x7FFFFFFF;
 	}
 
 	if (x < -32767.0) {
-		*alw_allegro_errno = ERANGE;
+		errno = ERANGE;
 		return -0x7FFFFFFF;
 	}
 
@@ -151,7 +151,7 @@ static alw_fixed alw_ftofix (double x)
 alw_fixed alw_fixdiv (alw_fixed x, alw_fixed y)
 {
 	if (y == 0) {
-		*alw_allegro_errno = ERANGE;
+		errno = ERANGE;
 		return (x < 0) ? -0x7FFFFFFF : 0x7FFFFFFF;
 	}
 	else

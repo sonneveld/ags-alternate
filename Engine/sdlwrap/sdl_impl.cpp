@@ -8,11 +8,10 @@
 #include <sys/stat.h>
 #include <assert.h>
 
-int *alw_allegro_errno = NULL;
-
 char _debug_str[10000];
 
 #define PRINT_STUB sprintf(_debug_str, "STUB %s:%d %s\n", __FILE__, __LINE__, __FUNCSIG__); OutputDebugString(_debug_str)
+#define PRINT_STUB
 
 // INIT
 // ============================================================================
@@ -72,9 +71,14 @@ static ALW_BITMAP *wrap_sdl_surface(SDL_Surface *surf) {
 	x->w = surf->w;
 	x->h = surf->h;
 
-  x->vtable = &_default_vtable;
+  x->vtable = (ALW_GFX_VTABLE *)malloc(sizeof(ALW_GFX_VTABLE));
+  x->vtable->mask_color = 0;
 
-  x->clip = 0;
+  x->clip = 1;
+  x->cl = 0;
+  x->ct = 0;
+  x->cr = surf->w;
+  x->cb = surf->h;
 
 	x->line = (unsigned char **)malloc(x->h * sizeof(unsigned char*));
 	int hcount = surf->h;
@@ -92,20 +96,50 @@ static ALW_BITMAP *wrap_sdl_surface(SDL_Surface *surf) {
 
 static void _add_palette_to_surface(SDL_Surface *surf) {
   SDL_Surface* videoSurf = SDL_GetVideoSurface();
-  if (videoSurf) {
-    SDL_SetColors(surf, videoSurf->format->palette->colors, 0, videoSurf->format->palette->ncolors);
-  }
+  if (!videoSurf)
+    return;
 
+  if (!videoSurf->format->palette)
+    return;
+  
+  SDL_SetColors(surf, videoSurf->format->palette->colors, 0, videoSurf->format->palette->ncolors);
+
+}
+
+static void _bmp_set_color_key(ALW_BITMAP *bmp) {
+  SDL_Surface *surf = bmp->surf;
+
+  switch (surf->format->BitsPerPixel) {
+    case 8:
+      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_8);
+      bmp->vtable->mask_color = MASK_COLOR_8;
+      break;
+    case 15:
+      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_15);
+      bmp->vtable->mask_color =MASK_COLOR_15;
+      break;
+    case 16:
+      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_16);
+      bmp->vtable->mask_color =MASK_COLOR_16;
+      break;
+    case 24:
+      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_24);
+      bmp->vtable->mask_color =MASK_COLOR_24;
+      break;
+    case 32:
+      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_32);
+      bmp->vtable->mask_color =MASK_COLOR_32;
+      break;
+  }
 }
 
 ALW_BITMAP *alw_create_bitmap_ex(int color_depth, int width, int height) {
 	// depth (8, 15, 16, 24 or 32 bits per pixel)
 	SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, color_depth, 0,0,0,0);
-  SDL_SetColorKey(surf, SDL_SRCCOLORKEY, 0);
-
   _add_palette_to_surface(surf);
-
-	return wrap_sdl_surface(surf);
+	ALW_BITMAP *bmp = wrap_sdl_surface(surf);
+  _bmp_set_color_key(bmp);
+  return bmp;
 }
 
 
@@ -138,9 +172,12 @@ ALW_BITMAP *alw_create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, i
 	if (pParent->format->palette)
 		SDL_SetColors(m_pSurface, pParent->format->palette->colors, 0, pParent->format->palette->ncolors);
 
+
 	SDL_UnlockSurface(pParent);
 
-	return wrap_sdl_surface(m_pSurface);
+	ALW_BITMAP *bmp =wrap_sdl_surface(m_pSurface);
+  _bmp_set_color_key(bmp);
+  return bmp;
 }
 
 void alw_destroy_bitmap(ALW_BITMAP *bitmap) {
@@ -157,9 +194,8 @@ int alw_bitmap_color_depth(ALW_BITMAP *bmp) {
 }
 
 int alw_bitmap_mask_color(ALW_BITMAP *bmp) {
-	// not supported ?
 	PRINT_STUB;
-	return 0;
+  return bmp->vtable->mask_color;
 }
 
 int alw_is_linear_bitmap(ALW_BITMAP *bmp) {
@@ -190,6 +226,12 @@ void alw_release_screen() {
 void alw_set_clip_rect(ALW_BITMAP *bitmap, int x1, int y1, int x2, int y2) {
 	SDL_Rect rect = {x1, y1, x2-x1+1, y2-y1+1};
 	SDL_SetClipRect(bitmap->surf, &rect);
+
+  bitmap->clip = 1;
+  bitmap->cl = x1;
+  bitmap->cr = x2;
+  bitmap->ct = y1;
+  bitmap->cb = y2;
 }
 void alw_set_clip_state(ALW_BITMAP *bitmap, int state) {
 	PRINT_STUB;
@@ -411,12 +453,40 @@ ALW_PACKFILE *__old_pack_fopen(char *,char *) {	PRINT_STUB; return 0;}
 // BLITS
 // ============================================================================
 
-
+void _linear_draw_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
 void _linear_draw_sprite_v_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
 void _linear_draw_sprite_h_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
 void _linear_draw_sprite_vh_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
 void _linear_draw_trans_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
 void _linear_draw_lit_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
+
+void _linear_draw_sprite15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_v_flip15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_h_flip15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_vh_flip15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_trans_sprite15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_lit_sprite15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
+
+void _linear_draw_sprite16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_v_flip16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_h_flip16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_vh_flip16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_trans_sprite16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_lit_sprite16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
+
+void _linear_draw_sprite24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_v_flip24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_h_flip24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_vh_flip24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_trans_sprite24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_lit_sprite24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
+
+void _linear_draw_sprite32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_v_flip32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_h_flip32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_sprite_vh_flip32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_trans_sprite32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
+void _linear_draw_lit_sprite32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
 
 
 unsigned char _my_blit_col = 16;
@@ -433,7 +503,20 @@ void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, 
 	SDL_Rect srcrect = {source_x, source_y, width, height};
 	SDL_Rect dstrect = {dest_x, dest_y, width, height};
 
-	SDL_BlitSurface(src, &srcrect, dst, &dstrect);
+  // alw_blit actually ignores alpha
+  int origalphaflag = src->flags & (SDL_SRCALPHA|SDL_RLEACCEL);
+  int origalpha = src->format->alpha;
+  int origcolkeyflag = src->flags & (SDL_SRCCOLORKEY|SDL_RLEACCEL);
+  int origcolkey = src->format->colorkey;
+  SDL_SetAlpha(src, 0, 255);
+  SDL_SetColorKey(src, 0, 0);
+
+  SDL_BlitSurface(src, &srcrect, dst, &dstrect);
+
+  if (origalphaflag)
+    SDL_SetAlpha(src, origalphaflag, origalpha);
+  if (origcolkeyflag)
+    SDL_SetColorKey(src, origcolkeyflag, origcolkey);
 
   //if (dest_x != 0 || dest_y != 0) {
 //    SDL_FillRect(dst, &dstrect, _my_blit_col);
@@ -446,31 +529,155 @@ void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, 
 }
 void alw_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-	alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+
+  switch (sprite->surf->format->BitsPerPixel) {
+    case 8:
+      _linear_draw_sprite8(bmp, sprite, x, y);
+      break;
+    case 15:
+      _linear_draw_sprite15(bmp, sprite, x, y);
+      break;
+    case 16:
+      _linear_draw_sprite16(bmp, sprite, x, y);
+      break;
+    case 24:
+      _linear_draw_sprite24(bmp, sprite, x, y);
+      break;
+    case 32:
+      _linear_draw_sprite32(bmp, sprite, x, y);
+      break;
+  }
+
+  return;
+
+
+  SDL_Surface *src = sprite->surf;
+  SDL_Surface *dst = bmp->surf;
+  //dst = _actual_sdl_screen;
+
+  void *srcpixels = sprite->surf->pixels;
+  void *destpixels = bmp->surf->pixels;
+
+  SDL_Rect srcrect = {0, 0, sprite->w, sprite->h};
+  SDL_Rect dstrect = {x, y, sprite->w, sprite->h};
+
+  SDL_BlitSurface(src, &srcrect, dst, &dstrect);
+
+  SDL_Flip(_actual_sdl_screen);
 }
+
+
 void alw_draw_lit_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int color) { 
 	PRINT_STUB;
-  _linear_draw_lit_sprite8(bmp, sprite, x, y, color);
+  // we assume that bmp and sprite have same color depth
+
+  switch (sprite->surf->format->BitsPerPixel) {
+    case 8:
+      _linear_draw_lit_sprite8(bmp, sprite, x, y, color);
+      break;
+    case 15:
+      _linear_draw_lit_sprite15(bmp, sprite, x, y, color);
+      break;
+    case 16:
+      _linear_draw_lit_sprite16(bmp, sprite, x, y, color);
+      break;
+    case 24:
+      _linear_draw_lit_sprite24(bmp, sprite, x, y, color);
+      break;
+    case 32:
+      _linear_draw_lit_sprite32(bmp, sprite, x, y, color);
+      break;
+  }
   //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
 }
 void alw_draw_trans_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-  _linear_draw_trans_sprite8(bmp, sprite, x, y);
+
+
+  switch (sprite->surf->format->BitsPerPixel) {
+    case 8:
+      _linear_draw_trans_sprite8(bmp, sprite, x, y);
+      break;
+    case 15:
+      _linear_draw_trans_sprite15(bmp, sprite, x, y);
+      break;
+    case 16:
+      _linear_draw_trans_sprite16(bmp, sprite, x, y);
+      break;
+    case 24:
+      _linear_draw_trans_sprite24(bmp, sprite, x, y);
+      break;
+    case 32:
+      _linear_draw_trans_sprite32(bmp, sprite, x, y);
+      break;
+  }
+
   //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
 }
 void alw_draw_sprite_h_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-  _linear_draw_sprite_h_flip8(bmp, sprite, x, y);
+  // we assume that bmp and sprite have same color depth
+  switch (sprite->surf->format->BitsPerPixel) {
+    case 8:
+      _linear_draw_sprite_h_flip8(bmp, sprite, x, y);
+      break;
+    case 15:
+      _linear_draw_sprite_h_flip15(bmp, sprite, x, y);
+      break;
+    case 16:
+      _linear_draw_sprite_h_flip16(bmp, sprite, x, y);
+      break;
+    case 24:
+      _linear_draw_sprite_h_flip24(bmp, sprite, x, y);
+      break;
+    case 32:
+      _linear_draw_sprite_h_flip32(bmp, sprite, x, y);
+      break;
+  }
   //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
 }
 void alw_draw_sprite_v_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-  _linear_draw_sprite_v_flip8(bmp, sprite, x, y);
+  // we assume that bmp and sprite have same color depth
+  switch (sprite->surf->format->BitsPerPixel) {
+    case 8:
+      _linear_draw_sprite_v_flip8(bmp, sprite, x, y);
+      break;
+    case 15:
+      _linear_draw_sprite_v_flip15(bmp, sprite, x, y);
+      break;
+    case 16:
+      _linear_draw_sprite_v_flip16(bmp, sprite, x, y);
+      break;
+    case 24:
+      _linear_draw_sprite_v_flip24(bmp, sprite, x, y);
+      break;
+    case 32:
+      _linear_draw_sprite_v_flip32(bmp, sprite, x, y);
+      break;
+  }
 	//alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
 }
 void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-  _linear_draw_sprite_vh_flip8(bmp, sprite, x, y);
+  // we assume that bmp and sprite have same color depth
+  switch (sprite->surf->format->BitsPerPixel) {
+    case 8:
+      _linear_draw_sprite_vh_flip8(bmp, sprite, x, y);
+      break;
+    case 15:
+      _linear_draw_sprite_vh_flip15(bmp, sprite, x, y);
+      break;
+    case 16:
+      _linear_draw_sprite_vh_flip16(bmp, sprite, x, y);
+      break;
+    case 24:
+      _linear_draw_sprite_vh_flip24(bmp, sprite, x, y);
+      break;
+    case 32:
+      _linear_draw_sprite_vh_flip32(bmp, sprite, x, y);
+      break;
+  }
   //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
 }
 //void alw_stretch_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int source_width, int source_height, int dest_x, int dest_y, int dest_width, int dest_height){ PRINT_STUB; }
@@ -481,12 +688,40 @@ void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) 
 // COLOURS
 // ============================================================================
 
-int alw_makecol_depth(int color_depth, int r, int g, int b) { PRINT_STUB; return 0;}
+int alw_makecol_depth(int color_depth, int r, int g, int b) {
+  PRINT_STUB; 
+  return SDL_MapRGB(_actual_sdl_screen->format, r, g, b);
+  return 0;
+}
 int alw_makeacol_depth(int color_depth, int r, int g, int b, int a) { PRINT_STUB; return 0;}
-int alw_getr_depth(int color_depth, int c){ PRINT_STUB; return 0;}
-int alw_getg_depth(int color_depth, int c){ PRINT_STUB; return 0;}
-int alw_getb_depth(int color_depth, int c){ PRINT_STUB; return 0;}
-int alw_geta_depth(int color_depth, int c){ PRINT_STUB; return 0;}
+int alw_getr_depth(int color_depth, int c)
+{ 
+  PRINT_STUB;
+  Uint8 r,g,b;
+  SDL_GetRGB(c, _actual_sdl_screen->format, &r, &g, &b);
+  return r;
+}
+int alw_getg_depth(int color_depth, int c)
+{ 
+  PRINT_STUB;
+  Uint8 r,g,b;
+  SDL_GetRGB(c, _actual_sdl_screen->format, &r, &g, &b);
+  return g;
+}
+int alw_getb_depth(int color_depth, int c)
+{ 
+  PRINT_STUB;
+  Uint8 r,g,b;
+  SDL_GetRGB(c, _actual_sdl_screen->format, &r, &g, &b);
+  return b;
+}
+int alw_geta_depth(int color_depth, int c)
+{  
+  PRINT_STUB;
+  Uint8 r,g,b,a;
+  SDL_GetRGBA(c, _actual_sdl_screen->format, &r, &g, &b, &a);
+  return a;
+}
 
 
 // DRAWING
@@ -558,13 +793,20 @@ void alw_clear_to_color(ALW_BITMAP *bitmap, int color) { SDL_FillRect(bitmap->su
 void alw_clear_bitmap(ALW_BITMAP *bitmap) { SDL_FillRect(bitmap->surf, 0, 0); }
 void alw_hline(ALW_BITMAP *bmp, int x1, int y, int x2, int color)  { PRINT_STUB; }
 void alw_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color) { PRINT_STUB; }
-void alw_do_line(ALW_BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(ALW_BITMAP *bmp, int x, int y, int d))  { PRINT_STUB; }
+//void alw_do_line(ALW_BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(ALW_BITMAP *bmp, int x, int y, int d))  { PRINT_STUB; }
 void alw_rect(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)  { PRINT_STUB; }
-void alw_floodfill(ALW_BITMAP *bmp, int x, int y, int color) { PRINT_STUB; }
+extern void _soft_floodfill(ALW_BITMAP *bmp, int x, int y, int color);
+void alw_floodfill(ALW_BITMAP *bmp, int x, int y, int color) {
+  _soft_floodfill(bmp, x, y, color);
+}
 void alw_rectfill ( ALW_BITMAP *bmp, int x1, int y_1, int x2, int y2, int color)  { PRINT_STUB; }
 void alw_triangle(ALW_BITMAP *bmp, int x1,int y1,int x2,int y2,int x3,int y3, int color)  { PRINT_STUB; }
 void alw_circlefill(ALW_BITMAP *bmp, int x, int y, int radius, int color)  { PRINT_STUB; }
 
+void alw_hfill(ALW_BITMAP *dst, int dx1, int dy, int dx2, int color) {
+  SDL_Rect dstrect = {dx1, dy, dx2-dx1+1, 1};
+  SDL_FillRect(dst->surf, &dstrect, color);
+}
 
 // MOUSE
 // ============================================================================
@@ -693,20 +935,71 @@ int alw_poll_mouse() {
 // TRANSPARENCY
 // ============================================================================
 
+// 256-color transparency
 static ALW_COLOR_MAP *_alw_color_map;
-
-void alw_set_alpha_blender() { PRINT_STUB; }
-void alw_set_trans_blender(int r, int g, int b, int a) { PRINT_STUB; }
-void alw_set_blender_mode (ALW_BLENDER_FUNC b15, ALW_BLENDER_FUNC b16, ALW_BLENDER_FUNC b24, int r, int g, int b, int a) { PRINT_STUB; }
 void alw_create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos)) { PRINT_STUB; }
-
 void alw_set_color_map(ALW_COLOR_MAP *alw_color_map) {_alw_color_map = alw_color_map;};
-ALW_COLOR_MAP * alw_get_color_map(){return _alw_color_map;}
+int alw_has_color_map(){return _alw_color_map != 0;}
 
-extern "C" {
-	unsigned long _blender_trans16(unsigned long x, unsigned long y, unsigned long n){ PRINT_STUB; return 0;}
-	unsigned long _blender_trans15(unsigned long x, unsigned long y, unsigned long n){ PRINT_STUB; return 0;}
+extern unsigned long _blender_black(unsigned long x, unsigned long y, unsigned long n);
+// truecolor transparency
+// modes set before calling draw_trans_sprite, alw_draw_lit_sprite
+//void alw_set_alpha_blender() { PRINT_STUB; }   // see colblend
+//void alw_set_trans_blender(int r, int g, int b, int a) { PRINT_STUB; }   // see colblend
+void alw_set_blender_mode (ALW_BLENDER_FUNC b15, ALW_BLENDER_FUNC b16, ALW_BLENDER_FUNC b24, int r, int g, int b, int a) 
+{ 
+  PRINT_STUB; 
+  _blender_func15 = b15;
+  _blender_func16 = b16;
+  _blender_func24 = b24;
+  _blender_func32 = b24;
+
+  _blender_func15x = _blender_black;
+  _blender_func16x = _blender_black;
+  _blender_func24x = _blender_black;
+
+  _blender_col_15 = alw_makecol15(r, g, b);
+  _blender_col_16 = alw_makecol16(r, g, b);
+  _blender_col_24 = alw_makecol24(r, g, b);
+  _blender_col_32 = alw_makecol32(r, g, b);
+
+  _blender_alpha = a;
 }
+void alw_set_blender_mode_ex(ALW_BLENDER_FUNC b15,ALW_BLENDER_FUNC b16,ALW_BLENDER_FUNC b24,ALW_BLENDER_FUNC b32,ALW_BLENDER_FUNC b15x,ALW_BLENDER_FUNC b16x,ALW_BLENDER_FUNC b24x, int r, int g,int b,int a) 
+{ 
+  PRINT_STUB; 
+  _blender_func15 = b15;
+  _blender_func16 = b16;
+  _blender_func24 = b24;
+  _blender_func32 = b32;
+
+  _blender_func15x = b15x;
+  _blender_func16x = b16x;
+  _blender_func24x = b24x;
+
+  _blender_col_15 = alw_makecol15(r, g, b);
+  _blender_col_16 = alw_makecol16(r, g, b);
+  _blender_col_24 = alw_makecol24(r, g, b);
+  _blender_col_32 = alw_makecol32(r, g, b);
+
+  _blender_alpha = a;
+}
+
+ALW_BLENDER_FUNC _blender_func15 = 0;   /* truecolor pixel blender routines */
+ALW_BLENDER_FUNC _blender_func16 = 0;
+ALW_BLENDER_FUNC _blender_func24 = 0;
+ALW_BLENDER_FUNC _blender_func32 = 0;
+
+ALW_BLENDER_FUNC _blender_func15x = 0;
+ALW_BLENDER_FUNC _blender_func16x = 0;
+ALW_BLENDER_FUNC _blender_func24x = 0;
+
+int _blender_col_15 = 0;               /* for truecolor lit sprites */
+int _blender_col_16 = 0;
+int _blender_col_24 = 0;
+int _blender_col_32 = 0;
+
+int _blender_alpha = 0;                /* for truecolor translucent drawing */
 
 // DIGIAL AUDIO
 // ============================================================================
@@ -753,9 +1046,10 @@ void alw_set_volume_per_voice(int scale){ PRINT_STUB; }
 // COLOR FORMATS
 // ============================================================================
 
-ALW_RGB_MAP *alw_rgb_map;
-void alw_rgb_to_hsv(int r, int g, int b, float *h, float *s, float *v){ PRINT_STUB; }
-void alw_hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b){ PRINT_STUB; }
+//ALW_RGB_MAP *alw_rgb_map;
+void alw_set_rgb_map(ALW_RGB_MAP *rgb_map) { PRINT_STUB; }
+//void alw_rgb_to_hsv(int r, int g, int b, float h, float *s, float *v){ PRINT_STUB; }
+//void alw_hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b){ PRINT_STUB; }
 void alw_create_rgb_table(ALW_RGB_MAP *table, const ALW_PALETTE pal, void (*callback)(int pos)){ PRINT_STUB; }
 
 
@@ -1136,3 +1430,37 @@ int almp3_get_length_msecs_mp3stream(ALMP3_MP3STREAM *mp3, int total_size){ PRIN
 int almp3_get_pos_msecs_mp3stream(ALMP3_MP3STREAM *mp3){ PRINT_STUB; return 0;}
 
 ALW_AUDIOSTREAM *almp3_get_audiostream_mp3stream(ALMP3_MP3STREAM *mp3){ PRINT_STUB; return 0;}
+
+
+// DIRECT ACCESS
+// ============================================================================
+
+unsigned long alw_bmp_write_line(ALW_BITMAP *bmp, int line) {
+  PRINT_STUB;
+  return (unsigned long)bmp->line[line];
+}
+unsigned long alw_bmp_read_line(ALW_BITMAP *bmp, int line) {
+  PRINT_STUB;
+  return (unsigned long)bmp->line[line];
+}
+
+void alw_bmp_unwrite_line(ALW_BITMAP *bmp) { PRINT_STUB; }
+void alw_bmp_select(ALW_BITMAP *bmp) { PRINT_STUB; }
+
+
+int bmp_read24 (uintptr_t addr)
+{
+  unsigned char *p = (unsigned char *)addr;
+  int c;
+
+  c = READ3BYTES(p);
+
+  return c;
+}
+
+void bmp_write24 (uintptr_t addr, int c)
+{
+  unsigned char *p = (unsigned char *)addr;
+
+  WRITE3BYTES(p, c);
+}

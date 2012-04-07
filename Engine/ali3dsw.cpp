@@ -520,12 +520,15 @@ void ALSoftwareGraphicsDriver::RenderToBackBuffer()
     }
     else if (bitmap->_hasAlpha)
     {
-      if (bitmap->_transparency == 0)
+      if (bitmap->_transparency == 0){
         alw_set_alpha_blender();
-      else
+        alw_draw_trans_sprite(virtualScreen, bitmap->_bmp, drawAtX, drawAtY);
+      }
+      else {
         alw_set_blender_mode(NULL, NULL, _trans_alpha_blender32, 0, 0, 0, bitmap->_transparency);
+        alw_draw_trans_sprite(virtualScreen, bitmap->_bmp, drawAtX, drawAtY);
+      }
 
-      alw_draw_trans_sprite(virtualScreen, bitmap->_bmp, drawAtX, drawAtY);
     }
     else
     {

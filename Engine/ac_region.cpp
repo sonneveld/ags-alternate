@@ -7,18 +7,20 @@
 #include "bmp.h"
 
 void generate_light_table() {
-  int cc;
-  if ((game.color_depth == 1) && (alw_get_color_map() == NULL)) {
-    // in 256-col mode, check if we need the light table this room
-    for (cc=0;cc < MAX_REGIONS;cc++) {
-      if (thisroom.regionLightLevel[cc] < 0) {
-        alw_create_light_table(&maincoltable,palette,0,0,0,NULL);
-		alw_set_color_map(&maincoltable);
-        break;
-        }
-      }
+  if (game.color_depth != 1)
+    return;
+  if (alw_has_color_map())
+    return;
+
+  // in 256-col mode, check if we need the light table this room
+  for (int cc=0;cc < MAX_REGIONS;cc++) {
+    if (thisroom.regionLightLevel[cc] < 0) {
+      alw_create_light_table(&maincoltable,palette,0,0,0,NULL);
+      alw_set_color_map(&maincoltable);
+      break;
     }
   }
+}
 
 /* *** SCRIPT SYMBOL: [Region] SetAreaLightLevel *** */
 void SetAreaLightLevel(int area, int brightness) {

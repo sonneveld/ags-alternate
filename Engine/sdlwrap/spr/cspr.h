@@ -18,6 +18,12 @@
 #ifndef __bma_cspr_h
 #define __bma_cspr_h
 
+#define bmp_select alw_bmp_select
+#define bmp_read_line alw_bmp_read_line
+#define bmp_write_line alw_bmp_write_line
+#define bmp_unwrite_line alw_bmp_unwrite_line
+typedef ALW_BLENDER_FUNC BLENDER_FUNC;
+
 /* _linear_draw_sprite:
  *  Draws a sprite onto a linear bitmap at the specified x, y position,
  *  using a masked drawing mode where zero pixels are not output.

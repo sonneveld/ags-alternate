@@ -179,7 +179,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib libcpmt.lib d3d9.lib quartz.lib strmiids.lib winmm.lib shlwapi.lib amstrmid.lib SDL.lib SDLmain.lib"
+				AdditionalDependencies="quartz.lib strmiids.lib shlwapi.lib SDL.lib SDLmain.lib"
 				OutputFile=".\acwin___Win32_DebugWorking/acwin.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -929,6 +929,14 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\sdlwrap\colblend.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\color.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\common\compress.cpp"
 				>
 				<FileConfiguration
@@ -991,6 +999,22 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\sdlwrap\spr\cspr15.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cspr16.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cspr24.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\spr\cspr32.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\sdlwrap\spr\cspr8.cpp"
 				>
 			</File>
@@ -1027,6 +1051,14 @@
 			</File>
 			<File
 				RelativePath=".\sdlwrap\cstretch.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\flood.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\sdlwrap\gfx.cpp"
 				>
 			</File>
 			<File
