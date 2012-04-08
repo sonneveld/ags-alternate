@@ -1,0 +1,320 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		519E332E153137400026C374 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E332D153137400026C374 /* Cocoa.framework */; };
+		519E3338153137400026C374 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 519E3336153137400026C374 /* InfoPlist.strings */; };
+		519E333E153137400026C374 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 519E333C153137400026C374 /* Credits.rtf */; };
+		519E335F15314C4E0026C374 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E335D15314C4E0026C374 /* SDL.framework */; };
+		519E336015314C4E0026C374 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E335E15314C4E0026C374 /* SDL_ttf.framework */; };
+		519E336515314CA30026C374 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519E336115314CA30026C374 /* main.cpp */; };
+		519E336615314CA30026C374 /* SDLMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 519E336315314CA30026C374 /* SDLMain.m */; };
+		519E336715314CA30026C374 /* Vera.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 519E336415314CA30026C374 /* Vera.ttf */; };
+		519E336915314CC30026C374 /* SDL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 519E335D15314C4E0026C374 /* SDL.framework */; };
+		519E336A15314CC30026C374 /* SDL_ttf.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 519E335E15314C4E0026C374 /* SDL_ttf.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		519E336815314CBD0026C374 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				519E336915314CC30026C374 /* SDL.framework in CopyFiles */,
+				519E336A15314CC30026C374 /* SDL_ttf.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		519E3329153137400026C374 /* EngineMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EngineMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		519E332D153137400026C374 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		519E3330153137400026C374 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		519E3331153137400026C374 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		519E3332153137400026C374 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		519E3335153137400026C374 /* EngineMac-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "EngineMac-Info.plist"; sourceTree = "<group>"; };
+		519E3337153137400026C374 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		519E333B153137400026C374 /* EngineMac-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EngineMac-Prefix.pch"; sourceTree = "<group>"; };
+		519E333D153137400026C374 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		519E335D15314C4E0026C374 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = Library/Frameworks/SDL.framework; sourceTree = SDKROOT; };
+		519E335E15314C4E0026C374 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = Library/Frameworks/SDL_ttf.framework; sourceTree = SDKROOT; };
+		519E336115314CA30026C374 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		519E336215314CA30026C374 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = "<group>"; };
+		519E336315314CA30026C374 /* SDLMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDLMain.m; sourceTree = "<group>"; };
+		519E336415314CA30026C374 /* Vera.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Vera.ttf; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		519E3326153137400026C374 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				519E335F15314C4E0026C374 /* SDL.framework in Frameworks */,
+				519E336015314C4E0026C374 /* SDL_ttf.framework in Frameworks */,
+				519E332E153137400026C374 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		519E331E153137400026C374 = {
+			isa = PBXGroup;
+			children = (
+				519E3333153137400026C374 /* EngineMac */,
+				519E332C153137400026C374 /* Frameworks */,
+				519E332A153137400026C374 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		519E332A153137400026C374 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				519E3329153137400026C374 /* EngineMac.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		519E332C153137400026C374 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				519E335D15314C4E0026C374 /* SDL.framework */,
+				519E335E15314C4E0026C374 /* SDL_ttf.framework */,
+				519E332D153137400026C374 /* Cocoa.framework */,
+				519E332F153137400026C374 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		519E332F153137400026C374 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				519E3330153137400026C374 /* AppKit.framework */,
+				519E3331153137400026C374 /* CoreData.framework */,
+				519E3332153137400026C374 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		519E3333153137400026C374 /* EngineMac */ = {
+			isa = PBXGroup;
+			children = (
+				519E336115314CA30026C374 /* main.cpp */,
+				519E336215314CA30026C374 /* SDLMain.h */,
+				519E336315314CA30026C374 /* SDLMain.m */,
+				519E336415314CA30026C374 /* Vera.ttf */,
+				519E3334153137400026C374 /* Supporting Files */,
+			);
+			path = EngineMac;
+			sourceTree = "<group>";
+		};
+		519E3334153137400026C374 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				519E3335153137400026C374 /* EngineMac-Info.plist */,
+				519E3336153137400026C374 /* InfoPlist.strings */,
+				519E333B153137400026C374 /* EngineMac-Prefix.pch */,
+				519E333C153137400026C374 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		519E3328153137400026C374 /* EngineMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 519E3347153137400026C374 /* Build configuration list for PBXNativeTarget "EngineMac" */;
+			buildPhases = (
+				519E3325153137400026C374 /* Sources */,
+				519E3326153137400026C374 /* Frameworks */,
+				519E3327153137400026C374 /* Resources */,
+				519E336815314CBD0026C374 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EngineMac;
+			productName = EngineMac;
+			productReference = 519E3329153137400026C374 /* EngineMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		519E3320153137400026C374 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = Engine;
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = 519E3323153137400026C374 /* Build configuration list for PBXProject "EngineMac" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 519E331E153137400026C374;
+			productRefGroup = 519E332A153137400026C374 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				519E3328153137400026C374 /* EngineMac */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		519E3327153137400026C374 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				519E3338153137400026C374 /* InfoPlist.strings in Resources */,
+				519E333E153137400026C374 /* Credits.rtf in Resources */,
+				519E336715314CA30026C374 /* Vera.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		519E3325153137400026C374 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				519E336515314CA30026C374 /* main.cpp in Sources */,
+				519E336615314CA30026C374 /* SDLMain.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		519E3336153137400026C374 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				519E3337153137400026C374 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		519E333C153137400026C374 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				519E333D153137400026C374 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		519E3345153137400026C374 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		519E3346153137400026C374 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		519E3348153137400026C374 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "EngineMac/EngineMac-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"/Library/Frameworks/SDL.framework/Headers/**",
+					"/Library/Frameworks/SDL_ttf.framework/Headers/**",
+				);
+				INFOPLIST_FILE = "EngineMac/EngineMac-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		519E3349153137400026C374 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "EngineMac/EngineMac-Prefix.pch";
+				HEADER_SEARCH_PATHS = (
+					"/Library/Frameworks/SDL.framework/Headers/**",
+					"/Library/Frameworks/SDL_ttf.framework/Headers/**",
+				);
+				INFOPLIST_FILE = "EngineMac/EngineMac-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		519E3323153137400026C374 /* Build configuration list for PBXProject "EngineMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				519E3345153137400026C374 /* Debug */,
+				519E3346153137400026C374 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		519E3347153137400026C374 /* Build configuration list for PBXNativeTarget "EngineMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				519E3348153137400026C374 /* Debug */,
+				519E3349153137400026C374 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 519E3320153137400026C374 /* Project object */;
+}
