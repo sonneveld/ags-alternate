@@ -12,8 +12,9 @@
 
 */
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
+#include <time.h>
 #include "acplatfm.h"
 
 #include "bmp.h"
@@ -28,7 +29,7 @@
 #include "ac_exescr.h"
 #include "ac_input.h"
 #include "ac_parser.h"
-#include "dynobj/script_date_time.h"
+#include "script_date_time.h"
 #include "cscomp.h"
 
 AGSPlatformDriver* AGSPlatformDriver::instance = NULL;
@@ -52,7 +53,7 @@ void AGSPlatformDriver::UnRegisterGameWithGameExplorer() { }
 
 void AGSPlatformDriver::ReplaceSpecialPaths(const char *sourcePath, char *destPath) {
 
-  if (strnicmp(sourcePath, "$MYDOCS$", 8) == 0) {
+  if (ac_strnicmp(sourcePath, "$MYDOCS$", 8) == 0) {
     // For platforms with no My Documents folder, just
     // redirect it back to current folder
     strcpy(destPath, ".");
@@ -444,7 +445,7 @@ int IAGSEngine::GetWalkbehindBaseline (int32 wa) {
     quit("!IAGSEngine::GetWalkBehindBase: invalid walk-behind area specified");
   return croom->walkbehind_base[wa];
 }
-void* IAGSEngine::GetScriptFunctionAddress (const char *funcName) {
+const void* IAGSEngine::GetScriptFunctionAddress (const char *funcName) {
   return ccGetSymbolAddress ((char*)funcName);
 }
 int IAGSEngine::GetBitmapTransparentColor(ALW_BITMAP *bmp) {
@@ -977,5 +978,13 @@ int cd_player_control(int cmdd, int datt) {
 
   return 0;
 }
+#else
 
+int cd_player_init() {
+    return 0;
+}
+
+int cd_player_control(int cmdd, int datt) {
+    return 0;
+}
 #endif  // !defined(DJGPP) && !defined(BSD_VERSION) && !defined(MAC_VERSION)

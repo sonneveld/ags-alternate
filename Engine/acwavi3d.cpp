@@ -4,7 +4,7 @@
 //#define ALLEGRO_STATICLINK  // already defined in project settings
 #include <stdio.h>
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 //#include <allegro/platform/aintwin.h>
 #include <d3d9.h>

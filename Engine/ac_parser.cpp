@@ -1,10 +1,12 @@
 #include "ac_parser.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
 #include "ac_string.h"
+
+#include "strimpl.h"
 
 /* *** SCRIPT SYMBOL: [Parser] SaidUnknownWord *** */
 int SaidUnknownWord (char*buffer) {
@@ -35,7 +37,7 @@ int find_word_in_dictionary (char *lookfor) {
     return -1;
 
   for (j = 0; j < game.dict->num_words; j++) {
-    if (stricmp(lookfor, game.dict->word[j]) == 0) {
+    if (ac_stricmp(lookfor, game.dict->word[j]) == 0) {
       return game.dict->wordnum[j];
     }
   }
@@ -108,7 +110,7 @@ int parse_sentence (char*text, int *numwords, short*wordarray, short*compareto, 
   numwords[0] = 0;
   if (compareto == NULL)
     play.bad_parsed_word[0] = 0;
-  strlwr(text);
+  ac_strlwr(text);
   while (1) {
     if ((compareto != NULL) && (compareto[comparing] == RESTOFLINE))
       return 1;

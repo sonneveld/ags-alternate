@@ -14,7 +14,7 @@
 
 #include "routefnd.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include <string.h>
 #include <math.h>
@@ -222,7 +222,7 @@ int find_nearest_walkable_area(block tempw, int fromX, int fromY, int toX, int t
 }
 
 
-static int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
+int is_route_possible(int fromx, int fromy, int tox, int toy, block wss)
 {
   wallscreen = wss;
   suggestx = -1;

@@ -3,7 +3,7 @@
 
 #define UNICODE
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -24,7 +24,7 @@ extern const char* ccGetSectionNameAtOffs(ccScript *scri, long offs);
 // DEBUG MESSAGES AND LOGGING?
 // ============================================================================
 
-void quitprintf(char*texx, ...) {
+void quitprintf(const char*texx, ...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
   va_start(ap,texx);
@@ -60,7 +60,7 @@ void write_log_debug(const char*msg) {
 /* The idea of this is that non-essential errors such as "sound file not
    found" are logged instead of exiting the program.
 */
-void debug_log(char*texx, ...) {
+void debug_log(const char*texx, ...) {
   // if not in debug mode, don't print it so we don't worry the
   // end player
   if (play.debug_mode == 0)
@@ -98,7 +98,7 @@ void debug_log(char*texx, ...) {
 }
 
 
-void debug_write_console (char *msg, ...) {
+void debug_write_console (const char *msg, ...) {
   char displbuf[STD_BUFFER_SIZE];
   va_list ap;
   va_start(ap,msg);
@@ -166,7 +166,9 @@ bool send_message_to_editor(const char *msg, const char *errorMsg)
 
   char messageToSend[STD_BUFFER_SIZE];
   sprintf(messageToSend, "<?xml version=\"1.0\" encoding=\"Windows-1252\"?><Debugger Command=\"%s\">", msg);
+#ifdef WINDOWS_VERSION
   sprintf(&messageToSend[strlen(messageToSend)], "  <EngineWindow>%d</EngineWindow> ", alw_win_get_window());
+#endif
   sprintf(&messageToSend[strlen(messageToSend)], "  <ScriptState><![CDATA[%s]]></ScriptState> ", callStack);
   if (errorMsg != NULL)
   {
@@ -232,7 +234,9 @@ int check_for_messages_from_editor()
     if (strncmp(msgPtr, "START", 5) == 0)
     {
       const char *windowHandle = strstr(msgPtr, "EditorWindow") + 14;
+#ifdef WINDOWS_VERSION
       editor_window_handle = (HWND)atoi(windowHandle);
+#endif
     }
     else if (strncmp(msgPtr, "READY", 5) == 0)
     {

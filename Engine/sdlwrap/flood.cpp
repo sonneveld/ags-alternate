@@ -19,7 +19,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 typedef ALW_BITMAP BITMAP;
 #define ASSERT assert
 #define is_linear_bitmap alw_is_linear_bitmap

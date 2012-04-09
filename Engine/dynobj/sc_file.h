@@ -3,7 +3,7 @@
 
 #include <stdio.h>  // for FILE
 
-#include "dynobj/cc_dynamic_object.h"
+#include "cc_dynamic_object.h"
 
 // object-based File routine -- struct definition
 #define scFileRead   1

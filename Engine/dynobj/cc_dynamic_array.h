@@ -1,7 +1,7 @@
 #ifndef _CC_DYNAMIC_ARRAY_H_HEADER
 #define _CC_DYNAMIC_ARRAY_H_HEADER
 
-#include "dynobj/cc_dynamic_object.h"
+#include "cc_dynamic_object.h"
 
 // *** IMPL FOR DYNAMIC ARRAYS **
 

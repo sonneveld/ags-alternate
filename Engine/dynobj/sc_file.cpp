@@ -1,4 +1,4 @@
-#include "dynobj/sc_file.h"
+#include "sc_file.h"
 
 extern FILE* FileOpen(const char*fnmm, const char* mode);
 extern void FileClose(FILE*hha);

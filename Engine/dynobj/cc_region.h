@@ -1,7 +1,7 @@
 #ifndef _CC_REGION_H_HEADER
 #define _CC_REGION_H_HEADER
 
-#include "dynobj/ags_cc_dynamic_object.h"  // AGSCCDynamicObject
+#include "ags_cc_dynamic_object.h"  // AGSCCDynamicObject
 
 struct CCRegion : AGSCCDynamicObject {
 

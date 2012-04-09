@@ -11,8 +11,9 @@
 */
 
 #include "sprcache.h"
-
-#include "sdlwrap/allegro.h"
+#include <time.h>
+#include <unistd.h>
+#include "allegro.h"
 
 #ifdef _MANAGED
 // ensure this doesn't get compiled to .NET IL

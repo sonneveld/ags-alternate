@@ -1,11 +1,13 @@
 
 #include "ac_datetime.h"
 
-#include "sdlwrap/allegro.h"
+#include <time.h>
+
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
-#include "dynobj/script_date_time.h"
+#include "script_date_time.h"
 #include "cscomp.h"
 
 ScriptDateTime* DateTime_Now_Core() {

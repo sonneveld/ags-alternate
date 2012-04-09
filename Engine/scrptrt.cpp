@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include "agsio.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "routefnd.h"
 

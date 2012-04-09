@@ -1,6 +1,6 @@
 #include "ac_text.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

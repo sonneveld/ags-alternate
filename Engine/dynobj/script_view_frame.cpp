@@ -1,6 +1,6 @@
-#include "dynobj/script_view_frame.h"
+#include "script_view_frame.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

@@ -6,7 +6,7 @@
 
 #include "acwavi.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include <windows.h>
 #include <stdlib.h>

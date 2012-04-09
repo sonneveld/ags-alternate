@@ -1,6 +1,6 @@
-#include "dynobj/cc_character.h"
+#include "cc_character.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

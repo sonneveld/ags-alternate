@@ -22,7 +22,7 @@
 
 //#include "allegro.h"
 //#include "allegro/internal/aintern.h"
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 #include <math.h>
 #include <assert.h>
 

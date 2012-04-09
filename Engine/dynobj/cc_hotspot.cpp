@@ -1,6 +1,6 @@
-#include "dynobj/cc_hotspot.h"
+#include "cc_hotspot.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

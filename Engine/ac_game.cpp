@@ -1,6 +1,8 @@
 #include "ac_game.h"
 
-#include "sdlwrap/allegro.h"
+#include <sys/stat.h>
+
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_types.h"
@@ -25,7 +27,7 @@
 #include "ac_exescr.h"
 #include "ac_input.h"
 #include "cscomp.h"
-#include "dynobj/script_view_frame.h"
+#include "script_view_frame.h"
 
 #define BITMAP ALW_BITMAP
 #include "agsplugin.h"
@@ -419,11 +421,7 @@ int Game_SetSaveGameDirectory(const char *newFolder) {
   platform->ReplaceSpecialPaths(newFolder, newSaveGameDir);
   alw_fix_filename_slashes(newSaveGameDir);
 
-#ifdef LINUX_VERSION
-  mkdir(newSaveGameDir, 0);
-#else
-  mkdir(newSaveGameDir);
-#endif
+  ac_mkdir(newSaveGameDir);
 
   alw_put_backslash(newSaveGameDir);
 
@@ -443,7 +441,7 @@ int Game_SetSaveGameDirectory(const char *newFolder) {
   sprintf(restartGamePath, "%s""agssave.%d%s", saveGameDirectory, RESTART_POINT_SAVE_GAME_NUMBER, saveGameSuffix);
   FILE *restartGameFile = fopen(restartGamePath, "rb");
   if (restartGameFile != NULL) {
-    long fileSize = filelength(fileno(restartGameFile));
+    long fileSize = ac_fstream_sizebytes(restartGameFile);
     char *mbuffer = (char*)malloc(fileSize);
     fread(mbuffer, fileSize, 1, restartGameFile);
     fclose(restartGameFile);

@@ -1,6 +1,6 @@
-#include "dynobj/script_string.h"
+#include "script_string.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

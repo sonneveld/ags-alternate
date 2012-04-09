@@ -3,7 +3,7 @@
 
 // forward declarations:
 #include <stdio.h>          // for FILE
-#include "sdlwrap/allegro.h"        // for ALW_BITMAP
+#include "allegro.h"        // for ALW_BITMAP
 typedef ALW_BITMAP *block;      // wgt2allh.h
 class IDriverDependantBitmap; // ali3d.h
 struct CharacterInfo;       // acroom.h
@@ -40,8 +40,8 @@ struct InteractionVariable; // acroom.h
 #define scAdd_External_Symbol ccAddExternalSymbol
 
 
-extern void quit(char*quitmsg);
-extern void quitprintf(char*texx, ...);
+extern void quit(const char*quitmsg);
+extern void quitprintf(const char*texx, ...);
 extern void put_sprite_256(int, int, block);
 extern void write_log(char*msg);
 extern void initialize_sprite (int ee);
@@ -99,7 +99,7 @@ extern const char* Character_GetTextProperty(CharacterInfo *chaa, const char *pr
 extern CharacterInfo *GetCharacterAtLocation(int xx, int yy);
 extern int Character_GetSpeakingFrame(CharacterInfo *chaa);
 
-extern void ccAddExternalSymbol(char *namof, void *addrof);
+extern void ccAddExternalSymbol(const char *namof, void *addrof);
 
 
 // for ac_mouse.cpp

@@ -32,8 +32,8 @@ struct ScriptRegion {
 
 struct TempEip {
   int oldval;
-  TempEip::TempEip (int newval) ;
-  TempEip::~TempEip () ;
+  TempEip (int newval) ;
+  ~TempEip () ;
 };
 
 struct DebugConsoleText {

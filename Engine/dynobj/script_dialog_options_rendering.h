@@ -1,7 +1,7 @@
 #ifndef _SCRIPT_DIALOG_OPTIONS_RENDERING_H_HEADER
 #define _SCRIPT_DIALOG_OPTIONS_RENDERING_H_HEADER
 
-#include "dynobj/ags_cc_dynamic_object.h"
+#include "ags_cc_dynamic_object.h"
 
 struct ScriptDrawingSurface;  // acruntim.h
 

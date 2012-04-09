@@ -1,6 +1,6 @@
 #include "ac_obj.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 //#include <aastr.h>
 
@@ -964,8 +964,8 @@ int GetObjectAt(int xx,int yy) {
 
     block theImage = GetObjectImage(aa, &isflipped);
 
-    if (is_pos_in_sprite(xx, yy, xxx, yyy - spHeight, theImage,
-                         spWidth, spHeight, isflipped) == FALSE)
+    if (!is_pos_in_sprite(xx, yy, xxx, yyy - spHeight, theImage,
+                         spWidth, spHeight, isflipped))
       continue;
 
     int usebasel = objs[aa].get_baseline();   

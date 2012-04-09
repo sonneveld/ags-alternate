@@ -1,6 +1,6 @@
-#include "dynobj/cc_dialog.h"
+#include "cc_dialog.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "acruntim.h"
 #include "ac_context.h"

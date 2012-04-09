@@ -7,7 +7,7 @@
 #ifndef __ALI3D_H
 #define __ALI3D_H
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 // forward declarations:
 struct GFXFilter; // acgfx.h

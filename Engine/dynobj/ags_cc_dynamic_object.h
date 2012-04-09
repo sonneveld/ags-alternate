@@ -1,7 +1,7 @@
 #ifndef _AGS_CC_DYNAMIC_OBJECT_H_HEADER
 #define _AGS_CC_DYNAMIC_OBJECT_H_HEADER
 
-#include "dynobj/cc_dynamic_object.h" // for ICCDynamicObject
+#include "cc_dynamic_object.h" // for ICCDynamicObject
 
 struct AGSCCDynamicObject : ICCDynamicObject {
 public:

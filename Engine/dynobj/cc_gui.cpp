@@ -1,6 +1,6 @@
-#include "dynobj/cc_gui.h"
+#include "cc_gui.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

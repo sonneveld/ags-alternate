@@ -15,7 +15,7 @@
 
 #include "bmp.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "wgt2allg.h"
 #include "acgfx.h"

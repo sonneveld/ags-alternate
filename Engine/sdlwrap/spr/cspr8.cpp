@@ -16,7 +16,7 @@
  */
 
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 typedef  ALW_BITMAP BITMAP;
 typedef ALW_COLOR_MAP COLOR_MAP;
 #define AL_CONST const

@@ -12,7 +12,9 @@
 
 #include "acgui.h"
 
-#include "sdlwrap/allegro.h"
+#include <stdlib.h>
+
+#include "allegro.h"
 
 #include "bmp.h"
 
@@ -22,6 +24,8 @@
 #include "acruntim.h"
 #include "sprcache.h"
 #include "cscomp.h"
+#include "strimpl.h"
+
 
 #ifdef THIS_IS_THE_ENGINE
 #define get_adjusted_spritewidth(x) wgetblockwidth(spriteset[x])
@@ -816,14 +820,14 @@ void GUIButton::Draw()
       int drawInv = 0;
 
       // Stretch to fit button
-      if (stricmp(text, "(INV)") == 0)
+      if (ac_stricmp(text, "(INV)") == 0)
         drawInv = 1;
       // Draw at actual size
-      if (stricmp(text, "(INVNS)") == 0)
+      if (ac_stricmp(text, "(INVNS)") == 0)
         drawInv = 2;
 
       // Stretch if too big, actual size if not
-      if (stricmp(text, "(INVSHR)") == 0) {
+      if (ac_stricmp(text, "(INVSHR)") == 0) {
         if ((get_adjusted_spritewidth(gui_inv_pic) > wid - 6) ||
             (get_adjusted_spriteheight(gui_inv_pic) > hit - 6))
           drawInv = 1;
@@ -1021,7 +1025,7 @@ const char* GUIMain::get_objscript_name(const char *basedOn) {
     if (strlen(basedOn) > 18)
       return "";
     sprintf(oNameBuffer, "g%s", basedOn);
-    strlwr(oNameBuffer);
+    ac_strlwr(oNameBuffer);
     oNameBuffer[1] = toupper(oNameBuffer[1]);
   }
   return &oNameBuffer[0];

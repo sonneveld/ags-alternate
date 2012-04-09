@@ -1,6 +1,6 @@
 #include "ac_script_gui.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -52,7 +52,7 @@ int FindGUIID (const char* GUIName) {
   for (int ii = 0; ii < game.numgui; ii++) {
     if (strcmp(guis[ii].name, GUIName) == 0)
       return ii;
-    if ((guis[ii].name[0] == 'g') && (stricmp(&guis[ii].name[1], GUIName) == 0))
+    if ((guis[ii].name[0] == 'g') && (ac_stricmp(&guis[ii].name[1], GUIName) == 0))
       return ii;
   }
   quit("FindGUIID: No matching GUI found: GUI may have been deleted");

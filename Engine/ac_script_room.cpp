@@ -1,6 +1,6 @@
 #include "ac_script_room.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -8,7 +8,7 @@
 #include "ac_string.h"
 #include "ac_obj.h"
 #include "ac_palette.h"
-#include "dynobj/script_drawing_surface.h"
+#include "script_drawing_surface.h"
 #include "cscomp.h"
 
 

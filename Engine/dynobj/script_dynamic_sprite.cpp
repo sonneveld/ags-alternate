@@ -1,6 +1,6 @@
-#include "dynobj/script_dynamic_sprite.h"
+#include "script_dynamic_sprite.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

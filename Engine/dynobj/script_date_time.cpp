@@ -1,6 +1,6 @@
-#include "dynobj/script_date_time.h"
+#include "script_date_time.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

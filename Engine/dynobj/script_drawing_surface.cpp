@@ -1,6 +1,6 @@
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
-#include "dynobj/script_drawing_surface.h"
+#include "script_drawing_surface.h"
 
 #include "ac.h"
 #include "ac_context.h"

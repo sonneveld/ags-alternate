@@ -18,7 +18,7 @@
  */
 
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 
 

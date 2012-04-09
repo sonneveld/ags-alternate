@@ -5,9 +5,12 @@
 // ********* MacOS PLACEHOLDER DRIVER *********
 
 #include "acplatfm.h"
+#include <unistd.h>
 
 
-bool PlayMovie(char const *name, int skipType);
+bool PlayMovie(char const *name, int skipType) {
+    return true;
+}
 
 
 struct AGSMac : AGS32BitOSDriver {
@@ -69,7 +72,7 @@ void AGSMac::PlayVideo(const char *name, int skip, int flags) {
   if (!PlayMovie(name, skip))
   {
     char useloc[512];
-    sprintf(useloc, "%s/%s", get_filename(usetup.data_files_dir), name);
+    sprintf(useloc, "%s/%s", alw_get_filename(usetup.data_files_dir), name);
     PlayMovie(useloc, skip);
   }
 }

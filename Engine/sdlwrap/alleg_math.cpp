@@ -1,7 +1,8 @@
 
 #include <math.h>
+#include <errno.h>
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 // NOTE: following code is completely ripped off from allegro 4.2.  Make sure
 // proper acknowledgements are here before release.

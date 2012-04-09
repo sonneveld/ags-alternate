@@ -1,6 +1,6 @@
 #include "ac_overlay.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -8,7 +8,7 @@
 #include "ali3d.h"
 #include "sprcache.h"
 #include "cscomp.h"
-#include "dynobj/script_overlay.h"
+#include "script_overlay.h"
 
 
 void remove_screen_overlay_index(int cc) {

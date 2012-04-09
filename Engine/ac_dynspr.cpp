@@ -1,6 +1,6 @@
 #include "ac_dynspr.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include <math.h>
 #include "ac.h"
@@ -11,9 +11,10 @@
 #include "ac_file.h"
 #include "ac_maths.h"
 #include "acgui.h"
-#include "dynobj/script_dynamic_sprite.h"
-#include "dynobj/script_drawing_surface.h"
+#include "script_dynamic_sprite.h"
+#include "script_drawing_surface.h"
 #include "cscomp.h"
+
 
 /* *** SCRIPT SYMBOL: [DynamicSprite] LoadSaveSlotScreenshot *** */
 int LoadSaveSlotScreenshot(int slnum, int width, int height) {

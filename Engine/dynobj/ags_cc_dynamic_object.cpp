@@ -1,4 +1,4 @@
-#include "dynobj/ags_cc_dynamic_object.h"
+#include "ags_cc_dynamic_object.h"
 
 #include "ac.h"         // for quit()
 

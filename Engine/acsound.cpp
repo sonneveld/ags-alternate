@@ -11,7 +11,7 @@
   CLEAR that the code has been altered from the Standard Version.
 */
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 #include "acsound.h"
 
 #include "ac.h"
@@ -24,11 +24,6 @@
 #define DUMB_MOD_PLAYER
 #else
 #define JGMOD_MOD_PLAYER
-#endif
-
-#ifdef MAC_VERSION
-// for toupper
-#include <ctype.h>
 #endif
 
 #if ALW_ALLEGRO_DATE > 20050101
@@ -152,11 +147,7 @@ struct MYWAVE:public SOUNDCLIP
 MYWAVE *thiswave;
 SOUNDCLIP *my_load_wave(const char *filename, int voll, int loop)
 {
-#ifdef MAC_VERSION
-  ALW_SAMPLE *new_sample = alw_load_wav(filename);
-#else
   ALW_SAMPLE *new_sample = alw_load_sample(filename);
-#endif
 
   if (new_sample == NULL)
     return NULL;

@@ -23,7 +23,7 @@
 
 
 #include <math.h>
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 typedef ALW_BITMAP BITMAP;
 

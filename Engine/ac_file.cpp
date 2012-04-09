@@ -1,30 +1,27 @@
 #include "ac_file.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
 #include "ac_string.h"
 #include "clib32.h"
 #include "misc.h"
-#include "dynobj/sc_file.h"
+#include "sc_file.h"
 #include "cscomp.h"
+
+#include <sys/stat.h>
+#include <wchar.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
 
 #ifdef WINDOWS_VERSION
 #include <shlwapi.h>
 #elif defined(LINUX_VERSION) || defined(MAC_VERSION)
 #define HWND long
-#define _getcwd getcwd
-
-long int filelength(int fhandle)
-{
-	struct stat statbuf;
-	fstat(fhandle, &statbuf);
-	return statbuf.st_size;
-}
 #else   // it's DOS (DJGPP)
 #include "sys/exceptn.h"
-#define _getcwd getcwd
 
 int sys_getch() {
   return getch();
@@ -34,6 +31,25 @@ int sys_getch() {
 #define MAX_OPEN_SCRIPT_FILES 10
 static FILE*valid_handles[MAX_OPEN_SCRIPT_FILES+1];
 static int num_open_script_files = 0;
+
+
+uint32_t ac_fd_sizebytes(int fd) {
+  struct stat buf;
+  int result = fstat(fd, &buf);
+  if (result != 0){
+    // errno is set
+    return -1L;
+  }
+  if (buf.st_size > UINT32_MAX){
+    errno = EOVERFLOW;
+    return -1L;
+  }
+  return buf.st_size;
+}
+
+uint32_t ac_fstream_sizebytes(FILE *f) {
+  return ac_fd_sizebytes(fileno(f));
+}
 
 void get_current_dir_path(char* buffer, const char *fileName)
 {
@@ -77,7 +93,7 @@ bool validate_user_file_path(const char *fnmm, char *output, bool currentDirOnly
     {
       sprintf(output, "%s/%s", appDataDir, game.saveGameFolderName);
       alw_fix_filename_slashes(output);
-      mkdir(output);
+      ac_mkdir(output);
     }
     else 
     {
@@ -168,7 +184,7 @@ static int FileIsEOF (FILE *haa) {
     return 1;
   if (ferror (haa))
     return 1;
-  if (ftell (haa) >= filelength (fileno(haa)))
+  if (ftell (haa) >= ac_fd_sizebytes (fileno(haa)))
     return 1;
   return 0;
 }
@@ -364,25 +380,37 @@ static int File_GetError(sc_File *fil) {
   return FileIsError(fil->handle);
 }
 
+#ifdef WINDOWS_VERSION
 
 void change_to_directory_of_file(LPCWSTR fileName)
 {
   WCHAR wcbuffer[MAX_PATH];
   StrCpyW(wcbuffer, fileName);
 
-#if defined(LINUX_VERSION) || defined(MAC_VERSION)
-    if (strrchr(wcbuffer, '/') != NULL) {
-      strrchr(wcbuffer, '/')[0] = 0;
-      chdir(wcbuffer);
-    }
-#else
   LPWSTR backSlashAt = StrRChrW(wcbuffer, NULL, L'\\');
   if (backSlashAt != NULL) {
       wcbuffer[wcslen(wcbuffer) - wcslen(backSlashAt)] = L'\0';
       SetCurrentDirectoryW(wcbuffer);
     }
-#endif
+
 }
+
+#else
+
+void change_to_directory_of_file(const char *fileName)
+{
+  char wcbuffer[MAX_PATH];
+  strcpy(wcbuffer, fileName);
+  
+  if (strrchr(wcbuffer, '/') != NULL) {
+    strrchr(wcbuffer, '/')[0] = 0;
+    chdir(wcbuffer);
+  }
+
+}
+
+
+#endif
 
 
 

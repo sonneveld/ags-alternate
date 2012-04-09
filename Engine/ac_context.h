@@ -25,7 +25,9 @@ extern struct GlobalMouseState global_mouse_state;
 extern struct GlobalRoomState global_room_state;
 extern char *music_file;
 extern char *speech_file;
+#ifdef WINDOWS_VERSION
 extern WCHAR directoryPathBuffer[];
+#endif
 
 #define REC_MOUSECLICK 1
 #define REC_MOUSEMOVE  2
@@ -225,7 +227,9 @@ extern char editor_debugger_instance_token[];
 extern IAGSEditorDebugger *editor_debugger;
 extern int break_on_next_script_step;
 extern volatile int game_paused_in_debugger;
+#ifdef WINDOWS_VERSION
 extern HWND editor_window_handle;
+#endif
 
 extern int in_enters_screen;
 extern int done_es_error;

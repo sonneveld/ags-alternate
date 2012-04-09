@@ -1,7 +1,7 @@
 #ifndef _CC_GUI_H_HEADER
 #define _CC_GUI_H_HEADER
 
-#include "dynobj/ags_cc_dynamic_object.h"  // AGSCCDynamicObject
+#include "ags_cc_dynamic_object.h"  // AGSCCDynamicObject
 
 struct CCGUI : AGSCCDynamicObject {
 

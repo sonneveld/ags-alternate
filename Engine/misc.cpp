@@ -27,15 +27,14 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
-#include "sdlwrap/allegro.h"
 #include "misc.h"
 
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #include <string.h>
 /* File Name Concatenator basically on Windows / DOS */
-char *ci_find_file(char *dir_name, char *file_name)
+char *ci_find_file(const char *dir_name, const char *file_name)
 {
   char  *diamond = NULL;
 
@@ -56,7 +55,7 @@ char *ci_find_file(char *dir_name, char *file_name)
 
 #else
 /* Case Insensitive File Find */
-char *ci_find_file(char *dir_name, char *file_name)
+char *ci_find_file(const char *dir_name_in, const char *file_name_in)
 {
   struct stat   statbuf;
   struct dirent *entry = NULL;
@@ -66,9 +65,21 @@ char *ci_find_file(char *dir_name, char *file_name)
   char          *directory = NULL;
   char          *filename = NULL;
 
-  if (dir_name == NULL && file_name == NULL)
+  if (dir_name_in == NULL && file_name_in == NULL)
       return NULL;
 
+  char *dir_name = 0;
+  char *file_name = 0;
+  
+  if (dir_name_in) {
+    dir_name = (char*)alloca(strlen(dir_name_in)+1);
+    strcpy(dir_name, dir_name_in);
+  }
+  if (file_name_in) {
+    file_name = (char*)alloca(strlen(file_name_in)+1);  
+    strcpy(file_name, file_name_in);
+  }
+    
   if (!(dir_name == NULL)) {
     alw_fix_filename_case(dir_name);
     alw_fix_filename_slashes(dir_name);
@@ -148,9 +159,12 @@ char *ci_find_file(char *dir_name, char *file_name)
 }
 
 /* Case Insensitive fopen */
-FILE *ci_fopen(char *file_name, const char *mode)
+FILE *ci_fopen(const char *file_name, const char *mode)
 {
   FILE *fd;
+  
+  char *tmp = ac_getcwd(0, -1);
+  
   char *fullpath = ci_find_file(NULL, file_name);
 
   /* If I didn't find a file, this could be writing a new file,

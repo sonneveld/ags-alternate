@@ -1,6 +1,6 @@
 #include "ac_gui_inv_window.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

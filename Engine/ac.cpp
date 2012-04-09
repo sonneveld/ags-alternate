@@ -12,6 +12,10 @@
 
 */
 
+#ifdef MAC_VERSION
+#define MAC_HACK
+#endif
+
 #include "bmp.h"
 
 //#define THIS_IS_THE_ENGINE   now defined in the VC Project so that it's defined in all files
@@ -21,6 +25,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
+#include <errno.h>
+#include <time.h>
 
 #ifdef DJGPP
 #include <dir.h>
@@ -60,7 +66,7 @@ extern void * memcpy_amd(void *dest, const void *src, size_t n);
 
 extern int our_eip;
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 #include "wgt2allg.h"
 #include "sprcache.h"
 #include "routefnd.h"
@@ -85,18 +91,8 @@ extern int our_eip;
 #include <shellapi.h>
 #elif defined(LINUX_VERSION) || defined(MAC_VERSION)
 #define HWND long
-#define _getcwd getcwd
-
-long int filelength(int fhandle)
-{
-	struct stat statbuf;
-	fstat(fhandle, &statbuf);
-	return statbuf.st_size;
-}
 #else   // it's DOS (DJGPP)
 #include "sys/exceptn.h"
-#define _getcwd getcwd
-
 int sys_getch() {
   return getch();
 }
@@ -124,7 +120,7 @@ extern "C" {
 #include "cscomp.h"
 
 #include "AGSEditorDebugger.h"
-#include <ac_debug.h>
+#include "ac_debug.h"
 
 #define INI_READONLY
 //#include <myini.H>
@@ -142,6 +138,9 @@ extern "C" {
 #include "cdplaylib.h"
 #include "acchars.h"
 #include "ac_parser.h"
+
+#include "allegro.h"
+
 
 // WOUTTEST_REVERSE used by acgui.h
 #define WOUTTEXT_REVERSE wouttext_reverseifnecessary
@@ -178,23 +177,23 @@ extern "C" {
 #include "ac_game.h"
 #include "ac_exescr.h"
 #include "ac_input.h"
-#include "dynobj/cc_gui_object.h"
-#include "dynobj/cc_character.h"
-#include "dynobj/cc_hotspot.h"
-#include "dynobj/cc_region.h"
-#include "dynobj/cc_inventory.h"
-#include "dynobj/cc_gui.h"
-#include "dynobj/cc_object.h"
-#include "dynobj/cc_dialog.h"
-#include "dynobj/script_string.h"
-#include "dynobj/script_dialog_options_rendering.h"
-#include "dynobj/script_drawing_surface.h"
-#include "dynobj/sc_file.h"
-#include "dynobj/script_overlay.h"
-#include "dynobj/script_date_time.h"
-#include "dynobj/script_view_frame.h"
-#include "dynobj/script_dynamic_sprite.h"
-
+#include "cc_gui_object.h"
+#include "cc_character.h"
+#include "cc_hotspot.h"
+#include "cc_region.h"
+#include "cc_inventory.h"
+#include "cc_gui.h"
+#include "cc_object.h"
+#include "cc_dialog.h"
+#include "script_string.h"
+#include "script_dialog_options_rendering.h"
+#include "script_drawing_surface.h"
+#include "sc_file.h"
+#include "script_overlay.h"
+#include "script_date_time.h"
+#include "script_view_frame.h"
+#include "script_dynamic_sprite.h"
+#include "strimpl.h"
 
 
 #if defined(WINDOWS_VERSION) && !defined(_DEBUG)
@@ -755,7 +754,7 @@ int numevents=0;
 #define REP_EXEC_ALWAYS_NAME "repeatedly_execute_always"
 #define REP_EXEC_NAME "repeatedly_execute"
 char*tsnames[4]={NULL, REP_EXEC_NAME, "on_key_press","on_mouse_click"};
-char*evblockbasename;
+const char*evblockbasename;
 int evblocknum;
 
 int inside_script=0;
@@ -1580,7 +1579,7 @@ void mark_current_background_dirty()
 // OBJECTS
 // ============================================================================
 
-inline int is_valid_object(int obtest) {
+int is_valid_object(int obtest) {
   if ((obtest < 0) || (obtest >= croom->numobj)) return 0;
   return 1;
 }
@@ -2091,7 +2090,7 @@ int run_text_script_2iparam(ccInstance*sci,char*tsname,int iparam,int param2) {
   }
 
   // response to a button click, better update guis
-  if (strnicmp(tsname, "interface_click", 15) == 0)
+  if (ac_strnicmp(tsname, "interface_click", 15) == 0)
     guis_need_update = 1;
 
   int toret = run_script_function_if_exist(sci, tsname, 2, iparam, param2);
@@ -2709,7 +2708,7 @@ void load_new_room_objects( CharacterInfo* forchar, int newnum )
     else
     {
       sprintf(objectScriptObjNames[cc], "o%s", thisroom.objectscriptnames[cc]);
-      strlwr(objectScriptObjNames[cc]);
+      ac_strlwr(objectScriptObjNames[cc]);
       if (objectScriptObjNames[cc][1] != 0)
         objectScriptObjNames[cc][1] = toupper(objectScriptObjNames[cc][1]);
     }
@@ -3324,7 +3323,7 @@ void process_event(EventHappened*evp) {
   else if (evp->type==EV_RUNEVBLOCK) {
     NewInteraction*evpt=NULL;
     InteractionScripts *scriptPtr = NULL;
-    char *oldbasename = evblockbasename;
+    const char *oldbasename = evblockbasename;
     int   oldblocknum = evblocknum;
 
     if (evp->data1==EVB_HOTSPOT) {
@@ -4116,7 +4115,7 @@ int GetLipSyncFrame (char *curtex, int *stroffs) {
       if (strchr(tptr, '/'))
         lenthisbit = strchr(tptr, '/') - tptr;
       
-      if ((strnicmp (curtex, tptr, lenthisbit) == 0) && (lenthisbit > bestfit_len)) {
+      if ((ac_strnicmp (curtex, tptr, lenthisbit) == 0) && (lenthisbit > bestfit_len)) {
         bestfit = aa;
         bestfit_len = lenthisbit;
       }
@@ -5044,15 +5043,15 @@ void replace_macro_tokens(char*statusbarformat,char*cur_stb_text) {
       }
       macroname[idd]=0; 
       tempo[0]=0;
-      if (stricmp(macroname,"score")==0)
+      if (ac_stricmp(macroname,"score")==0)
         sprintf(tempo,"%d",play.score);
-      else if (stricmp(macroname,"totalscore")==0)
+      else if (ac_stricmp(macroname,"totalscore")==0)
         sprintf(tempo,"%d",MAXSCORE);
-      else if (stricmp(macroname,"scoretext")==0)
+      else if (ac_stricmp(macroname,"scoretext")==0)
         sprintf(tempo,"%d of %d",play.score,MAXSCORE);
-      else if (stricmp(macroname,"gamename")==0)
+      else if (ac_stricmp(macroname,"gamename")==0)
         strcpy(tempo, play.game_name);
-      else if (stricmp(macroname,"overhotspot")==0) {
+      else if (ac_stricmp(macroname,"overhotspot")==0) {
         // While game is in Wait mode, no overhotspot text
         if (!IsInterfaceEnabled())
           tempo[0] = 0;
@@ -6387,7 +6386,7 @@ bool send_exception_to_editor(char *qmsg)
 // message. If it begins with anything else, it is treated as an internal
 // error.
 // "!|" is a special code used to mean that the player has aborted (Alt+X)
-void quit(char*quitmsg) {
+void quit(const char*quitmsg) {
   int i;
   // Need to copy it in case it's from a plugin (since we're
   // about to free plugins)
@@ -8336,7 +8335,7 @@ int play_speech(int charid,int sndid) {
   curLipLine = -1;  // See if we have voice lip sync for this line
   curLipLinePhenome = -1;
   for (ii = 0; ii < numLipLines; ii++) {
-    if (stricmp(splipsync[ii].filename, basefnptr) == 0) {
+    if (ac_stricmp(splipsync[ii].filename, basefnptr) == 0) {
       curLipLine = ii;
       break;
     }
@@ -8860,11 +8859,11 @@ InteractionVariable *get_interaction_variable (int varindx) {
 InteractionVariable *FindGraphicalVariable(const char *varName) {
   int ii;
   for (ii = 0; ii < numGlobalVars; ii++) {
-    if (stricmp (globalvars[ii].name, varName) == 0)
+    if (ac_stricmp (globalvars[ii].name, varName) == 0)
       return &globalvars[ii];
   }
   for (ii = 0; ii < thisroom.numLocalVars; ii++) {
-    if (stricmp (thisroom.localvars[ii].name, varName) == 0)
+    if (ac_stricmp (thisroom.localvars[ii].name, varName) == 0)
       return &thisroom.localvars[ii];
   }
   return NULL;
@@ -8881,7 +8880,7 @@ int get_nivalue (NewInteractionCommandList *nic, int idx, int parm) {
 
 
 char bname[40],bne[40];
-char* make_ts_func_name(char*base,int iii,int subd) {
+char* make_ts_func_name(const char*base,int iii,int subd) {
   sprintf(bname,base,iii);
   sprintf(bne,"%s_%c",bname,subd+'a');
   return &bne[0];
@@ -9131,11 +9130,11 @@ void run_unhandled_event (int evnt) {
     return;
 
   int evtype=0;
-  if (strnicmp(evblockbasename,"hotspot",7)==0) evtype=1;
-  else if (strnicmp(evblockbasename,"object",6)==0) evtype=2;
-  else if (strnicmp(evblockbasename,"character",9)==0) evtype=3;
-  else if (strnicmp(evblockbasename,"inventory",9)==0) evtype=5;
-  else if (strnicmp(evblockbasename,"region",6)==0)
+  if (ac_strnicmp(evblockbasename,"hotspot",7)==0) evtype=1;
+  else if (ac_strnicmp(evblockbasename,"object",6)==0) evtype=2;
+  else if (ac_strnicmp(evblockbasename,"character",9)==0) evtype=3;
+  else if (ac_strnicmp(evblockbasename,"inventory",9)==0) evtype=5;
+  else if (ac_strnicmp(evblockbasename,"region",6)==0)
     return;  // no unhandled_events for regions
 
   // clicked Hotspot 0, so change the type code
@@ -10418,7 +10417,7 @@ int restore_game_data (FILE *ooo, const char *nametouse) {
   }
   fgetstring_limit (rbuffer, ooo, 180);
   rbuffer[180] = 0;
-  if (stricmp (rbuffer, usetup.main_data_filename)) {
+  if (ac_stricmp (rbuffer, usetup.main_data_filename)) {
     fclose(ooo);
     return -5;
   }
@@ -11196,6 +11195,30 @@ void EndSkippingUntilCharStops() {
 // SCRIPT EXPORTS
 // ============================================================================
 
+// quick hack to get Gemini Rue running.
+int ShellExecute(char * operation, char * file, char * parameters, int showCommand) {    return 0;  }
+void srSetSnowDriftSpeed(int x, int y){ }
+void srSetSnowDriftRange(int x, int y){ }
+void srSetSnowFallSpeed(int x, int y){ }
+void srChangeSnowAmount(int x){ }
+void srSetSnowBaseline(int x, int y){ }
+void srChangeRainAmount(int x){}
+void srSetRainView(int x, int y, int z, int omega){}
+void srSetRainTransparency(int x, int y){}
+void srSetSnowTransparency(int x, int y){}
+void srSetSnowDefaultView(int x, int y){}
+void srSetRainDefaultView(int x, int y){}
+void srSetRainWindSpeed(int x){}
+void srSetSnowWindSpeed(int x){}
+void srSetWindSpeed(int x){}
+void srSetRainBaseline(int x, int y){}
+void srSetBaseline(int x, int y){}
+void srSetSnowAmount(int x){}
+void srSetRainAmount(int x){}
+void srSetRainFallSpeed(int x, int y){}
+void srSetSnowView(int x, int y, int z, int omega){}
+
+  
 #define scAdd_External_Symbol ccAddExternalSymbol
 void setup_script_exports() {
   // the ^5 after the function name is the number of params
@@ -11238,8 +11261,32 @@ void setup_script_exports() {
   register_recording_script_functions();
   register_multimedia_script_functions();
 
-//scAdd_External_Symbol("GetLanguageString",(void *)GetLanguageString);
-
+  //scAdd_External_Symbol("GetLanguageString",(void *)GetLanguageString);
+  
+  // gemini rue hack
+  scAdd_External_Symbol("ShellExecute",(void *)ShellExecute);
+  scAdd_External_Symbol("srSetSnowDriftSpeed",(void *)srSetSnowDriftSpeed);
+  scAdd_External_Symbol("srSetSnowDriftRange",(void *)srSetSnowDriftRange);
+  scAdd_External_Symbol("srSetSnowFallSpeed",(void *)srSetSnowFallSpeed);
+  scAdd_External_Symbol("srChangeSnowAmount",(void *)srChangeSnowAmount);
+  scAdd_External_Symbol("srSetSnowBaseline",(void *)srSetSnowBaseline);
+  scAdd_External_Symbol("srChangeRainAmount",(void *)srChangeRainAmount);
+  scAdd_External_Symbol("srSetRainView",(void *)srSetRainView);
+  scAdd_External_Symbol("srSetRainTransparency",(void *)srSetRainTransparency);
+  scAdd_External_Symbol("srSetSnowTransparency",(void *)srSetSnowTransparency);
+  scAdd_External_Symbol("srSetSnowDefaultView",(void *)srSetSnowDefaultView);
+  scAdd_External_Symbol("srSetRainDefaultView",(void *)srSetRainDefaultView);
+  scAdd_External_Symbol("srSetRainWindSpeed",(void *)srSetRainWindSpeed);
+  scAdd_External_Symbol("srSetSnowWindSpeed",(void *)srSetSnowWindSpeed);
+  scAdd_External_Symbol("srSetWindSpeed",(void *)srSetWindSpeed);
+  scAdd_External_Symbol("srSetRainBaseline",(void *)srSetRainBaseline);
+  scAdd_External_Symbol("srSetBaseline",(void *)srSetBaseline);
+  scAdd_External_Symbol("srSetSnowAmount",(void *)srSetSnowAmount);
+  scAdd_External_Symbol("srSetRainAmount",(void *)srSetRainAmount);
+  scAdd_External_Symbol("srSetRainFallSpeed",(void *)srSetRainFallSpeed);
+  scAdd_External_Symbol("srSetSnowView",(void *)srSetSnowView);
+  
+  
   scAdd_External_Symbol("game",&play);
   scAdd_External_Symbol("gs_globals",&play.globalvars[0]);
   scAdd_External_Symbol("mouse",&global_mouse_state.scmouse);
@@ -12320,7 +12367,7 @@ char *INIreaditem(const char *sectn, const char *entry) {
   while (!feof(fin)) {
     fgets (templine, 199, fin);
     // find the section
-    if (strnicmp (wantsect, templine, strlen(wantsect)) == 0) {
+    if (ac_strnicmp (wantsect, templine, strlen(wantsect)) == 0) {
       while (!feof(fin)) {
         // we're in the right section, find the entry
         fgets (templine, 199, fin);
@@ -12331,7 +12378,7 @@ char *INIreaditem(const char *sectn, const char *entry) {
         // Strip CRLF
         templine[strlen(templine)-1] = 0;
         // Have we found the entry?
-        if (strnicmp (templine, entry, strlen(entry)) == 0) {
+        if (ac_strnicmp (templine, entry, strlen(entry)) == 0) {
           char *pptr = &templine[strlen(entry)];
           while ((pptr[0] == ' ') || (pptr[0] == '\t'))
             pptr++;
@@ -12386,7 +12433,7 @@ void read_config_file(char *argv0) {
   else {
     fclose(ppp);
     // put the full path, or it gets written back to the Windows folder
-    _getcwd (ac_config_file, 255);
+    ac_getcwd(ac_config_file, 255);
     strcat (ac_config_file, "\\acsetup.cfg");
     alw_fix_filename_case(ac_config_file);
     alw_fix_filename_slashes(ac_config_file);
@@ -12614,7 +12661,7 @@ void initialize_start_and_play_game(int override_start_room, const char *loadSav
         }
 
         play.randseed = getw(in);
-        int flen = filelength(fileno(in)) - ftell (in);
+        int flen = ac_fstream_sizebytes(in) - ftell (in);
         if (replayver >= 3) {
           flen = getw(in) * sizeof(short);
         }
@@ -12707,7 +12754,7 @@ int initialize_graphics_filter(const char *filterID, int width, int height, int 
   int idx = 0;
   GFXFilter **filterList;
 
-  if (stricmp(usetup.gfxDriverID, "D3D9") == 0)
+  if (ac_stricmp(usetup.gfxDriverID, "D3D9") == 0)
   {
     filterList = get_d3d_gfx_filter_list(false);
   }
@@ -12926,6 +12973,11 @@ void initialise_game_file_name(int argc,char **argv)
   WideCharToMultiByte(CP_ACP, 0, directoryPathBuffer, -1, game_file_name, MAX_PATH, NULL, NULL);
 #else
   game_file_name = argv[datafile_argv];
+  
+#ifdef MAC_HACK
+  game_file_name = "Game.exe";
+#endif
+  
 #endif
 }
 
@@ -12936,68 +12988,68 @@ void main_handle_command_line_arguments(int argc, char **argv) {
 
   for (int ee=1;ee<argc;ee++) {
     if (argv[ee][1]=='?') {help_required=1; return;}
-    if (stricmp(argv[ee],"-shelllaunch") == 0)
+    if (ac_stricmp(argv[ee],"-shelllaunch") == 0)
       change_to_game_dir = 1;
-    else if (stricmp(argv[ee],"-updatereg") == 0)
+    else if (ac_stricmp(argv[ee],"-updatereg") == 0)
       debug_flags |= DBG_REGONLY;
-    else if (stricmp(argv[ee],"-windowed") == 0)
+    else if (ac_stricmp(argv[ee],"-windowed") == 0)
       force_window = 1;
-    else if (stricmp(argv[ee],"-fullscreen") == 0)
+    else if (ac_stricmp(argv[ee],"-fullscreen") == 0)
       force_window = 2;
-    else if (stricmp(argv[ee],"-hicolor") == 0)
+    else if (ac_stricmp(argv[ee],"-hicolor") == 0)
       force_16bit = 1;
-    else if (stricmp(argv[ee],"-letterbox") == 0)
+    else if (ac_stricmp(argv[ee],"-letterbox") == 0)
       force_letterbox = 1;
-    else if (stricmp(argv[ee],"-record") == 0)
+    else if (ac_stricmp(argv[ee],"-record") == 0)
       play.recording = 1;
-    else if (stricmp(argv[ee],"-playback") == 0)
+    else if (ac_stricmp(argv[ee],"-playback") == 0)
       play.playback = 1;
 #ifdef _DEBUG
-    else if ((stricmp(argv[ee],"--startr") == 0) && (ee < argc-1)) {
+    else if ((ac_stricmp(argv[ee],"--startr") == 0) && (ee < argc-1)) {
       override_start_room = atoi(argv[ee+1]);
       ee++;
     }
 #endif
-    else if ((stricmp(argv[ee],"--testre") == 0) && (ee < argc-2)) {
+    else if ((ac_stricmp(argv[ee],"--testre") == 0) && (ee < argc-2)) {
       strcpy(return_to_roomedit, argv[ee+1]);
       strcpy(return_to_room, argv[ee+2]);
       ee+=2;
     }
-    else if (stricmp(argv[ee],"--15bit")==0) debug_15bit_mode = 1;
-    else if (stricmp(argv[ee],"--24bit")==0) debug_24bit_mode = 1;
-    else if (stricmp(argv[ee],"--fps")==0) display_fps = 2;
-    else if (stricmp(argv[ee],"--test")==0) debug_flags|=DBG_DEBUGMODE;
-    else if (stricmp(argv[ee],"-noiface")==0) debug_flags|=DBG_NOIFACE;
-    else if (stricmp(argv[ee],"-nosprdisp")==0) debug_flags|=DBG_NODRAWSPRITES;
-    else if (stricmp(argv[ee],"-nospr")==0) debug_flags|=DBG_NOOBJECTS;
-    else if (stricmp(argv[ee],"-noupdate")==0) debug_flags|=DBG_NOUPDATE;
-    else if (stricmp(argv[ee],"-nosound")==0) debug_flags|=DBG_NOSFX;
-    else if (stricmp(argv[ee],"-nomusic")==0) debug_flags|=DBG_NOMUSIC;
-    else if (stricmp(argv[ee],"-noscript")==0) debug_flags|=DBG_NOSCRIPT;
-    else if (stricmp(argv[ee],"-novideo")==0) debug_flags|=DBG_NOVIDEO;
-    else if (stricmp(argv[ee],"-noexceptionhandler")==0) usetup.disable_exception_handling = 1;
-    else if (stricmp(argv[ee],"-dbgscript")==0) debug_flags|=DBG_DBGSCRIPT;
-    else if (stricmp(argv[ee],"-registergame") == 0)
+    else if (ac_stricmp(argv[ee],"--15bit")==0) debug_15bit_mode = 1;
+    else if (ac_stricmp(argv[ee],"--24bit")==0) debug_24bit_mode = 1;
+    else if (ac_stricmp(argv[ee],"--fps")==0) display_fps = 2;
+    else if (ac_stricmp(argv[ee],"--test")==0) debug_flags|=DBG_DEBUGMODE;
+    else if (ac_stricmp(argv[ee],"-noiface")==0) debug_flags|=DBG_NOIFACE;
+    else if (ac_stricmp(argv[ee],"-nosprdisp")==0) debug_flags|=DBG_NODRAWSPRITES;
+    else if (ac_stricmp(argv[ee],"-nospr")==0) debug_flags|=DBG_NOOBJECTS;
+    else if (ac_stricmp(argv[ee],"-noupdate")==0) debug_flags|=DBG_NOUPDATE;
+    else if (ac_stricmp(argv[ee],"-nosound")==0) debug_flags|=DBG_NOSFX;
+    else if (ac_stricmp(argv[ee],"-nomusic")==0) debug_flags|=DBG_NOMUSIC;
+    else if (ac_stricmp(argv[ee],"-noscript")==0) debug_flags|=DBG_NOSCRIPT;
+    else if (ac_stricmp(argv[ee],"-novideo")==0) debug_flags|=DBG_NOVIDEO;
+    else if (ac_stricmp(argv[ee],"-noexceptionhandler")==0) usetup.disable_exception_handling = 1;
+    else if (ac_stricmp(argv[ee],"-dbgscript")==0) debug_flags|=DBG_DBGSCRIPT;
+    else if (ac_stricmp(argv[ee],"-registergame") == 0)
     {
       justRegisterGame = true;
     }
-    else if (stricmp(argv[ee],"-unregistergame") == 0)
+    else if (ac_stricmp(argv[ee],"-unregistergame") == 0)
     {
       justUnRegisterGame = true;
     }
-    else if ((stricmp(argv[ee],"-loadsavedgame") == 0) && (argc > ee + 1))
+    else if ((ac_stricmp(argv[ee],"-loadsavedgame") == 0) && (argc > ee + 1))
     {
       loadSaveGameOnStartup = argv[ee + 1];
       ee++;
     }
-    else if ((stricmp(argv[ee],"--enabledebugger") == 0) && (argc > ee + 1))
+    else if ((ac_stricmp(argv[ee],"--enabledebugger") == 0) && (argc > ee + 1))
     {
       strcpy(editor_debugger_instance_token, argv[ee + 1]);
       editor_debugging_enabled = 1;
       force_window = 1;
       ee++;
     }
-    else if (stricmp(argv[ee],"--takeover")==0) {
+    else if (ac_stricmp(argv[ee],"--takeover")==0) {
       if (argc < ee+2)
         break;
       play.takeover_data = atoi (argv[ee + 1]);
@@ -13076,22 +13128,30 @@ int main(int argc, char*argv[]) {
   {
     // When launched by double-clicking a save game file, the curdir will
     // be the save game folder unless we correct it
+#ifdef WINDOWS_VERSION
     change_to_directory_of_file(wArgv[0]);
+#else
+    change_to_directory_of_file(argv[0]);
+#endif
   }
  
 #ifdef MAC_VERSION
-  getcwd(appDirectory, 512);
+  ac_getcwd(appDirectory, 512);
 #endif
  
   //if (change_to_game_dir == 1)  {
   if (datafile_argv > 0) {
     // If launched by double-clicking .AGS file, change to that
     // folder; else change to this exe's folder
+#ifdef WINDOWS_VERSION
     change_to_directory_of_file(wArgv[datafile_argv]);
+#else
+    change_to_directory_of_file(argv[datafile_argv]);
+#endif
   }
 
 #ifdef MAC_VERSION
-  getcwd(dataDirectory, 512);
+  ac_getcwd(dataDirectory, 512);
 #endif
  
   // Update shell associations and exit
@@ -13126,13 +13186,13 @@ int initeng_init_allegro()
   write_log_debug("Initializing allegro");
 
   set_eip(-199);
+  
   // Initialize allegro
-#ifdef WINDOWS_VERSION
-  if (alw_install_allegro(SYSTEM_AUTODETECT,&errno,atexit)) {
-    platform->DisplayAlert("Unable to initialize graphics subsystem. Make sure you have DirectX 5 or above installed.");
-#else
   if (alw_allegro_init()) {
-    platform->DisplayAlert("Unknown error initializing graphics subsystem.");
+#ifdef WINDOWS_VERSION
+    platform->DisplayAlert("Unable to initialize graphics subsystem. Make sure you have DirectX 5 or above installed.");
+#else 
+    platform->DisplayAlert("Unable to initialize graphics subsystem.");
 #endif
     return EXIT_NORMAL;
   }
@@ -13164,7 +13224,7 @@ int initeng_init_window( int argc, char* * argv )
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
   // check if Setup needs to be run instead
   if (argc>1) {
-    if (stricmp(argv[1],"--setup")==0) { 
+    if (ac_stricmp(argv[1],"--setup")==0) { 
       write_log_debug("Running Setup");
 
       if (!platform->RunSetup())
@@ -13230,7 +13290,7 @@ int initeng_init_game_data( int argc, char* * argv )
 
     if (((strchr(game_file_name, '/') != NULL) ||
       (strchr(game_file_name, '\\') != NULL)) &&
-      (stricmp(usetup.data_files_dir, ".") == 0)) {
+      (ac_stricmp(usetup.data_files_dir, ".") == 0)) {
         // there is a path in the game file name (and the user
         // has not specified another one)
         // save the path, so that it can load the VOX files, etc
@@ -13677,7 +13737,7 @@ void initeng_init_screen_settings(int &initasx, int &initasy, int &firstDepth, i
     secondDepth = 24;
   }
 
-#if 1
+#ifndef MAC_HACK
 #ifdef MAC_VERSION
   if (game.color_depth > 1)
   {
@@ -13697,7 +13757,7 @@ void create_gfx_driver()
 {
 #ifdef ENABLE_THIS_LATER
 #ifdef WINDOWS_VERSION
-  if (stricmp(usetup.gfxDriverID, "D3D9") == 0)
+  if (ac_stricmp(usetup.gfxDriverID, "D3D9") == 0)
     gfxDriver = GetD3DGraphicsDriver(filter);
   else
 #endif
@@ -13720,7 +13780,7 @@ int initeng_switch_gfx_mode(int &initasx, int &initasy, int &firstDepth, int &se
     bool errorAndExit = true;
 
     if (((usetup.gfxFilterID == NULL) || 
-      (stricmp(usetup.gfxFilterID, "None") == 0)) &&
+      (ac_stricmp(usetup.gfxFilterID, "None") == 0)) &&
       (scrnwid == 320))
     {
       // If the game is 320x200 and no filter is being used, try using a 2x

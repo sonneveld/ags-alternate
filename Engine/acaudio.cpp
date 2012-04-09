@@ -9,7 +9,7 @@
   CLEAR that the code has been altered from the Standard Version.
 
 */
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "acsound.h"
 #include <math.h>
@@ -21,8 +21,8 @@
 #include "clib32.h"
 #include "ac_multimedia.h"
 #include "ac_file.h"
-#include "dynobj/cc_audio_channel.h"
-#include "dynobj/cc_audio_clip.h"
+#include "cc_audio_channel.h"
+#include "cc_audio_clip.h"
 #include "cscomp.h"
 
 ScriptAudioChannel scrAudioChannel[MAX_SOUND_CHANNELS + 1];
@@ -780,7 +780,7 @@ ScriptAudioClip* get_audio_clip_for_old_style_number(bool isMusic, int indexNumb
 
   for (int bb = 0; bb < game.audioClipCount; bb++)
   {
-    if (stricmp(game.audioClips[bb].scriptName, audioClipName) == 0)
+    if (ac_stricmp(game.audioClips[bb].scriptName, audioClipName) == 0)
     {
       return &game.audioClips[bb];
     }

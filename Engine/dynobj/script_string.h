@@ -2,7 +2,7 @@
 #define _SCRIPT_STRING_H_HEADER
 
 
-#include "dynobj/ags_cc_dynamic_object.h"  // AGSCCDynamicObject
+#include "ags_cc_dynamic_object.h"  // AGSCCDynamicObject
 #include "cscomp.h"     // ICCStringClass
 
 struct ScriptString : AGSCCDynamicObject, ICCStringClass {

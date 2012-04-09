@@ -14,7 +14,7 @@
 
 #include "acchars.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -34,7 +34,7 @@
 #include "acgfx.h"
 #include "ali3d.h"
 #include "ac_exescr.h"
-#include "dynobj/script_overlay.h"
+#include "script_overlay.h"
 #include "cscomp.h"
 
 // order of loops to turn character in circle from down to down

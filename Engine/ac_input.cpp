@@ -1,9 +1,9 @@
 #include "ac_input.h"
 
-#include "sdlwrap/allegro.h"
+#include <unistd.h>
 
+#include "allegro.h"
 
-#include "sdlwrap/allegro.h"
 #include "ac.h"
 #include "ac_context.h"
 
@@ -11,6 +11,7 @@
 #include "acgfx.h"
 #include "ac_game.h"
 #include "cscomp.h"
+#include "ac_file.h"
 
 
 // KEYBOARD HANDLER
@@ -618,7 +619,7 @@ void stop_recording() {
   fwrite (recordbuffer, recsize, sizeof(short), ooo);
   if (fsr != NULL) {
     putw (1, ooo);  // yes there is a save present
-    int lenno = filelength(fileno(fsr));
+    int lenno = ac_fstream_sizebytes(fsr);
     char *tbufr = (char*)malloc (lenno);
     fread (tbufr, lenno, 1, fsr);
     fwrite (tbufr, lenno, 1, ooo);

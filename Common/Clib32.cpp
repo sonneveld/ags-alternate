@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include "ac_file.h"
 #include "clib32.h"
 
 #define NATIVESTATIC
@@ -32,18 +33,16 @@
 #if !defined(LINUX_VERSION) && !defined(MAC_VERSION)
 #include <io.h>
 #else
-#include "djcompat.h"
-#include "sdlwrap/allegro.h"
+//#include "djcompat.h"
+#include "allegro.h"
 #endif
 #include "misc.h"
-
-#ifdef MAC_VERSION
-#include "macport.h"
-#endif
 
 #include "bigend.h"
 
 #include "agsio.h"
+#include "strimpl.h"
+
 
 //#define CLIB_IS_INSTALLED
 //static char clib32copyright[] = "CLIB32 v1.21 (c) 1995,1996,1998,2001,2007 Chris Jones";
@@ -335,7 +334,7 @@ extern "C"
 
       // make a backup of the original file name
       strcpy(original_base_filename, mflib.data_filenames[0]);
-      strlwr(original_base_filename);
+      ac_strlwr(original_base_filename);
 
       strcpy(mflib.data_filenames[0], libpath);
       for (int aa = 0; aa < mflib.num_files; aa++) {
@@ -407,7 +406,7 @@ extern "C"
 
     int bb;
     for (bb = 0; bb < mflib.num_files; bb++) {
-      if (stricmp(mflib.filenames[bb], fill) == 0)
+      if (ac_stricmp(mflib.filenames[bb], fill) == 0)
         return bb;
     }
     return -1;
@@ -457,7 +456,7 @@ extern "C"
   {
     int bb;
     for (bb = 0; bb < mflib.num_files; bb++) {
-      if (stricmp(mflib.filenames[bb], filly) == 0) {
+      if (ac_stricmp(mflib.filenames[bb], filly) == 0) {
         char actfilename[250];
         sprintf(actfilename, "%s\\%s", base_path, mflib.data_filenames[mflib.file_datafile[bb]]);
         tfil = ci_fopen(actfilename, readmode);
@@ -507,12 +506,9 @@ extern "C"
 
     }
 
-    if ((last_opened_size < 0) && (tfil != NULL))
-#ifdef MAC_VERSION
-      last_opened_size = flength(tfil);
-#else
-      last_opened_size = filelength(fileno(tfil));
-#endif
+    if ((last_opened_size < 0) && (tfil != NULL)) {
+      last_opened_size = ac_fstream_sizebytes(tfil);
+    }
 
     return tfil;
   }

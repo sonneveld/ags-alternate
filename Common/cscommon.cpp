@@ -171,7 +171,7 @@ void ccFreeScript(ccScript * ccs)
   ccs->numSections = 0;
 }
 
-void fputstring(char *sss, FILE *ddd) {
+void fputstring(const char *sss, FILE *ddd) {
   int b = 0;
   while (sss[b] != 0) {
     fputc(sss[b], ddd);

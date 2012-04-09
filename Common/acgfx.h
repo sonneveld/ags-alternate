@@ -10,7 +10,7 @@
 #ifndef __ACGFX_H
 #define __ACGFX_H
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 extern unsigned long _myblender_color15(unsigned long x, unsigned long y, unsigned long n);
 extern unsigned long _myblender_color16(unsigned long x, unsigned long y, unsigned long n);

@@ -52,7 +52,7 @@ extern void ccFreeScript(ccScript *);
 extern ccScript *fread_script(FILE *);
 
 // give the script access to a variable or function in your program
-extern void ccAddExternalSymbol(char *, void *);
+extern void ccAddExternalSymbol(const char *, void *);
 // remove the script access to a variable or function in your program
 extern void ccRemoveExternalSymbol(char *);
 // create a runnable instance of the supplied script
@@ -149,7 +149,7 @@ extern void preproc_shutdown(void);
 
 extern int ccAddObjectReference(long handle);
 extern int ccReleaseObjectReference(long handle);
-extern void fputstring(char *sss, FILE *ddd);
+extern void fputstring(const char *sss, FILE *ddd);
 extern void fgetstring_limit(char *sss, FILE *ddd, int bufsize);
 extern void fgetstring(char *sss, FILE *ddd);
 
@@ -329,7 +329,7 @@ struct ccInstance
 #define SCMD_DYNAMICBOUNDS 71   // check reg1 is between 0 and m[MAR-4]
 #define SCMD_NEWARRAY     72    // reg1 = new array of reg1 elements, each of size arg2 (arg3=managed type?)
 
-static char *sccmdnames[] = {
+static const char *sccmdnames[] = {
   "NULL", "$add", "$sub", "$$mov", "memwritelit", "ret", "$mov",
   "$memread", "$memwrite", "$$mul", "$$div", "$$add", "$$sub", "$$bit_and", "$$bit_or",
   "$$cmp", "$$ncmp", "$$gt", "$$lt", "$$gte", "$$lte", "$$and", "$$or",
@@ -344,7 +344,7 @@ static char *sccmdnames[] = {
   "loopcheckoff", "memwrite.ptr.0.nd", "jnz", "$dynamicbounds", "$newarray"
 };
 
-static char *regnames[] = { "null", "sp", "mar", "ax", "bx", "cx", "op", "dx" };
+static const char *regnames[] = { "null", "sp", "mar", "ax", "bx", "cx", "op", "dx" };
 static short sccmdargs[] = {
   0, 2, 2, 2, 2, 0, 2,
   1, 1, 2, 2, 2, 2, 2, 2,

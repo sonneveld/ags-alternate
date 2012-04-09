@@ -1,4 +1,4 @@
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "acroom.h"
 
@@ -8,6 +8,7 @@
 #include "bmp.h"
 #include "misc.h"
 #include "cscomp.h"
+#include "ac_file.h"
 
 // copied over from ac.cpp`
 #define NO_SAVE_FUNCTIONS
@@ -96,14 +97,14 @@ int CustomProperties::UnSerialize (FILE *infrom) {
 }
 
 
-static int in_interaction_editor = 0;
+int in_interaction_editor = 0;
 
 
 void WordsDictionary::sort () {
   int aa, bb;
   for (aa = 0; aa < num_words; aa++) {
     for (bb = aa + 1; bb < num_words; bb++) {
-      if (((wordnum[aa] == wordnum[bb]) && (stricmp(word[aa], word[bb]) > 0))
+      if (((wordnum[aa] == wordnum[bb]) && (ac_stricmp(word[aa], word[bb]) > 0))
           || (wordnum[aa] > wordnum[bb])) {
         short temp = wordnum[aa];
         char tempst[30];
@@ -122,14 +123,14 @@ void WordsDictionary::sort () {
 int WordsDictionary::find_index (const char*wrem) {
   int aa;
   for (aa = 0; aa < num_words; aa++) {
-    if (stricmp (wrem, word[aa]) == 0)
+    if (ac_stricmp (wrem, word[aa]) == 0)
       return aa;
   }
   return -1;
 }
 
 // {name, flags, numArgs, {argTypes}, {argNames}, description, textscript}
-static ActionTypes actions[NUM_ACTION_TYPES] = {
+ActionTypes actions[NUM_ACTION_TYPES] = {
   {"Do nothing", 0, 0, {NULL}, {NULL}, "Does nothing.", ""},
   {"Run script", AFLG_RUNSCRIPT, 0, {NULL}, {NULL}, "Runs a text script. Click the 'Edit Script' button to modify the script.", ""},
   {"Game - Add score on first execution", 0, 1, {ARG_TYPE_INT}, {"Points to add"},
@@ -486,7 +487,7 @@ static long save_lzw(char *fnn, ALW_BITMAP *bmpp, color *pall, long offe) {
   fseek(iii, offe, SEEK_SET);
 
   ooo = ci_fopen(lztempfnm, "rb");
-  fll = filelength(fileno(ooo));
+  fll =ac_fstream_sizebytes(ooo);
   fwrite(&pall[0], sizeof(color), 256, iii);
   fwrite(&fll, 4, 1, iii);
   gobacto = ftell(iii);

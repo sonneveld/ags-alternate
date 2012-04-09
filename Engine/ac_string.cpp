@@ -1,11 +1,12 @@
 #include "ac_string.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "acruntim.h"
 #include "ac_maths.h"
-#include "dynobj/script_string.h"
+#include "script_string.h"
+#include "strimpl.h"
 
 // ** SCRIPT STRING
 
@@ -104,7 +105,7 @@ static int String_CompareTo(const char *thisString, const char *otherString, boo
     return strcmp(thisString, otherString);
   }
   else {
-    return stricmp(thisString, otherString);
+    return ac_stricmp(thisString, otherString);
   }
 }
 
@@ -115,7 +116,7 @@ static int String_StartsWith(const char *thisString, const char *checkForString,
     return (strncmp(thisString, checkForString, strlen(checkForString)) == 0) ? 1 : 0;
   }
   else {
-    return (strnicmp(thisString, checkForString, strlen(checkForString)) == 0) ? 1 : 0;
+    return (ac_strnicmp(thisString, checkForString, strlen(checkForString)) == 0) ? 1 : 0;
   }
 }
 
@@ -135,7 +136,7 @@ static int String_EndsWith(const char *thisString, const char *checkForString, b
   }
   else 
   {
-    return (stricmp(&thisString[checkAtOffset], checkForString) == 0) ? 1 : 0;
+    return (ac_stricmp(&thisString[checkAtOffset], checkForString) == 0) ? 1 : 0;
   }
 }
 
@@ -154,7 +155,7 @@ static const char* String_Replace(const char *thisString, const char *lookForTex
     }
     else
     {
-      matchHere = (strnicmp(&thisString[i], lookForText, strlen(lookForText)) == 0);
+      matchHere = (ac_strnicmp(&thisString[i], lookForText, strlen(lookForText)) == 0);
     }
 
     if (matchHere)
@@ -179,7 +180,7 @@ static const char* String_Replace(const char *thisString, const char *lookForTex
 static const char* String_LowerCase(const char *thisString) {
   char *buffer = (char*)malloc(strlen(thisString) + 1);
   strcpy(buffer, thisString);
-  strlwr(buffer);
+  ac_strlwr(buffer);
   return CreateNewScriptString(buffer, false);
 }
 
@@ -187,7 +188,7 @@ static const char* String_LowerCase(const char *thisString) {
 static const char* String_UpperCase(const char *thisString) {
   char *buffer = (char*)malloc(strlen(thisString) + 1);
   strcpy(buffer, thisString);
-  strupr(buffer);
+  ac_strupr(buffer);
   return CreateNewScriptString(buffer, false);
 }
 
@@ -290,8 +291,8 @@ static int StrContains (const char *s1, const char *s2) {
   char *tempbuf2 = (char*)malloc(strlen(s2) + 1);
   strcpy(tempbuf1, s1);
   strcpy(tempbuf2, s2);
-  strlwr(tempbuf1);
-  strlwr(tempbuf2);
+  ac_strlwr(tempbuf1);
+  ac_strlwr(tempbuf2);
 
   char *offs = strstr (tempbuf1, tempbuf2);
   free(tempbuf1);
@@ -303,23 +304,18 @@ static int StrContains (const char *s1, const char *s2) {
   return (offs - tempbuf1);
 }
 
-#ifdef WINDOWS_VERSION
-#define strlwr _strlwr
-#define strupr _strupr
-#endif
-
 /* *** SCRIPT SYMBOL: [String] StrToLowerCase *** */
 static void _sc_strlower (char *desbuf) {
   VALIDATE_STRING(desbuf);
   check_strlen (desbuf);
-  strlwr (desbuf);
+  ac_strlwr (desbuf);
 }
 
 /* *** SCRIPT SYMBOL: [String] StrToUpperCase *** */
 static void _sc_strupper (char *desbuf) {
   VALIDATE_STRING(desbuf);
   check_strlen (desbuf);
-  strupr (desbuf);
+  ac_strupr (desbuf);
 }
 
 /*int _sc_strcmp (char *s1, char *s2) {
@@ -327,7 +323,7 @@ static void _sc_strupper (char *desbuf) {
 }
 
 int _sc_stricmp (char *s1, char *s2) {
-  return stricmp (get_translation (s1), get_translation(s2));
+  return ac_stricmp (get_translation (s1), get_translation(s2));
 }*/
 
 
@@ -461,7 +457,7 @@ void register_string_script_functions() {
   scAdd_External_Symbol("String::geti_Chars", (void*)String_GetChars);
   scAdd_External_Symbol("String::get_Length", (void*)strlen);
   scAdd_External_Symbol("StrCat",(void *)_sc_strcat);
-  scAdd_External_Symbol("StrCaseComp",(void *)stricmp);
+  scAdd_External_Symbol("StrCaseComp",(void *)ac_stricmp);
   scAdd_External_Symbol("StrComp",(void *)strcmp);
   scAdd_External_Symbol("StrContains",(void *)StrContains);
   scAdd_External_Symbol("StrCopy",(void *)_sc_strcpy);

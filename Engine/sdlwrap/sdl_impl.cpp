@@ -1,10 +1,10 @@
 
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <malloc.h>
 #include <sys/stat.h>
 #include <assert.h>
 
@@ -20,9 +20,8 @@ char alw_allegro_error[ALW_ALLEGRO_ERROR_SIZE];
 
 static void (*_on_close_callback)(void) = 0;
 
-int alw_install_allegro(int system_id, int *errno_ptr, int (*atexit_ptr)( void (__cdecl *func )( void ))) { 
-  SDL_Init(SDL_INIT_EVERYTHING);
-  return 0;
+int alw_allegro_init() { 
+  return SDL_Init(SDL_INIT_EVERYTHING);
 }
 
 void alw_allegro_exit() { 
@@ -165,7 +164,7 @@ ALW_BITMAP *alw_create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, i
 
 	SDL_LockSurface(pParent);
 
-	byte* pPixels = (byte*)pParent->pixels + pParent->pitch*nTop + pParent->format->BytesPerPixel * nLeft;
+	uint8_t* pPixels = (uint8_t*)pParent->pixels + pParent->pitch*nTop + pParent->format->BytesPerPixel * nLeft;
 
 	SDL_Surface *m_pSurface = SDL_CreateRGBSurfaceFrom(pPixels, nWidth, nHeight, pParent->format->BitsPerPixel, pParent->pitch, pParent->format->Rmask, pParent->format->Gmask, pParent->format->Bmask, pParent->format->Amask);
 
@@ -310,7 +309,11 @@ void alw_unselect_palette() { PRINT_STUB; }
 
 const char *ALL_SEP_CHAR = "\\/";
 
+#ifdef WINDOWS_VERSION
 const char SYS_SEP_CHAR = '\\';
+#else
+const char SYS_SEP_CHAR = '/';
+#endif
 
 char *alw_append_filename(char *dest, const char *path, const char *filename, int size) {
 	size_t pathlen = strlen(path);
@@ -327,9 +330,9 @@ char *alw_append_filename(char *dest, const char *path, const char *filename, in
 	lastch = path[pathlen-1];
 
 	if (strchr(ALL_SEP_CHAR, lastch) != 0)
-		_snprintf (dest, size, "%s%s", tmp, filename);
+		ac_snprintf (dest, size, "%s%s", tmp, filename);
 	else
-		_snprintf (dest, size, "%s%c%s", tmp, SYS_SEP_CHAR, filename);
+		ac_snprintf (dest, size, "%s%c%s", tmp, SYS_SEP_CHAR, filename);
 
 	free(tmp);
 	return dest;
@@ -1062,7 +1065,9 @@ void alw_stop_audio_stream(ALW_AUDIOSTREAM *stream){ PRINT_STUB; }
 
 // WINALLEG
 // ============================================================================
+#ifdef WINDOWS_VERSION
 HWND alw_win_get_window(void){ PRINT_STUB;  return 0;}
+#endif
 int alw_wnd_call_proc(int (*proc)(void)){ PRINT_STUB;  return 0;}
 
 
@@ -1278,6 +1283,7 @@ void  alw_set_rgb_g_shift_32(int x) {_rgb_g_shift_32 = x;}
 void  alw_set_rgb_b_shift_32(int x) {_rgb_b_shift_32 = x;}
 void  alw_set_rgb_a_shift_32(int x) {_rgb_a_shift_32 = x;}
 
+#ifdef WINDOWS_VERSION
 static HWND _allegro_wnd = NULL;
 void alw_set_allegro_wnd(HWND allegro_wnd) {_allegro_wnd = allegro_wnd;}
 HWND alw_get_allegro_wnd() {return _allegro_wnd;}
@@ -1285,6 +1291,7 @@ HWND alw_get_allegro_wnd() {return _allegro_wnd;}
 extern "C" LPDIRECTDRAW2 alw_get_directdraw() { PRINT_STUB; return 0;}
 extern "C" LPDIRECTSOUND alw_get_directsound(){ PRINT_STUB; return 0;}
 extern "C" DDRAW_SURFACE *alw_get_gfx_directx_primary_surface(){ PRINT_STUB; return 0;}
+#endif
 
 ALW_BITMAP *alw_gfx_directx_create_system_bitmap(int width, int height){ PRINT_STUB; return 0;}
 
@@ -1463,4 +1470,11 @@ void bmp_write24 (uintptr_t addr, int c)
   unsigned char *p = (unsigned char *)addr;
 
   WRITE3BYTES(p, c);
+}
+
+
+// OSX
+// ============================================================================
+int osx_sys_question(const char *m, const char*b1, const char*b2) {
+    return 0;
 }

@@ -24,10 +24,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #if defined(LINUX_VERSION) || defined(MAC_VERSION)
-#include "djcompat.h"
+//#include "djcompat.h"
 #else
 #include <dos.h>
 #include <io.h>
@@ -48,14 +48,6 @@ typedef ALW_BITMAP *block;
 #ifdef __cplusplus
 extern "C"
 {
-#endif
-
-#if defined(WINDOWS_VERSION) || defined(LINUX_VERSION) || defined(MAC_VERSION)
-#include <time.h>
-  struct time
-  {
-    int ti_hund, ti_sec, ti_min, ti_hour;
-  };
 #endif
 
 extern const char *spindexid;

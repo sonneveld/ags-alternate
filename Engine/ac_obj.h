@@ -2,7 +2,7 @@
 #define _AC_SCR_OBJ_H_HEADER
 
 // forward declarations:
-#include "sdlwrap/allegro.h"    // for BITMAP
+#include "allegro.h"    // for BITMAP
 typedef ALW_BITMAP *block;  // wgt2allh.h
 struct MoveList;        // acroom.h
 

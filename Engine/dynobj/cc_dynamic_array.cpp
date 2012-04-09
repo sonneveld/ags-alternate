@@ -1,4 +1,4 @@
-#include "dynobj/cc_dynamic_array.h"
+#include "cc_dynamic_array.h"
 
 #include "cscomp.h"
 

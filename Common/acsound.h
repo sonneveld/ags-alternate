@@ -13,7 +13,7 @@
 #ifndef __ACSOUND_H
 #define __ACSOUND_H
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 #include "acruntim.h"
 
 #define MUS_MIDI 1

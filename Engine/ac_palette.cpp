@@ -1,6 +1,6 @@
 #include "ac_palette.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"

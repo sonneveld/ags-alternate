@@ -12,12 +12,15 @@
 
 #include "AGSEditorDebugger.h"
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
+#ifdef WINDOWS_VERSION
 #include <windows.h>
-#include <stdio.h>
 #include <io.h>
 #include <malloc.h>
+#endif
+#include <stdlib.h>
+#include <stdio.h>
 
 
 struct DummyAGSDebugger : IAGSEditorDebugger
@@ -168,7 +171,7 @@ public:
       // check again, because the editor might have deleted the file in the meantime
       return NULL;
     }
-    int fileSize = filelength(fileno(inn));
+    int fileSize =ac_fstream_sizebytes(inn);
     char *msg = (char*)malloc(fileSize + 1);
     fread(msg, fileSize, 1, inn);
     fclose(inn);

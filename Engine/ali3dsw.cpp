@@ -11,7 +11,7 @@
   You MAY NOT compile your own builds of the engine without making it EXPLICITLY
   CLEAR that the code has been altered from the Standard Version.
 */
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 //#include "winalleg.h"
 
 #include "ali3d.h"
@@ -385,6 +385,7 @@ bool ALSoftwareGraphicsDriver::SupportsGammaControl()
 
 void ALSoftwareGraphicsDriver::SetGamma(int newGamma)
 {
+#ifdef _WIN32
   for (int i = 0; i < 256; i++) {
     int newValue = ((int)defaultGammaRamp.red[i] * newGamma) / 100;
     if (newValue >= 65535)
@@ -395,6 +396,7 @@ void ALSoftwareGraphicsDriver::SetGamma(int newGamma)
   }
 
   dxGammaControl->SetGammaRamp(0, &gammaRamp);
+#endif
 }
 
 ALW_BITMAP* ALSoftwareGraphicsDriver::ConvertBitmapToSupportedColourDepth(ALW_BITMAP *allegroBitmap)
@@ -626,7 +628,7 @@ void ALSoftwareGraphicsDriver::highcolor_fade_in(ALW_BITMAP *currentVirtScreen, 
        {
          if (_callback)
            _callback();
-         Sleep(1);
+         alw_rest(1);
        }
        while (timerValue == *_loopTimer);
    }
@@ -665,7 +667,7 @@ void ALSoftwareGraphicsDriver::highcolor_fade_out(int speed, int targetColourRed
                 {
                   if (_callback)
                     _callback();
-                  Sleep(1);
+                  alw_rest(1);
                 }
                 while (timerValue == *_loopTimer);
             }
@@ -757,7 +759,7 @@ void ALSoftwareGraphicsDriver::BoxOutEffect(bool blackingOut, int speed, int del
       if (_callback)
         _callback();
 
-      Sleep(delay);
+      alw_rest(delay);
     }
     this->ClearRectangle(0, 0, _screenWidth - 1, _screenHeight - 1, NULL);
   }
@@ -772,8 +774,9 @@ bool ALSoftwareGraphicsDriver::PlayVideo(const char *filename, bool useAVISound,
 {
 #ifdef _WIN32
   int result = dxmedia_play_video(filename, useAVISound, skipType, stretchToFullScreen ? 1 : 0);
-#endif
   return (result == 0);
+#endif
+  return TRUE;
 }
 
 // add the alpha values together, used for compositing alpha images

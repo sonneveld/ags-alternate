@@ -1,4 +1,4 @@
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 #include "wgt2allg.h"
 #include "bmp.h"
 

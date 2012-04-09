@@ -1,12 +1,13 @@
 #ifndef _ALLEGRO_WRAPPER_H
 #define _ALLEGRO_WRAPPER_H
+#define ALLEGRO_H
 
 // use to get an idea of what's being used so we can port it to SDL or Allegro3
 
 // ignore stuff in the graphics drivers since we'd probably have to write from scratch
 // ignore external libraries, they'd have to be rewritten anyway.
 
-
+#ifdef WINDOWS_VERSION
 // include windows.h, with funny business since allegro ALSO uses BITMAP type.
 #define BITMAP WINDOWS_BITMAP
 #define WIN32_LEAN_AND_MEAN
@@ -14,12 +15,39 @@
 #define WINDOWS_RGB(r,g,b)  ((COLORREF)(((BYTE)(r)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(b))<<16)))
 #undef BITMAP
 #undef RGB
-
 #include <direct.h>
 #include <ddraw.h>
 #include <mmsystem.h>
 #include <dsound.h>
+#endif  // WINDOWS_VERSION
 
+#ifndef TRUE
+#define TRUE (1)
+#define FALSE (0)
+#endif
+
+
+// keep ac_stricmp just as symbol since we have a ptr ref to it in ac_string.cpp
+#ifdef WINDOWS_VERSION
+// ISO
+#define ac_stricmp                  _stricmp
+#define ac_strnicmp(str1, str2, n)  _strnicmp(str1, str2, n)
+#define ac_mkdir(dirname)           _mkdir(dirname)
+#define ac_getcwd(buffer, maxlen)   _getcwd(buffer, maxlen)
+#define ac_snprintf                 _snprintf
+#else
+// POSIX
+#define ac_stricmp                  strcasecmp
+#define ac_strnicmp(str1, str2, n)  strncasecmp(str1, str2, n)
+#define ac_mkdir(pathname)          mkdir(pathname, 0755)
+#define ac_getcwd(buf, size)        getcwd(buf, size)
+#define ac_snprintf                 snprintf
+#endif
+
+#ifndef MAX_PATH
+#include <limits.h>
+#define MAX_PATH PATH_MAX
+#endif
 
 #define ALLEGRO_DATE 20120101
 
@@ -38,6 +66,11 @@
 #define MASK_COLOR_16      0xF81F
 #define MASK_COLOR_24      0xFF00FF
 #define MASK_COLOR_32      0xFF00FF
+
+#define GFX_AUTODETECT                 0
+#define GFX_AUTODETECT_FULLSCREEN      1
+#define GFX_AUTODETECT_WINDOWED        2
+
 
 typedef struct ALW_GFX_VTABLE        /* functions for drawing onto bitmaps */
 {
@@ -194,6 +227,7 @@ extern void  alw_set_rgb_g_shift_32(int x);
 extern void  alw_set_rgb_b_shift_32(int x);
 extern void  alw_set_rgb_a_shift_32(int x);
 
+#ifdef WINDOWS_VERSION
 extern void alw_set_allegro_wnd(HWND allegro_wnd);
 extern HWND alw_get_allegro_wnd();
 //HWND allegro_wnd = NULL;
@@ -212,6 +246,8 @@ typedef struct DDRAW_SURFACE {
 
 extern "C" extern DDRAW_SURFACE *alw_get_gfx_directx_primary_surface();
 
+#endif
+
 ALW_BITMAP *alw_gfx_directx_create_system_bitmap(int width, int height);
 
 #define DIGI_DIRECTX(n)          AL_ID('D','X','A'+(n),' ')
@@ -224,13 +260,20 @@ ALW_BITMAP *alw_gfx_directx_create_system_bitmap(int width, int height);
 #define SYSTEM_NONE        AL_ID('N','O','N','E')
 
 
+// OSX
+extern char appDirectory[512];
+extern int osx_sys_question(const char *, const char*, const char*);
+
+
 // WINALLEG
+#ifdef WINDOWS_VERSION
 HWND alw_win_get_window(void);
+#endif
 int alw_wnd_call_proc(int (*proc)(void));
 
 // INIT
 #define ALW_ALLEGRO_DATE ALLEGRO_DATE
-int alw_install_allegro(int system_id, int *errno_ptr, int (*atexit_ptr)( void (__cdecl *func )( void )));
+int alw_allegro_init();
 void alw_allegro_exit();
 void alw_set_window_title(const char *name);
 int alw_set_close_button_callback(void (*proc)(void));
@@ -325,7 +368,7 @@ extern ALW_BITMAP *alw_screen;
 
 void alw_set_color_depth(int depth);
 ALW_BITMAP *alw_create_bitmap(int width, int height) ;
-ALW_BITMAP *alw_create_bitmap_ex(int color_depth, int width, int height) ;
+extern ALW_BITMAP *alw_create_bitmap_ex(int color_depth, int width, int height) ;
 ALW_BITMAP *alw_create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, int height) ;
 void alw_destroy_bitmap(ALW_BITMAP *bitmap) ;
 int alw_bitmap_color_depth(ALW_BITMAP *bmp) ;

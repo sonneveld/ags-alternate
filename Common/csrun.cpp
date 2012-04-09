@@ -30,7 +30,7 @@
 
 #include "cscomp.h"
 #include "misc.h"
-#include "dynobj/cc_dynamic_array.h"
+#include "cc_dynamic_array.h"
 
 #ifdef AGS_BIG_ENDIAN
 #include <list>
@@ -129,7 +129,7 @@ static void dump_instruction(unsigned long *codeptr, int cps, int spp)
   fprintf(dto, "Line %3d, IP:%8d (SP:%8d) ", line_num, cps, spp);
 
   int l, thisop = codeptr[0] & INSTANCE_ID_REMOVEMASK, isreg = 0, t = 0;
-  char *toprint = sccmdnames[thisop];
+  const char *toprint = sccmdnames[thisop];
   if (toprint[0] == '$') {
     isreg = 1;
     toprint++;
@@ -481,18 +481,18 @@ public:
 struct SystemImports
 {
 private:
-  char **name;
-  char **addr;
+  const char **name;
+  const char **addr;
   ccInstance **isScriptImp;
   int numimports;
   int bufferSize;
   ccTreeMap btree;
 
 public:
-  int  add(char *, char *, ccInstance*);
+  int  add(const char *, const char *, ccInstance*);
   void remove(char *);
-  char *get_addr_of(char *);
-  int  get_index_of(char *);
+  const char *get_addr_of(char *);
+  int  get_index_of(const char *);
   ccInstance* is_script_import(char *);
   void remove_range(char *, unsigned long);
   void clear() {
@@ -527,7 +527,7 @@ void SystemImports::remove_all_script_exports()
 
 }*/
 
-int SystemImports::add(char *namm, char *add, ccInstance *anotherscr = NULL)
+int SystemImports::add(const char *namm, const char *add, ccInstance *anotherscr = NULL)
 {
   int ixof;
 
@@ -553,8 +553,8 @@ int SystemImports::add(char *namm, char *add, ccInstance *anotherscr = NULL)
     if (this->bufferSize > 50000)
       return -1;  // something has gone badly wrong
     this->bufferSize += 1000;
-    this->name = (char**)realloc(this->name, sizeof(char*) * this->bufferSize);
-    this->addr = (char**)realloc(this->addr, sizeof(char*) * this->bufferSize);
+    this->name = (const char**)realloc(this->name, sizeof(char*) * this->bufferSize);
+    this->addr = (const char**)realloc(this->addr, sizeof(char*) * this->bufferSize);
     this->isScriptImp = (ccInstance**)realloc(this->isScriptImp, sizeof(ccInstance*) * this->bufferSize);
   }
 
@@ -584,7 +584,7 @@ void SystemImports::remove(char *nameToRemove) {
   }*/
 }
 
-char *SystemImports::get_addr_of(char *namw)
+const char *SystemImports::get_addr_of(char *namw)
 {
   int o = get_index_of(namw);
   if (o < 0)
@@ -593,7 +593,7 @@ char *SystemImports::get_addr_of(char *namw)
   return addr[o];
 }
 
-int SystemImports::get_index_of(char *namw)
+int SystemImports::get_index_of(const char *namw)
 {
   int bestMatch = -1;
   char altName[200];
@@ -683,7 +683,7 @@ Spans gSpans;
 #endif
 
 
-void ccAddExternalSymbol(char *namof, void *addrof)
+void ccAddExternalSymbol(const char *namof, void *addrof)
 {
   simp.add(namof, (char *)addrof, NULL);
 }
@@ -698,7 +698,7 @@ void ccRemoveAllSymbols()
   simp.clear();
 }
 
-void *ccGetSymbolAddress(char *namof)
+const void *ccGetSymbolAddress(char *namof)
 {
   return simp.get_addr_of(namof);
 }

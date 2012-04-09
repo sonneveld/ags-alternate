@@ -10,7 +10,7 @@
 
 */
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #pragma unmanaged
 #ifndef USE_ALFONT
@@ -20,6 +20,7 @@
 #include "wgt2allg.h"
 #include "acroom.h"
 #include "acruntim.h"
+#include "ac_file.h"
 
 #ifdef USE_ALFONT
 //#include "alfont.h"
@@ -347,7 +348,7 @@ bool WFNFontRenderer::LoadFromDisk(int fontNumber, int fontSize)
   lenof = last_opened_size;
 #else
   // in the editor, we don't read from clib, only from disk
-  lenof = filelength(fileno(ffi));
+  lenof = ac_fstream_sizebytes(ffi);
 #endif
 
   wgtfont tempalloc = (wgtfont) malloc(lenof + 40);
@@ -422,7 +423,7 @@ bool TTFFontRenderer::LoadFromDisk(int fontNumber, int fontSize)
   // if not in the library, get size manually
   if (lenof < 1)
   {
-	  lenof = _filelength(_fileno(reader));
+	  lenof = ac_fstream_sizebytes(reader);
   }
 
   membuffer = (char *)malloc(lenof);

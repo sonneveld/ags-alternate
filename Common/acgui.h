@@ -13,6 +13,7 @@
 #ifndef __ACGUI_H
 #define __ACGUI_H
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "bigend.h"
 

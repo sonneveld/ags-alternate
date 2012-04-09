@@ -13,7 +13,7 @@
 #error This file should only be included on the Windows build
 #endif
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 // ********* WINDOWS *********
 

@@ -11,8 +11,9 @@
 */
 
 #include <string.h>
+#include <unistd.h>
 
-#include "sdlwrap/allegro.h"
+#include "allegro.h"
 
 #include "ac.h"
 #include "ac_context.h"
@@ -29,10 +30,6 @@
 #include <dir.h>
 #endif
 
-#endif
-
-#if defined(DJGPP) || defined(LINUX_VERSION) || defined(MAC_VERSION)
-#define _getcwd getcwd
 #endif
 
 #include "acgui.h"
@@ -867,7 +864,7 @@ void preparesavegamelist(int ctrllist)
   alw_al_ffblk ffb;
   int bufix = 0;
   char curdir[255];
-  _getcwd(curdir, 255);
+  ac_getcwd(curdir, 255);
 
   char searchPath[260];
   sprintf(searchPath, "%s""agssave.*%s", saveGameDirectory, saveGameSuffix);

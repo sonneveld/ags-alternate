@@ -143,7 +143,7 @@ enum { ST_TUNE = 0, ST_SAVELOAD = 1, ST_MANDISABLED = 2, ST_MANVIEW = 3, ST_VOLU
 
 #define GAME_FILE_VERSION 42
 
-void quit(char *);
+void quit(const char *);
 
 #ifdef DJGPP
 #define PCKD __attribute__((packed))
@@ -362,7 +362,7 @@ struct CustomPropertySchema {
   // Find the index of the specified property
   int findProperty (const char *pname) {
     for (int ii = 0; ii < numProps; ii++) {
-      if (stricmp (pname, propName[ii]) == 0)
+      if (ac_stricmp (pname, propName[ii]) == 0)
         return ii;
     }
     return -1;
@@ -428,7 +428,7 @@ struct CustomProperties {
   // Find the index of the specified property
   int findProperty (const char *pname) {
     for (int ii = 0; ii < numProps; ii++) {
-      if (stricmp (pname, propName[ii]) == 0)
+      if (ac_stricmp (pname, propName[ii]) == 0)
         return ii;
     }
     return -1;

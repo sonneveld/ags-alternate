@@ -41,10 +41,10 @@
 #include <string.h>
 #include <sys/stat.h>
 
-FILE *ci_fopen(char *file_name, const char *mode);
+FILE *ci_fopen(const char *file_name, const char *mode);
 
 #endif // LINUX_VERSION || MAC_VERSION
 
-char *ci_find_file(char *dir_name, char *file_name);
+char *ci_find_file(const char *dir_name, const char *file_name);
 
 #endif  // __MISC_H
