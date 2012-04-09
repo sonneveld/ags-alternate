@@ -293,6 +293,9 @@ void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
   }
 
   SDL_SetPalette(surface, flags, colors, firstcolor, ncolors);
+  
+  if (vsync)
+    SDL_Flip(_actual_sdl_screen);
 }
 void alw_get_palette_range(ALW_PALETTE p, int from, int to) { PRINT_STUB; }
 
@@ -526,7 +529,7 @@ void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, 
     //_my_blit_col = (_my_blit_col +1)% 40;
   //}
 
-	SDL_Flip(_actual_sdl_screen);
+	//SDL_Flip(_actual_sdl_screen);
 
   //void;
 }
@@ -566,7 +569,7 @@ void alw_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) {
 
   SDL_BlitSurface(src, &srcrect, dst, &dstrect);
 
-  SDL_Flip(_actual_sdl_screen);
+  //SDL_Flip(_actual_sdl_screen);
 }
 
 

@@ -942,18 +942,11 @@ extern void Character_SetY(CharacterInfo *chaa, int newval);
 extern int  Character_GetZ(CharacterInfo *chaa);
 extern void Character_SetZ(CharacterInfo *chaa, int newval);
 
-#ifdef WINDOWS_VERSION
-#define AGS_INLINE inline
-#else
-// the linux compiler won't allow extern inline
-#define AGS_INLINE
-#endif
-
-extern AGS_INLINE int divide_down_coordinate(int coord);
-extern AGS_INLINE int multiply_up_coordinate(int coord);
-extern AGS_INLINE void multiply_up_coordinates(int *x, int *y);
-extern AGS_INLINE int get_fixed_pixel_size(int pixels);
-extern AGS_INLINE int convert_to_low_res(int coord);
-extern AGS_INLINE int convert_back_to_high_res(int coord);
+extern int divide_down_coordinate(int coord);
+extern int multiply_up_coordinate(int coord);
+extern void multiply_up_coordinates(int *x, int *y);
+extern int get_fixed_pixel_size(int pixels);
+extern int convert_to_low_res(int coord);
+extern int convert_back_to_high_res(int coord);
 
 #endif

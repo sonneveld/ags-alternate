@@ -48,7 +48,7 @@ void AGSMac::DisplayAlert(const char *text, ...) {
 }
 
 void AGSMac::Delay(int millis) {
-  usleep(millis);
+  alw_rest(millis);
 }
 
 unsigned long AGSMac::GetDiskFreeSpaceMB() {

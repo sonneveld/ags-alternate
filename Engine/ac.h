@@ -75,7 +75,7 @@ extern void next_iteration();
 extern int load_game(int,char*, int*);
 extern void break_up_text_into_lines(int wii,int fonnt,char*todis);
 extern void wouttext_outline(int xxp,int yyp,int usingfont,char*texx);
-extern inline int get_fixed_pixel_size(int pixels);
+extern int get_fixed_pixel_size(int pixels);
 
 // for acdialog.cpp
 extern void next_iteration();
@@ -89,10 +89,10 @@ extern char saveGameDirectory[260];
 
 // for acgui.cpp
 extern void draw_sprite_compensate(int spr, int x, int y, int xray);
-extern inline int divide_down_coordinate(int coord);
-extern inline int multiply_up_coordinate(int coord);
-extern inline void multiply_up_coordinates(int *x, int *y);
-extern inline int get_fixed_pixel_size(int pixels);
+extern int divide_down_coordinate(int coord);
+extern int multiply_up_coordinate(int coord);
+extern void multiply_up_coordinates(int *x, int *y);
+extern int get_fixed_pixel_size(int pixels);
 
 // for acchars.cpp
 extern const char* Character_GetTextProperty(CharacterInfo *chaa, const char *property);
