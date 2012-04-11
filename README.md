@@ -58,6 +58,10 @@ https://github.com/fuzzie/scummvm/tree/ags/engines/ags
 https://github.com/fuzzie/scummvm/commits/ags
 http://logs.scummvm.org/log.php?log=scummvm.log.12Feb2012&format=html
 
+AGS Draconian Edition
+http://www.bigbluecup.com/yabb/index.php?topic=44502.0
+https://github.com/AlanDrake/Adventure-Game-Studio
+
 AGS forks
 https://gitorious.org/ags
 https://gitorious.org/~jjs/ags/ags-for-psp

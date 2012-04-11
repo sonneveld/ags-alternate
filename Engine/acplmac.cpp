@@ -6,6 +6,7 @@
 
 #include "acplatfm.h"
 #include <unistd.h>
+#include "mac_alert.h"
 
 
 bool PlayMovie(char const *name, int skipType) {
@@ -39,12 +40,12 @@ int AGSMac::CDPlayerCommand(int cmdd, int datt) {
 }
 
 void AGSMac::DisplayAlert(const char *text, ...) {
-  char displbuf[2000];
+  char displbuf[2501];  // 1 more than win version
   va_list ap;
   va_start(ap, text);
-  vsprintf(displbuf, text, ap);
+  vsnprintf(displbuf, 2501, text, ap);
   va_end(ap);
-  printf("%s", displbuf);
+  show_alert(displbuf, "Adventure Game Studio");
 }
 
 void AGSMac::Delay(int millis) {

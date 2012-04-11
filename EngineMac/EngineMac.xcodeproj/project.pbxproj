@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		512ABC0515340E7700D3CFC7 /* mac_alert.mm in Sources */ = {isa = PBXBuildFile; fileRef = 512ABC0415340E7700D3CFC7 /* mac_alert.mm */; };
 		51325BF6153162A100335A54 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E335D15314C4E0026C374 /* SDL.framework */; };
 		51325BF7153162A100335A54 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E335E15314C4E0026C374 /* SDL_ttf.framework */; };
 		51325BF8153162DA00335A54 /* sdl_impl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519E343F15314EEC0026C374 /* sdl_impl.cpp */; };
@@ -128,6 +129,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		512ABC0415340E7700D3CFC7 /* mac_alert.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mac_alert.mm; sourceTree = "<group>"; };
+		512ABC071534107C00D3CFC7 /* mac_alert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mac_alert.h; sourceTree = "<group>"; };
 		51325C52153172D600335A54 /* hq2x3x.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hq2x3x.cpp; path = ../../External/hq2x/src/hq2x3x.cpp; sourceTree = "<group>"; };
 		51325C54153172E400335A54 /* hq2x3x.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hq2x3x.h; path = ../../External/hq2x/include/hq2x3x.h; sourceTree = "<group>"; };
 		519E3329153137400026C374 /* EngineMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EngineMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -468,6 +471,8 @@
 				519E338515314E7C0026C374 /* sprcache.cpp */,
 				519E338815314E7C0026C374 /* wgt2allg.cpp */,
 				519E3334153137400026C374 /* Supporting Files */,
+				512ABC0415340E7700D3CFC7 /* mac_alert.mm */,
+				512ABC071534107C00D3CFC7 /* mac_alert.h */,
 			);
 			path = EngineMac;
 			sourceTree = "<group>";
@@ -805,6 +810,7 @@
 				519E339715314E7C0026C374 /* wgt2allg.cpp in Sources */,
 				51325C53153172D900335A54 /* hq2x3x.cpp in Sources */,
 				51DD9BFD1532C31400F6EE89 /* strimpl.cpp in Sources */,
+				512ABC0515340E7700D3CFC7 /* mac_alert.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
