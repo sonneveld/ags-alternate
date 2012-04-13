@@ -54,31 +54,34 @@ int System_GetHardwareAcceleration()
 /* *** SCRIPT SYMBOL: [System] System::get_NumLock *** */
 int System_GetNumLock()
 {
-  return (alw_key_shifts & KB_NUMLOCK_FLAG) ? 1 : 0;
+  alw_poll_keyboard();
+  return (alw_get_key_shifts(KB_NUMLOCK_FLAG)) ? 1 : 0;
 }
 
 /* *** SCRIPT SYMBOL: [System] System::get_CapsLock *** */
 int System_GetCapsLock()
 {
-  return (alw_key_shifts & KB_CAPSLOCK_FLAG) ? 1 : 0;
+  alw_poll_keyboard();
+  return (alw_get_key_shifts(KB_CAPSLOCK_FLAG)) ? 1 : 0;
 }
 
 /* *** SCRIPT SYMBOL: [System] System::get_ScrollLock *** */
 int System_GetScrollLock()
 {
-  return (alw_key_shifts & KB_SCROLOCK_FLAG) ? 1 : 0;
+  alw_poll_keyboard();
+  return (alw_get_key_shifts(KB_SCROLOCK_FLAG)) ? 1 : 0;
 }
 
 /* *** SCRIPT SYMBOL: [System] System::set_NumLock *** */
 void System_SetNumLock(int newValue)
 {
   // doesn't work ... maybe allegro doesn't implement this on windows
-  int ledState = alw_key_shifts & (KB_SCROLOCK_FLAG | KB_CAPSLOCK_FLAG);
-  if (newValue)
-  {
-    ledState |= KB_NUMLOCK_FLAG;
-  }
-  alw_set_leds(ledState);
+  //int ledState = alw_key_shifts & (KB_SCROLOCK_FLAG | KB_CAPSLOCK_FLAG);
+  //if (newValue)
+  //{
+  //  ledState |= KB_NUMLOCK_FLAG;
+  //}
+  //alw_set_leds(ledState);
 }
 
 /* *** SCRIPT SYMBOL: [System] System::get_VSync *** */

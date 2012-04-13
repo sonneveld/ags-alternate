@@ -213,7 +213,7 @@ int rec_iskeypressed (int keycode) {
     return playback_keystate[keycode];
   }
 
-  int toret = alw_key[keycode];
+  int toret = alw_get_key(keycode);
 
   if (play.recording) {
     if (toret != playback_keystate[keycode]) {

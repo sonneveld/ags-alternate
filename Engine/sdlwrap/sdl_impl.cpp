@@ -21,7 +21,12 @@ char alw_allegro_error[ALW_ALLEGRO_ERROR_SIZE];
 static void (*_on_close_callback)(void) = 0;
 
 int alw_allegro_init() { 
-  return SDL_Init(SDL_INIT_EVERYTHING);
+  int result =  SDL_Init(SDL_INIT_EVERYTHING);
+  if (!result) {
+    // if initialise
+    SDL_EnableUNICODE(1);
+  }
+  return result;
 }
 
 void alw_allegro_exit() { 
@@ -903,17 +908,20 @@ static void _handle_mouse_button_up_event(SDL_MouseButtonEvent *button_event){
 	alw_mouse_b &= ~_sdl_button_to_allegro_bit(button_event->button);
 }
 
+static void _handle_key_down_event(SDL_KeyboardEvent *key_event);
+static void _handle_key_up_event(SDL_KeyboardEvent *key_event);
+
 static int _poll_everything() {
 	SDL_Event event;
 	while (SDL_PollEvent(&event)) {
 		// Process event...
 		switch (event.type) {
-		case SDL_KEYDOWN:
-			printf("The %s key was pressed!\n", SDL_GetKeyName(event.key.keysym.sym));
-			//if (event.key.keysym.sym == SDLK_q)
-			//	game_running =0;
-			if (event.key.keysym.sym == SDLK_w)
-				alw_position_mouse(10, 10);
+      case SDL_KEYDOWN:
+        _handle_key_down_event(&event.key);
+        break;
+      case SDL_KEYUP:
+        _handle_key_up_event(&event.key);
+        break;
 			break;
 
 		case SDL_MOUSEMOTION:
@@ -925,6 +933,7 @@ static int _poll_everything() {
 		case SDL_MOUSEBUTTONUP:
 			_handle_mouse_button_up_event(&event.button);
 			break;
+        
 		case SDL_QUIT:
       if (_on_close_callback)
         _on_close_callback();
@@ -937,6 +946,438 @@ static int _poll_everything() {
 int alw_poll_mouse() {
 	return _poll_everything();
 }
+
+
+// KEYBOARD
+// ============================================================================
+
+static int _scancode_sdl_to_allegro(int sdl_key_sym);
+static int _scancode_allegro_to_sdl(int allegro_scancode);
+
+static int _sdl_key_state[SDLK_LAST] = {0};
+
+#define _READKEY_BUF_SIZE 32
+SDL_keysym _readkey_buf[_READKEY_BUF_SIZE];
+int _readkey_start = 0;  // oldest
+int _readkey_end = 0;    // spot to write next one.
+
+int _readkey_buffer_is_full() {
+	return (_readkey_end+1)%_READKEY_BUF_SIZE == _readkey_start;
+}
+
+int _readkey_buffer_is_empty() {
+	return _readkey_start == _readkey_end;
+}
+
+void _readkey_buffer_push(SDL_keysym value)  {
+	assert(!_readkey_buffer_is_full());
+	
+	_readkey_buf[_readkey_end] = value;
+	_readkey_end = (_readkey_end+1)%_READKEY_BUF_SIZE;
+	
+	assert (_readkey_start != _readkey_end);
+}
+
+SDL_keysym _readkey_buffer_pop() {
+  assert(!_readkey_buffer_is_empty());
+	SDL_keysym value = _readkey_buf[_readkey_start];
+	_readkey_start = (_readkey_start+1)%_READKEY_BUF_SIZE;
+  return value;
+}
+
+void _readkey_buffer_clear() {
+  _readkey_start = 0;
+  _readkey_end = 0;
+  
+}
+
+
+int alw_install_keyboard(){ 
+  PRINT_STUB; 
+  alw_clear_keybuf();
+  return 0; 
+}
+
+/* Returns TRUE if the current keyboard driver is operating in polling mode. */
+int alw_keyboard_needs_poll(){ PRINT_STUB; return 1; }
+
+/* poll keyboard, only need for alw_key and alw_key_shifts */
+int alw_poll_keyboard(){ _poll_everything(); return 0; }
+
+/* Returns TRUE if there are keypresses waiting in the input buffer. You can use 
+ this to see if the next call to readkey() is going to block or to simply wait 
+ for the user to press a key. */
+int alw_keypressed(){ 
+  PRINT_STUB;
+  alw_poll_keyboard(); 
+  return !_readkey_buffer_is_empty();
+}
+
+/* Returns the next character from the keyboard buffer, in ASCII format. If the 
+ buffer is empty, it waits until a key is pressed.
+ The low byte of the return value contains the ASCII code of the key, and the 
+ high byte the scancode. */
+int alw_readkey(){ 
+  PRINT_STUB;
+  
+  for (;;) {
+    alw_poll_keyboard(); 
+    if (!_readkey_buffer_is_empty())
+      break;
+    SDL_Delay(1);
+    
+  }
+  
+  SDL_keysym sdlkeysym = _readkey_buffer_pop();
+  int allegro_scancode = _scancode_sdl_to_allegro(sdlkeysym.sym);
+  int allegro_ascii = sdlkeysym.unicode & 0x7f;
+  int value = allegro_ascii | (allegro_scancode << 8);
+  return value;
+}
+
+void alw_clear_keybuf() { 
+  PRINT_STUB; 
+  alw_poll_keyboard(); // read anything in sdl event buffer.
+  _readkey_buffer_clear();
+  memset(_sdl_key_state, 0, sizeof(_sdl_key_state));
+}
+
+/* Array of flags indicating the state of each key, ordered by scancode */
+//volatile char alw_key[KEY_MAX];
+int alw_get_key(int allegro_scancode) {
+  alw_poll_keyboard();
+  int sdl_scancode = _scancode_allegro_to_sdl(allegro_scancode);
+  if (sdl_scancode <= 0)
+    return 0;
+  return _sdl_key_state[sdl_scancode];
+}
+
+/* Bitmask containing the current state of shift/ctrl/alt, */
+int alw_get_key_shifts(int allegro_shift) {
+  alw_poll_keyboard();
+  switch (allegro_shift) {
+    case KB_NUMLOCK_FLAG:
+      return _sdl_key_state[SDLK_NUMLOCK];
+    case KB_CAPSLOCK_FLAG:
+      return _sdl_key_state[SDLK_CAPSLOCK];
+    case KB_SCROLOCK_FLAG:
+      return _sdl_key_state[SDLK_SCROLLOCK];
+  }
+  return 0;
+}
+
+static void _handle_key_down_event(SDL_KeyboardEvent *key_event) {
+  _sdl_key_state[key_event->keysym.sym] = 1;
+	
+  // we get weirdness if there isn't an ascii version.. ac engine expects to be
+  // able to read an extended char?
+  //if (key_event->keysym.unicode >= 0x80 || key_event->keysym.unicode < 0)
+  //  return;
+  
+  if (_readkey_buffer_is_full())
+    return;
+  
+  int allegro_scancode = _scancode_sdl_to_allegro(key_event->keysym.sym);
+  if (allegro_scancode <=0)
+    return;
+
+  _readkey_buffer_push(key_event->keysym);
+}
+
+static void _handle_key_up_event(SDL_KeyboardEvent *key_event) {
+  _sdl_key_state[key_event->keysym.sym] = 0;
+}
+
+static int _scancode_sdl_to_allegro(int sdl_key_sym) {
+  switch (sdl_key_sym) {
+    case SDLK_BACKSPACE:    return KEY_BACKSPACE;
+    case SDLK_TAB:          return KEY_TAB;
+    case SDLK_RETURN:       return KEY_ENTER;
+    case SDLK_PAUSE:        return KEY_PAUSE;
+    case SDLK_ESCAPE:       return KEY_ESC;
+    case SDLK_SPACE:        return KEY_SPACE;
+    case SDLK_QUOTE:        return KEY_QUOTE;
+    case SDLK_COMMA:        return KEY_COMMA;
+    case SDLK_MINUS:        return KEY_MINUS;
+    case SDLK_PERIOD:       return KEY_STOP;
+    case SDLK_SLASH:        return KEY_SLASH;
+    case SDLK_0:            return KEY_0;
+    case SDLK_1:            return KEY_1;
+    case SDLK_2:            return KEY_2;
+    case SDLK_3:            return KEY_3;
+    case SDLK_4:            return KEY_4;
+    case SDLK_5:            return KEY_5;
+    case SDLK_6:            return KEY_6;
+    case SDLK_7:            return KEY_7;
+    case SDLK_8:            return KEY_8;
+    case SDLK_9:            return KEY_9;
+    case SDLK_COLON:        return KEY_COLON;
+    case SDLK_SEMICOLON:    return KEY_SEMICOLON;
+    case SDLK_EQUALS:       return KEY_EQUALS;
+    case SDLK_LEFTBRACKET:  return KEY_OPENBRACE;
+    case SDLK_BACKSLASH:    return KEY_BACKSLASH;
+    case SDLK_RIGHTBRACKET: return KEY_CLOSEBRACE;
+    case SDLK_BACKQUOTE:    return KEY_TILDE;
+    case SDLK_a:            return KEY_A;
+    case SDLK_b:            return KEY_B;
+    case SDLK_c:            return KEY_C;
+    case SDLK_d:            return KEY_D;
+    case SDLK_e:            return KEY_E;
+    case SDLK_f:            return KEY_F;
+    case SDLK_g:            return KEY_G;
+    case SDLK_h:            return KEY_H;
+    case SDLK_i:            return KEY_I;
+    case SDLK_j:            return KEY_J;
+    case SDLK_k:            return KEY_K;
+    case SDLK_l:            return KEY_L;
+    case SDLK_m:            return KEY_M;
+    case SDLK_n:            return KEY_N;
+    case SDLK_o:            return KEY_O;
+    case SDLK_p:            return KEY_P;
+    case SDLK_q:            return KEY_Q;
+    case SDLK_r:            return KEY_R;
+    case SDLK_s:            return KEY_S;
+    case SDLK_t:            return KEY_T;
+    case SDLK_u:            return KEY_U;
+    case SDLK_v:            return KEY_V;
+    case SDLK_w:            return KEY_W;
+    case SDLK_x:            return KEY_X;
+    case SDLK_y:            return KEY_Y;
+    case SDLK_z:            return KEY_Z;
+    case SDLK_DELETE:       return KEY_DEL;
+    case SDLK_KP0:          return KEY_0_PAD;
+    case SDLK_KP1:          return KEY_1_PAD;
+    case SDLK_KP2:          return KEY_2_PAD;
+    case SDLK_KP3:          return KEY_3_PAD;
+    case SDLK_KP4:          return KEY_4_PAD;
+    case SDLK_KP5:          return KEY_5_PAD;
+    case SDLK_KP6:          return KEY_6_PAD;
+    case SDLK_KP7:          return KEY_7_PAD;
+    case SDLK_KP8:          return KEY_8_PAD;
+    case SDLK_KP9:          return KEY_9_PAD;
+    case SDLK_KP_PERIOD:    return KEY_DEL_PAD;
+    case SDLK_KP_DIVIDE:    return KEY_SLASH_PAD;
+    case SDLK_KP_MULTIPLY:  return KEY_ASTERISK;
+    case SDLK_KP_MINUS:     return KEY_MINUS_PAD;
+    case SDLK_KP_PLUS:      return KEY_PLUS_PAD;
+    case SDLK_KP_ENTER:     return KEY_ENTER_PAD;
+    case SDLK_KP_EQUALS:    return KEY_EQUALS_PAD;
+    case SDLK_UP:           return KEY_UP;
+    case SDLK_DOWN:         return KEY_DOWN;
+    case SDLK_RIGHT:        return KEY_RIGHT;
+    case SDLK_LEFT:         return KEY_LEFT;
+    case SDLK_INSERT:       return KEY_INSERT;
+    case SDLK_HOME:         return KEY_HOME;
+    case SDLK_END:          return KEY_END;
+    case SDLK_PAGEUP:       return KEY_PGUP;
+    case SDLK_PAGEDOWN:     return KEY_PGDN;
+    case SDLK_F1:           return KEY_F1;
+    case SDLK_F2:           return KEY_F2;
+    case SDLK_F3:           return KEY_F3;
+    case SDLK_F4:           return KEY_F4;
+    case SDLK_F5:           return KEY_F5;
+    case SDLK_F6:           return KEY_F6;
+    case SDLK_F7:           return KEY_F7;
+    case SDLK_F8:           return KEY_F8;
+    case SDLK_F9:           return KEY_F9;
+    case SDLK_F10:          return KEY_F10;
+    case SDLK_F11:          return KEY_F11;
+    case SDLK_F12:          return KEY_F12;
+    case SDLK_NUMLOCK:      return KEY_NUMLOCK;
+    case SDLK_CAPSLOCK:     return KEY_CAPSLOCK;
+    case SDLK_SCROLLOCK:    return KEY_SCRLOCK;
+    case SDLK_RSHIFT:       return KEY_RSHIFT;
+    case SDLK_LSHIFT:       return KEY_LSHIFT;
+    case SDLK_RCTRL:        return KEY_RCONTROL;
+    case SDLK_LCTRL:        return KEY_LCONTROL;
+    case SDLK_RALT:         return KEY_ALT;
+    case SDLK_LALT:         return KEY_ALT;
+    case SDLK_LSUPER:       return KEY_LWIN;
+    case SDLK_RSUPER:       return KEY_RWIN;
+    case SDLK_PRINT:        return KEY_PRTSCR;
+    default:                return -1;
+  }
+}
+
+static int _scancode_allegro_to_sdl(int allegro_scancode) {
+  switch (allegro_scancode) {
+    case KEY_A:             return SDLK_a;
+    case KEY_B:             return SDLK_b;
+    case KEY_C:             return SDLK_c;
+    case KEY_D:             return SDLK_d;
+    case KEY_E:             return SDLK_e;
+    case KEY_F:             return SDLK_f;
+    case KEY_G:             return SDLK_g;
+    case KEY_H:             return SDLK_h;
+    case KEY_I:             return SDLK_i;
+    case KEY_J:             return SDLK_j;
+    case KEY_K:             return SDLK_k;
+    case KEY_L:             return SDLK_l;
+    case KEY_M:             return SDLK_m;
+    case KEY_N:             return SDLK_n;
+    case KEY_O:             return SDLK_o;
+    case KEY_P:             return SDLK_p;
+    case KEY_Q:             return SDLK_q;
+    case KEY_R:             return SDLK_r;
+    case KEY_S:             return SDLK_s;
+    case KEY_T:             return SDLK_t;
+    case KEY_U:             return SDLK_u;
+    case KEY_V:             return SDLK_v;
+    case KEY_W:             return SDLK_w;
+    case KEY_X:             return SDLK_x;
+    case KEY_Y:             return SDLK_y;
+    case KEY_Z:             return SDLK_z;
+    case KEY_0:             return SDLK_0;
+    case KEY_1:             return SDLK_1;
+    case KEY_2:             return SDLK_2;
+    case KEY_3:             return SDLK_3;
+    case KEY_4:             return SDLK_4;
+    case KEY_5:             return SDLK_5;
+    case KEY_6:             return SDLK_6;
+    case KEY_7:             return SDLK_7;
+    case KEY_8:             return SDLK_8;
+    case KEY_9:             return SDLK_9;
+    case KEY_0_PAD:         return SDLK_KP0;
+    case KEY_1_PAD:         return SDLK_KP1;
+    case KEY_2_PAD:         return SDLK_KP2;
+    case KEY_3_PAD:         return SDLK_KP3;
+    case KEY_4_PAD:         return SDLK_KP4;
+    case KEY_5_PAD:         return SDLK_KP5;
+    case KEY_6_PAD:         return SDLK_KP6;
+    case KEY_7_PAD:         return SDLK_KP7;
+    case KEY_8_PAD:         return SDLK_KP8;
+    case KEY_9_PAD:         return SDLK_KP9;
+    case KEY_F1:            return SDLK_F1;
+    case KEY_F2:            return SDLK_F2;
+    case KEY_F3:            return SDLK_F3;
+    case KEY_F4:            return SDLK_F4;
+    case KEY_F5:            return SDLK_F5;
+    case KEY_F6:            return SDLK_F6;
+    case KEY_F7:            return SDLK_F7;
+    case KEY_F8:            return SDLK_F8;
+    case KEY_F9:            return SDLK_F9;
+    case KEY_F10:           return SDLK_F10;
+    case KEY_F11:           return SDLK_F11;
+    case KEY_F12:           return SDLK_F12;
+    case KEY_ESC:           return SDLK_ESCAPE;
+    case KEY_TILDE:         return SDLK_BACKQUOTE;
+    case KEY_MINUS:         return SDLK_MINUS;
+    case KEY_EQUALS:        return SDLK_EQUALS;
+    case KEY_BACKSPACE:     return SDLK_BACKSPACE;
+    case KEY_TAB:           return SDLK_TAB;
+    case KEY_OPENBRACE:     return SDLK_LEFTBRACKET;
+    case KEY_CLOSEBRACE:    return SDLK_RIGHTBRACKET;
+    case KEY_ENTER:         return SDLK_RETURN;
+    case KEY_COLON:         return SDLK_COLON;
+    case KEY_QUOTE:         return SDLK_QUOTE;
+    case KEY_BACKSLASH:     return SDLK_BACKSLASH;
+    case KEY_COMMA:         return SDLK_COMMA;
+    case KEY_STOP:          return SDLK_PERIOD;
+    case KEY_SLASH:         return SDLK_SLASH;
+    case KEY_SPACE:         return SDLK_SPACE;
+    case KEY_INSERT:        return SDLK_INSERT;
+    case KEY_DEL:           return SDLK_DELETE;
+    case KEY_HOME:          return SDLK_HOME;
+    case KEY_END:           return SDLK_END;
+    case KEY_PGUP:          return SDLK_PAGEUP;
+    case KEY_PGDN:          return SDLK_PAGEDOWN;
+    case KEY_LEFT:          return SDLK_LEFT;
+    case KEY_RIGHT:         return SDLK_RIGHT;
+    case KEY_UP:            return SDLK_UP;
+    case KEY_DOWN:          return SDLK_DOWN;
+    case KEY_SLASH_PAD:     return SDLK_KP_DIVIDE;
+    case KEY_ASTERISK:      return SDLK_KP_MULTIPLY;
+    case KEY_MINUS_PAD:     return SDLK_KP_MINUS;
+    case KEY_PLUS_PAD:      return SDLK_KP_PLUS;
+    case KEY_DEL_PAD:       return SDLK_KP_PERIOD;
+    case KEY_ENTER_PAD:     return SDLK_KP_ENTER;
+    case KEY_PRTSCR:        return SDLK_PRINT;
+    case KEY_PAUSE:         return SDLK_PAUSE;
+    case KEY_EQUALS_PAD:    return SDLK_KP_EQUALS;
+    case KEY_SEMICOLON:     return SDLK_SEMICOLON;
+    case KEY_LSHIFT:        return SDLK_LSHIFT;
+    case KEY_RSHIFT:        return SDLK_RSHIFT;
+    case KEY_LCONTROL:      return SDLK_LCTRL;
+    case KEY_RCONTROL:      return SDLK_RCTRL;
+    case KEY_ALT:           return SDLK_LALT;
+    //case KEY_ALT:           return SDLK_RALT;
+    case KEY_LWIN:          return SDLK_LSUPER;
+    case KEY_RWIN:          return SDLK_RSUPER;
+    case KEY_SCRLOCK:       return SDLK_SCROLLOCK;
+    case KEY_NUMLOCK:       return SDLK_NUMLOCK;
+    case KEY_CAPSLOCK:      return SDLK_CAPSLOCK;
+    default:                return -1;
+  }
+}
+
+const unsigned char alw_hw_to_mycode[256] = {
+	/* 0x00 */ 0, KEY_ESC, KEY_1, KEY_2,
+	/* 0x04 */ KEY_3, KEY_4, KEY_5, KEY_6,
+	/* 0x08 */ KEY_7, KEY_8, KEY_9, KEY_0,
+	/* 0x0C */ KEY_MINUS, KEY_EQUALS, KEY_BACKSPACE, KEY_TAB,
+	/* 0x10 */ KEY_Q, KEY_W, KEY_E, KEY_R,
+	/* 0x14 */ KEY_T, KEY_Y, KEY_U, KEY_I,
+	/* 0x18 */ KEY_O, KEY_P, KEY_OPENBRACE, KEY_CLOSEBRACE,
+	/* 0x1C */ KEY_ENTER, KEY_LCONTROL, KEY_A, KEY_S,
+	/* 0x20 */ KEY_D, KEY_F, KEY_G, KEY_H,
+	/* 0x24 */ KEY_J, KEY_K, KEY_L, KEY_SEMICOLON,
+	/* 0x28 */ KEY_QUOTE, KEY_TILDE, KEY_LSHIFT, KEY_BACKSLASH,
+	/* 0x2C */ KEY_Z, KEY_X, KEY_C, KEY_V,
+	/* 0x30 */ KEY_B, KEY_N, KEY_M, KEY_COMMA,
+	/* 0x34 */ KEY_STOP, KEY_SLASH, KEY_RSHIFT, KEY_ASTERISK,
+	/* 0x38 */ KEY_ALT, KEY_SPACE, KEY_CAPSLOCK, KEY_F1,
+	/* 0x3C */ KEY_F2, KEY_F3, KEY_F4, KEY_F5,
+	/* 0x40 */ KEY_F6, KEY_F7, KEY_F8, KEY_F9,
+	/* 0x44 */ KEY_F10, KEY_NUMLOCK, KEY_SCRLOCK, KEY_7_PAD,
+	/* 0x48 */ KEY_8_PAD, KEY_9_PAD, KEY_MINUS_PAD, KEY_4_PAD,
+	/* 0x4C */ KEY_5_PAD, KEY_6_PAD, KEY_PLUS_PAD, KEY_1_PAD,
+	/* 0x50 */ KEY_2_PAD, KEY_3_PAD, KEY_0_PAD, KEY_DEL_PAD,
+	/* 0x54 */ KEY_PRTSCR, 0, KEY_BACKSLASH2, KEY_F11,
+	/* 0x58 */ KEY_F12, 0, 0, KEY_LWIN,
+	/* 0x5C */ KEY_RWIN, KEY_MENU, 0, 0,
+	/* 0x60 */ 0, 0, 0, 0,
+	/* 0x64 */ 0, 0, 0, 0,
+	/* 0x68 */ 0, 0, 0, 0,
+	/* 0x6C */ 0, 0, 0, 0,
+	/* 0x70 */ KEY_KANA, 0, 0, KEY_ABNT_C1,
+	/* 0x74 */ 0, 0, 0, 0,
+	/* 0x78 */ 0, KEY_CONVERT, 0, KEY_NOCONVERT,
+	/* 0x7C */ 0, KEY_YEN, 0, 0,
+	/* 0x80 */ 0, 0, 0, 0,
+	/* 0x84 */ 0, 0, 0, 0,
+	/* 0x88 */ 0, 0, 0, 0,
+	/* 0x8C */ 0, 0, 0, 0,
+	/* 0x90 */ 0, KEY_AT, KEY_COLON2, 0,
+	/* 0x94 */ KEY_KANJI, 0, 0, 0,
+	/* 0x98 */ 0, 0, 0, 0,
+	/* 0x9C */ KEY_ENTER_PAD, KEY_RCONTROL, 0, 0,
+	/* 0xA0 */ 0, 0, 0, 0,
+	/* 0xA4 */ 0, 0, 0, 0,
+	/* 0xA8 */ 0, 0, 0, 0,
+	/* 0xAC */ 0, 0, 0, 0,
+	/* 0xB0 */ 0, 0, 0, 0,
+	/* 0xB4 */ 0, KEY_SLASH_PAD, 0, KEY_PRTSCR,
+	/* 0xB8 */ KEY_ALTGR, 0, 0, 0,
+	/* 0xBC */ 0, 0, 0, 0,
+	/* 0xC0 */ 0, 0, 0, 0,
+	/* 0xC4 */ 0, KEY_PAUSE, 0, KEY_HOME,
+	/* 0xC8 */ KEY_UP, KEY_PGUP, 0, KEY_LEFT,
+	/* 0xCC */ 0, KEY_RIGHT, 0, KEY_END,
+	/* 0xD0 */ KEY_DOWN, KEY_PGDN, KEY_INSERT, KEY_DEL,
+	/* 0xD4 */ 0, 0, 0, 0,
+	/* 0xD8 */ 0, 0, 0, KEY_LWIN,
+	/* 0xDC */ KEY_RWIN, KEY_MENU, 0, 0,
+	/* 0xE0 */ 0, 0, 0, 0,
+	/* 0xE4 */ 0, 0, 0, 0,
+	/* 0xE8 */ 0, 0, 0, 0,
+	/* 0xEC */ 0, 0, 0, 0,
+	/* 0xF0 */ 0, 0, 0, 0,
+	/* 0xF4 */ 0, 0, 0, 0,
+	/* 0xF8 */ 0, 0, 0, 0,
+	/* 0xFC */ 0, 0, 0, 0
+};
+LPDIRECTINPUTDEVICE alw_key_dinput_device;
+
 
 // TRANSPARENCY
 // ============================================================================
@@ -1073,86 +1514,6 @@ HWND alw_win_get_window(void){ PRINT_STUB;  return 0;}
 #endif
 int alw_wnd_call_proc(int (*proc)(void)){ PRINT_STUB;  return 0;}
 
-
-// KEYBOARD
-// ============================================================================
-
-int alw_install_keyboard(){ PRINT_STUB; return 0;}
-int alw_keyboard_needs_poll(){ PRINT_STUB; return 0;}
-int alw_poll_keyboard(){ PRINT_STUB; return 0;}
-int alw_keypressed(){ PRINT_STUB; return 0;}
-int alw_readkey(){ PRINT_STUB; return 0;}
-volatile char alw_key[KEY_MAX];
-volatile int alw_key_shifts;
-void alw_set_leds(int leds){ PRINT_STUB;}
-
-const unsigned char alw_hw_to_mycode[256] = {
-	/* 0x00 */ 0, KEY_ESC, KEY_1, KEY_2,
-	/* 0x04 */ KEY_3, KEY_4, KEY_5, KEY_6,
-	/* 0x08 */ KEY_7, KEY_8, KEY_9, KEY_0,
-	/* 0x0C */ KEY_MINUS, KEY_EQUALS, KEY_BACKSPACE, KEY_TAB,
-	/* 0x10 */ KEY_Q, KEY_W, KEY_E, KEY_R,
-	/* 0x14 */ KEY_T, KEY_Y, KEY_U, KEY_I,
-	/* 0x18 */ KEY_O, KEY_P, KEY_OPENBRACE, KEY_CLOSEBRACE,
-	/* 0x1C */ KEY_ENTER, KEY_LCONTROL, KEY_A, KEY_S,
-	/* 0x20 */ KEY_D, KEY_F, KEY_G, KEY_H,
-	/* 0x24 */ KEY_J, KEY_K, KEY_L, KEY_SEMICOLON,
-	/* 0x28 */ KEY_QUOTE, KEY_TILDE, KEY_LSHIFT, KEY_BACKSLASH,
-	/* 0x2C */ KEY_Z, KEY_X, KEY_C, KEY_V,
-	/* 0x30 */ KEY_B, KEY_N, KEY_M, KEY_COMMA,
-	/* 0x34 */ KEY_STOP, KEY_SLASH, KEY_RSHIFT, KEY_ASTERISK,
-	/* 0x38 */ KEY_ALT, KEY_SPACE, KEY_CAPSLOCK, KEY_F1,
-	/* 0x3C */ KEY_F2, KEY_F3, KEY_F4, KEY_F5,
-	/* 0x40 */ KEY_F6, KEY_F7, KEY_F8, KEY_F9,
-	/* 0x44 */ KEY_F10, KEY_NUMLOCK, KEY_SCRLOCK, KEY_7_PAD,
-	/* 0x48 */ KEY_8_PAD, KEY_9_PAD, KEY_MINUS_PAD, KEY_4_PAD,
-	/* 0x4C */ KEY_5_PAD, KEY_6_PAD, KEY_PLUS_PAD, KEY_1_PAD,
-	/* 0x50 */ KEY_2_PAD, KEY_3_PAD, KEY_0_PAD, KEY_DEL_PAD,
-	/* 0x54 */ KEY_PRTSCR, 0, KEY_BACKSLASH2, KEY_F11,
-	/* 0x58 */ KEY_F12, 0, 0, KEY_LWIN,
-	/* 0x5C */ KEY_RWIN, KEY_MENU, 0, 0,
-	/* 0x60 */ 0, 0, 0, 0,
-	/* 0x64 */ 0, 0, 0, 0,
-	/* 0x68 */ 0, 0, 0, 0,
-	/* 0x6C */ 0, 0, 0, 0,
-	/* 0x70 */ KEY_KANA, 0, 0, KEY_ABNT_C1,
-	/* 0x74 */ 0, 0, 0, 0,
-	/* 0x78 */ 0, KEY_CONVERT, 0, KEY_NOCONVERT,
-	/* 0x7C */ 0, KEY_YEN, 0, 0,
-	/* 0x80 */ 0, 0, 0, 0,
-	/* 0x84 */ 0, 0, 0, 0,
-	/* 0x88 */ 0, 0, 0, 0,
-	/* 0x8C */ 0, 0, 0, 0,
-	/* 0x90 */ 0, KEY_AT, KEY_COLON2, 0,
-	/* 0x94 */ KEY_KANJI, 0, 0, 0,
-	/* 0x98 */ 0, 0, 0, 0,
-	/* 0x9C */ KEY_ENTER_PAD, KEY_RCONTROL, 0, 0,
-	/* 0xA0 */ 0, 0, 0, 0,
-	/* 0xA4 */ 0, 0, 0, 0,
-	/* 0xA8 */ 0, 0, 0, 0,
-	/* 0xAC */ 0, 0, 0, 0,
-	/* 0xB0 */ 0, 0, 0, 0,
-	/* 0xB4 */ 0, KEY_SLASH_PAD, 0, KEY_PRTSCR,
-	/* 0xB8 */ KEY_ALTGR, 0, 0, 0,
-	/* 0xBC */ 0, 0, 0, 0,
-	/* 0xC0 */ 0, 0, 0, 0,
-	/* 0xC4 */ 0, KEY_PAUSE, 0, KEY_HOME,
-	/* 0xC8 */ KEY_UP, KEY_PGUP, 0, KEY_LEFT,
-	/* 0xCC */ 0, KEY_RIGHT, 0, KEY_END,
-	/* 0xD0 */ KEY_DOWN, KEY_PGDN, KEY_INSERT, KEY_DEL,
-	/* 0xD4 */ 0, 0, 0, 0,
-	/* 0xD8 */ 0, 0, 0, KEY_LWIN,
-	/* 0xDC */ KEY_RWIN, KEY_MENU, 0, 0,
-	/* 0xE0 */ 0, 0, 0, 0,
-	/* 0xE4 */ 0, 0, 0, 0,
-	/* 0xE8 */ 0, 0, 0, 0,
-	/* 0xEC */ 0, 0, 0, 0,
-	/* 0xF0 */ 0, 0, 0, 0,
-	/* 0xF4 */ 0, 0, 0, 0,
-	/* 0xF8 */ 0, 0, 0, 0,
-	/* 0xFC */ 0, 0, 0, 0
-};
-LPDIRECTINPUTDEVICE alw_key_dinput_device;
 
 
 // AASTRETCH

@@ -15,7 +15,6 @@
 #define READKEY_CODE_ALT_TAB 0x4000
 
 extern void keyboard_input_initialise();
-extern int my_readkey();
 
 extern void write_record_event (int evnt, int dlen, short *dbuf);
 extern void disable_replay_playback ();

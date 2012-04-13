@@ -377,9 +377,11 @@ void check_debug_keys() {
     if (play.debug_mode) {
       // do the run-time script debugging
 
-      if ((!alw_key[KEY_SCRLOCK]) && (scrlockWasDown))
+      alw_poll_keyboard();
+      
+      if ((!alw_get_key(KEY_SCRLOCK)) && (scrlockWasDown))
         scrlockWasDown = 0;
-      else if ((alw_key[KEY_SCRLOCK]) && (!scrlockWasDown)) {
+      else if ((alw_get_key(KEY_SCRLOCK)) && (!scrlockWasDown)) {
 
         break_on_next_script_step = 1;
         scrlockWasDown = 1;

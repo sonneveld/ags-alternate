@@ -11135,7 +11135,7 @@ int do_game_load(const char *nametouse, int slotNumber, char *descrp, int *wantS
   // ensure keyboard buffer is clean
   // use the raw versions rather than the rec_ versions so we don't
   // interfere with the replay sync
-  while (alw_keypressed()) alw_readkey();
+  alw_clear_keybuf();
 
   return 0;
 }
