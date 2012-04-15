@@ -62,7 +62,10 @@ const char* AGSMac::GetNoMouseErrorString() {
 }
 
 eScriptSystemOSID AGSMac::GetSystemOSID() {
-  return eOS_Mac;
+  // Gemini Rue checks this value before deciding to play ambient sounds!  
+  // Right now we fake it by pretending to be win
+  return eOS_Win;
+  // return eOS_Mac;
 }
 
 int AGSMac::InitializeCDPlayer() {

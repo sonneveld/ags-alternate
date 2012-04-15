@@ -117,29 +117,40 @@ struct ALW_BITMAP {
 	unsigned char **line;
 };
 
+
+#define F_BUF_SIZE      4096           /* 4K buffer for caching data */
+#define PACKFILE_FLAG_WRITE      1     /* the file is being written */
+#define PACKFILE_FLAG_PACK       2     /* data is compressed */
+#define PACKFILE_FLAG_CHUNK      4     /* file is a sub-chunk */
+#define PACKFILE_FLAG_EOF        8     /* reached the end-of-file */
+#define PACKFILE_FLAG_ERROR      16    /* an error has occurred */
+#define PACKFILE_FLAG_OLD_CRYPT  32    /* backward compatibility mode */
+#define PACKFILE_FLAG_EXEDAT     64    /* reading from our executable */
+
+
 struct _al_normal_packfile_details
 {
-	//int hndl;                           /* DOS file handle */
-	//int flags;                          /* PACKFILE_FLAG_* constants */
-	//unsigned char *buf_pos;             /* position in buffer */
-	//int buf_size;                       /* number of bytes in the buffer */
+	int hndl;                           /* file handle */
+	int flags;                          /* PACKFILE_FLAG_* constants */
+	unsigned char *buf_pos;             /* position in buffer */
+	int buf_size;                       /* number of bytes in the buffer */
 	long todo;                          /* number of bytes still on the disk */
-	//struct PACKFILE *parent;            /* nested, parent file */
+	struct PACKFILE *parent;            /* nested, parent file */
 	//struct LZSS_PACK_DATA *pack_data;   /* for LZSS compression */
 	//struct LZSS_UNPACK_DATA *unpack_data; /* for LZSS decompression */
-	//char *filename;                     /* name of the file */
+	char *filename;                     /* name of the file */
 	//char *passdata;                     /* encryption key data */
 	//char *passpos;                      /* current key position */
-	//unsigned char buf[F_BUF_SIZE];      /* the actual data buffer */
+	unsigned char buf[F_BUF_SIZE];      /* the actual data buffer */
 };
 
-struct ALW_PACKFILE {
+typedef struct ALW_PACKFILE {
    //AL_CONST PACKFILE_VTABLE *vtable;
-   //void *userdata;
-   //int is_normal_packfile;
+   void *userdata;
+   int is_normal_packfile;
 
    struct _al_normal_packfile_details normal;
-};
+} ALW_PACKFILE;
 
 typedef struct ALW_SAMPLE
 {
@@ -628,9 +639,9 @@ ALW_PACKFILE *alw_pack_fopen(const char *filename, const char *mode) ;
 long alw_pack_fread(void *p, long n, ALW_PACKFILE *f) ;
 int alw_pack_fseek(ALW_PACKFILE *f, int offset) ;
 int alw_pack_fclose(ALW_PACKFILE *f) ;
-extern "C" {
-extern ALW_PACKFILE *__old_pack_fopen(char *,char *);
-}
+
+extern ALW_PACKFILE *__old_pack_fopen(const char *, const char *);
+
 
 
 // FIXED
@@ -646,8 +657,6 @@ alw_fixed alw_fixatan(alw_fixed x);
 
 
 // ALOGG
-extern "C" {
-
 #define ALOGG_OK                     0
 #define ALOGG_POLL_PLAYJUSTFINISHED  1
 
@@ -656,7 +665,6 @@ typedef struct ALOGG_OGGSTREAM ALOGG_OGGSTREAM;
 
 extern ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len);
 extern void alogg_destroy_ogg(ALOGG_OGG *ogg);
-extern int alogg_play_ogg(ALOGG_OGG *ogg, int buffer_len, int vol, int pan);
 extern int alogg_play_ex_ogg(ALOGG_OGG *ogg, int buffer_len, int vol, int pan, int speed, int loop);
 extern void alogg_stop_ogg(ALOGG_OGG *ogg);
 extern void alogg_adjust_ogg(ALOGG_OGG *ogg, int vol, int pan, int speed, int loop);
@@ -684,7 +692,7 @@ extern ALW_AUDIOSTREAM *alogg_get_audiostream_oggstream(ALOGG_OGGSTREAM *ogg);
 
 int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg);
 int alogg_is_end_of_ogg(ALOGG_OGG *ogg);
-}
+
 
 // ALMP3
 

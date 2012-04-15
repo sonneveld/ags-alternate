@@ -111,6 +111,11 @@
 		519E339515314E7C0026C374 /* mousew32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519E338415314E7C0026C374 /* mousew32.cpp */; };
 		519E339615314E7C0026C374 /* sprcache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519E338515314E7C0026C374 /* sprcache.cpp */; };
 		519E339715314E7C0026C374 /* wgt2allg.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519E338815314E7C0026C374 /* wgt2allg.cpp */; };
+		51AC3DF1153AEA6B004F7194 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51AC3DF0153AEA6B004F7194 /* OpenAL.framework */; };
+		51AC3DF4153AEA71004F7194 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51AC3DF3153AEA71004F7194 /* Ogg.framework */; };
+		51AC3DF6153AEA77004F7194 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51AC3DF5153AEA77004F7194 /* Vorbis.framework */; };
+		51B7C670153858AC004D1816 /* clib32_copy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51B7C66F153858AC004D1816 /* clib32_copy.cpp */; };
+		51B7C67515392F77004D1816 /* allegfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51B7C6721538608C004D1816 /* allegfile.cpp */; };
 		51DD9BFD1532C31400F6EE89 /* strimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51DD9BFB1532C31100F6EE89 /* strimpl.cpp */; };
 /* End PBXBuildFile section */
 
@@ -335,6 +340,11 @@
 		519E344915314EEC0026C374 /* cspr24.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cspr24.cpp; sourceTree = "<group>"; };
 		519E344A15314EEC0026C374 /* cspr32.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cspr32.cpp; sourceTree = "<group>"; };
 		519E344B15314EEC0026C374 /* cspr8.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cspr8.cpp; sourceTree = "<group>"; };
+		51AC3DF0153AEA6B004F7194 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		51AC3DF3153AEA71004F7194 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = Library/Frameworks/Ogg.framework; sourceTree = SDKROOT; };
+		51AC3DF5153AEA77004F7194 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = Library/Frameworks/Vorbis.framework; sourceTree = SDKROOT; };
+		51B7C66F153858AC004D1816 /* clib32_copy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = clib32_copy.cpp; sourceTree = "<group>"; };
+		51B7C6721538608C004D1816 /* allegfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = allegfile.cpp; sourceTree = "<group>"; };
 		51DD9BFB1532C31100F6EE89 /* strimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = strimpl.cpp; path = ../../Common/strimpl.cpp; sourceTree = "<group>"; };
 		51DD9BFC1532C31300F6EE89 /* strimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = strimpl.h; path = ../../Common/strimpl.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -344,6 +354,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				51AC3DF6153AEA77004F7194 /* Vorbis.framework in Frameworks */,
+				51AC3DF4153AEA71004F7194 /* Ogg.framework in Frameworks */,
+				51AC3DF1153AEA6B004F7194 /* OpenAL.framework in Frameworks */,
 				519E332E153137400026C374 /* Cocoa.framework in Frameworks */,
 				51325BF6153162A100335A54 /* SDL.framework in Frameworks */,
 				51325BF7153162A100335A54 /* SDL_ttf.framework in Frameworks */,
@@ -365,6 +378,9 @@
 		519E331E153137400026C374 = {
 			isa = PBXGroup;
 			children = (
+				51AC3DF5153AEA77004F7194 /* Vorbis.framework */,
+				51AC3DF3153AEA71004F7194 /* Ogg.framework */,
+				51AC3DF0153AEA6B004F7194 /* OpenAL.framework */,
 				519E3333153137400026C374 /* EngineMac */,
 				519E332C153137400026C374 /* Frameworks */,
 				519E332A153137400026C374 /* Products */,
@@ -473,6 +489,7 @@
 				519E3334153137400026C374 /* Supporting Files */,
 				512ABC0415340E7700D3CFC7 /* mac_alert.mm */,
 				512ABC071534107C00D3CFC7 /* mac_alert.h */,
+				51B7C66F153858AC004D1816 /* clib32_copy.cpp */,
 			);
 			path = EngineMac;
 			sourceTree = "<group>";
@@ -550,6 +567,7 @@
 				519E343E15314EEC0026C374 /* rotate.cpp */,
 				519E343F15314EEC0026C374 /* sdl_impl.cpp */,
 				519E344015314EEC0026C374 /* spr */,
+				51B7C6721538608C004D1816 /* allegfile.cpp */,
 			);
 			name = sdlwrap;
 			path = ../../Engine/sdlwrap;
@@ -811,6 +829,8 @@
 				51325C53153172D900335A54 /* hq2x3x.cpp in Sources */,
 				51DD9BFD1532C31400F6EE89 /* strimpl.cpp in Sources */,
 				512ABC0515340E7700D3CFC7 /* mac_alert.mm in Sources */,
+				51B7C670153858AC004D1816 /* clib32_copy.cpp in Sources */,
+				51B7C67515392F77004D1816 /* allegfile.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -904,7 +924,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "./**";
+				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers/** /Library/Frameworks/SDL_ttf.framework/Headers/**";
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = app;
 			};
@@ -933,7 +953,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
-				USER_HEADER_SEARCH_PATHS = "./**";
+				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers/** /Library/Frameworks/SDL_ttf.framework/Headers/**";
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = app;
 			};

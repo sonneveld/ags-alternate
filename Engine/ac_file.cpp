@@ -420,14 +420,14 @@ void change_to_directory_of_file(const char *fileName)
 
 // override packfile functions to allow it to load from our
 // custom CLIB datafiles
-extern "C" {
+
 ALW_PACKFILE*_my_temppack;
-extern ALW_PACKFILE *__old_pack_fopen(char *,char *);
+extern ALW_PACKFILE *__old_pack_fopen(const char *, const char *);
 
 #if ALW_ALLEGRO_DATE > 19991010
-ALW_PACKFILE *pack_fopen(const char *filnam1, const char *modd1) {
+ALW_PACKFILE *alw_pack_fopen(const char *filnam1, const char *modd1) {
 #else
-ALW_PACKFILE *pack_fopen(char *filnam1, char *modd1) {
+ALW_PACKFILE *alw_pack_fopen(char *filnam1, char *modd1) {
 #endif
       
     char msg[2000];
@@ -482,7 +482,8 @@ ALW_PACKFILE *pack_fopen(char *filnam1, char *modd1) {
     return __old_pack_fopen(filnam, modd);
   } 
   else {
-    _my_temppack=__old_pack_fopen(clibgetdatafile(filnam), modd);
+    char *old_pack_fname = clibgetdatafile(filnam);
+    _my_temppack=__old_pack_fopen(old_pack_fname, modd);
     if (_my_temppack == NULL)
       quitprintf("pack_fopen: unable to change datafile: not found: %s", clibgetdatafile(filnam));
 
@@ -500,7 +501,7 @@ ALW_PACKFILE *pack_fopen(char *filnam1, char *modd1) {
   }
 }
 
-} // end extern "C"
+
 
 // end packfile functions
 

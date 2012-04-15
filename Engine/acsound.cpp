@@ -26,19 +26,6 @@
 #define JGMOD_MOD_PLAYER
 #endif
 
-#if ALW_ALLEGRO_DATE > 20050101
-// because we have to use Allegro 4.2
-// and the packfile format has changed slightly
-// 'todo' has been put in a structure called 'normal'
-#define todo normal.todo
-#endif
-
-extern "C" {
-  //extern int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg);
-  //extern int alogg_is_end_of_ogg(ALOGG_OGG *ogg);
-  //extern int alogg_get_ogg_freq(ALOGG_OGG *ogg);
-  //extern int alogg_get_ogg_stereo(ALOGG_OGG *ogg);
-}
 
 ALW_PACKFILE *mp3in;
 
@@ -186,8 +173,8 @@ struct MYMP3:public SOUNDCLIP
       char *tempbuf = (char *)almp3_get_mp3stream_buffer(stream);
       if (tempbuf != NULL) {
         int free_val = -1;
-        if (chunksize > in->todo) {
-          chunksize = in->todo;
+        if (chunksize > in->normal.todo) {
+          chunksize = in->normal.todo;
           free_val = chunksize;
         }
         alw_pack_fread(tempbuf, chunksize, in);
@@ -299,17 +286,17 @@ SOUNDCLIP *my_load_mp3(const char *filname, int voll)
   thistune = new MYMP3();
   thistune->in = mp3in;
   thistune->chunksize = MP3CHUNKSIZE;
-  thistune->filesize = mp3in->todo;
+  thistune->filesize = mp3in->normal.todo;
   thistune->done = 0;
   thistune->vol = voll;
 
-  if (thistune->chunksize > mp3in->todo)
-    thistune->chunksize = mp3in->todo;
+  if (thistune->chunksize > mp3in->normal.todo)
+    thistune->chunksize = mp3in->normal.todo;
 
   alw_pack_fread(tmpbuffer, thistune->chunksize, mp3in);
 
   thistune->buffer = (char *)tmpbuffer;
-  thistune->stream = almp3_create_mp3stream(tmpbuffer, thistune->chunksize, (mp3in->todo < 1));
+  thistune->stream = almp3_create_mp3stream(tmpbuffer, thistune->chunksize, (mp3in->normal.todo < 1));
 
   if (thistune->stream == NULL) {
     free(tmpbuffer);
@@ -436,7 +423,7 @@ SOUNDCLIP *my_load_static_mp3(const char *filname, int voll, bool loop)
   if (mp3in == NULL)
     return NULL;
 
-  long muslen = mp3in->todo;
+  long muslen = mp3in->normal.todo;
 
   char *mp3buffer = (char *)malloc(muslen);
   if (mp3buffer == NULL)
@@ -605,7 +592,7 @@ struct MYSTATICOGG:public SOUNDCLIP
     if (tune != NULL) {
       alogg_stop_ogg(tune);
       alogg_rewind_ogg(tune);
-      alogg_play_ogg(tune, 16384, vol, panning);
+      alogg_play_ex_ogg(tune, 16384, vol, panning, 1000, FALSE);
       last_ms_offs = 0;
       last_but_one = 0;
       last_but_one_but_one = 0;
@@ -670,7 +657,7 @@ SOUNDCLIP *my_load_static_ogg(const char *filname, int voll, bool loop)
   if (mp3in == NULL)
     return NULL;
 
-  long muslen = mp3in->todo;
+  long muslen = mp3in->normal.todo;
 
   char *mp3buffer = (char *)malloc(muslen);
   if (mp3buffer == NULL)
@@ -711,16 +698,16 @@ struct MYOGG:public SOUNDCLIP
     if (paused)
       return 0;
 
-    if ((!done) && (in->todo > 0))
+    if ((!done) && (in->normal.todo > 0))
     {
       // update the buffer
       char *tempbuf = (char *)alogg_get_oggstream_buffer(stream);
       if (tempbuf != NULL)
       {
         int free_val = -1;
-        if (chunksize > in->todo)
+        if (chunksize > in->normal.todo)
         {
-          chunksize = in->todo;
+          chunksize = in->normal.todo;
           free_val = chunksize;
         }
         alw_pack_fread(tempbuf, chunksize, in);
@@ -886,13 +873,13 @@ SOUNDCLIP *my_load_ogg(const char *filname, int voll)
   thisogg->last_ms_offs = 0;
   thisogg->last_but_one_but_one = 0;
 
-  if (thisogg->chunksize > mp3in->todo)
-    thisogg->chunksize = mp3in->todo;
+  if (thisogg->chunksize > mp3in->normal.todo)
+    thisogg->chunksize = mp3in->normal.todo;
 
   alw_pack_fread(tmpbuffer, thisogg->chunksize, mp3in);
 
   thisogg->buffer = (char *)tmpbuffer;
-  thisogg->stream = alogg_create_oggstream(tmpbuffer, thisogg->chunksize, (mp3in->todo < 1));
+  thisogg->stream = alogg_create_oggstream(tmpbuffer, thisogg->chunksize, (mp3in->normal.todo < 1));
 
   if (thisogg->stream == NULL) {
     free(tmpbuffer);
