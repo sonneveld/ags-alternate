@@ -29,7 +29,7 @@ char alw_allegro_error[ALW_ALLEGRO_ERROR_SIZE];
 static void (*_on_close_callback)(void) = 0;
 
 int alw_allegro_init() { 
-  int result =  SDL_Init(SDL_INIT_EVERYTHING);
+  int result =  SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO);
   if (!result) {
     // if initialise
     SDL_EnableUNICODE(1);
@@ -1840,7 +1840,7 @@ DUH_SIGRENDERER *al_duh_get_sigrenderer(AL_DUH_PLAYER *dp){ PRINT_STUB; return 0
 // ALOGG
 // ============================================================================
 
-static const int _ALOGG_BUFFER_SIZE = 4096*2;
+static const int _ALOGG_BUFFER_SIZE = 16*1024;
 static const int _ALOGG_NUM_BUFFER = 8;
 
 struct ogg_static_buffer {
@@ -1866,11 +1866,15 @@ struct ALOGG_OGG {
   
   // static buff
   ogg_static_buffer statbuf;
+  
+  // packfile
+  ALW_PACKFILE *packfile;
 };
 
 
-struct ALOGG_OGGSTREAM {} ;
 
+// ov callback notes
+// http://xiph.org/vorbis/doc/vorbisfile/callbacks.html
 
 size_t _bufread(void *ptr, size_t size, size_t count, ogg_static_buffer *statbuf) {
   size_t avail = (statbuf->data_len-statbuf->pos)/size;
@@ -1892,7 +1896,7 @@ int _bufseek(ogg_static_buffer *statbuf, ogg_int64_t offset, int origin) {
       statbuf->pos += offset;
       break;
     case SEEK_END: // 2
-      statbuf->pos = statbuf->data_len - 1 + offset;
+      statbuf->pos = statbuf->data_len + offset;
       break;
     default:
       return -1;
@@ -1911,79 +1915,103 @@ static ov_callbacks OV_CALLBACKS_BUF = {
 };
 
 
-void fillALBuffer (ALOGG_OGG *alogg, ALuint alBuffer) {
+
+static int _alogg_fill_albuffer (ALOGG_OGG *alogg, ALuint alBuffer) {
   char buf[_ALOGG_BUFFER_SIZE];
   long filled = 0;
-  
+
   while (!alogg->eof && filled < _ALOGG_BUFFER_SIZE) {
-    long count = ov_read(&alogg->vf,buf+filled,_ALOGG_BUFFER_SIZE-filled,0,2,1,&alogg->current_section);
-    
+    long count = ov_read(&alogg->vf,
+                         buf+filled,
+                         _ALOGG_BUFFER_SIZE-filled,
+                         0,2,1,
+                         &alogg->current_section);
+
     if (count == 0) {
       if (alogg->is_looping) {
         ov_pcm_seek_lap(&alogg->vf, 0); // rewind ogg
-        //printf("LOOOOOOP\n");
       } else {
         alogg->eof = 1;
         break;
       }
     }
+    else if (count < 0) {
+      printf("ogg render error occured\n");
+      break;
+    }
     
     filled += count;
   }
+  
+  if (filled <= 0)
+    return 1;
   
 	// copy from sampleBuffer to AL buffer
 	alBufferData(alBuffer,
                alogg->format,
                buf,
-               filled,//player->bufferSizeBytes,
+               filled,
                alogg->rate);
+  CheckALError ("Couldn't buffer data");
+  
+  return 0;
+}
+
+// read the ogg info and fill in channel, rate and format info.
+static int _set_alogg_stats(ALOGG_OGG *alogg) {
+  
+  vorbis_info *vi=ov_info(&alogg->vf,-1);
+  alogg->channels = vi->channels;
+  alogg->rate = vi->rate;
+    
+  switch (alogg->channels) {
+    case 1: alogg->format = AL_FORMAT_MONO16; break;
+    case 2: alogg->format = AL_FORMAT_STEREO16; break;
+    default: return 1;
+  }
+
+  return 0;
 }
 
 // xtern: my_load_static_ogg
 ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len)
 { 
+  ALuint source = 0;
+  ALOGG_OGG *alogg = 0;
+  
   PRINT_STUB; 
 
-  ALuint source = _openal_new_source();
+  source = _openal_new_source();
   if (source == 0)
-    return NULL;
+    goto error_1;
   
-  ALOGG_OGG *alogg = (ALOGG_OGG*)malloc(sizeof(ALOGG_OGG));
+  alogg = (ALOGG_OGG*)malloc(sizeof(ALOGG_OGG));
+  if (alogg == 0) goto error_2;
+  memset(alogg, 0, sizeof(ALOGG_OGG));
   alogg->source = source;
   
-  //FILE *f = fopen(oggpath, "r");
   alogg->statbuf.data = data;
   alogg->statbuf.data_len = data_len;
   alogg->statbuf.pos = 0;
   
   if(ov_open_callbacks(&alogg->statbuf, &alogg->vf, NULL, 0, OV_CALLBACKS_BUF) < 0) {
     fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
-    exit(1);
+    goto error_3;
   }  
   
-  
-  {
-    //char **ptr=ov_comment(&alogg->vf,-1)->user_comments;
-    vorbis_info *vi=ov_info(&alogg->vf,-1);
-    alogg->channels = vi->channels;// == 2 ? AL_FORMAT_STEREO16 : AL_FORMAT_MONO16;
-    alogg->rate = vi->rate;
-  }
-  
-  switch (alogg->channels) {
-    case 1:
-      alogg->format = AL_FORMAT_MONO16;
-      break;
-    case 2:
-      alogg->format = AL_FORMAT_STEREO16;
-      break;
-    default:
-      return 0;
-  }
+  if (_set_alogg_stats(alogg))
+    goto error_4;
 
-
-  // parse ogg
-  // get audio info
   return alogg;
+
+error_4:
+  ov_clear(&alogg->vf);
+error_3:
+  free(alogg);
+error_2:
+  alDeleteSources(1, &source);
+error_1:
+  return NULL;
 }
 
 // xtern: MYSTATICOGG:Destroy
@@ -2012,15 +2040,24 @@ int alogg_play_ex_ogg(ALOGG_OGG *alogg, int buffer_len, int vol, int pan, int sp
 	alGenBuffers(_ALOGG_NUM_BUFFER, alogg->buffers);
 	CheckALError ("Couldn't generate buffer");
   
-  
+  int filledBuffers = 0;
   for (int i=0; i<_ALOGG_NUM_BUFFER; i++) {
-		fillALBuffer(alogg, alogg->buffers[i]);
+    // error or stopped early.
+		if (_alogg_fill_albuffer(alogg, alogg->buffers[i]) != 0)
+      break;
+    
+    filledBuffers += 1;
 	}
   
+  if (filledBuffers <= 0) {
+    printf("no buffers!\n");
+    return 0;
+  }
+  //assert(filledBuffers > 0);
   //FillStaticBuffer(alogg);
   
   // queue up the buffers on the source
-	alSourceQueueBuffers(alogg->source, _ALOGG_NUM_BUFFER, alogg->buffers);
+	alSourceQueueBuffers(alogg->source, filledBuffers, alogg->buffers);
   
  
   
@@ -2063,7 +2100,8 @@ int alogg_poll_ogg(ALOGG_OGG *alogg)
     alGetBufferi(freeBuffer, AL_SIZE, &bytesdone);
     alogg->past_byte_count += bytesdone;
 
-		fillALBuffer(alogg, freeBuffer);
+		if (_alogg_fill_albuffer(alogg, freeBuffer) != 0)
+      break;
     
 		alSourceQueueBuffers(alogg->source, 1, &freeBuffer);
 		CheckALError ("couldn't queue refilled buffer");
@@ -2081,15 +2119,19 @@ int alogg_poll_ogg(ALOGG_OGG *alogg)
     // or if its on repeat.
     
     if (added_buffers) {
-      printf("replaying\n");
+      //printf("replaying\n");
       alSourcePlay (alogg->source);
       CheckALError ("Couldn't play");
+    } else {
+      printf ("stopping?\n");
     }
   }
 	
   
+  return alogg_is_playing_ogg(alogg) ? 0: ALOGG_POLL_PLAYJUSTFINISHED;
   
-  return alogg->eof;
+//  return !alogg_is_playing_ogg(alogg);
+//  return alogg->eof;
   
   
   
@@ -2186,34 +2228,104 @@ int alogg_is_playing_ogg(ALOGG_OGG *alogg)
 ALW_AUDIOSTREAM *alogg_get_audiostream_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0;}
 
 
-ALOGG_OGGSTREAM *alogg_create_oggstream(void *first_data_buffer, int data_buffer_len, int last_block)
-{ 
-  PRINT_STUB; 
-  // parse ogg
-  // get audio info
-  return (ALOGG_OGGSTREAM*)malloc(sizeof(ALOGG_OGGSTREAM));
+
+
+
+
+
+size_t _packfileread(void *ptr, size_t size, size_t count, ALW_PACKFILE *packfile) {
+  
+  
+  
+  return alw_pack_fread(ptr, count*size, packfile);
+  
+//  size_t avail = (packfile->normal.todo)/size;
+  
+//  if (avail < count)
+ //   count = avail;
+  
+  
+ // count = alw_pack_fread(ptr, count*size, packfile);
+
+  
+//  return count;
 }
+
+
+static ov_callbacks OV_CALLBACKS_PACKFILE = {
+  (size_t (*)(void *, size_t, size_t, void *))  _packfileread,
+  (int (*)(void *, ogg_int64_t, int))           NULL,
+  (int (*)(void *))                             NULL,
+  (long (*)(void *))                            NULL
+};
+
+
+
+ALOGG_OGGSTREAM *alogg_create_oggstream_from_packfile(ALW_PACKFILE *packfile) {
+  ALuint source = 0;
+  ALOGG_OGG *alogg = 0;
+  
+  PRINT_STUB; 
+  
+  source = _openal_new_source();
+  if (source == 0)
+    goto error_1;
+  
+  alogg = (ALOGG_OGG*)malloc(sizeof(ALOGG_OGG));
+  if (alogg == 0) goto error_2;
+  memset(alogg, 0, sizeof(ALOGG_OGG));
+  alogg->source = source;
+  
+  alogg->packfile = packfile;
+  
+  if(ov_open_callbacks(alogg->packfile, &alogg->vf, NULL, 0, OV_CALLBACKS_PACKFILE) < 0) {
+    fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
+    goto error_3;
+  }  
+  
+  if (_set_alogg_stats(alogg))
+    goto error_4;
+  
+  return alogg;
+  
+error_4:
+  ov_clear(&alogg->vf);
+error_3:
+  free(alogg);
+error_2:
+  alDeleteSources(1, &source);
+error_1:
+  return NULL;
+}
+
+
 void alogg_destroy_oggstream(ALOGG_OGGSTREAM *ogg)
 { 
   // destroy!
   PRINT_STUB;
+  alogg_destroy_ogg(ogg);
 }
 int alogg_play_oggstream(ALOGG_OGGSTREAM *ogg, int buffer_len, int vol, int pan)
 { 
   PRINT_STUB; 
-  return 0;
+  return alogg_play_ex_ogg(ogg, 0, vol, pan, 1000, 0);
 }
 void alogg_stop_oggstream(ALOGG_OGGSTREAM *ogg)
 { 
   // stop oggstream
   PRINT_STUB;
+  alogg_stop_ogg(ogg);
 }
-void alogg_adjust_oggstream(ALOGG_OGGSTREAM *ogg, int vol, int pan, int speed){ PRINT_STUB;}
+void alogg_adjust_oggstream(ALOGG_OGGSTREAM *ogg, int vol, int pan, int speed)
+{
+  PRINT_STUB;
+  alogg_adjust_ogg(ogg, vol, pan, 1000, 0);
+}
 int alogg_poll_oggstream(ALOGG_OGGSTREAM *ogg)
 { 
   // polling
   PRINT_STUB; 
-  return 0;
+  return alogg_poll_ogg(ogg);
 }
 void *alogg_get_oggstream_buffer(ALOGG_OGGSTREAM *ogg)
 {
@@ -2222,16 +2334,20 @@ void *alogg_get_oggstream_buffer(ALOGG_OGGSTREAM *ogg)
   return 0;
 }  
 void alogg_free_oggstream_buffer(ALOGG_OGGSTREAM *ogg, int bytes_used){ PRINT_STUB;}
-int alogg_get_pos_msecs_oggstream(ALOGG_OGGSTREAM *ogg){ PRINT_STUB; return 0;}
+int alogg_get_pos_msecs_oggstream(ALOGG_OGGSTREAM *ogg)
+{ 
+  PRINT_STUB; 
+  return alogg_get_pos_msecs_ogg(ogg);
+}
 int alogg_is_playing_oggstream(ALOGG_OGGSTREAM *ogg) 
 { 
   PRINT_STUB; 
-  return 0;
+  return alogg_is_playing_ogg(ogg);
 }
 ALW_AUDIOSTREAM *alogg_get_audiostream_oggstream(ALOGG_OGGSTREAM *ogg){ PRINT_STUB; return 0;}
 
-int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg){ PRINT_STUB; return 0;}
-int alogg_is_end_of_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0;}
+int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg){ PRINT_STUB; ogg->eof;}
+int alogg_is_end_of_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return ogg->eof;}
 
 
 // ALMP3

@@ -661,7 +661,7 @@ alw_fixed alw_fixatan(alw_fixed x);
 #define ALOGG_POLL_PLAYJUSTFINISHED  1
 
 typedef struct ALOGG_OGG ALOGG_OGG;
-typedef struct ALOGG_OGGSTREAM ALOGG_OGGSTREAM;
+typedef struct ALOGG_OGG ALOGG_OGGSTREAM;
 
 extern ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len);
 extern void alogg_destroy_ogg(ALOGG_OGG *ogg);
@@ -678,7 +678,8 @@ extern int alogg_get_wave_freq_ogg(ALOGG_OGG *ogg);
 extern int alogg_is_playing_ogg(ALOGG_OGG *ogg);
 extern ALW_AUDIOSTREAM *alogg_get_audiostream_ogg(ALOGG_OGG *ogg);
 
-extern ALOGG_OGGSTREAM *alogg_create_oggstream(void *first_data_buffer, int data_buffer_len, int last_block);
+//extern ALOGG_OGGSTREAM *alogg_create_oggstream(void *first_data_buffer, int data_buffer_len, int last_block);
+extern ALOGG_OGGSTREAM *alogg_create_oggstream_from_packfile(ALW_PACKFILE *packfile);
 extern void alogg_destroy_oggstream(ALOGG_OGGSTREAM *ogg);
 extern int alogg_play_oggstream(ALOGG_OGGSTREAM *ogg, int buffer_len, int vol, int pan);
 extern void alogg_stop_oggstream(ALOGG_OGGSTREAM *ogg);

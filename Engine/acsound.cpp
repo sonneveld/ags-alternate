@@ -704,28 +704,11 @@ struct MYOGG:public SOUNDCLIP
       return done;
     if (paused)
       return 0;
-
-    if ((!done) && (in->normal.todo > 0))
-    {
-      // update the buffer
-      char *tempbuf = (char *)alogg_get_oggstream_buffer(stream);
-      if (tempbuf != NULL)
-      {
-        int free_val = -1;
-        if (chunksize > in->normal.todo)
-        {
-          chunksize = in->normal.todo;
-          free_val = chunksize;
-        }
-        alw_pack_fread(tempbuf, chunksize, in);
-        alogg_free_oggstream_buffer(stream, free_val);
-      }
-    }
+    
     if (alogg_poll_oggstream(stream) == ALOGG_POLL_PLAYJUSTFINISHED) {
-      done = 1;
+        done = 1;
     }
-    else get_pos_ms();  // call this to keep the last_but_one stuff up to date
-
+    
     return done;
   }
 
@@ -776,45 +759,8 @@ struct MYOGG:public SOUNDCLIP
     // hideous hack below to sort it out.
     if ((done) || (!alogg_is_playing_oggstream(stream)))
       return 0;
-
-    ALW_AUDIOSTREAM *str = alogg_get_audiostream_oggstream(stream);
-    long offs = (alw_voice_get_position(str->voice) * 1000) / str->samp->freq;
-
-    if (last_ms_offs != alogg_get_pos_msecs_oggstream(stream)) {
-      last_but_one_but_one = last_but_one;
-      last_but_one = last_ms_offs;
-      last_ms_offs = alogg_get_pos_msecs_oggstream(stream);
-    }
-
-    // just about to switch buffers
-    if (offs < 0)
-      return last_but_one;
-
-    int end_of_stream = alogg_is_end_of_oggstream(stream);
-
-    if ((str->active == 1) && (last_but_one_but_one > 0) && (str->locked == NULL)) {
-      switch (end_of_stream) {
-      case 0:
-      case 2:
-        offs -= (last_but_one - last_but_one_but_one);
-        break;
-      case 1:
-        offs -= (last_but_one - last_but_one_but_one);
-        break;
-      }
-    }
-
-/*    char tbuffer[260];
-    sprintf(tbuffer,"offs: %d  last_but_one_but_one: %d  last_but_one: %d  active:%d  locked: %p   EOS: %d",
-       offs, last_but_one_but_one, last_but_one, str->active, str->locked, end_of_stream);
-    write_log(tbuffer);*/
-
-    if (end_of_stream == 1) {
-      
-      return offs + last_but_one;
-    }
-
-    return offs + last_but_one_but_one;
+    
+    return alogg_get_pos_msecs_oggstream(stream);
   }
 
   int get_length_ms()
@@ -860,16 +806,9 @@ struct MYOGG:public SOUNDCLIP
 MYOGG *thisogg;
 SOUNDCLIP *my_load_ogg(const char *filname, int voll)
 {
-
   mp3in = alw_pack_fopen(filname, "rb");
   if (mp3in == NULL)
     return NULL;
-
-  char *tmpbuffer = (char *)malloc(MP3CHUNKSIZE);
-  if (tmpbuffer == NULL) {
-    alw_pack_fclose(mp3in);
-    return NULL;
-  }
 
   thisogg = new MYOGG();
   thisogg->in = mp3in;
@@ -883,13 +822,10 @@ SOUNDCLIP *my_load_ogg(const char *filname, int voll)
   if (thisogg->chunksize > mp3in->normal.todo)
     thisogg->chunksize = mp3in->normal.todo;
 
-  alw_pack_fread(tmpbuffer, thisogg->chunksize, mp3in);
-
-  thisogg->buffer = (char *)tmpbuffer;
-  thisogg->stream = alogg_create_oggstream(tmpbuffer, thisogg->chunksize, (mp3in->normal.todo < 1));
+  thisogg->buffer = 0;
+  thisogg->stream = alogg_create_oggstream_from_packfile(mp3in);
 
   if (thisogg->stream == NULL) {
-    free(tmpbuffer);
     alw_pack_fclose(mp3in);
     delete thisogg;
     return NULL;
