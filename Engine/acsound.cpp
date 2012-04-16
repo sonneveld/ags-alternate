@@ -543,48 +543,6 @@ struct MYSTATICOGG:public SOUNDCLIP
       return 0;
     
     return alogg_get_pos_msecs_ogg(tune);
-    
-#if 0
-
-    ALW_AUDIOSTREAM *str = alogg_get_audiostream_ogg(tune);
-    long offs = (alw_voice_get_position(str->voice) * 1000) / str->samp->freq;
-
-    if (last_ms_offs != alogg_get_pos_msecs_ogg(tune)) {
-      last_but_one_but_one = last_but_one;
-      last_but_one = last_ms_offs;
-      last_ms_offs = alogg_get_pos_msecs_ogg(tune);
-    }
-
-    // just about to switch buffers
-    if (offs < 0)
-      return last_but_one;
-
-    int end_of_stream = alogg_is_end_of_ogg(tune);
-
-    if ((str->active == 1) && (last_but_one_but_one > 0) && (str->locked == NULL)) {
-      switch (end_of_stream) {
-      case 0:
-      case 2:
-        offs -= (last_but_one - last_but_one_but_one);
-        break;
-      case 1:
-        offs -= (last_but_one - last_but_one_but_one);
-        break;
-      }
-    }
-
-/*    char tbuffer[260];
-    sprintf(tbuffer,"offs: %d  last_but_one_but_one: %d  last_but_one: %d  active:%d  locked: %p   EOS: %d",
-       offs, last_but_one_but_one, last_but_one, str->active, str->locked, end_of_stream);
-    write_log(tbuffer);*/
-
-    if (end_of_stream == 1) {
-      
-      return offs + last_but_one + extraOffset;
-    }
-
-    return offs + last_but_one_but_one + extraOffset;
-#endif
   }
 
   int get_length_ms()

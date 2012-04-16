@@ -1477,30 +1477,15 @@ static void CheckALError (const char *operation) {
 //static int _snd_digi_voices = -1;
 //static int _snd_midi_voices = -1;
 
-
 static ALCdevice* _openal_device;
 static ALCcontext* _openal_context;
-//#define _OPENAL_NUM_SOURCES (32)
-
-//static int _openal_num_sources = -1;
-//static   ALuint	*_openal_sources=0;
-
-/*
-static ALuint _openal_next_available_source() {
-  for (int i = 0; i < _openal_num_sources; i++) {
-    ALint srcType;
-    alGetSourcei(_openal_sources[i], AL_SOURCE_TYPE, &srcType);
-    CheckALError ("Couldn't read source type");
-    if (srcType == AL_UNDETERMINED)
-      return _openal_sources[i];
-  }
-  return 0; // none found.
-}*/
 
 static ALuint _openal_new_source() {
   ALuint source;
   alGenSources(1, &source);
+  CheckALError("Couldn't generate source");
   alSourcef(source, AL_GAIN, AL_MAX_GAIN);
+  CheckALError("Couldn't set max gain on source");
   return source;
 }
 
@@ -1518,7 +1503,6 @@ int alw_install_sound(int digi, int midi, const char *cfg_path)
   (void)cfg_path;
   
   PRINT_STUB; 
-  //_openal_num_sources = _OPENAL_NUM_SOURCES;
 
 	// set up OpenAL buffers
   _openal_device = alcOpenDevice(NULL);
@@ -1528,30 +1512,12 @@ int alw_install_sound(int digi, int midi, const char *cfg_path)
 	alcMakeContextCurrent (_openal_context);
 	CheckALError ("Couldn't make AL context current");
   
-	// set up streaming source
-  /*
-  _openal_sources = (ALuint*)malloc(_openal_num_sources*sizeof(ALuint));
-	alGenSources(_openal_num_sources, _openal_sources);
-	CheckALError ("Couldn't generate sources");
-  
-  for (int i = 0; i < _openal_num_sources; i++) {
-    alSourcef(_openal_sources[i], AL_GAIN, AL_MAX_GAIN);
-    CheckALError("Couldn't set source gain");
-  }*/
-  
   return 0;
 }
 
 void alw_remove_sound()
 { 
   PRINT_STUB; 
-  
-  /*
-  if (_openal_sources != 0){
-    alDeleteSources(_openal_num_sources, _openal_sources);
-    free(_openal_sources);
-    _openal_sources = 0;
-  } */
   
   if (_openal_context != 0){
     alcDestroyContext(_openal_context);
@@ -2015,15 +1981,34 @@ error_1:
 }
 
 // xtern: MYSTATICOGG:Destroy
-void alogg_destroy_ogg(ALOGG_OGG *ogg)
+void alogg_destroy_ogg(ALOGG_OGG *alogg)
 { 
+  PRINT_STUB;
   
-  alogg_stop_ogg(ogg);
+  alogg_stop_ogg(alogg);
   
   // release
-  alDeleteSources(1, &ogg->source);
+  ov_clear(&alogg->vf);
   
-  PRINT_STUB;
+  alSourcei(alogg->source, AL_BUFFER, NULL);
+  CheckALError ("Couldn't remove buffers from source.");
+  
+  for(int i=0; i < _ALOGG_NUM_BUFFER; i++) {
+    if (alIsBuffer(alogg->buffers[i])) {
+      alSourcei(alogg->source, AL_BUFFER, NULL);
+      alDeleteBuffers(1, &alogg->buffers[i]);
+      CheckALError ("Couldn't delete buffer");
+    }
+  }
+  
+  if (alIsSource(alogg->source)) {
+    alDeleteSources(1, &alogg->source);
+    CheckALError ("Couldn't delete source");
+  }
+  
+  if (alogg != 0) {
+    free(alogg);
+  }
 }
 
 // xtern: MYSTATICOGG:play_from, Restart
@@ -2051,16 +2036,15 @@ int alogg_play_ex_ogg(ALOGG_OGG *alogg, int buffer_len, int vol, int pan, int sp
   
   if (filledBuffers <= 0) {
     printf("no buffers!\n");
-    return 0;
+    alDeleteBuffers(_ALOGG_NUM_BUFFER, alogg->buffers);
+    CheckALError ("Couldn't delete buffers");
+    return -1;
   }
-  //assert(filledBuffers > 0);
-  //FillStaticBuffer(alogg);
   
   // queue up the buffers on the source
 	alSourceQueueBuffers(alogg->source, filledBuffers, alogg->buffers);
-  
+  CheckALError ("Couldn't add buffers to queue");
  
-  
   alSourcePlay(alogg->source);
 	CheckALError ("Couldn't play");
   
@@ -2072,18 +2056,14 @@ void alogg_stop_ogg(ALOGG_OGG *ogg)
 {
   // stop playing
   alSourceStop(ogg->source);
+  CheckALError ("Couldn't stop source");
   PRINT_STUB;
 }
 
-
-//int _tmp_count = 0;
 // xtern: MYSTATICOGG:Poll
 int alogg_poll_ogg(ALOGG_OGG *alogg)
 { 
   // poll, do work, return 1 if finished.
-  
-  
-  
 	ALint processed;
 	alGetSourcei (alogg->source, AL_BUFFERS_PROCESSED, &processed);
 	CheckALError ("couldn't get al_buffers_processed");
@@ -2119,45 +2099,25 @@ int alogg_poll_ogg(ALOGG_OGG *alogg)
     // or if its on repeat.
     
     if (added_buffers) {
-      //printf("replaying\n");
+      //	printf("replaying\n");
       alSourcePlay (alogg->source);
       CheckALError ("Couldn't play");
     } else {
-      printf ("stopping?\n");
+      //printf ("stopping?\n");
     }
   }
 	
-  
   return alogg_is_playing_ogg(alogg) ? 0: ALOGG_POLL_PLAYJUSTFINISHED;
-  
-//  return !alogg_is_playing_ogg(alogg);
-//  return alogg->eof;
-  
-  
-  
-  //ALint bytesoffset;
-  //alGetSourcei( ogg->source, AL_BYTE_OFFSET, &bytesoffset );
-  //CheckALError ("Couldn't get offset.");
-  
-
-  //if (_tmp_count %200 == 0)
-  //  printf("play ogg %d bytes\n", bytesoffset);
-  //_tmp_count += 1;
-  
-  PRINT_STUB; 
-  return 0;
 }
 
 
 // extern: MYSTATICOGG: set_volume
 void alogg_adjust_ogg(ALOGG_OGG *ogg, int vol, int pan, int speed, int loop)
 { 
-  
   ALfloat newVolume = vol/255.0f;
   alSourcef(ogg->source, AL_GAIN, newVolume);
+  CheckALError ("Couldn't set volume");
   
-  //ALint alloop = loop?AL_TRUE:AL_FALSE;
-  //alSourcei(ogg->source, AL_LOOPING, alloop);
   ogg->is_looping = loop;
   
   // adjust vol, speed, etc.
@@ -2200,10 +2160,7 @@ int alogg_get_pos_msecs_ogg(ALOGG_OGG *alogg)
   CheckALError ("Couldn't get offset.");
  
   int bytes_processed = alogg->past_byte_count + bytesoffset;
-  int samples_processed = bytes_processed / 2;
-  
-  int time = bytes_processed *1000 / 2 / alogg->channels / alogg->rate;
-  
+  int time = bytes_processed *1000 / sizeof(ALshort) / alogg->channels / alogg->rate;
   
   return time;
 }
@@ -2229,28 +2186,9 @@ ALW_AUDIOSTREAM *alogg_get_audiostream_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0
 
 
 
-
-
-
-
 size_t _packfileread(void *ptr, size_t size, size_t count, ALW_PACKFILE *packfile) {
-  
-  
-  
   return alw_pack_fread(ptr, count*size, packfile);
-  
-//  size_t avail = (packfile->normal.todo)/size;
-  
-//  if (avail < count)
- //   count = avail;
-  
-  
- // count = alw_pack_fread(ptr, count*size, packfile);
-
-  
-//  return count;
 }
-
 
 static ov_callbacks OV_CALLBACKS_PACKFILE = {
   (size_t (*)(void *, size_t, size_t, void *))  _packfileread,
@@ -2258,8 +2196,6 @@ static ov_callbacks OV_CALLBACKS_PACKFILE = {
   (int (*)(void *))                             NULL,
   (long (*)(void *))                            NULL
 };
-
-
 
 ALOGG_OGGSTREAM *alogg_create_oggstream_from_packfile(ALW_PACKFILE *packfile) {
   ALuint source = 0;
@@ -2298,10 +2234,8 @@ error_1:
   return NULL;
 }
 
-
 void alogg_destroy_oggstream(ALOGG_OGGSTREAM *ogg)
 { 
-  // destroy!
   PRINT_STUB;
   alogg_destroy_ogg(ogg);
 }
@@ -2312,28 +2246,19 @@ int alogg_play_oggstream(ALOGG_OGGSTREAM *ogg, int buffer_len, int vol, int pan)
 }
 void alogg_stop_oggstream(ALOGG_OGGSTREAM *ogg)
 { 
-  // stop oggstream
   PRINT_STUB;
   alogg_stop_ogg(ogg);
 }
 void alogg_adjust_oggstream(ALOGG_OGGSTREAM *ogg, int vol, int pan, int speed)
 {
   PRINT_STUB;
-  alogg_adjust_ogg(ogg, vol, pan, 1000, 0);
+  alogg_adjust_ogg(ogg, vol, pan, speed, 0);
 }
 int alogg_poll_oggstream(ALOGG_OGGSTREAM *ogg)
 { 
-  // polling
   PRINT_STUB; 
   return alogg_poll_ogg(ogg);
 }
-void *alogg_get_oggstream_buffer(ALOGG_OGGSTREAM *ogg)
-{
-  // used to fill next bit of streaming buffer
-  PRINT_STUB;
-  return 0;
-}  
-void alogg_free_oggstream_buffer(ALOGG_OGGSTREAM *ogg, int bytes_used){ PRINT_STUB;}
 int alogg_get_pos_msecs_oggstream(ALOGG_OGGSTREAM *ogg)
 { 
   PRINT_STUB; 
@@ -2346,8 +2271,6 @@ int alogg_is_playing_oggstream(ALOGG_OGGSTREAM *ogg)
 }
 ALW_AUDIOSTREAM *alogg_get_audiostream_oggstream(ALOGG_OGGSTREAM *ogg){ PRINT_STUB; return 0;}
 
-int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg){ PRINT_STUB; ogg->eof;}
-int alogg_is_end_of_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return ogg->eof;}
 
 
 // ALMP3

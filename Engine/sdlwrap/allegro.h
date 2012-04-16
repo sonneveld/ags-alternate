@@ -685,14 +685,9 @@ extern int alogg_play_oggstream(ALOGG_OGGSTREAM *ogg, int buffer_len, int vol, i
 extern void alogg_stop_oggstream(ALOGG_OGGSTREAM *ogg);
 extern void alogg_adjust_oggstream(ALOGG_OGGSTREAM *ogg, int vol, int pan, int speed);
 extern int alogg_poll_oggstream(ALOGG_OGGSTREAM *ogg);
-extern void *alogg_get_oggstream_buffer(ALOGG_OGGSTREAM *ogg);
-extern void alogg_free_oggstream_buffer(ALOGG_OGGSTREAM *ogg, int bytes_used);
 extern int alogg_get_pos_msecs_oggstream(ALOGG_OGGSTREAM *ogg);
 extern int alogg_is_playing_oggstream(ALOGG_OGGSTREAM *ogg);
 extern ALW_AUDIOSTREAM *alogg_get_audiostream_oggstream(ALOGG_OGGSTREAM *ogg);
-
-int alogg_is_end_of_oggstream(ALOGG_OGGSTREAM *ogg);
-int alogg_is_end_of_ogg(ALOGG_OGG *ogg);
 
 
 // ALMP3
