@@ -1840,6 +1840,9 @@ DUH_SIGRENDERER *al_duh_get_sigrenderer(AL_DUH_PLAYER *dp){ PRINT_STUB; return 0
 // ALOGG
 // ============================================================================
 
+static const int _ALOGG_BUFFER_SIZE = 4096*2;
+static const int _ALOGG_NUM_BUFFER = 8;
+
 struct ogg_static_buffer {
   void *data;
   int pos;
@@ -1849,7 +1852,7 @@ struct ogg_static_buffer {
 struct ALOGG_OGG {
   // openal
    ALuint source;
-  ALuint buffer;
+  ALuint buffers[_ALOGG_BUFFER_SIZE];
   
   // ogg
   OggVorbis_File vf;
@@ -1857,6 +1860,9 @@ struct ALOGG_OGG {
   int channels;
   ALenum format;
   long rate;
+  int is_looping; 
+  int eof;  // set to 1 when reached end.
+  int past_byte_count;
   
   // static buff
   ogg_static_buffer statbuf;
@@ -1904,27 +1910,29 @@ static ov_callbacks OV_CALLBACKS_BUF = {
   (long (*)(void *))                            _buftell
 };
 
-//#define OGGBUFSIZE (4096*8)
-//static char _pcmout[OGGBUFSIZE]; /* take 4k out of the data segment, not the stack */
 
-
-void FillStaticBuffer(ALOGG_OGG *alogg) {
-  
-  ogg_int64_t ov_pcm_total(OggVorbis_File *vf,int i);
-  long pcm_samples = ov_pcm_total(&alogg->vf, -1);
-  long pcm_bytes = pcm_samples * 2*2;
-  
-  printf("bytes: %ld", pcm_bytes);
-  char *buf = (char*) malloc(pcm_bytes);
-  
+void fillALBuffer (ALOGG_OGG *alogg, ALuint alBuffer) {
+  char buf[_ALOGG_BUFFER_SIZE];
   long filled = 0;
-  while (filled < pcm_bytes) {
-    long count = ov_read(&alogg->vf,buf+filled,pcm_bytes-filled,0,2,1,&alogg->current_section);
+  
+  while (!alogg->eof && filled < _ALOGG_BUFFER_SIZE) {
+    long count = ov_read(&alogg->vf,buf+filled,_ALOGG_BUFFER_SIZE-filled,0,2,1,&alogg->current_section);
+    
+    if (count == 0) {
+      if (alogg->is_looping) {
+        ov_pcm_seek_lap(&alogg->vf, 0); // rewind ogg
+        //printf("LOOOOOOP\n");
+      } else {
+        alogg->eof = 1;
+        break;
+      }
+    }
+    
     filled += count;
   }
   
 	// copy from sampleBuffer to AL buffer
-	alBufferData(alogg->buffer,
+	alBufferData(alBuffer,
                alogg->format,
                buf,
                filled,//player->bufferSizeBytes,
@@ -1971,16 +1979,7 @@ ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len)
     default:
       return 0;
   }
-  
-  // only one buffer cause its static.
-  //ALuint buffer;
-	alGenBuffers(1, &alogg->buffer);
-	CheckALError ("Couldn't generate buffer");
-  
-  FillStaticBuffer(alogg);
-  
-  // queue up the buffers on the source
-	alSourceQueueBuffers(source, 1, &alogg->buffer);
+
 
   // parse ogg
   // get audio info
@@ -2000,12 +1999,32 @@ void alogg_destroy_ogg(ALOGG_OGG *ogg)
 }
 
 // xtern: MYSTATICOGG:play_from, Restart
-int alogg_play_ex_ogg(ALOGG_OGG *ogg, int buffer_len, int vol, int pan, int speed, int loop)
+int alogg_play_ex_ogg(ALOGG_OGG *alogg, int buffer_len, int vol, int pan, int speed, int loop)
 { 
   // start playing ogg with these parameters
   PRINT_STUB; 
   
-  alSourcePlayv (1, &ogg->source);
+  // set is looping first, so that we can loop while prefilling buffers
+  alogg_adjust_ogg(alogg, vol, pan, speed, loop);
+  
+  // only one buffer cause its static.
+  //ALuint buffer;
+	alGenBuffers(_ALOGG_NUM_BUFFER, alogg->buffers);
+	CheckALError ("Couldn't generate buffer");
+  
+  
+  for (int i=0; i<_ALOGG_NUM_BUFFER; i++) {
+		fillALBuffer(alogg, alogg->buffers[i]);
+	}
+  
+  //FillStaticBuffer(alogg);
+  
+  // queue up the buffers on the source
+	alSourceQueueBuffers(alogg->source, _ALOGG_NUM_BUFFER, alogg->buffers);
+  
+ 
+  
+  alSourcePlay(alogg->source);
 	CheckALError ("Couldn't play");
   
   return 0;
@@ -2020,20 +2039,68 @@ void alogg_stop_ogg(ALOGG_OGG *ogg)
 }
 
 
-int _tmp_count = 0;
+//int _tmp_count = 0;
 // xtern: MYSTATICOGG:Poll
-int alogg_poll_ogg(ALOGG_OGG *ogg)
+int alogg_poll_ogg(ALOGG_OGG *alogg)
 { 
   // poll, do work, return 1 if finished.
   
-  ALint bytesoffset;
-  alGetSourcei( ogg->source, AL_BYTE_OFFSET, &bytesoffset );
-  CheckALError ("Couldn't get offset.");
+  
+  
+	ALint processed;
+	alGetSourcei (alogg->source, AL_BUFFERS_PROCESSED, &processed);
+	CheckALError ("couldn't get al_buffers_processed");
+	
+  int added_buffers = 0;
+  
+	while (processed > 0) {
+    
+		ALuint freeBuffer;
+		alSourceUnqueueBuffers(alogg->source, 1, &freeBuffer);
+		CheckALError("couldn't unqueue buffer");
+    
+    ALint bytesdone = 0;
+    alGetBufferi(freeBuffer, AL_SIZE, &bytesdone);
+    alogg->past_byte_count += bytesdone;
+
+		fillALBuffer(alogg, freeBuffer);
+    
+		alSourceQueueBuffers(alogg->source, 1, &freeBuffer);
+		CheckALError ("couldn't queue refilled buffer");
+
+    added_buffers = 1;
+		processed--;
+	}
+  
+  ALint srcstate;
+  alGetSourcei(alogg->source, AL_SOURCE_STATE, &srcstate);
+  CheckALError ("Couldn't get state");
+  if (srcstate != AL_PLAYING) {
+    
+    // TODO: check that we've buffered the last of the ogg.
+    // or if its on repeat.
+    
+    if (added_buffers) {
+      printf("replaying\n");
+      alSourcePlay (alogg->source);
+      CheckALError ("Couldn't play");
+    }
+  }
+	
+  
+  
+  return alogg->eof;
+  
+  
+  
+  //ALint bytesoffset;
+  //alGetSourcei( ogg->source, AL_BYTE_OFFSET, &bytesoffset );
+  //CheckALError ("Couldn't get offset.");
   
 
-  if (_tmp_count %200 == 0)
-    printf("play ogg %d bytes\n", bytesoffset);
-  _tmp_count += 1;
+  //if (_tmp_count %200 == 0)
+  //  printf("play ogg %d bytes\n", bytesoffset);
+  //_tmp_count += 1;
   
   PRINT_STUB; 
   return 0;
@@ -2047,8 +2114,9 @@ void alogg_adjust_ogg(ALOGG_OGG *ogg, int vol, int pan, int speed, int loop)
   ALfloat newVolume = vol/255.0f;
   alSourcef(ogg->source, AL_GAIN, newVolume);
   
-  ALint alloop = loop?AL_TRUE:AL_FALSE;
-  alSourcei(ogg->source, AL_LOOPING, alloop);
+  //ALint alloop = loop?AL_TRUE:AL_FALSE;
+  //alSourcei(ogg->source, AL_LOOPING, alloop);
+  ogg->is_looping = loop;
   
   // adjust vol, speed, etc.
   PRINT_STUB;
@@ -2056,37 +2124,63 @@ void alogg_adjust_ogg(ALOGG_OGG *ogg, int vol, int pan, int speed, int loop)
 
 
 // extern: MYSTATICOGG: Restart
-void alogg_rewind_ogg(ALOGG_OGG *ogg)
+void alogg_rewind_ogg(ALOGG_OGG *alogg)
 {
   // jump back to start. replay
   PRINT_STUB;
+  ov_pcm_seek_lap(&alogg->vf, 0);
 }
 
 // xtern: MYSTATICOGG:play_from
-void alogg_seek_abs_msecs_ogg(ALOGG_OGG *ogg, int msecs){ PRINT_STUB;}
-
-// xtern: MYSTATICOGG:play_from
-int alogg_get_wave_is_stereo_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0;}
-
-// xtern: MYSTATICOGG:play_from
-int alogg_get_wave_freq_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0;}
+void alogg_seek_abs_msecs_ogg(ALOGG_OGG *alogg, int msecs) {
+  PRINT_STUB;
+  double s = msecs/1000.0;
+  ov_time_seek(&(alogg->vf), s);
+}
 
 
 // xtern: MYSTATICOGG: get_length_ms
-int alogg_get_length_msecs_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0;}
+int alogg_get_length_msecs_ogg(ALOGG_OGG *alogg)
+{
+  PRINT_STUB;
+  double time_ms = ov_time_total(&alogg->vf, -1) * 1000.0;
+  return (int)time_ms;
+}
 
 
 // xtern: MYSTATICOGG: get_pos_ms
-int alogg_get_pos_msecs_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0;}
+int alogg_get_pos_msecs_ogg(ALOGG_OGG *alogg)
+{
+  PRINT_STUB;
+  
+  ALint bytesoffset;
+  alGetSourcei( alogg->source, AL_BYTE_OFFSET, &bytesoffset );
+  CheckALError ("Couldn't get offset.");
+ 
+  int bytes_processed = alogg->past_byte_count + bytesoffset;
+  int samples_processed = bytes_processed / 2;
+  
+  int time = bytes_processed *1000 / 2 / alogg->channels / alogg->rate;
+  
+  
+  return time;
+}
 
 
 // xtern: MYSTATICOGG: get_pos_ms
-int alogg_is_playing_ogg(ALOGG_OGG *ogg)
+int alogg_is_playing_ogg(ALOGG_OGG *alogg)
 {
   // is the ogg currently playing?
   // seems to get other stuff called to calculate position.
   PRINT_STUB; 
-  return 0;
+  
+  ALint srcstate;
+  alGetSourcei(alogg->source, AL_SOURCE_STATE, &srcstate);
+  CheckALError ("Couldn't get state");
+
+  int playing = (srcstate == AL_PLAYING) || !alogg->eof;
+  
+  return playing;
 }
 // xtern: MYSTATICOGG: get_pos_ms, get_voice
 ALW_AUDIOSTREAM *alogg_get_audiostream_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0;}

@@ -541,6 +541,10 @@ struct MYSTATICOGG:public SOUNDCLIP
     // hideous hack below to sort it out.
     if ((done) || (!alogg_is_playing_ogg(tune)))
       return 0;
+    
+    return alogg_get_pos_msecs_ogg(tune);
+    
+#if 0
 
     ALW_AUDIOSTREAM *str = alogg_get_audiostream_ogg(tune);
     long offs = (alw_voice_get_position(str->voice) * 1000) / str->samp->freq;
@@ -580,6 +584,7 @@ struct MYSTATICOGG:public SOUNDCLIP
     }
 
     return offs + last_but_one_but_one + extraOffset;
+#endif
   }
 
   int get_length_ms()
@@ -615,10 +620,12 @@ struct MYSTATICOGG:public SOUNDCLIP
 
   virtual int play_from(int position)
   {
+#if 0
     if (use_extra_sound_offset) 
       extraOffset = ((16384 / (alogg_get_wave_is_stereo_ogg(tune) ? 2 : 1)) * 1000) / alogg_get_wave_freq_ogg(tune);
     else
       extraOffset = 0;
+#endif
 
     if (alogg_play_ex_ogg(tune, 16384, vol, panning, 1000, repeat) != ALOGG_OK) {
       destroy();
