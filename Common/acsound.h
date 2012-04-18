@@ -63,25 +63,31 @@ struct SOUNDCLIP
   }
 
   virtual void set_panning(int newPanning) {
+#if 0
     int voice = get_voice();
     if (voice >= 0) {
       alw_voice_set_pan(voice, newPanning);
       panning = newPanning;
     }
+#endif
   }
 
   virtual void pause() {
+#if 0
     int voice = get_voice();
     if (voice >= 0) {
       alw_voice_stop(voice);
       paused = 1;
     }
+#endif
   }
   virtual void resume() {
+#if 0
     int voice = get_voice();
     if (voice >= 0)
       alw_voice_start(voice);
     paused = 0;
+#endif
   }
 
   SOUNDCLIP() {

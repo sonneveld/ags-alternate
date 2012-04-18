@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <assert.h>
 
+#include <vector>
+
 #import <OpenAL/al.h>
 #import <OpenAL/alc.h>
 #include <vorbis/codec.h>
@@ -15,6 +17,9 @@
 
 #include <SDL_ttf.h>
 
+#include "pcmgen.h"
+#include "auderr.h"
+#include "sampleloader.h"
 
 char _debug_str[10000];
 
@@ -1457,23 +1462,6 @@ int _blender_alpha = 0;                /* for truecolor translucent drawing */
 // SOUND INIT
 // ============================================================================
 
-static void CheckALError (const char *operation) {
-	ALenum alErr = alGetError();
-	if (alErr == AL_NO_ERROR) return;
-	const char *errFormat = NULL;
-	switch (alErr) {
-		case AL_INVALID_NAME: errFormat = "OpenAL Error: %s (AL_INVALID_NAME)"; break;
-		case AL_INVALID_VALUE:  errFormat = "OpenAL Error: %s (AL_INVALID_VALUE)"; break;
-		case AL_INVALID_ENUM:  errFormat = "OpenAL Error: %s (AL_INVALID_ENUM)"; break;
-		case AL_INVALID_OPERATION: errFormat = "OpenAL Error: %s (AL_INVALID_OPERATION)"; break;
-		case AL_OUT_OF_MEMORY: errFormat = "OpenAL Error: %s (AL_OUT_OF_MEMORY)"; break;
-		default: errFormat = "OpenAL Error: %s (unknown error code)"; break;
-	}
-	fprintf (stderr, errFormat, operation);
-	exit(1);
-	
-}
-
 //static int _snd_digi_voices = -1;
 //static int _snd_midi_voices = -1;
 
@@ -1535,19 +1523,150 @@ void alw_set_volume_per_voice(int scale){ PRINT_STUB; }
 
 // DIGIAL AUDIO
 // ============================================================================
-ALW_SAMPLE *alw_load_sample(const char *filename){ PRINT_STUB; return 0;}
-void alw_destroy_sample(ALW_SAMPLE *spl){ PRINT_STUB; }
-int alw_play_sample(const ALW_SAMPLE *spl, int vol, int pan, int freq, int loop){ PRINT_STUB; return 0;}
-void alw_stop_sample(const ALW_SAMPLE *spl){ PRINT_STUB; }
 
-// for controlling played samples
-void alw_voice_start(int voice){ PRINT_STUB; }
-void alw_voice_stop(int voice){ PRINT_STUB; }
-int alw_voice_get_position(int voice){ PRINT_STUB; return 0;}
-void alw_voice_set_position(int voice, int position){ PRINT_STUB; }
-void alw_voice_set_volume(int voice, int volume){ PRINT_STUB; }
-void alw_voice_set_pan(int voice, int pan) { PRINT_STUB; }
-int alw_voice_get_frequency(int voice){ PRINT_STUB; return 0;}
+
+AlwSample::AlwSample() {
+    source = 0;
+  }
+  
+AlwSample::~AlwSample() {
+  PRINT_STUB;
+  alSourceStop(source);
+  CheckALError("Couldn't stop source");
+  alSourcei(source, AL_BUFFER, NULL);  // unqueue all buffers
+  CheckALError("Couldn't unqueue all buffers from source");
+  
+  for(std::vector<ALuint>::iterator it = buffers.begin(); it != buffers.end(); ++it) {
+    ALuint bid = *it;
+    alDeleteBuffers(1, &bid);
+    CheckALError("Couldn't delete buffer");
+  }
+  buffers.clear();
+  alDeleteSources(1, &source);
+  CheckALError("Couldn't delete source");
+  source = 0;
+}
+
+int AlwSample::play(int vol, int pan, int freq, int loop) {
+  
+  alGenSources(1, &source);
+  CheckALError("Couldn't generate source");
+  
+  for(std::vector<ALuint>::iterator it = buffers.begin(); it != buffers.end(); ++it) {
+    ALuint bid = *it;
+    alSourceQueueBuffers(source, 1, &bid);
+    CheckALError("Couldn't enqueue buffer");
+  }
+
+  set_volume(vol);
+  set_pan(pan);
+  set_loop(loop);
+  
+  alSourcePlay(source);
+  CheckALError("Couldn't play source");
+  
+  return 1; //?
+}
+
+int AlwSample::stop() {
+  alSourceStop(source);
+  CheckALError("Couldn't stop source");
+  alSourceRewind(source);
+  CheckALError("Couldn't rewing source");
+  return 0;
+}
+
+int AlwSample::pause() {
+  alSourceStop(source);
+  CheckALError("Couldn't stop source");
+  return 0;
+}
+
+int AlwSample::resume() {
+  alSourcePlay(source);
+  CheckALError("Couldn't play source");
+  return 0;
+}
+
+
+void AlwSample::set_position(int pos) {
+  alSourcei(source, AL_SAMPLE_OFFSET, pos);
+  CheckALError("Couldn't set source position");
+
+}
+
+void AlwSample::set_volume(int vol) {
+  ALfloat newVolume = vol/255.0f;
+  alSourcef(source, AL_GAIN, newVolume);
+  CheckALError ("Couldn't set volume");
+}
+
+void AlwSample::set_pan(int pan) {
+  
+}
+
+void AlwSample::set_loop(int isloop) {
+  alSourcei(source, AL_LOOPING, isloop?AL_TRUE:AL_FALSE);
+  CheckALError("Couldn't set source looping");
+  
+}
+
+double AlwSample::get_position_ms() {
+  ALfloat secOffset;
+  alGetSourcef(source, AL_SEC_OFFSET, &secOffset);
+  CheckALError("Couldn't get source time offset");
+  return secOffset * 1000.0;
+}
+
+int AlwSample::get_position() {
+  ALint sampleOffset;
+  alGetSourcei(source, AL_SAMPLE_OFFSET,&sampleOffset);
+  CheckALError("Couldn't get source sample offset");
+  return sampleOffset;
+}
+
+
+double AlwSample::get_length_ms() {
+  double length_s = 0.0;
+  
+  for(std::vector<ALuint>::iterator it = buffers.begin(); it != buffers.end(); ++it) {
+    ALuint bid = *it;
+   
+    ALint size, bits, channels, freq;
+    
+    alGetBufferi(bid, AL_SIZE, &size);
+    CheckALError("Couldn't get buffer size");
+    alGetBufferi(bid, AL_BITS, &bits);
+    CheckALError("Couldn't get buffer bits");
+    alGetBufferi(bid, AL_CHANNELS, &channels);
+    CheckALError("Couldn't get buffer channels");
+    alGetBufferi(bid, AL_FREQUENCY, &freq);
+    CheckALError("Couldn't get buffer frequency");
+    
+    length_s += (double)size / channels / (bits/8) / freq;
+  }
+  
+  return length_s * 1000.0;
+}
+
+int AlwSample::is_done() {
+  ALint srcstate;
+  alGetSourcei(source, AL_SOURCE_STATE, &srcstate);
+  CheckALError("Couldn't get source state");
+  CheckALError ("Couldn't get state");
+  return srcstate != AL_PLAYING;
+}
+
+
+AlwSample *alw_load_sample(const char *filename){   //***
+  PRINT_STUB; 
+  AlwSample *sample = new AlwSample();
+  
+  if (CreateOpenAlBuffersFromSample(filename, sample->buffers) != 0)
+    return 0;
+  
+  return sample;
+}
 
 
 // MIDI
@@ -1821,123 +1940,12 @@ struct ALOGG_OGG {
   ALuint buffers[_ALOGG_BUFFER_SIZE];
   
   // ogg
-  OggVorbis_File vf;
-   int current_section;
-  int channels;
-  ALenum format;
-  long rate;
-  int is_looping; 
-  int eof;  // set to 1 when reached end.
   int past_byte_count;
   
-  // static buff
-  ogg_static_buffer statbuf;
-  
-  // packfile
-  ALW_PACKFILE *packfile;
+  // pcmgen
+  IStaticPcmGenerator *pcmgen;
 };
 
-
-
-// ov callback notes
-// http://xiph.org/vorbis/doc/vorbisfile/callbacks.html
-
-size_t _bufread(void *ptr, size_t size, size_t count, ogg_static_buffer *statbuf) {
-  size_t avail = (statbuf->data_len-statbuf->pos)/size;
-  
-  if (avail < count)
-    count = avail;
-  
-  memcpy(ptr, ((char*)statbuf->data)+statbuf->pos, count*size);
-  statbuf->pos += count*size;
-  
-  return count;
-}
-int _bufseek(ogg_static_buffer *statbuf, ogg_int64_t offset, int origin) {
-  switch (origin) {
-    case SEEK_SET: //0
-      statbuf->pos = offset;
-      break;
-    case SEEK_CUR: // 1
-      statbuf->pos += offset;
-      break;
-    case SEEK_END: // 2
-      statbuf->pos = statbuf->data_len + offset;
-      break;
-    default:
-      return -1;
-  }
-  return 0;
-}
-long _buftell(ogg_static_buffer *statbuf) {
-  return statbuf->pos;
-}
-
-static ov_callbacks OV_CALLBACKS_BUF = {
-  (size_t (*)(void *, size_t, size_t, void *))  _bufread,
-  (int (*)(void *, ogg_int64_t, int))           _bufseek,
-  (int (*)(void *))                             NULL,
-  (long (*)(void *))                            _buftell
-};
-
-
-
-static int _alogg_fill_albuffer (ALOGG_OGG *alogg, ALuint alBuffer) {
-  char buf[_ALOGG_BUFFER_SIZE];
-  long filled = 0;
-
-  while (!alogg->eof && filled < _ALOGG_BUFFER_SIZE) {
-    long count = ov_read(&alogg->vf,
-                         buf+filled,
-                         _ALOGG_BUFFER_SIZE-filled,
-                         0,2,1,
-                         &alogg->current_section);
-
-    if (count == 0) {
-      if (alogg->is_looping) {
-        ov_pcm_seek_lap(&alogg->vf, 0); // rewind ogg
-      } else {
-        alogg->eof = 1;
-        break;
-      }
-    }
-    else if (count < 0) {
-      printf("ogg render error occured\n");
-      break;
-    }
-    
-    filled += count;
-  }
-  
-  if (filled <= 0)
-    return 1;
-  
-	// copy from sampleBuffer to AL buffer
-	alBufferData(alBuffer,
-               alogg->format,
-               buf,
-               filled,
-               alogg->rate);
-  CheckALError ("Couldn't buffer data");
-  
-  return 0;
-}
-
-// read the ogg info and fill in channel, rate and format info.
-static int _set_alogg_stats(ALOGG_OGG *alogg) {
-  
-  vorbis_info *vi=ov_info(&alogg->vf,-1);
-  alogg->channels = vi->channels;
-  alogg->rate = vi->rate;
-    
-  switch (alogg->channels) {
-    case 1: alogg->format = AL_FORMAT_MONO16; break;
-    case 2: alogg->format = AL_FORMAT_STEREO16; break;
-    default: return 1;
-  }
-
-  return 0;
-}
 
 // xtern: my_load_static_ogg
 ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len)
@@ -1948,36 +1956,16 @@ ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len)
   PRINT_STUB; 
 
   source = _openal_new_source();
-  if (source == 0)
-    goto error_1;
+  if (source == 0) return 0;
   
   alogg = (ALOGG_OGG*)malloc(sizeof(ALOGG_OGG));
-  if (alogg == 0) goto error_2;
+  if (alogg == 0) return 0;
   memset(alogg, 0, sizeof(ALOGG_OGG));
+  
   alogg->source = source;
-  
-  alogg->statbuf.data = data;
-  alogg->statbuf.data_len = data_len;
-  alogg->statbuf.pos = 0;
-  
-  if(ov_open_callbacks(&alogg->statbuf, &alogg->vf, NULL, 0, OV_CALLBACKS_BUF) < 0) {
-    fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
-    goto error_3;
-  }  
-  
-  if (_set_alogg_stats(alogg))
-    goto error_4;
-
+  alogg->pcmgen = pcmgen_from_ogg_buffer(data, data_len);
+    
   return alogg;
-
-error_4:
-  ov_clear(&alogg->vf);
-error_3:
-  free(alogg);
-error_2:
-  alDeleteSources(1, &source);
-error_1:
-  return NULL;
 }
 
 // xtern: MYSTATICOGG:Destroy
@@ -1988,7 +1976,7 @@ void alogg_destroy_ogg(ALOGG_OGG *alogg)
   alogg_stop_ogg(alogg);
   
   // release
-  ov_clear(&alogg->vf);
+  alogg->pcmgen->Close();
   
   alSourcei(alogg->source, AL_BUFFER, NULL);
   CheckALError ("Couldn't remove buffers from source.");
@@ -2028,8 +2016,12 @@ int alogg_play_ex_ogg(ALOGG_OGG *alogg, int buffer_len, int vol, int pan, int sp
   int filledBuffers = 0;
   for (int i=0; i<_ALOGG_NUM_BUFFER; i++) {
     // error or stopped early.
-		if (_alogg_fill_albuffer(alogg, alogg->buffers[i]) != 0)
+    FillBufferResult result = alogg->pcmgen->FillOpenAlBuffer(alogg->buffers[i]);
+    
+    if (result == FBR_EOF)
       break;
+    if (result == FBR_FAILURE)
+      return -1;
     
     filledBuffers += 1;
 	}
@@ -2079,8 +2071,9 @@ int alogg_poll_ogg(ALOGG_OGG *alogg)
     ALint bytesdone = 0;
     alGetBufferi(freeBuffer, AL_SIZE, &bytesdone);
     alogg->past_byte_count += bytesdone;
-
-		if (_alogg_fill_albuffer(alogg, freeBuffer) != 0)
+    
+    FillBufferResult result = alogg->pcmgen->FillOpenAlBuffer(freeBuffer);
+    if (result != FBR_OK)
       break;
     
 		alSourceQueueBuffers(alogg->source, 1, &freeBuffer);
@@ -2118,7 +2111,7 @@ void alogg_adjust_ogg(ALOGG_OGG *ogg, int vol, int pan, int speed, int loop)
   alSourcef(ogg->source, AL_GAIN, newVolume);
   CheckALError ("Couldn't set volume");
   
-  ogg->is_looping = loop;
+  ogg->pcmgen->SetLoopMode(loop != 0);
   
   // adjust vol, speed, etc.
   PRINT_STUB;
@@ -2130,14 +2123,13 @@ void alogg_rewind_ogg(ALOGG_OGG *alogg)
 {
   // jump back to start. replay
   PRINT_STUB;
-  ov_pcm_seek_lap(&alogg->vf, 0);
+  alogg->pcmgen->SeekMs(0.0);
 }
 
 // xtern: MYSTATICOGG:play_from
 void alogg_seek_abs_msecs_ogg(ALOGG_OGG *alogg, int msecs) {
   PRINT_STUB;
-  double s = msecs/1000.0;
-  ov_time_seek(&(alogg->vf), s);
+  alogg->pcmgen->SeekMs((double)msecs);
 }
 
 
@@ -2145,8 +2137,7 @@ void alogg_seek_abs_msecs_ogg(ALOGG_OGG *alogg, int msecs) {
 int alogg_get_length_msecs_ogg(ALOGG_OGG *alogg)
 {
   PRINT_STUB;
-  double time_ms = ov_time_total(&alogg->vf, -1) * 1000.0;
-  return (int)time_ms;
+  return (int)alogg->pcmgen->GetTotalMs();
 }
 
 
@@ -2160,9 +2151,8 @@ int alogg_get_pos_msecs_ogg(ALOGG_OGG *alogg)
   CheckALError ("Couldn't get offset.");
  
   int bytes_processed = alogg->past_byte_count + bytesoffset;
-  int time = bytes_processed *1000 / sizeof(ALshort) / alogg->channels / alogg->rate;
-  
-  return time;
+  double time = alogg->pcmgen->BytesPosInMs(bytes_processed);
+  return (int)time;
 }
 
 
@@ -2177,7 +2167,7 @@ int alogg_is_playing_ogg(ALOGG_OGG *alogg)
   alGetSourcei(alogg->source, AL_SOURCE_STATE, &srcstate);
   CheckALError ("Couldn't get state");
 
-  int playing = (srcstate == AL_PLAYING) || !alogg->eof;
+  int playing = (srcstate == AL_PLAYING) || !alogg->pcmgen->HasDecodeEof();
   
   return playing;
 }
@@ -2186,16 +2176,7 @@ ALW_AUDIOSTREAM *alogg_get_audiostream_ogg(ALOGG_OGG *ogg){ PRINT_STUB; return 0
 
 
 
-size_t _packfileread(void *ptr, size_t size, size_t count, ALW_PACKFILE *packfile) {
-  return alw_pack_fread(ptr, count*size, packfile);
-}
 
-static ov_callbacks OV_CALLBACKS_PACKFILE = {
-  (size_t (*)(void *, size_t, size_t, void *))  _packfileread,
-  (int (*)(void *, ogg_int64_t, int))           NULL,
-  (int (*)(void *))                             NULL,
-  (long (*)(void *))                            NULL
-};
 
 ALOGG_OGGSTREAM *alogg_create_oggstream_from_packfile(ALW_PACKFILE *packfile) {
   ALuint source = 0;
@@ -2204,34 +2185,16 @@ ALOGG_OGGSTREAM *alogg_create_oggstream_from_packfile(ALW_PACKFILE *packfile) {
   PRINT_STUB; 
   
   source = _openal_new_source();
-  if (source == 0)
-    goto error_1;
+  if (source == 0) return 0;
   
   alogg = (ALOGG_OGG*)malloc(sizeof(ALOGG_OGG));
-  if (alogg == 0) goto error_2;
+  if (alogg == 0) return 0;
   memset(alogg, 0, sizeof(ALOGG_OGG));
+  
   alogg->source = source;
-  
-  alogg->packfile = packfile;
-  
-  if(ov_open_callbacks(alogg->packfile, &alogg->vf, NULL, 0, OV_CALLBACKS_PACKFILE) < 0) {
-    fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
-    goto error_3;
-  }  
-  
-  if (_set_alogg_stats(alogg))
-    goto error_4;
+  alogg->pcmgen = pcmgen_from_ogg_packfile(packfile);
   
   return alogg;
-  
-error_4:
-  ov_clear(&alogg->vf);
-error_3:
-  free(alogg);
-error_2:
-  alDeleteSources(1, &source);
-error_1:
-  return NULL;
 }
 
 void alogg_destroy_oggstream(ALOGG_OGGSTREAM *ogg)

@@ -55,7 +55,9 @@
 #define U_ASCII         AL_ID('A','S','C','8')
 #define U_UNICODE       AL_ID('U','N','I','C')
 
+#include <vector>
 
+#import <OpenAL/al.h>
 
 #include "SDL.h"
 
@@ -152,22 +154,9 @@ typedef struct ALW_PACKFILE {
    struct _al_normal_packfile_details normal;
 } ALW_PACKFILE;
 
-typedef struct ALW_SAMPLE
-{
-	//int bits;                           /* 8 or 16 */
-	//int stereo;                         /* sample type flag */
-	int freq;                           /* sample frequency */
-	//int priority;                       /* 0-255 */
-	unsigned long len;                  /* length (in samples) */
-	//unsigned long loop_start;           /* loop start position */
-	//unsigned long loop_end;             /* loop finish position */
-	//unsigned long param;                /* for internal use by the driver */
-	//void *data;                         /* sample data */
-} ALW_SAMPLE;
-
 struct ALW_AUDIOSTREAM {
 	int voice;                          /* the voice we are playing on */
-	struct ALW_SAMPLE *samp;                /* the sample we are using */
+	//struct ALW_SAMPLE *samp;                /* the sample we are using */
 	//int len;                            /* buffer length */
 	//int bufcount;                       /* number of buffers per sample half */
 	//int bufnum;                         /* current refill buffer */
@@ -577,20 +566,32 @@ void alw_set_volume(int digi_volume, int midi_volume);
 void alw_set_volume_per_voice(int scale);
 
 // DIGIAL AUDIO
-extern ALW_SAMPLE *alw_load_sample(const char *filename);
-extern void alw_destroy_sample(ALW_SAMPLE *spl);
-extern int alw_play_sample(const ALW_SAMPLE *spl, int vol, int pan, int freq, int loop);
-extern void alw_stop_sample(const ALW_SAMPLE *spl);
 
-// for controlling played samples
-void alw_voice_start(int voice);
-void alw_voice_stop(int voice);
-int alw_voice_get_position(int voice);
-void alw_voice_set_position(int voice, int position);
-void alw_voice_set_volume(int voice, int volume);
-void alw_voice_set_pan(int voice, int pan);
-int alw_voice_get_frequency(int voice);
+class AlwSample {
+private:  
+  ALuint source;
 
+public:
+  std::vector<ALuint> buffers;
+  
+  AlwSample();
+  ~AlwSample();
+  
+  int play(int vol, int pan, int freq, int loop) ;
+  int stop();
+  int pause() ;
+  int resume();
+  void set_position(int pos);
+  void set_volume(int vol);
+  void set_pan(int pan);
+  void set_loop(int isloop) ;
+  double get_position_ms();
+  int get_position();
+  double get_length_ms();
+  int is_done();  
+};
+
+extern AlwSample *alw_load_sample(const char *filename);
 
 
 // MIDI

@@ -29,10 +29,12 @@
 
 ALW_PACKFILE *mp3in;
 
+#pragma mark WAVE
+
 // My new MP3STREAM wrapper
 struct MYWAVE:public SOUNDCLIP
 {
-  ALW_SAMPLE *wave;
+  AlwSample *wave;
   int voice;
   int firstTime;
   int repeat;
@@ -50,8 +52,8 @@ struct MYWAVE:public SOUNDCLIP
       firstTime = 0;
     }
 
-    if (alw_voice_get_position(voice) < 0)
-      done = 1;
+    done = wave->is_done();
+
     return done;
   }
 
@@ -63,42 +65,34 @@ struct MYWAVE:public SOUNDCLIP
     {
       newvol += volModifier + directionalVolModifier;
       if (newvol < 0) newvol = 0;
-      alw_voice_set_volume(voice, newvol);
+      wave->set_volume(newvol);
     }
   }
 
   void destroy()
   {
-    alw_destroy_sample(wave);
+    delete wave;
     wave = NULL;
   }
 
   void seek(int pos)
   {
-    alw_voice_set_position(voice, pos);
+    wave->set_position(pos);
   }
 
   int get_pos()
   {
-    return alw_voice_get_position(voice);
+    return wave->get_position();
   }
 
   int get_pos_ms()
   {
-    // convert the offset in samples into the offset in ms
-    //return ((1000000 / alw_voice_get_frequency(voice)) * alw_voice_get_position(voice)) / 1000;
-
-    if (alw_voice_get_frequency(voice) < 100)
-      return 0;
-    // (number of samples / (samples per second / 100)) * 10 = ms
-    return (alw_voice_get_position(voice) / (alw_voice_get_frequency(voice) / 100)) * 10;
+    return wave->get_position_ms();
   }
 
   int get_length_ms()
   {
-    if (wave->freq < 100)
-      return 0;
-    return (wave->len / (wave->freq / 100)) * 10;
+    return wave->get_length_ms();
   }
 
   void restart()
@@ -106,8 +100,8 @@ struct MYWAVE:public SOUNDCLIP
     if (wave != NULL) {
       done = 0;
       paused = 0;
-      alw_stop_sample(wave);
-      voice = alw_play_sample(wave, vol, panning, 1000, 0);
+      wave->stop();
+      wave->play(vol, panning, 1000, 0);
     }
   }
 
@@ -121,11 +115,27 @@ struct MYWAVE:public SOUNDCLIP
   }
 
   int play() {
-    voice = alw_play_sample(wave, vol, panning, 1000, repeat);
-
+    wave->play(vol, panning, 1000, repeat);
+    voice = -1;
     return 1;
   }
 
+  virtual void set_panning(int newPanning) 
+  {
+    wave->set_pan(newPanning);
+    panning = newPanning;
+  }
+  
+  virtual void pause() {
+    wave->stop();
+    paused = 1;
+  }
+  
+  virtual void resume() {
+    wave->resume();
+    paused = 0;
+  }
+  
   MYWAVE() : SOUNDCLIP() {
     voice = -1;
   }
@@ -134,7 +144,7 @@ struct MYWAVE:public SOUNDCLIP
 MYWAVE *thiswave;
 SOUNDCLIP *my_load_wave(const char *filename, int voll, int loop)
 {
-  ALW_SAMPLE *new_sample = alw_load_sample(filename);
+  AlwSample *new_sample = alw_load_sample(filename);
 
   if (new_sample == NULL)
     return NULL;
@@ -147,6 +157,9 @@ SOUNDCLIP *my_load_wave(const char *filename, int voll, int loop)
 
   return thiswave;
 }
+
+
+#pragma mark Streaming MP3
 
 //#define MP3CHUNKSIZE 100000
 #define MP3CHUNKSIZE 32768
@@ -308,6 +321,8 @@ SOUNDCLIP *my_load_mp3(const char *filname, int voll)
   return thistune;
 }
 
+#pragma mark Static MP3
+
 // pre-loaded (non-streaming) MP3 file
 struct MYSTATICMP3:public SOUNDCLIP
 {
@@ -468,6 +483,8 @@ SOUNDCLIP *my_load_static_mp3(const char *filname, int voll, bool loop)
 }
 
 #endif // NO_MP3_PLAYER
+
+#pragma mark Static OGG
 
 // pre-loaded (non-streaming) OGG file
 struct MYSTATICOGG:public SOUNDCLIP
@@ -649,6 +666,9 @@ SOUNDCLIP *my_load_static_ogg(const char *filname, int voll, bool loop)
   return thissogg;
 }
 
+
+#pragma mark Streaming OGG
+
 struct MYOGG:public SOUNDCLIP
 {
   ALOGG_OGGSTREAM *stream;
@@ -692,7 +712,6 @@ struct MYOGG:public SOUNDCLIP
     if (buffer != NULL)
       free(buffer);
     buffer = NULL;
-    alw_pack_fclose(in);
   }
 
   void seek(int pos)
@@ -791,6 +810,8 @@ SOUNDCLIP *my_load_ogg(const char *filname, int voll)
 
   return thisogg;
 }
+
+#pragma mark MIDI
 
 // MIDI
 struct MYMIDI:public SOUNDCLIP
@@ -901,6 +922,7 @@ SOUNDCLIP *my_load_midi(const char *filname, int repet)
   return thismidi;
 }
 
+#pragma mark JGMOD
 
 #ifdef JGMOD_MOD_PLAYER
 
@@ -1015,6 +1037,8 @@ void remove_mod_player() {
 
 #endif   // JGMOD_MOD_PLAYER
 
+
+#pragma mark DUMB
 
 #ifdef DUMB_MOD_PLAYER
 
