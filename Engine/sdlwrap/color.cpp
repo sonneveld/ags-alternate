@@ -3,9 +3,8 @@
 #include <math.h>
 #include <assert.h>
 
-#define ASSERT assert
-#undef MIN
-#define MIN(x,y)     (((x) < (y)) ? (x) : (y))
+#include "allegro.h"
+#include "alw_to_allegro.h"
 
 // taken from allegro.
 

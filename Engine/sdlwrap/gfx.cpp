@@ -24,8 +24,8 @@
 
 #include <math.h>
 #include "allegro.h"
+#include "alw_to_allegro.h"
 
-typedef ALW_BITMAP BITMAP;
 
 /* do_line:
  *  Calculates all the points along a line between x1, y1 and x2, y2, 

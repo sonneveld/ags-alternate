@@ -17,11 +17,7 @@
 
 
 #include "allegro.h"
-typedef  ALW_BITMAP BITMAP;
-typedef ALW_COLOR_MAP COLOR_MAP;
-#define AL_CONST const
-#include <assert.h>
-#define ASSERT assert
+#include "alw_to_allegro.h"
 
 #ifdef ALLEGRO_COLOR32
 

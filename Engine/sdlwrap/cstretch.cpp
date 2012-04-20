@@ -20,7 +20,7 @@
 
 #include "allegro.h"
 
-typedef ALW_BITMAP BITMAP;
+#include "alw_to_allegro.h"
 
 
 

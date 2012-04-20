@@ -20,16 +20,9 @@
 #include <assert.h>
 
 #include "allegro.h"
-typedef ALW_BITMAP BITMAP;
-#define ASSERT assert
-#define is_linear_bitmap alw_is_linear_bitmap
-#define bmp_read_line alw_bmp_read_line
-#define bmp_unwrite_line alw_bmp_unwrite_line
-#define bmp_select alw_bmp_select
-#define bitmap_color_depth alw_bitmap_color_depth
-#define getpixel alw_getpixel
-#define acquire_bitmap alw_acquire_bitmap
-#define release_bitmap alw_release_bitmap
+#include "alw_to_allegro.h"
+
+
 
 
 typedef struct FLOODED_LINE      /* store segments which have been flooded */
