@@ -36,6 +36,18 @@ template<class T> T* allocmem(size_t nelem=1, size_t extra=0)
   return x;
 }
 
+
+int _bestfit_color_for_current_palette(int r, int g, int b) {
+  //return bestfit_color(_current_palette, r, g, b);
+  return 0;
+}
+
+int _tmp_lookup_table[255] = {0};
+int *_palette_expansion_table(int color_depth) {
+  return _tmp_lookup_table;
+}
+
+
 // INIT
 // ============================================================================
 
@@ -1869,6 +1881,7 @@ ALW_BITMAP *alw_gfx_directx_create_system_bitmap(int width, int height){ PRINT_S
 // FONTS
 // ============================================================================
 
+#if 0
 int alfont_init(void){ PRINT_STUB; return 0;}
 void alfont_exit(void){ PRINT_STUB;}
 
@@ -1884,7 +1897,7 @@ void alfont_textout(ALW_BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y
 
 int alfont_text_height(ALFONT_FONT *f){ PRINT_STUB; return 0;}
 int alfont_text_length(ALFONT_FONT *f, const char *str){ PRINT_STUB; return 0;}
-
+#endif
 
 // CDLIB
 // ============================================================================

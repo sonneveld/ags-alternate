@@ -970,8 +970,8 @@ extern int alfont_text_length(ALFONT_FONT *f, const char *str);
 void aa_stretch_sprite (ALW_BITMAP* dst, ALW_BITMAP* src, int dx, int dy, int dw, int dh);
 
 
-
-
+int _bestfit_color_for_current_palette(int r, int g, int b) ;
+int *_palette_expansion_table(int color_depth) ;
 
 #define COLORCONV_NONE              0
 
@@ -1066,5 +1066,12 @@ void aa_stretch_sprite (ALW_BITMAP* dst, ALW_BITMAP* src, int dx, int dy, int dw
 	COLORCONV_32A_TO_15 |       \
 	COLORCONV_32A_TO_16 |       \
 	COLORCONV_32A_TO_24))
+
+
+// VTABLES
+
+void _vtable_blit_to_self(int for_depth, ALW_BITMAP *src, ALW_BITMAP *dest, int s_x, int s_y, int d_x, int d_y, int w, int h);
+void _vtable_blit_to_self_forward(int for_depth, ALW_BITMAP *src, ALW_BITMAP *dest, int s_x, int s_y, int d_x, int d_y, int w, int h) ;
+void _vtable_blit_to_self_backward(int for_depth, ALW_BITMAP *src, ALW_BITMAP *dest, int s_x, int s_y, int d_x, int d_y, int w, int h);
 
 #endif

@@ -20,19 +20,12 @@
  */
 
 
-//#include "allegro.h"
-//#include "allegro/internal/aintern.h"
 #include "allegro.h"
+#include "alw_to_allegro.h"
+
 #include <math.h>
-#include <assert.h>
 
-#define AL_PI        3.14159265358979323846
-#define _AL_SINCOS(x, s, c)  do { (c) = cos(x); (s) = sin(x); } while (0)
 
-typedef  ALW_BITMAP BITMAP;
-typedef  alw_fixed fixed;
-
-extern void bmp_write24 (uintptr_t addr, int c);
 
 /*
  * Scanline drawers.
@@ -53,7 +46,7 @@ extern void bmp_write24 (uintptr_t addr, int c);
       r_bmp_x >>= 16;                                              \
       l_bmp_x >>= 16;                                              \
       for (; l_bmp_x <= r_bmp_x; l_bmp_x++) {                      \
-	 c = alw_getpixel(spr, l_spr_x>>16, l_spr_y>>16);              \
+	 c = getpixel(spr, l_spr_x>>16, l_spr_y>>16);              \
 	 if (c != mask_color)                                      \
 	    PUTPIXEL;                                              \
 	 l_spr_x += spr_dx;                                        \
@@ -65,20 +58,20 @@ SCANLINE_DRAWER_GENERIC(generic_convert
 			,
 			int bmp_depth;
 			int spr_depth;
-			bmp_depth = alw_bitmap_color_depth(bmp);
-			spr_depth = alw_bitmap_color_depth(spr);
+			bmp_depth = bitmap_color_depth(bmp);
+			spr_depth = bitmap_color_depth(spr);
 			,
-			alw_putpixel(bmp, l_bmp_x, bmp_y_i,
-				 alw_makecol_depth(bmp_depth,
-					       alw_getr_depth(spr_depth, c),
-					       alw_getg_depth(spr_depth, c),
-					       alw_getb_depth(spr_depth, c))))
+			putpixel(bmp, l_bmp_x, bmp_y_i,
+				 makecol_depth(bmp_depth,
+					       getr_depth(spr_depth, c),
+					       getg_depth(spr_depth, c),
+					       getb_depth(spr_depth, c))))
 
 SCANLINE_DRAWER_GENERIC(generic
 			,
 			; /* nop */
 			,
-			alw_putpixel(bmp, l_bmp_x, bmp_y_i, c))
+			putpixel(bmp, l_bmp_x, bmp_y_i, c))
 
 
 
@@ -95,8 +88,8 @@ SCANLINE_DRAWER_GENERIC(generic
                                                                       \
       r_bmp_x >>= 16;                                                 \
       l_bmp_x >>= 16;                                                 \
-                                                      \
-      addr = (uintptr_t)bmp->line[bmp_y_i] ;                           \
+      bmp_select(bmp);                                                \
+      addr = bmp_write_line(bmp, bmp_y_i);                            \
       end_addr = addr + r_bmp_x * ((bits_pp + 7) / 8);                \
       addr += l_bmp_x * ((bits_pp + 7) / 8);                          \
       for (; addr <= end_addr; addr += ((bits_pp + 7) / 8)) {         \
@@ -274,10 +267,10 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
       (double)(ys[(top_index-1) & 3] - ys[top_index]) >
       (double)(xs[(top_index-1) & 3] - xs[top_index]) *
       (double)(ys[(top_index+1) & 3] - ys[top_index]) ? 1 : -1;
-   //FIXME: why does alw_fixmul overflow below?
-   /*if (alw_fixmul(xs[(top_index+1) & 3] - xs[top_index],
+   //FIXME: why does fixmul overflow below?
+   /*if (fixmul(xs[(top_index+1) & 3] - xs[top_index],
       ys[(top_index-1) & 3] - ys[top_index]) >
-         alw_fixmul(xs[(top_index-1) & 3] - xs[top_index],
+         fixmul(xs[(top_index-1) & 3] - xs[top_index],
             ys[(top_index+1) & 3] - ys[top_index]))
       right_index = 1;
    else
@@ -330,7 +323,7 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
       clip_right = (bmp->cr << 16) - 1;
    }
    else {
-      assert(left_bmp_x >= 0 && top_bmp_x >= 0 && bottom_bmp_x >= 0
+      ASSERT(left_bmp_x >= 0 && top_bmp_x >= 0 && bottom_bmp_x >= 0
 	     && right_bmp_x < (bmp->w << 16)
 	     && top_bmp_x < (bmp->w << 16)
 	     && bottom_bmp_x < (bmp->w << 16));
@@ -358,7 +351,7 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
 	 clip_bottom_i = bmp->cb;
    }
    else {
-      assert(clip_bottom_i <= bmp->h);
+      ASSERT(clip_bottom_i <= bmp->h);
    }
 
    /* Calculate y coordinate of first scanline. */
@@ -371,7 +364,7 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
 	 bmp_y_i = bmp->ct;
    }
    else {
-      assert(bmp_y_i >= 0);
+      ASSERT(bmp_y_i >= 0);
    }
 
    /* Sprite is above or below bottom clipping area. */
@@ -381,18 +374,18 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
    /* Vertical gap between top corner and centre of topmost scanline. */
    extra_scanline_fraction = (bmp_y_i << 16) + 0x8000 - top_bmp_y;
    /* Calculate x coordinate of beginning of scanline in bmp. */
-   l_bmp_dx = alw_fixdiv(left_bmp_x - top_bmp_x,
+   l_bmp_dx = fixdiv(left_bmp_x - top_bmp_x,
 		   left_bmp_y - top_bmp_y);
-   l_bmp_x = top_bmp_x + alw_fixmul(extra_scanline_fraction, l_bmp_dx);
+   l_bmp_x = top_bmp_x + fixmul(extra_scanline_fraction, l_bmp_dx);
    /* Calculate x coordinate of beginning of scanline in spr. */
    /* note: all these are rounded down which is probably a Good Thing (tm) */
-   l_spr_dx = alw_fixdiv(left_spr_x - top_spr_x,
+   l_spr_dx = fixdiv(left_spr_x - top_spr_x,
 		   left_bmp_y - top_bmp_y);
-   l_spr_x = top_spr_x + alw_fixmul(extra_scanline_fraction, l_spr_dx);
+   l_spr_x = top_spr_x + fixmul(extra_scanline_fraction, l_spr_dx);
    /* Calculate y coordinate of beginning of scanline in spr. */
-   l_spr_dy = alw_fixdiv(left_spr_y - top_spr_y,
+   l_spr_dy = fixdiv(left_spr_y - top_spr_y,
 		   left_bmp_y - top_bmp_y);
-   l_spr_y = top_spr_y + alw_fixmul(extra_scanline_fraction, l_spr_dy);
+   l_spr_y = top_spr_y + fixmul(extra_scanline_fraction, l_spr_dy);
 
    /* Calculate left loop bound. */
    l_bmp_y_bottom_i = (left_bmp_y + 0x8000) >> 16;
@@ -400,18 +393,18 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
       l_bmp_y_bottom_i = clip_bottom_i;
 
    /* Calculate x coordinate of end of scanline in bmp. */
-   r_bmp_dx = alw_fixdiv(right_bmp_x - top_bmp_x,
+   r_bmp_dx = fixdiv(right_bmp_x - top_bmp_x,
 		   right_bmp_y - top_bmp_y);
-   r_bmp_x = top_bmp_x + alw_fixmul(extra_scanline_fraction, r_bmp_dx);
+   r_bmp_x = top_bmp_x + fixmul(extra_scanline_fraction, r_bmp_dx);
    #ifdef KEEP_TRACK_OF_RIGHT_SPRITE_SCANLINE
    /* Calculate x coordinate of end of scanline in spr. */
-   r_spr_dx = alw_fixdiv(right_spr_x - top_spr_x,
+   r_spr_dx = fixdiv(right_spr_x - top_spr_x,
 		   right_bmp_y - top_bmp_y);
-   r_spr_x = top_spr_x + alw_fixmul(extra_scanline_fraction, r_spr_dx);
+   r_spr_x = top_spr_x + fixmul(extra_scanline_fraction, r_spr_dx);
    /* Calculate y coordinate of end of scanline in spr. */
-   r_spr_dy = alw_fixdiv(right_spr_y - top_spr_y,
+   r_spr_dy = fixdiv(right_spr_y - top_spr_y,
 		   right_bmp_y - top_bmp_y);
-   r_spr_y = top_spr_y + alw_fixmul(extra_scanline_fraction, r_spr_dy);
+   r_spr_y = top_spr_y + fixmul(extra_scanline_fraction, r_spr_dy);
    #endif
 
    /* Calculate right loop bound. */
@@ -445,17 +438,17 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
 	 /* Vertical gap between left corner and centre of scanline. */
 	 extra_scanline_fraction = (bmp_y_i << 16) + 0x8000 - left_bmp_y;
 	 /* Update x coordinate of beginning of scanline in bmp. */
-	 l_bmp_dx = alw_fixdiv(bottom_bmp_x - left_bmp_x,
+	 l_bmp_dx = fixdiv(bottom_bmp_x - left_bmp_x,
 			 bottom_bmp_y - left_bmp_y);
-	 l_bmp_x = left_bmp_x + alw_fixmul(extra_scanline_fraction, l_bmp_dx);
+	 l_bmp_x = left_bmp_x + fixmul(extra_scanline_fraction, l_bmp_dx);
 	 /* Update x coordinate of beginning of scanline in spr. */
-	 l_spr_dx = alw_fixdiv(bottom_spr_x - left_spr_x,
+	 l_spr_dx = fixdiv(bottom_spr_x - left_spr_x,
 			 bottom_bmp_y - left_bmp_y);
-	 l_spr_x = left_spr_x + alw_fixmul(extra_scanline_fraction, l_spr_dx);
+	 l_spr_x = left_spr_x + fixmul(extra_scanline_fraction, l_spr_dx);
 	 /* Update y coordinate of beginning of scanline in spr. */
-	 l_spr_dy = alw_fixdiv(bottom_spr_y - left_spr_y,
+	 l_spr_dy = fixdiv(bottom_spr_y - left_spr_y,
 			 bottom_bmp_y - left_bmp_y);
-	 l_spr_y = left_spr_y + alw_fixmul(extra_scanline_fraction, l_spr_dy);
+	 l_spr_y = left_spr_y + fixmul(extra_scanline_fraction, l_spr_dy);
 
 	 /* Update loop bound. */
 	 if (sub_pixel_accuracy)
@@ -471,18 +464,18 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
 	 /* Vertical gap between right corner and centre of scanline. */
 	 extra_scanline_fraction = (bmp_y_i << 16) + 0x8000 - right_bmp_y;
 	 /* Update x coordinate of end of scanline in bmp. */
-	 r_bmp_dx = alw_fixdiv(bottom_bmp_x - right_bmp_x,
+	 r_bmp_dx = fixdiv(bottom_bmp_x - right_bmp_x,
 			 bottom_bmp_y - right_bmp_y);
-	 r_bmp_x = right_bmp_x + alw_fixmul(extra_scanline_fraction, r_bmp_dx);
+	 r_bmp_x = right_bmp_x + fixmul(extra_scanline_fraction, r_bmp_dx);
 	 #ifdef KEEP_TRACK_OF_RIGHT_SPRITE_SCANLINE
 	 /* Update x coordinate of beginning of scanline in spr. */
-	 r_spr_dx = alw_fixdiv(bottom_spr_x - right_spr_x,
+	 r_spr_dx = fixdiv(bottom_spr_x - right_spr_x,
 			 bottom_bmp_y - right_bmp_y);
-	 r_spr_x = right_spr_x + alw_fixmul(extra_scanline_fraction, r_spr_dx);
+	 r_spr_x = right_spr_x + fixmul(extra_scanline_fraction, r_spr_dx);
 	 /* Update y coordinate of beginning of scanline in spr. */
-	 r_spr_dy = alw_fixdiv(bottom_spr_y - right_spr_y,
+	 r_spr_dy = fixdiv(bottom_spr_y - right_spr_y,
 			 bottom_bmp_y - right_bmp_y);
-	 r_spr_y = right_spr_y + alw_fixmul(extra_scanline_fraction, r_spr_dy);
+	 r_spr_y = right_spr_y + fixmul(extra_scanline_fraction, r_spr_dy);
 	 #endif
 
 	 /* Update loop bound: We aren't supposed to use this any more, so
@@ -501,15 +494,15 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
       /* ... and move starting point in sprite accordingly. */
       if (sub_pixel_accuracy) {
 	 l_spr_x_rounded = l_spr_x +
-			   alw_fixmul((l_bmp_x_rounded - l_bmp_x), spr_dx);
+			   fixmul((l_bmp_x_rounded - l_bmp_x), spr_dx);
 	 l_spr_y_rounded = l_spr_y +
-			   alw_fixmul((l_bmp_x_rounded - l_bmp_x), spr_dy);
+			   fixmul((l_bmp_x_rounded - l_bmp_x), spr_dy);
       }
       else {
 	 l_spr_x_rounded = l_spr_x +
-			   alw_fixmul(l_bmp_x_rounded + 0x7fff - l_bmp_x, spr_dx);
+			   fixmul(l_bmp_x_rounded + 0x7fff - l_bmp_x, spr_dx);
 	 l_spr_y_rounded = l_spr_y +
-			   alw_fixmul(l_bmp_x_rounded + 0x7fff - l_bmp_x, spr_dy);
+			   fixmul(l_bmp_x_rounded + 0x7fff - l_bmp_x, spr_dy);
       }
 
       /* Make right bmp coordinate be an integer and clip it. */
@@ -634,7 +627,7 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
       #endif
    }
 
-   //bmp_unwrite_line(bmp);
+   bmp_unwrite_line(bmp);
 }
 
 
@@ -648,28 +641,17 @@ void _parallelogram_map(BITMAP *bmp, BITMAP *spr, fixed xs[4], fixed ys[4],
 void _parallelogram_map_standard(BITMAP *bmp, BITMAP *sprite,
 				 fixed xs[4], fixed ys[4])
 {
-   //int old_drawing_mode;
-   if (alw_bitmap_color_depth(bmp) != alw_bitmap_color_depth(sprite)) {
-      /* These scanline drawers use alw_putpixel() so we must set solid mode. */
-      //old_drawing_mode = _drawing_mode;
-      //drawing_mode(DRAW_MODE_SOLID, _drawing_pattern,
-		   //_drawing_x_anchor, _drawing_y_anchor);
+   if (bitmap_color_depth(bmp) != bitmap_color_depth(sprite)) {
+      /* These scanline drawers use putpixel() so we must set solid mode. */
       _parallelogram_map(bmp, sprite, xs, ys,
 			 draw_scanline_generic_convert, FALSE);
-//      drawing_mode(old_drawing_mode, _drawing_pattern,
-		   //_drawing_x_anchor, _drawing_y_anchor);
    }
-   else if (!alw_is_memory_bitmap(sprite)) {
-      //old_drawing_mode = _drawing_mode;
-      //drawing_mode(DRAW_MODE_SOLID, _drawing_pattern,
-		   //_drawing_x_anchor, _drawing_y_anchor);
+   else if (!is_memory_bitmap(sprite)) {
       _parallelogram_map(bmp, sprite, xs, ys,
 			 draw_scanline_generic, FALSE);
-      //drawing_mode(old_drawing_mode, _drawing_pattern,
-		   //_drawing_x_anchor, _drawing_y_anchor);
    }
-   else if (alw_is_linear_bitmap(bmp)) {
-      switch (alw_bitmap_color_depth(bmp)) {
+   else if (is_linear_bitmap(bmp)) {
+      switch (bitmap_color_depth(bmp)) {
 	 #ifdef ALLEGRO_COLOR8
 	    case 8:
 	       _parallelogram_map(bmp, sprite, xs, ys,
@@ -705,7 +687,7 @@ void _parallelogram_map_standard(BITMAP *bmp, BITMAP *sprite,
 
 	 default:
 	    /* NOTREACHED */
-	    assert(0);
+	    ASSERT(0);
       }
    }
    #ifdef ALLEGRO_GFX_HAS_VGA
@@ -777,21 +759,21 @@ void _rotate_scale_flip_coordinates(fixed w, fixed h,
    }
 
    /* Calculate new coordinates of all corners. */
-   w = alw_fixmul(w, scale_x);
-   h = alw_fixmul(h, scale_y);
-   cx = alw_fixmul(cx, scale_x);
-   cy = alw_fixmul(cy, scale_y);
+   w = fixmul(w, scale_x);
+   h = fixmul(h, scale_y);
+   cx = fixmul(cx, scale_x);
+   cy = fixmul(cy, scale_y);
 
-   xofs = x - alw_fixmul(cx, fix_cos) + alw_fixmul(cy, fix_sin);
+   xofs = x - fixmul(cx, fix_cos) + fixmul(cy, fix_sin);
 
-   yofs = y - alw_fixmul(cx, fix_sin) - alw_fixmul(cy, fix_cos);
+   yofs = y - fixmul(cx, fix_sin) - fixmul(cy, fix_cos);
 
    xs[tl] = xofs;
    ys[tl] = yofs;
-   xs[tr] = xofs + alw_fixmul(w, fix_cos);
-   ys[tr] = yofs + alw_fixmul(w, fix_sin);
-   xs[bl] = xofs - alw_fixmul(h, fix_sin);
-   ys[bl] = yofs + alw_fixmul(h, fix_cos);
+   xs[tr] = xofs + fixmul(w, fix_cos);
+   ys[tr] = yofs + fixmul(w, fix_sin);
+   xs[bl] = xofs - fixmul(h, fix_sin);
+   ys[bl] = yofs + fixmul(h, fix_cos);
 
    xs[br] = xs[tr] + xs[bl] - xs[tl];
    ys[br] = ys[tr] + ys[bl] - ys[tl];

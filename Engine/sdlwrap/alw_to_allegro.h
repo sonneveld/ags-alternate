@@ -18,9 +18,13 @@
 #undef MAX
 #define MAX(x,y)     (((x) > (y)) ? (x) : (y))
 
+#define AL_PI        3.14159265358979323846
+#define _AL_SINCOS(x, s, c)  do { (c) = cos(x); (s) = sin(x); } while (0)
+
 typedef ALW_BITMAP BITMAP;
 typedef ALW_BLENDER_FUNC BLENDER_FUNC;
 typedef ALW_COLOR_MAP COLOR_MAP;
+typedef alw_fixed fixed;
 
 #define AL_CONST const
 #define ASSERT assert
@@ -76,5 +80,18 @@ typedef ALW_COLOR_MAP COLOR_MAP;
 #define makecol16 alw_makecol16
 #define makecol24 alw_makecol24
 #define makecol32 alw_makecol32
+
+#define getr_depth alw_getr_depth
+#define getg_depth alw_getg_depth
+#define getb_depth alw_getb_depth
+#define geta_depth alw_geta_depth
+
+#define getpixel alw_getpixel
+#define putpixel alw_putpixel
+
+#define fixdiv alw_fixdiv
+#define fixmul alw_fixmul
+
+#define set_trans_blender alw_set_trans_blender
 
 #endif
