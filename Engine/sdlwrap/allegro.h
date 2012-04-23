@@ -27,6 +27,14 @@
 #endif
 
 
+#undef MIN
+#undef MAX
+#undef MID
+#define MIN(x,y)     (((x) < (y)) ? (x) : (y))
+#define MAX(x,y)     (((x) > (y)) ? (x) : (y))
+#define MID(x,y,z)   MAX((x), MIN((y), (z)))
+
+
 // keep ac_stricmp just as symbol since we have a ptr ref to it in ac_string.cpp
 #ifdef WINDOWS_VERSION
 // ISO
@@ -76,7 +84,7 @@
 
 typedef struct ALW_GFX_VTABLE        /* functions for drawing onto bitmaps */
 {
-	//int color_depth;
+	int color_depth;  
 	int mask_color;
 	//void *unwrite_bank;  /* C function on some machines, asm on i386 */
 } GFX_VTABLE;
@@ -108,17 +116,20 @@ struct ALW_BITMAP {
 	//void *write_bank;             /* C func on some machines, asm on i386 */
 	//void *read_bank;              /* C func on some machines, asm on i386 */
 	//void *dat;                    /* the memory we allocated for the bitmap */
-	//unsigned long id;             /* for identifying sub-bitmaps */
-	void *extra;                  /* points to a structure with more info */
-	//int x_ofs;                    /* horizontal offset (for sub-bitmaps) */
-	//int y_ofs;                    /* vertical offset (for sub-bitmaps) */
+	unsigned long id;             /* for identifying sub-bitmaps */
+	//void *extra;                  /* points to a structure with more info */
+	int x_ofs;                    /* horizontal offset (for sub-bitmaps) */
+	int y_ofs;                    /* vertical offset (for sub-bitmaps) */
 	//int seg;                      /* bitmap segment */
 
 	// actually used
 	SDL_Surface *surf;
-	unsigned char **line;
+	unsigned char *line[0];
 };
 
+#define ALW_BMP_ID_SUB         0x20000000
+#define ALW_BMP_ID_LOCKED      0x04000000
+#define ALW_BMP_ID_MASK        0x01FFFFFF
 
 #define F_BUF_SIZE      4096           /* 4K buffer for caching data */
 #define PACKFILE_FLAG_WRITE      1     /* the file is being written */
@@ -373,6 +384,7 @@ ALW_BITMAP *alw_create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, i
 void alw_destroy_bitmap(ALW_BITMAP *bitmap) ;
 int alw_bitmap_color_depth(ALW_BITMAP *bmp) ;
 int alw_bitmap_mask_color(ALW_BITMAP *bmp) ;
+extern int alw_is_same_bitmap(ALW_BITMAP *bmp1, ALW_BITMAP *bmp2);
 int alw_is_linear_bitmap(ALW_BITMAP *bmp) ;
 int alw_is_memory_bitmap(ALW_BITMAP *bmp) ;
 int alw_is_video_bitmap(ALW_BITMAP *bmp) ;
@@ -389,6 +401,7 @@ int alw_save_bitmap(const char *filename, ALW_BITMAP *bmp, const ALW_RGB *pal);
 ALW_BITMAP *alw_load_bitmap(const char *filename, ALW_RGB *pal);
 ALW_BITMAP *alw_load_pcx(const char *filename, ALW_RGB *pal) ;
 void alw_set_color_conversion(int mode) ;
+int alw_get_color_conversion();
 
 // ALW_PALETTE
 extern ALW_PALETTE alw_black_palette;

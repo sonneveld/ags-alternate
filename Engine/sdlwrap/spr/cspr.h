@@ -384,6 +384,31 @@ void FUNC_LINEAR_DRAW_TRANS_SPRITE(BITMAP *dst, BITMAP *src, int dx, int dy)
 
    blender = MAKE_DTS_BLENDER();
 
+   if ((alw_bitmap_color_depth(src) == 8) && (alw_bitmap_color_depth(dst) != 8)) {
+      bmp_select(dst);
+
+      for (y = 0; y < h; y++) {
+	 unsigned char *s = src->line[sybeg + y] + sxbeg;
+	 PIXEL_PTR ds = OFFSET_PIXEL_PTR(bmp_read_line(dst, dybeg + y), dxbeg);
+	 PIXEL_PTR dd = OFFSET_PIXEL_PTR(bmp_write_line(dst, dybeg + y), dxbeg);
+
+	 for (x = w - 1; x >= 0; s++, INC_PIXEL_PTR(ds), INC_PIXEL_PTR(dd), x--) {
+	    unsigned long c = *s;
+#if PP_DEPTH == 8
+	    c = DTS_BLEND(blender, GET_PIXEL(ds), c);
+	    PUT_PIXEL(dd, c);
+#else
+            if (!IS_SPRITE_MASK(src, c)) {
+	       c = DTS_BLEND(blender, GET_PIXEL(ds), c);
+	       PUT_PIXEL(dd, c);
+	    }
+#endif
+	 }
+      }
+
+      bmp_unwrite_line(dst);
+   }
+   else  {
       for (y = 0; y < h; y++) {
 	 PIXEL_PTR s = OFFSET_PIXEL_PTR(src->line[sybeg + y], sxbeg);
 	 PIXEL_PTR d = OFFSET_PIXEL_PTR(dst->line[dybeg + y], dxbeg);
@@ -401,7 +426,7 @@ void FUNC_LINEAR_DRAW_TRANS_SPRITE(BITMAP *dst, BITMAP *src, int dx, int dy)
 #endif
 	 }
       }
-   
+   }
 }
 
 

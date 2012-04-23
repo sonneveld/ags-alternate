@@ -30,6 +30,7 @@ The source for most libraries is included.  Most been modified slightly to add f
  * directx Apr 2007 SDK
  * allegro 4.2.2 - http://sourceforge.net/projects/alleg/files/allegro/4.2.2/
  * alfont 1.9.1 - http://www.helixsoft.nl/project_page.php?file_name=alfont.proj original: http://web.archive.org/web/*/http://nekros.freeshell.org/delirium/alfont.php
+    - current version is available here: http://chernsha.sitesled.com/index.html
  * aastr 0.1.1
  * hq2x v????
  * libogg 1.1.3 - http://downloads.xiph.org/releases/ogg/

@@ -100,6 +100,11 @@
 		513DDB96153BEACC00CF4C88 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 513DDB91153BEAA900CF4C88 /* Ogg.framework */; };
 		513DDB97153BEAD000CF4C88 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 513DDB93153BEAB200CF4C88 /* Vorbis.framework */; };
 		513DDB98153BEAD000CF4C88 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 513DDB91153BEAA900CF4C88 /* Ogg.framework */; };
+		5192339915411B0A007332B6 /* graphics.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5192339815411B0A007332B6 /* graphics.cpp */; };
+		519233A6154127BB007332B6 /* cblit8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519233A2154127B9007332B6 /* cblit8.cpp */; };
+		519233A7154127BB007332B6 /* cblit16.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519233A3154127BA007332B6 /* cblit16.cpp */; };
+		519233A8154127BB007332B6 /* cblit24.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519233A4154127BA007332B6 /* cblit24.cpp */; };
+		519233A9154127BB007332B6 /* cblit32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 519233A5154127BA007332B6 /* cblit32.cpp */; };
 		519E332E153137400026C374 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E332D153137400026C374 /* Cocoa.framework */; };
 		519E3338153137400026C374 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 519E3336153137400026C374 /* InfoPlist.strings */; };
 		519E333E153137400026C374 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 519E333C153137400026C374 /* Credits.rtf */; };
@@ -121,6 +126,7 @@
 		51AC3DF1153AEA6B004F7194 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51AC3DF0153AEA6B004F7194 /* OpenAL.framework */; };
 		51B7C67515392F77004D1816 /* allegfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51B7C6721538608C004D1816 /* allegfile.cpp */; };
 		51DD9BFD1532C31400F6EE89 /* strimpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51DD9BFB1532C31100F6EE89 /* strimpl.cpp */; };
+		51DEEE671540413D008A5A35 /* blit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 51DEEE661540413D008A5A35 /* blit.cpp */; };
 		51E12B78153E417700473584 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 51E12B77153E417700473584 /* AudioToolbox.framework */; };
 /* End PBXBuildFile section */
 
@@ -147,6 +153,13 @@
 		51325C54153172E400335A54 /* hq2x3x.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hq2x3x.h; path = ../../External/hq2x/include/hq2x3x.h; sourceTree = "<group>"; };
 		513DDB91153BEAA900CF4C88 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = Library/Frameworks/Ogg.framework; sourceTree = SDKROOT; };
 		513DDB93153BEAB200CF4C88 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = Library/Frameworks/Vorbis.framework; sourceTree = SDKROOT; };
+		5192339815411B0A007332B6 /* graphics.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = graphics.cpp; sourceTree = "<group>"; };
+		5192339B15411B44007332B6 /* alw_to_allegro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alw_to_allegro.h; sourceTree = "<group>"; };
+		519233A1154127B9007332B6 /* cblit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cblit.h; sourceTree = "<group>"; };
+		519233A2154127B9007332B6 /* cblit8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cblit8.cpp; sourceTree = "<group>"; };
+		519233A3154127BA007332B6 /* cblit16.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cblit16.cpp; sourceTree = "<group>"; };
+		519233A4154127BA007332B6 /* cblit24.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cblit24.cpp; sourceTree = "<group>"; };
+		519233A5154127BA007332B6 /* cblit32.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cblit32.cpp; sourceTree = "<group>"; };
 		519E3329153137400026C374 /* EngineMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EngineMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		519E332D153137400026C374 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		519E3330153137400026C374 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -358,6 +371,7 @@
 		51B7C6721538608C004D1816 /* allegfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = allegfile.cpp; sourceTree = "<group>"; };
 		51DD9BFB1532C31100F6EE89 /* strimpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = strimpl.cpp; path = ../../Common/strimpl.cpp; sourceTree = "<group>"; };
 		51DD9BFC1532C31300F6EE89 /* strimpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = strimpl.h; path = ../../Common/strimpl.h; sourceTree = "<group>"; };
+		51DEEE661540413D008A5A35 /* blit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = blit.cpp; sourceTree = "<group>"; };
 		51E12B75153E40EB00473584 /* sampleloader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sampleloader.h; sourceTree = "<group>"; };
 		51E12B77153E417700473584 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
@@ -588,6 +602,9 @@
 				51A3B355153E3509003F2ACE /* auderr.cpp */,
 				51A3B357153E35C7003F2ACE /* auderr.h */,
 				51E12B75153E40EB00473584 /* sampleloader.h */,
+				51DEEE661540413D008A5A35 /* blit.cpp */,
+				5192339815411B0A007332B6 /* graphics.cpp */,
+				5192339B15411B44007332B6 /* alw_to_allegro.h */,
 			);
 			name = sdlwrap;
 			path = ../../Engine/sdlwrap;
@@ -596,6 +613,11 @@
 		519E344015314EEC0026C374 /* spr */ = {
 			isa = PBXGroup;
 			children = (
+				519233A1154127B9007332B6 /* cblit.h */,
+				519233A2154127B9007332B6 /* cblit8.cpp */,
+				519233A3154127BA007332B6 /* cblit16.cpp */,
+				519233A4154127BA007332B6 /* cblit24.cpp */,
+				519233A5154127BA007332B6 /* cblit32.cpp */,
 				519E344115314EEC0026C374 /* cdefs15.h */,
 				519E344215314EEC0026C374 /* cdefs16.h */,
 				519E344315314EEC0026C374 /* cdefs24.h */,
@@ -853,6 +875,12 @@
 				51A3B349153C3A8A003F2ACE /* pcmgen.cpp in Sources */,
 				51A3B354153E34B0003F2ACE /* sampleloader.cpp in Sources */,
 				51A3B356153E3509003F2ACE /* auderr.cpp in Sources */,
+				51DEEE671540413D008A5A35 /* blit.cpp in Sources */,
+				5192339915411B0A007332B6 /* graphics.cpp in Sources */,
+				519233A6154127BB007332B6 /* cblit8.cpp in Sources */,
+				519233A7154127BB007332B6 /* cblit16.cpp in Sources */,
+				519233A8154127BB007332B6 /* cblit24.cpp in Sources */,
+				519233A9154127BB007332B6 /* cblit32.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

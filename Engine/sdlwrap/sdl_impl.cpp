@@ -26,6 +26,16 @@ char _debug_str[10000];
 //#define PRINT_STUB sprintf(_debug_str, "STUB %s:%d %s\n", __FILE__, __LINE__, __FUNCSIG__); OutputDebugString(_debug_str)
 #define PRINT_STUB
 
+// we should be using new/delete, so hopefully temporary
+template<class T> T* allocmem(size_t nelem=1, size_t extra=0)
+{
+  size_t s = nelem*sizeof(T) + extra;
+  T* x = (T*)malloc(s);
+  assert(x != 0);
+  memset(x, 0, s);
+  return x;
+}
+
 // INIT
 // ============================================================================
 
@@ -83,13 +93,18 @@ void alw_set_color_depth(int depth) {
 GFX_VTABLE _default_vtable = {0};
 
 static ALW_BITMAP *wrap_sdl_surface(SDL_Surface *surf) {
-	ALW_BITMAP *x = (ALW_BITMAP *)malloc(sizeof(ALW_BITMAP));
+  
+  int nr_pointers = 2;
+  if (surf->h > nr_pointers) nr_pointers = surf->h;
+  
+  ALW_BITMAP *x = allocmem<ALW_BITMAP>(1, sizeof(char *) * nr_pointers);
 	x->surf = surf;
 	x->w = surf->w;
 	x->h = surf->h;
 
-  x->vtable = (ALW_GFX_VTABLE *)malloc(sizeof(ALW_GFX_VTABLE));
+  x->vtable = allocmem<ALW_GFX_VTABLE>();
   x->vtable->mask_color = 0;
+  x->vtable->color_depth = surf->format->BitsPerPixel;
 
   x->clip = 1;
   x->cl = 0;
@@ -97,7 +112,6 @@ static ALW_BITMAP *wrap_sdl_surface(SDL_Surface *surf) {
   x->cr = surf->w;
   x->cb = surf->h;
 
-	x->line = (unsigned char **)malloc(x->h * sizeof(unsigned char*));
 	int hcount = surf->h;
 	unsigned char **l = x->line;
 	unsigned char *p = (unsigned char*)surf->pixels;
@@ -170,50 +184,49 @@ ALW_BITMAP *alw_create_bitmap(int width, int height) {
   //return wrap_sdl_surface(surf);
 }
 
+extern ALW_BITMAP *create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, int height);
+
 ALW_BITMAP *alw_create_sub_bitmap(ALW_BITMAP *parent, int x, int y, int width, int height) {
-
-	// from http://lists.libsdl.org/pipermail/sdl-libsdl.org/2005-June/050556.html
-
-	SDL_Surface *pParent = parent->surf;
-	int nTop = y;
-	int nLeft = x;
-	int nWidth = width;
-	int nHeight = height;
-
-	SDL_LockSurface(pParent);
-
-	uint8_t* pPixels = (uint8_t*)pParent->pixels + pParent->pitch*nTop + pParent->format->BytesPerPixel * nLeft;
-
-	SDL_Surface *m_pSurface = SDL_CreateRGBSurfaceFrom(pPixels, nWidth, nHeight, pParent->format->BitsPerPixel, pParent->pitch, pParent->format->Rmask, pParent->format->Gmask, pParent->format->Bmask, pParent->format->Amask);
-
-	if (pParent->format->palette)
-		SDL_SetColors(m_pSurface, pParent->format->palette->colors, 0, pParent->format->palette->ncolors);
-
-
-	SDL_UnlockSurface(pParent);
-
-	ALW_BITMAP *bmp =wrap_sdl_surface(m_pSurface);
-  _bmp_set_color_key(bmp);
-  return bmp;
+  return create_sub_bitmap(parent, x, y, width, height);
 }
 
 void alw_destroy_bitmap(ALW_BITMAP *bitmap) {
-	SDL_FreeSurface(bitmap->surf);
-	free(bitmap->line);
-	bitmap->line = 0;
-	bitmap->surf =0 ;
-	free(bitmap);
+  if (bitmap->surf) { // sub bitmaps don't link to surf.
+    SDL_FreeSurface(bitmap->surf);
+    bitmap->surf = 0;
+    free(bitmap->vtable);
+    bitmap->vtable = 0;
+  }
+  free(bitmap);
 }
 
 int alw_bitmap_color_depth(ALW_BITMAP *bmp) {
 	// depth (8, 15, 16, 24 or 32 bits per pixel)
-	return bmp->surf->format->BitsPerPixel;
+	return bmp->vtable->color_depth;
 }
 
 int alw_bitmap_mask_color(ALW_BITMAP *bmp) {
 	PRINT_STUB;
   return bmp->vtable->mask_color;
 }
+
+int alw_is_same_bitmap(ALW_BITMAP *bmp1, ALW_BITMAP *bmp2)
+{
+  unsigned long m1;
+  unsigned long m2;
+  
+  if ((!bmp1) || (!bmp2))
+    return FALSE;
+  
+  if (bmp1 == bmp2)
+    return TRUE;
+  
+  m1 = bmp1->id & ALW_BMP_ID_MASK;
+  m2 = bmp2->id & ALW_BMP_ID_MASK;
+  
+  return ((m1) && (m1 == m2));
+}
+
 
 int alw_is_linear_bitmap(ALW_BITMAP *bmp) {
 	PRINT_STUB;
@@ -229,26 +242,28 @@ int alw_is_video_bitmap(ALW_BITMAP *bmp) {
 }
 
 void alw_acquire_bitmap(ALW_BITMAP *bmp) {
-	SDL_LockSurface(bmp->surf);
+  if (bmp->surf)
+    SDL_LockSurface(bmp->surf);
 }
 void alw_release_bitmap(ALW_BITMAP *bmp) {
-	SDL_UnlockSurface(bmp->surf);
+  if (bmp->surf)
+    SDL_UnlockSurface(bmp->surf);
 }
 void alw_acquire_screen() {
-	SDL_LockSurface(alw_screen->surf);
+  SDL_LockSurface(alw_screen->surf);
 }
 void alw_release_screen() {
 	SDL_UnlockSurface(alw_screen->surf);
 }
 void alw_set_clip_rect(ALW_BITMAP *bitmap, int x1, int y1, int x2, int y2) {
-	SDL_Rect rect = {x1, y1, x2-x1+1, y2-y1+1};
-	SDL_SetClipRect(bitmap->surf, &rect);
-
-  bitmap->clip = 1;
-  bitmap->cl = x1;
-  bitmap->cr = x2;
-  bitmap->ct = y1;
-  bitmap->cb = y2;
+  /* internal clipping is inclusive-exclusive */
+  x2++;
+  y2++;
+  
+  bitmap->cl = MID(0, x1, bitmap->w-1);
+  bitmap->ct = MID(0, y1, bitmap->h-1);
+  bitmap->cr = MID(0, x2, bitmap->w);
+  bitmap->cb = MID(0, y2, bitmap->h);
 }
 void alw_set_clip_state(ALW_BITMAP *bitmap, int state) {
 	PRINT_STUB;
@@ -293,9 +308,7 @@ void alw_vsync(){
 // we might be able to get away with no setting palettes yet.
 
 ALW_PALETTE alw_black_palette;
-
-void alw_set_palette(const ALW_PALETTE p) { PRINT_STUB; }
-void alw_get_palette(ALW_PALETTE p) { PRINT_STUB; }
+ALW_PALETTE alw_current_palette; 
 
 void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
   SDL_Surface *surface = _actual_sdl_screen;
@@ -303,7 +316,7 @@ void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
   int firstcolor = from;
   int ncolors = to-from+1;
 
-  SDL_Color *colors = (SDL_Color *)malloc(sizeof(SDL_Color)*ncolors);
+  SDL_Color *colors = allocmem<SDL_Color>(ncolors);
   for (int i = 0; i< ncolors; i++) {
     ALW_RGB alcol = p[from+i];
     SDL_Color sdlcol = {alcol.r*4, alcol.g*4, alcol.b*4};
@@ -317,8 +330,13 @@ void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
 }
 void alw_get_palette_range(ALW_PALETTE p, int from, int to) { PRINT_STUB; }
 
+void alw_set_palette(const ALW_PALETTE p) { alw_set_palette_range(p, 0, ALW_PAL_SIZE-1, TRUE); }
+void alw_get_palette(ALW_PALETTE p) { alw_get_palette_range(p, 0, ALW_PAL_SIZE-1); }
+
+
 void alw_fade_interpolate(const ALW_PALETTE source, const ALW_PALETTE dest, ALW_PALETTE output, int pos, int from, int to) {PRINT_STUB; }
 
+// temp palette storage
 void alw_select_palette(const ALW_PALETTE p) { PRINT_STUB; }
 void alw_unselect_palette() { PRINT_STUB; }
 
@@ -344,7 +362,7 @@ char *alw_append_filename(char *dest, const char *path, const char *filename, in
 		return dest;
 	} 
 
-	char *tmp = (char*)malloc(pathlen + 1);
+  char *tmp = allocmem<char>(pathlen+1);
 	strcpy(tmp, path);
 
 	int lastch = -1;
@@ -513,46 +531,17 @@ void _linear_draw_lit_sprite32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy,
 
 unsigned char _my_blit_col = 16;
 
+
+extern void blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height);
+
 void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height) {
-	PRINT_STUB; 
-	SDL_Surface *src = source->surf;
-	SDL_Surface *dst = dest->surf;
-	//dst = _actual_sdl_screen;
-
-	void *srcpixels = source->surf->pixels;
-	void *destpixels = dest->surf->pixels;
-
-	SDL_Rect srcrect = {source_x, source_y, width, height};
-	SDL_Rect dstrect = {dest_x, dest_y, width, height};
-
-  // alw_blit actually ignores alpha
-  int origalphaflag = src->flags & (SDL_SRCALPHA|SDL_RLEACCEL);
-  int origalpha = src->format->alpha;
-  int origcolkeyflag = src->flags & (SDL_SRCCOLORKEY|SDL_RLEACCEL);
-  int origcolkey = src->format->colorkey;
-  SDL_SetAlpha(src, 0, 255);
-  SDL_SetColorKey(src, 0, 0);
-
-  SDL_BlitSurface(src, &srcrect, dst, &dstrect);
-
-  if (origalphaflag)
-    SDL_SetAlpha(src, origalphaflag, origalpha);
-  if (origcolkeyflag)
-    SDL_SetColorKey(src, origcolkeyflag, origcolkey);
-
-  //if (dest_x != 0 || dest_y != 0) {
-//    SDL_FillRect(dst, &dstrect, _my_blit_col);
-    //_my_blit_col = (_my_blit_col +1)% 40;
-  //}
-
-	//SDL_Flip(_actual_sdl_screen);
-
-  //void;
+  blit(source, dest, source_x, source_y, dest_x, dest_y, width, height);
 }
+
 void alw_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
 
-  switch (sprite->surf->format->BitsPerPixel) {
+  switch (alw_bitmap_color_depth(sprite)) {
     case 8:
       _linear_draw_sprite8(bmp, sprite, x, y);
       break;
@@ -569,23 +558,6 @@ void alw_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) {
       _linear_draw_sprite32(bmp, sprite, x, y);
       break;
   }
-
-  return;
-
-
-  SDL_Surface *src = sprite->surf;
-  SDL_Surface *dst = bmp->surf;
-  //dst = _actual_sdl_screen;
-
-  void *srcpixels = sprite->surf->pixels;
-  void *destpixels = bmp->surf->pixels;
-
-  SDL_Rect srcrect = {0, 0, sprite->w, sprite->h};
-  SDL_Rect dstrect = {x, y, sprite->w, sprite->h};
-
-  SDL_BlitSurface(src, &srcrect, dst, &dstrect);
-
-  //SDL_Flip(_actual_sdl_screen);
 }
 
 
@@ -593,7 +565,7 @@ void alw_draw_lit_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int 
 	PRINT_STUB;
   // we assume that bmp and sprite have same color depth
 
-  switch (sprite->surf->format->BitsPerPixel) {
+  switch (alw_bitmap_color_depth(sprite)) {
     case 8:
       _linear_draw_lit_sprite8(bmp, sprite, x, y, color);
       break;
@@ -616,7 +588,7 @@ void alw_draw_trans_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) {
 	PRINT_STUB;
 
 
-  switch (sprite->surf->format->BitsPerPixel) {
+  switch (alw_bitmap_color_depth(sprite)) {
     case 8:
       _linear_draw_trans_sprite8(bmp, sprite, x, y);
       break;
@@ -639,7 +611,7 @@ void alw_draw_trans_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) {
 void alw_draw_sprite_h_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
   // we assume that bmp and sprite have same color depth
-  switch (sprite->surf->format->BitsPerPixel) {
+  switch (alw_bitmap_color_depth(sprite)) {
     case 8:
       _linear_draw_sprite_h_flip8(bmp, sprite, x, y);
       break;
@@ -661,7 +633,7 @@ void alw_draw_sprite_h_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) {
 void alw_draw_sprite_v_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
   // we assume that bmp and sprite have same color depth
-  switch (sprite->surf->format->BitsPerPixel) {
+  switch (alw_bitmap_color_depth(sprite)) {
     case 8:
       _linear_draw_sprite_v_flip8(bmp, sprite, x, y);
       break;
@@ -683,7 +655,7 @@ void alw_draw_sprite_v_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) {
 void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
   // we assume that bmp and sprite have same color depth
-  switch (sprite->surf->format->BitsPerPixel) {
+  switch (alw_bitmap_color_depth(sprite)) {
     case 8:
       _linear_draw_sprite_vh_flip8(bmp, sprite, x, y);
       break;
@@ -749,70 +721,103 @@ int alw_geta_depth(int color_depth, int c)
 // DRAWING
 // ============================================================================
 
-Uint32 _getpixel(SDL_Surface *surface, int x, int y)
-{
-	int bpp = surface->format->BytesPerPixel;
-	/* Here p is the address to the pixel we want to retrieve */
-	Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
-
+static Uint32 _readpixel(int bpp, Uint8 *p) {
 	switch(bpp) {
-	case 1:
-		return *p;
-
-	case 2:
-		return *(Uint16 *)p;
-
-	case 3:
-		if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-			return p[0] << 16 | p[1] << 8 | p[2];
-		else
-			return p[0] | p[1] << 8 | p[2] << 16;
-
-	case 4:
-		return *(Uint32 *)p;
-
-	default:
-		return 0;       /* shouldn't happen, but avoids warnings */
+    case 8:
+      return *p;
+      
+    case 15:
+    case 16:
+      return *(Uint16 *)p;
+      
+    case 24:
+      if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+        return p[0] << 16 | p[1] << 8 | p[2];
+      else
+        return p[0] | p[1] << 8 | p[2] << 16;
+      
+    case 32:
+      return *(Uint32 *)p;
+      
+    default:
+      return 0;       /* shouldn't happen, but avoids warnings */
 	}
 }
 
-void _putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
-{
-	int bpp = surface->format->BytesPerPixel;
-	/* Here p is the address to the pixel we want to set */
-	Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
-
+static void _writepixel(int bpp, Uint8 *p, Uint32 pixel) {
 	switch(bpp) {
-	case 1:
-		*p = pixel;
-		break;
-
-	case 2:
-		*(Uint16 *)p = pixel;
-		break;
-
-	case 3:
-		if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-			p[0] = (pixel >> 16) & 0xff;
-			p[1] = (pixel >> 8) & 0xff;
-			p[2] = pixel & 0xff;
-		} else {
-			p[0] = pixel & 0xff;
-			p[1] = (pixel >> 8) & 0xff;
-			p[2] = (pixel >> 16) & 0xff;
-		}
-		break;
-
-	case 4:
-		*(Uint32 *)p = pixel;
-		break;
+    case 8:
+      *p = pixel;
+      break;
+      
+    case 15:
+    case 16:
+      *(Uint16 *)p = pixel;
+      break;
+      
+    case 24:
+      if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+        p[0] = (pixel >> 16) & 0xff;
+        p[1] = (pixel >> 8) & 0xff;
+        p[2] = pixel & 0xff;
+      } else {
+        p[0] = pixel & 0xff;
+        p[1] = (pixel >> 8) & 0xff;
+        p[2] = (pixel >> 16) & 0xff;
+      }
+      break;
+      
+    case 32:
+      *(Uint32 *)p = pixel;
+      break;
 	}
 }
 
-int alw_getpixel ( ALW_BITMAP *bmp, int x, int y) { return _getpixel(bmp->surf, x, y); }
-void alw_putpixel ( ALW_BITMAP *bmp, int x, int y, int color) { _putpixel(bmp->surf, x, y, color); }
-void alw_clear_to_color(ALW_BITMAP *bitmap, int color) { SDL_FillRect(bitmap->surf, 0, color); }
-void alw_clear_bitmap(ALW_BITMAP *bitmap) { SDL_FillRect(bitmap->surf, 0, 0); }
+
+int alw_getpixel ( ALW_BITMAP *bmp, int x, int y)
+{ 
+  int bpp = bmp->vtable->color_depth;
+  Uint8 *p = bmp->line[y] + x*(bpp/8);
+  return _readpixel(bpp, p);
+}
+
+void alw_putpixel ( ALW_BITMAP *bmp, int x, int y, int color) 
+{ 
+  int bpp = bmp->vtable->color_depth;
+  Uint8 *p = bmp->line[y] + x*(bpp/8);
+  _writepixel(bpp, p, color);
+}
+
+void _linear_clear_to_color8(ALW_BITMAP *dst, int color);
+void _linear_clear_to_color15(ALW_BITMAP *dst, int color);
+void _linear_clear_to_color16(ALW_BITMAP *dst, int color);
+void _linear_clear_to_color24(ALW_BITMAP *dst, int color);
+void _linear_clear_to_color32(ALW_BITMAP *dst, int color);
+
+void alw_clear_to_color(ALW_BITMAP *bitmap, int color) 
+{
+  PRINT_STUB;
+  // we assume that bmp and sprite have same color depth
+  switch (alw_bitmap_color_depth(bitmap)) {
+    case 8:
+      _linear_clear_to_color8(bitmap, color);
+      break;
+    case 15:
+    case 16:
+      _linear_clear_to_color16(bitmap, color);
+      break;
+    case 24:
+      _linear_clear_to_color24(bitmap, color);
+      break;
+    case 32:
+      _linear_clear_to_color32(bitmap, color);
+      break;
+  }
+}
+void alw_clear_bitmap(ALW_BITMAP *bitmap) 
+{
+  alw_clear_to_color(bitmap, 0);
+}
 void alw_hline(ALW_BITMAP *bmp, int x1, int y, int x2, int color)  { PRINT_STUB; }
 void alw_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color) { PRINT_STUB; }
 //void alw_do_line(ALW_BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(ALW_BITMAP *bmp, int x, int y, int d))  { PRINT_STUB; }
@@ -1722,7 +1727,17 @@ int alw_play_fli(const char *filename, ALW_BITMAP *bmp, int loop, int (*callback
 int alw_save_bitmap(const char *filename, ALW_BITMAP *bmp, const ALW_RGB *pal){ PRINT_STUB; return 0;}
 ALW_BITMAP *alw_load_bitmap(const char *filename, ALW_RGB *pal){ PRINT_STUB; return 0;}
 ALW_BITMAP *alw_load_pcx(const char *filename, ALW_RGB *pal) { PRINT_STUB; return 0;}
-void alw_set_color_conversion(int mode) { PRINT_STUB;}
+
+
+static int _color_conv;
+void alw_set_color_conversion(int mode) 
+{ 
+  PRINT_STUB;
+  _color_conv = mode;
+}
+int alw_get_color_conversion() {
+  return _color_conv;
+}
 
 
 
@@ -1958,9 +1973,7 @@ ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len)
   source = _openal_new_source();
   if (source == 0) return 0;
   
-  alogg = (ALOGG_OGG*)malloc(sizeof(ALOGG_OGG));
-  if (alogg == 0) return 0;
-  memset(alogg, 0, sizeof(ALOGG_OGG));
+  alogg = allocmem<ALOGG_OGG>();
   
   alogg->source = source;
   alogg->pcmgen = pcmgen_from_ogg_buffer(data, data_len);
@@ -2187,9 +2200,7 @@ ALOGG_OGGSTREAM *alogg_create_oggstream_from_packfile(ALW_PACKFILE *packfile) {
   source = _openal_new_source();
   if (source == 0) return 0;
   
-  alogg = (ALOGG_OGG*)malloc(sizeof(ALOGG_OGG));
-  if (alogg == 0) return 0;
-  memset(alogg, 0, sizeof(ALOGG_OGG));
+  alogg = allocmem<ALOGG_OGG>();
   
   alogg->source = source;
   alogg->pcmgen = pcmgen_from_ogg_packfile(packfile);
