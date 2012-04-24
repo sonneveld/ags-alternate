@@ -81,10 +81,34 @@ static NSString *getApplicationName(void)
 /* The main class of the application, the application's delegate */
 @implementation SDLMain
 
+// ask the user for an exe file..  otherwise quit.
+- (void) askUserForExePath {
+  NSArray* fileTypes = [[NSArray alloc] initWithObjects:@"exe", @"EXE", nil];
+  
+  NSOpenPanel* openDlg = [NSOpenPanel openPanel];
+  [openDlg setCanChooseFiles:YES];  // select files
+  [openDlg setCanChooseDirectories:NO]; // no dirs
+  [openDlg setAllowsMultipleSelection:NO];
+  [openDlg setAllowedFileTypes:fileTypes];
+  NSURL *homeUrl = [NSURL fileURLWithPath: NSHomeDirectory()];
+  [openDlg setDirectoryURL:homeUrl ];
+  
+  // Display the dialog.  If the OK button was pressed,
+  // process the files.
+  NSInteger button = [openDlg runModal];
+  if ( button != NSFileHandlingPanelOKButton )
+    exit(0);
+  
+  NSURL *url  = [openDlg URL];
+  NSString *exePath = [url path];
+  
+  [self addFileToArgv:exePath];
+}
+
 /* Set the working directory to the .app's parent directory */
 - (void) setupWorkingDirectory:(BOOL)shouldChdir
 {
-#if 1
+#if 0
     // By changing the working directory to the application’s Resources folder, you 
     // should be able to use the same code to load files on Linux, Mac OS X, and Windows.
     // http://meandmark.com/blog/2009/12/sdl-tips-for-mac-os-x/
@@ -240,6 +264,32 @@ static void CustomApplicationMain (int argc, char **argv)
 
 #endif
 
+- (BOOL)addFileToArgv: (NSString *)filename
+{
+  const char *temparg;
+  size_t arglen;
+  char *arg;
+  char **newargv;
+  
+  temparg = [filename UTF8String];
+  arglen = SDL_strlen(temparg) + 1;
+  arg = (char *) SDL_malloc(arglen);
+  if (arg == NULL)
+    return FALSE;
+  
+  newargv = (char **) realloc(gArgv, sizeof (char *) * (gArgc + 2));
+  if (newargv == NULL)
+  {
+    SDL_free(arg);
+    return FALSE;
+  }
+  gArgv = newargv;
+  
+  SDL_strlcpy(arg, temparg, arglen);
+  gArgv[gArgc++] = arg;
+  gArgv[gArgc] = NULL;
+  return TRUE;
+}
 
 /*
  * Catch document open requests...this lets us notice files when the app
@@ -258,35 +308,13 @@ static void CustomApplicationMain (int argc, char **argv)
  */
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
 {
-    const char *temparg;
-    size_t arglen;
-    char *arg;
-    char **newargv;
-
     if (!gFinderLaunch)  /* MacOS is passing command line args. */
         return FALSE;
 
     if (gCalledAppMainline)  /* app has started, ignore this document. */
         return FALSE;
-
-    temparg = [filename UTF8String];
-    arglen = SDL_strlen(temparg) + 1;
-    arg = (char *) SDL_malloc(arglen);
-    if (arg == NULL)
-        return FALSE;
-
-    newargv = (char **) realloc(gArgv, sizeof (char *) * (gArgc + 2));
-    if (newargv == NULL)
-    {
-        SDL_free(arg);
-        return FALSE;
-    }
-    gArgv = newargv;
-
-    SDL_strlcpy(arg, temparg, arglen);
-    gArgv[gArgc++] = arg;
-    gArgv[gArgc] = NULL;
-    return TRUE;
+  
+    return [self addFileToArgv:filename];
 }
 
 
@@ -295,6 +323,8 @@ static void CustomApplicationMain (int argc, char **argv)
 {
     int status;
 
+    [self askUserForExePath];
+  
     /* Set the working directory to the .app's parent directory */
     [self setupWorkingDirectory:gFinderLaunch];
 

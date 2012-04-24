@@ -12976,9 +12976,9 @@ void initialise_game_file_name(int argc,char **argv)
 #else
   game_file_name = argv[datafile_argv];
   
-#ifdef MAC_HACK
-  game_file_name = "Game.exe";
-#endif
+//#ifdef MAC_HACK
+//  game_file_name = "Game.exe";
+//#endif
   
 #endif
 }
