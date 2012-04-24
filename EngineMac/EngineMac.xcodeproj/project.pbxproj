@@ -29,6 +29,11 @@
 		511BCC381544DCE500BE1A4F /* vtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC371544DCE500BE1A4F /* vtable.cpp */; };
 		511BCC411544E70F00BE1A4F /* libfreetype.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 511BCC401544E70F00BE1A4F /* libfreetype.dylib */; };
 		511BCC431544E88F00BE1A4F /* alfont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC421544E88F00BE1A4F /* alfont.cpp */; };
+		511BCC4A1544F20800BE1A4F /* cgfx8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC451544F20800BE1A4F /* cgfx8.cpp */; };
+		511BCC4B1544F20800BE1A4F /* cgfx15.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC461544F20800BE1A4F /* cgfx15.cpp */; };
+		511BCC4C1544F20800BE1A4F /* cgfx16.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC471544F20800BE1A4F /* cgfx16.cpp */; };
+		511BCC4D1544F20800BE1A4F /* cgfx24.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC481544F20800BE1A4F /* cgfx24.cpp */; };
+		511BCC4E1544F20800BE1A4F /* cgfx32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC491544F20800BE1A4F /* cgfx32.cpp */; };
 		512ABC0515340E7700D3CFC7 /* mac_alert.mm in Sources */ = {isa = PBXBuildFile; fileRef = 512ABC0415340E7700D3CFC7 /* mac_alert.mm */; };
 		51325BF6153162A100335A54 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E335D15314C4E0026C374 /* SDL.framework */; };
 		51325BF7153162A100335A54 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E335E15314C4E0026C374 /* SDL_ttf.framework */; };
@@ -178,8 +183,14 @@
 		511BCC221544D53300BE1A4F /* rotate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rotate.cpp; sourceTree = "<group>"; };
 		511BCC371544DCE500BE1A4F /* vtable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vtable.cpp; sourceTree = "<group>"; };
 		511BCC3A1544E14200BE1A4F /* alfont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alfont.h; sourceTree = "<group>"; };
-		511BCC401544E70F00BE1A4F /* libfreetype.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfreetype.dylib; path = ../../../../../usr/X11/lib/libfreetype.dylib; sourceTree = "<group>"; };
+		511BCC401544E70F00BE1A4F /* libfreetype.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfreetype.dylib; path = /usr/X11/lib/libfreetype.dylib; sourceTree = "<absolute>"; };
 		511BCC421544E88F00BE1A4F /* alfont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alfont.cpp; sourceTree = "<group>"; };
+		511BCC441544F20800BE1A4F /* cgfx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cgfx.h; sourceTree = "<group>"; };
+		511BCC451544F20800BE1A4F /* cgfx8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cgfx8.cpp; sourceTree = "<group>"; };
+		511BCC461544F20800BE1A4F /* cgfx15.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cgfx15.cpp; sourceTree = "<group>"; };
+		511BCC471544F20800BE1A4F /* cgfx16.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cgfx16.cpp; sourceTree = "<group>"; };
+		511BCC481544F20800BE1A4F /* cgfx24.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cgfx24.cpp; sourceTree = "<group>"; };
+		511BCC491544F20800BE1A4F /* cgfx32.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cgfx32.cpp; sourceTree = "<group>"; };
 		512ABC0415340E7700D3CFC7 /* mac_alert.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = mac_alert.mm; sourceTree = "<group>"; };
 		512ABC071534107C00D3CFC7 /* mac_alert.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mac_alert.h; sourceTree = "<group>"; };
 		51325C52153172D600335A54 /* hq2x3x.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hq2x3x.cpp; path = ../../External/hq2x/src/hq2x3x.cpp; sourceTree = "<group>"; };
@@ -426,6 +437,12 @@
 		511BCC091544D53300BE1A4F /* c */ = {
 			isa = PBXGroup;
 			children = (
+				511BCC441544F20800BE1A4F /* cgfx.h */,
+				511BCC451544F20800BE1A4F /* cgfx8.cpp */,
+				511BCC461544F20800BE1A4F /* cgfx15.cpp */,
+				511BCC471544F20800BE1A4F /* cgfx16.cpp */,
+				511BCC481544F20800BE1A4F /* cgfx24.cpp */,
+				511BCC491544F20800BE1A4F /* cgfx32.cpp */,
 				511BCC0A1544D53300BE1A4F /* cblit.h */,
 				511BCC0B1544D53300BE1A4F /* cblit16.cpp */,
 				511BCC0C1544D53300BE1A4F /* cblit24.cpp */,
@@ -458,7 +475,6 @@
 		519E331E153137400026C374 = {
 			isa = PBXGroup;
 			children = (
-				511BCC401544E70F00BE1A4F /* libfreetype.dylib */,
 				519E3333153137400026C374 /* EngineMac */,
 				519E332C153137400026C374 /* Frameworks */,
 				519E332A153137400026C374 /* Products */,
@@ -476,6 +492,7 @@
 		519E332C153137400026C374 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				511BCC401544E70F00BE1A4F /* libfreetype.dylib */,
 				51E12B77153E417700473584 /* AudioToolbox.framework */,
 				513DDB93153BEAB200CF4C88 /* Vorbis.framework */,
 				513DDB91153BEAA900CF4C88 /* Ogg.framework */,
@@ -904,6 +921,11 @@
 				511BCC351544D53300BE1A4F /* rotate.cpp in Sources */,
 				511BCC381544DCE500BE1A4F /* vtable.cpp in Sources */,
 				511BCC431544E88F00BE1A4F /* alfont.cpp in Sources */,
+				511BCC4A1544F20800BE1A4F /* cgfx8.cpp in Sources */,
+				511BCC4B1544F20800BE1A4F /* cgfx15.cpp in Sources */,
+				511BCC4C1544F20800BE1A4F /* cgfx16.cpp in Sources */,
+				511BCC4D1544F20800BE1A4F /* cgfx24.cpp in Sources */,
+				511BCC4E1544F20800BE1A4F /* cgfx32.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

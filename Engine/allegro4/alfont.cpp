@@ -307,74 +307,27 @@ static void _alfont_new_cache_glyph(ALFONT_FONT *f) {
 
 /* API */
 
+// Code reimplemented based on code in the alfont.lib provided with ags sources.
+// The original code searched for a best fit, whereas this just sets and forgets.
+// The other way might be better but games already rely on the previous implementation.
+
 int alfont_set_font_size(ALFONT_FONT *f, int h) {
-  int error, test_h, direction;
-  /* check the font doesn't already use that w and h */
   if (h == f->face_h)
     return ALFONT_OK;
-  else if (h <= 0)
+  if (h <= 0)
     return ALFONT_ERROR;
-
-  /* keep changing the size until the real size is not the one */
-  /* we want */
-  test_h = h;
-  direction = 0;
-  while (1) {
-    int real_height;
-    error = FT_Set_Pixel_Sizes(f->face, 0, test_h);
-    if (error)
-      break;
-
-    /* compare real height with asked height */
-    real_height = abs(f->face->size->metrics.ascender >> 6) + abs(f->face->size->metrics.descender >> 6);
-    if (real_height == h) {
-      /* we found the wanted height */
-      break;
-    }
-
-    /* check the direction */
-    if (direction == 0) {
-      /* direction still not set */
-      if (real_height > h)
-        direction = -1;
-      else
-        direction = 1;
-    }
-    
-    /* check we didn't overpass it */
-    else if ((direction > 0) && (real_height > h)) {
-      /* decrease one and found */
-      test_h--;
-      FT_Set_Pixel_Sizes(f->face, 0, test_h);
-      break;
-    }
-
-    /* check we didn't surpass it */
-    else if ((direction < 0) && (real_height < h)) {
-      break;
-    }
-
-    test_h += direction;
-
-    /* check we arent at 0 */
-    if (test_h <= 0) {
-      error = TRUE;
-      break;
-    }
-
-  }
-
-  if (!error) {
+  
+  if (!FT_Set_Pixel_Sizes(f->face, 0, h)) {
     _alfont_uncache_glyphs(f);
     f->face_h = h;
-    f->real_face_h = test_h;
+    f->real_face_h = h;
     f->face_ascender = f->face->size->metrics.ascender >> 6;
     return ALFONT_OK;
   }
-  else {
-    FT_Set_Pixel_Sizes(f->face, 0, f->real_face_h);
-    return ALFONT_ERROR;
-  }
+  
+  // error
+  FT_Set_Pixel_Sizes(f->face, 0, f->real_face_h);
+  return ALFONT_ERROR;
 }
 
 
@@ -496,6 +449,82 @@ void alfont_destroy_font(ALFONT_FONT *f) {
 }
 
 
+// code reimplemented based on code in the alfont.lib provided with ags sources.
+
+unsigned long _preservedalpha_blender_trans24(unsigned long x, unsigned long y, unsigned long n) 
+{
+  unsigned long res, g;
+  
+  unsigned long y_alpha = y & 0xFF000000;
+  unsigned long y_rgb = y & 0xFFFFFF;
+  
+  if (y_rgb == 0xFF00FF)
+    return (n<<24) | (x & 0xFFFFFF);
+	
+  if (n)
+    n++;
+  
+  res = ((x & 0xFF00FF) - (y & 0xFF00FF)) * n / 256 + y;
+  y &= 0xFF00;
+  x &= 0xFF00;
+  g = (x - y) * n / 256 + y;
+  
+  res &= 0xFF00FF;
+  g &= 0xFF00;
+  
+  return res | g | y_alpha;
+}
+
+unsigned long _skiptranspixels_blender_trans16(unsigned long x, unsigned long y, unsigned long n)
+{
+  unsigned long result;
+  
+  if (y == 0xF81F)
+		return x;
+  
+  if (n)
+    n = (n + 1) / 8;
+  
+  x = ((x & 0xF81F) | (x << 16)) & 0x7E0F81F;
+  y = ((y & 0xF81F) | (y << 16)) & 0x7E0F81F;
+  
+  result = ((x - y) * n / 32 + y) & 0x7E0F81F;
+  
+  return ((result & 0xF81F) | (result >> 16));
+}
+
+unsigned long _skiptranspixels_blender_trans15(unsigned long x, unsigned long y, unsigned long n)
+{
+  unsigned long result;
+  
+  if (y == 0x7c1f)
+		return x;
+  
+  if (n)
+    n = (n + 1) / 8;
+  
+  x = ((x & 0x7C1F) | (x << 16)) & 0x3E07C1F;
+  y = ((y & 0x7C1F) | (y << 16)) & 0x3E07C1F;
+  
+  result = ((x - y) * n / 32 + y) & 0x3E07C1F;
+  
+  return ((result & 0x7C1F) | (result >> 16));
+}
+
+void set_preservedalpha_trans_blender(int r, int g, int b, int a)
+{
+  alw_set_blender_mode(
+                       _skiptranspixels_blender_trans15,
+                       _skiptranspixels_blender_trans16,
+                       _preservedalpha_blender_trans24,
+                       r,
+                       g,
+                       b,
+                       a);
+}
+
+
+
 void alfont_textout_aa(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int y, int color) {
   alfont_textout_aa_ex(bmp, f, s, x, y, color, alfont_textmode);
 }
@@ -553,20 +582,25 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
       const int max_bmp_y = cglyph.aaheight + real_y;
 
       /* if in transparent mode */
-      {
-        for (bmp_y = real_y; bmp_y < max_bmp_y; bmp_y++) {
-          for (bmp_x = real_x; bmp_x < max_bmp_x; bmp_x++) {
-            const int alpha = *bmp_p++;
-            
-            if (alpha) {
-               //if (alpha >= 255)
-               //  solid_mode();
-               //else {
-               //  drawing_mode(DRAW_MODE_TRANS, NULL, 0, 0);
-               //  set_trans_blender(0, 0, 0, alpha);
-               //}
-               putpixel(bmp, bmp_x, bmp_y, color);
+      
+      // alpha_prev is small optimisation so that blender funcs are only set
+      // when alpha changes.
+      int alpha_prev = 999999;
+      int is_solid = 1;
+      for (bmp_y = real_y; bmp_y < max_bmp_y; bmp_y++) {
+        for (bmp_x = real_x; bmp_x < max_bmp_x; bmp_x++) {
+          const int alpha = *bmp_p++;
+          if (alpha) {
+            if (alpha != alpha_prev) {
+              if (alpha >= 255)
+                is_solid = 1;
+              else {
+                is_solid = 0;
+                set_preservedalpha_trans_blender(0, 0, 0, alpha);
+              }
+              alpha_prev = alpha;
             }
+            alw_putpixel_ex(bmp, bmp_x, bmp_y, color, alpha, is_solid);
           }
         }
       }
@@ -579,9 +613,6 @@ void alfont_textout_aa_ex(BITMAP *bmp, ALFONT_FONT *f, const char *s, int x, int
       y += cglyph.advancey + f->ch_spacing;
   }
   release_bitmap(bmp);
-
-  /* reset blender */
-  //solid_mode();
 }
 
 

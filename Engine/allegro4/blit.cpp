@@ -25,7 +25,7 @@
 #include "alw_to_allegro.h"
 
 
-
+#if 0
 /* get_replacement_mask_color:
  *  Helper function to get a replacement color for the bitmap's mask color.
  */
@@ -46,6 +46,7 @@ static int get_replacement_mask_color(BITMAP *bmp)
       return c;
    }
 }
+#endif
 
 
 

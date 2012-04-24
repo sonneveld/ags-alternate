@@ -299,7 +299,7 @@ int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
 		return 1;
 
 	alw_screen = wrap_sdl_surface(_actual_sdl_screen);
-
+  _bmp_set_color_key(alw_screen);
 	return 0;
 }
 
@@ -505,191 +505,38 @@ int alw_pack_fclose(ALW_PACKFILE *f) {
 // BLITS
 // ============================================================================
 
-void _linear_draw_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_v_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_h_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_vh_flip8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_trans_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_lit_sprite8(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
-
-void _linear_draw_sprite15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_v_flip15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_h_flip15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_vh_flip15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_trans_sprite15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_lit_sprite15(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
-
-void _linear_draw_sprite16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_v_flip16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_h_flip16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_vh_flip16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_trans_sprite16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_lit_sprite16(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
-
-void _linear_draw_sprite24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_v_flip24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_h_flip24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_vh_flip24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_trans_sprite24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_lit_sprite24(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
-
-void _linear_draw_sprite32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_v_flip32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_h_flip32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_sprite_vh_flip32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_trans_sprite32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy);
-void _linear_draw_lit_sprite32(ALW_BITMAP *dst, ALW_BITMAP *src, int dx, int dy, int color);
-
-
-unsigned char _my_blit_col = 16;
-
-
 extern void blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height);
 
 void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height) {
+  PRINT_STUB;
   blit(source, dest, source_x, source_y, dest_x, dest_y, width, height);
 }
 
 void alw_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-
-  switch (alw_bitmap_color_depth(sprite)) {
-    case 8:
-      _linear_draw_sprite8(bmp, sprite, x, y);
-      break;
-    case 15:
-      _linear_draw_sprite15(bmp, sprite, x, y);
-      break;
-    case 16:
-      _linear_draw_sprite16(bmp, sprite, x, y);
-      break;
-    case 24:
-      _linear_draw_sprite24(bmp, sprite, x, y);
-      break;
-    case 32:
-      _linear_draw_sprite32(bmp, sprite, x, y);
-      break;
-  }
+  _vtable_draw_sprite(bmp, sprite, x, y);
 }
-
 
 void alw_draw_lit_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int color) { 
 	PRINT_STUB;
-  // we assume that bmp and sprite have same color depth
-
-  switch (alw_bitmap_color_depth(sprite)) {
-    case 8:
-      _linear_draw_lit_sprite8(bmp, sprite, x, y, color);
-      break;
-    case 15:
-      _linear_draw_lit_sprite15(bmp, sprite, x, y, color);
-      break;
-    case 16:
-      _linear_draw_lit_sprite16(bmp, sprite, x, y, color);
-      break;
-    case 24:
-      _linear_draw_lit_sprite24(bmp, sprite, x, y, color);
-      break;
-    case 32:
-      _linear_draw_lit_sprite32(bmp, sprite, x, y, color);
-      break;
-  }
-  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+  _vtable_draw_lit_sprite(bmp, sprite, x, y, color);
 }
 void alw_draw_trans_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-
-
-  switch (alw_bitmap_color_depth(sprite)) {
-    case 8:
-      _linear_draw_trans_sprite8(bmp, sprite, x, y);
-      break;
-    case 15:
-      _linear_draw_trans_sprite15(bmp, sprite, x, y);
-      break;
-    case 16:
-      _linear_draw_trans_sprite16(bmp, sprite, x, y);
-      break;
-    case 24:
-      _linear_draw_trans_sprite24(bmp, sprite, x, y);
-      break;
-    case 32:
-      _linear_draw_trans_sprite32(bmp, sprite, x, y);
-      break;
-  }
-
-  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+  _vtable_draw_trans_sprite(bmp, sprite, x, y);
 }
 void alw_draw_sprite_h_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-  // we assume that bmp and sprite have same color depth
-  switch (alw_bitmap_color_depth(sprite)) {
-    case 8:
-      _linear_draw_sprite_h_flip8(bmp, sprite, x, y);
-      break;
-    case 15:
-      _linear_draw_sprite_h_flip15(bmp, sprite, x, y);
-      break;
-    case 16:
-      _linear_draw_sprite_h_flip16(bmp, sprite, x, y);
-      break;
-    case 24:
-      _linear_draw_sprite_h_flip24(bmp, sprite, x, y);
-      break;
-    case 32:
-      _linear_draw_sprite_h_flip32(bmp, sprite, x, y);
-      break;
-  }
-  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+  _vtable_draw_sprite_h_flip(bmp, sprite, x, y);
 }
 void alw_draw_sprite_v_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-  // we assume that bmp and sprite have same color depth
-  switch (alw_bitmap_color_depth(sprite)) {
-    case 8:
-      _linear_draw_sprite_v_flip8(bmp, sprite, x, y);
-      break;
-    case 15:
-      _linear_draw_sprite_v_flip15(bmp, sprite, x, y);
-      break;
-    case 16:
-      _linear_draw_sprite_v_flip16(bmp, sprite, x, y);
-      break;
-    case 24:
-      _linear_draw_sprite_v_flip24(bmp, sprite, x, y);
-      break;
-    case 32:
-      _linear_draw_sprite_v_flip32(bmp, sprite, x, y);
-      break;
-  }
-	//alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+  _vtable_draw_sprite_v_flip(bmp, sprite, x, y);
 }
 void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) { 
 	PRINT_STUB;
-  // we assume that bmp and sprite have same color depth
-  switch (alw_bitmap_color_depth(sprite)) {
-    case 8:
-      _linear_draw_sprite_vh_flip8(bmp, sprite, x, y);
-      break;
-    case 15:
-      _linear_draw_sprite_vh_flip15(bmp, sprite, x, y);
-      break;
-    case 16:
-      _linear_draw_sprite_vh_flip16(bmp, sprite, x, y);
-      break;
-    case 24:
-      _linear_draw_sprite_vh_flip24(bmp, sprite, x, y);
-      break;
-    case 32:
-      _linear_draw_sprite_vh_flip32(bmp, sprite, x, y);
-      break;
-  }
-  //alw_blit(sprite, bmp, 0, 0, x, y, sprite->w, sprite->h);
+  _vtable_draw_sprite_vh_flip(bmp, sprite, x, y);
 }
-//void alw_stretch_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int source_width, int source_height, int dest_x, int dest_y, int dest_width, int dest_height){ PRINT_STUB; }
-//void alw_stretch_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int w, int h) { PRINT_STUB;   alw_blit(sprite, bmp, 0, 0, x, y, w, h); }
-//void alw_rotate_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, alw_fixed angle) { PRINT_STUB; }
-//void alw_pivot_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int cx, int cy, alw_fixed angle) { PRINT_STUB; }
 
 // COLOURS
 // ============================================================================
@@ -733,104 +580,34 @@ int alw_geta_depth(int color_depth, int c)
 // DRAWING
 // ============================================================================
 
-static Uint32 _readpixel(int bpp, Uint8 *p) {
-	switch(bpp) {
-    case 8:
-      return *p;
-      
-    case 15:
-    case 16:
-      return *(Uint16 *)p;
-      
-    case 24:
-      if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-        return p[0] << 16 | p[1] << 8 | p[2];
-      else
-        return p[0] | p[1] << 8 | p[2] << 16;
-      
-    case 32:
-      return *(Uint32 *)p;
-      
-    default:
-      return 0;       /* shouldn't happen, but avoids warnings */
-	}
-}
-
-static void _writepixel(int bpp, Uint8 *p, Uint32 pixel) {
-	switch(bpp) {
-    case 8:
-      *p = pixel;
-      break;
-      
-    case 15:
-    case 16:
-      *(Uint16 *)p = pixel;
-      break;
-      
-    case 24:
-      if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-        p[0] = (pixel >> 16) & 0xff;
-        p[1] = (pixel >> 8) & 0xff;
-        p[2] = pixel & 0xff;
-      } else {
-        p[0] = pixel & 0xff;
-        p[1] = (pixel >> 8) & 0xff;
-        p[2] = (pixel >> 16) & 0xff;
-      }
-      break;
-      
-    case 32:
-      *(Uint32 *)p = pixel;
-      break;
-	}
-}
-
-
 int alw_getpixel ( ALW_BITMAP *bmp, int x, int y)
 { 
-  int bpp = bmp->vtable->color_depth;
-  Uint8 *p = bmp->line[y] + x*(bpp/8);
-  return _readpixel(bpp, p);
+  return _vtable_getpixel(bmp, x, y);
 }
 
 void alw_putpixel ( ALW_BITMAP *bmp, int x, int y, int color) 
 { 
-  int bpp = bmp->vtable->color_depth;
-  Uint8 *p = bmp->line[y] + x*(bpp/8);
-  _writepixel(bpp, p, color);
+  _vtable_putpixel(bmp, x, y, color);
 }
 
-void _linear_clear_to_color8(ALW_BITMAP *dst, int color);
-void _linear_clear_to_color15(ALW_BITMAP *dst, int color);
-void _linear_clear_to_color16(ALW_BITMAP *dst, int color);
-void _linear_clear_to_color24(ALW_BITMAP *dst, int color);
-void _linear_clear_to_color32(ALW_BITMAP *dst, int color);
+void alw_putpixel_ex ( ALW_BITMAP *bmp, int x, int y, int color, int alpha, int is_solid) 
+{ 
+  _vtable_putpixel(bmp, x, y, color, is_solid);
+}
 
 void alw_clear_to_color(ALW_BITMAP *bitmap, int color) 
 {
-  PRINT_STUB;
-  // we assume that bmp and sprite have same color depth
-  switch (alw_bitmap_color_depth(bitmap)) {
-    case 8:
-      _linear_clear_to_color8(bitmap, color);
-      break;
-    case 15:
-    case 16:
-      _linear_clear_to_color16(bitmap, color);
-      break;
-    case 24:
-      _linear_clear_to_color24(bitmap, color);
-      break;
-    case 32:
-      _linear_clear_to_color32(bitmap, color);
-      break;
-  }
+  _vtable_clear_to_color(bitmap, color);
 }
 void alw_clear_bitmap(ALW_BITMAP *bitmap) 
 {
-  alw_clear_to_color(bitmap, 0);
+  _vtable_clear_to_color(bitmap, 0);
 }
-void alw_hline(ALW_BITMAP *bmp, int x1, int y, int x2, int color)  { PRINT_STUB; }
+void alw_hline(ALW_BITMAP *bmp, int x1, int y, int x2, int color) 
+{
+  _vtable_hline(bmp, x1, y, x2, color);
+}
+
 void alw_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color) { PRINT_STUB; }
 //void alw_do_line(ALW_BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(ALW_BITMAP *bmp, int x, int y, int d))  { PRINT_STUB; }
 void alw_rect(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)  { PRINT_STUB; }
@@ -843,6 +620,7 @@ void alw_triangle(ALW_BITMAP *bmp, int x1,int y1,int x2,int y2,int x3,int y3, in
 void alw_circlefill(ALW_BITMAP *bmp, int x, int y, int radius, int color)  { PRINT_STUB; }
 
 void alw_hfill(ALW_BITMAP *dst, int dx1, int dy, int dx2, int color) {
+  // possibly wrong? otherwise how is this different from hline?
   SDL_Rect dstrect = {dx1, dy, dx2-dx1+1, 1};
   SDL_FillRect(dst->surf, &dstrect, color);
 }

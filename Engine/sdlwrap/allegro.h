@@ -499,6 +499,7 @@ void alw_bmp_select(ALW_BITMAP *bmp);
 
 int alw_getpixel ( ALW_BITMAP *bmp, int x, int y);
 void alw_putpixel ( ALW_BITMAP *bmp, int x, int y, int color);
+void alw_putpixel_ex ( ALW_BITMAP *bmp, int x, int y, int color, int alpha, int is_solid);
 void alw_clear_to_color(ALW_BITMAP *bitmap, int color);
 void alw_clear_bitmap(ALW_BITMAP *bitmap);
 void alw_hline(ALW_BITMAP *bmp, int x1, int y, int x2, int color) ;
@@ -1073,5 +1074,16 @@ int *_palette_expansion_table(int color_depth) ;
 void _vtable_blit_to_self(int for_depth, ALW_BITMAP *src, ALW_BITMAP *dest, int s_x, int s_y, int d_x, int d_y, int w, int h);
 void _vtable_blit_to_self_forward(int for_depth, ALW_BITMAP *src, ALW_BITMAP *dest, int s_x, int s_y, int d_x, int d_y, int w, int h) ;
 void _vtable_blit_to_self_backward(int for_depth, ALW_BITMAP *src, ALW_BITMAP *dest, int s_x, int s_y, int d_x, int d_y, int w, int h);
+void _vtable_putpixel(ALW_BITMAP *dst, int dx, int dy, int color, bool solid=true) ;
+int _vtable_getpixel(ALW_BITMAP *src, int sx, int sy);
+void _vtable_hline(ALW_BITMAP *dst, int dx1, int dy, int dx2, int color) ;
+void _vtable_vline(ALW_BITMAP *dst, int dx, int dy1, int dy2, int color);
+void _vtable_clear_to_color(ALW_BITMAP *bitmap, int color);
+void _vtable_draw_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) ;
+void _vtable_draw_lit_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int color) ;
+void _vtable_draw_trans_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) ;
+void _vtable_draw_sprite_h_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) ;
+void _vtable_draw_sprite_v_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) ;
+void _vtable_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y);
 
 #endif
