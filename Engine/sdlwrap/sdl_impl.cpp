@@ -576,9 +576,9 @@ void alw_put_backslash(char *filename) {
 
 
 
-char* alw_get_filename(char *path) {
-	char *result = path;
-	char *p = path;
+const char* alw_get_filename(const char *path) {
+	const char *result = path;
+	const char *p = path;
 
 	while (*p) {
 		if (strchr("\\/", *p) != 0)
@@ -590,17 +590,24 @@ char* alw_get_filename(char *path) {
 
 //=====
 
+extern int al_findnext(struct alw_al_ffblk *info);
+extern void al_findclose(struct alw_al_ffblk *info);
+extern int al_findfirst(const char *pattern, struct alw_al_ffblk *info, int attrib);
+
 int alw_al_findfirst(const char *pattern, struct alw_al_ffblk *info, int attrib) {
 	PRINT_STUB;
-	return 1; //stub
+  return al_findfirst(pattern, info, attrib);
 }
 
 int alw_al_findnext(struct alw_al_ffblk *info) {
 	PRINT_STUB;
-	return 1;
+	return al_findnext(info);
 }
 
-void alw_al_findclose(struct alw_al_ffblk *info) {PRINT_STUB;}
+void alw_al_findclose(struct alw_al_ffblk *info) {
+  PRINT_STUB;
+  al_findclose(info);
+}
 
 //=====
 
@@ -1910,6 +1917,7 @@ struct ALOGG_OGG {
   // openal
    ALuint source;
   ALuint buffers[_ALOGG_BUFFER_SIZE];
+  int buffers_init;
   
   // ogg
   int past_byte_count;
@@ -1934,6 +1942,7 @@ ALOGG_OGG *alogg_create_ogg_from_buffer(void *data, int data_len)
   
   alogg->source = source;
   alogg->pcmgen = pcmgen_from_ogg_buffer(data, data_len);
+  alogg->buffers_init = 0;
     
   return alogg;
 }
@@ -1975,37 +1984,43 @@ int alogg_play_ex_ogg(ALOGG_OGG *alogg, int buffer_len, int vol, int pan, int sp
   // start playing ogg with these parameters
   PRINT_STUB; 
   
+  if (alogg_is_playing_ogg(alogg))
+    return ALOGG_OK;
+  
   // set is looping first, so that we can loop while prefilling buffers
   alogg_adjust_ogg(alogg, vol, pan, speed, loop);
   
-  // only one buffer cause its static.
-  //ALuint buffer;
-	alGenBuffers(_ALOGG_NUM_BUFFER, alogg->buffers);
-	CheckALError ("Couldn't generate buffer");
-  
-  int filledBuffers = 0;
-  for (int i=0; i<_ALOGG_NUM_BUFFER; i++) {
-    // error or stopped early.
-    FillBufferResult result = alogg->pcmgen->FillOpenAlBuffer(alogg->buffers[i]);
+  if (!alogg->buffers_init) {
+    // only one buffer cause its static.
+    //ALuint buffer;
+    alGenBuffers(_ALOGG_NUM_BUFFER, alogg->buffers);
+    CheckALError ("Couldn't generate buffer");
+    FillBufferResult result;
+    int filledBuffers = 0;
+    for (int i=0; i<_ALOGG_NUM_BUFFER; i++) {
+      // error or stopped early.
+       result = alogg->pcmgen->FillOpenAlBuffer(alogg->buffers[i]);
+      
+      if (result == FBR_EOF)
+        break;
+      if (result == FBR_FAILURE)
+        return -1;
+      
+      filledBuffers += 1;
+    }
     
-    if (result == FBR_EOF)
-      break;
-    if (result == FBR_FAILURE)
+    if (filledBuffers <= 0) {
+      printf("no buffers!\n");
+      alDeleteBuffers(_ALOGG_NUM_BUFFER, alogg->buffers);
+      CheckALError ("Couldn't delete buffers");
       return -1;
+    }
     
-    filledBuffers += 1;
-	}
-  
-  if (filledBuffers <= 0) {
-    printf("no buffers!\n");
-    alDeleteBuffers(_ALOGG_NUM_BUFFER, alogg->buffers);
-    CheckALError ("Couldn't delete buffers");
-    return -1;
+    // queue up the buffers on the source
+    alSourceQueueBuffers(alogg->source, filledBuffers, alogg->buffers);
+    CheckALError ("Couldn't add buffers to queue");
+    alogg->buffers_init = 1;
   }
-  
-  // queue up the buffers on the source
-	alSourceQueueBuffers(alogg->source, filledBuffers, alogg->buffers);
-  CheckALError ("Couldn't add buffers to queue");
  
   alSourcePlay(alogg->source);
 	CheckALError ("Couldn't play");
@@ -2136,6 +2151,9 @@ int alogg_is_playing_ogg(ALOGG_OGG *alogg)
   ALint srcstate;
   alGetSourcei(alogg->source, AL_SOURCE_STATE, &srcstate);
   CheckALError ("Couldn't get state");
+  
+  if (srcstate == AL_INITIAL)
+    return 0;
 
   int playing = (srcstate == AL_PLAYING) || !alogg->pcmgen->HasDecodeEof();
   

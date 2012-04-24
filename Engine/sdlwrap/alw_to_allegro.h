@@ -29,6 +29,7 @@ typedef alw_fixed fixed;
 #define AL_CONST const
 #define ASSERT assert
 #define _AL_MALLOC malloc
+#define _AL_FREE free
 
 #define BMP_ID_MASK ALW_BMP_ID_MASK
 #define BMP_ID_SUB ALW_BMP_ID_SUB
@@ -96,5 +97,7 @@ typedef alw_fixed fixed;
 
 #define hline alw_hline
 #define vline alw_vline
+
+#define al_ffblk alw_al_ffblk
 
 #endif

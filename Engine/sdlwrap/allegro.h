@@ -101,11 +101,11 @@ typedef struct ALW_GFX_MODE_LIST
 } ALW_GFX_MODE_LIST;
 
 struct alw_al_ffblk {
-	//int attrib;         /* actual attributes of the file found */
+	int attrib;         /* actual attributes of the file found */
 	time_t time;        /* modification time of file */
-	//long size;          /* size of file */
+	long size;          /* size of file */
 	char name[512];     /* name of file */
-	//void *ff_data;      /* private hook */
+	void *ff_data;      /* private hook */
 };
 
 struct ALW_BITMAP {
@@ -630,7 +630,7 @@ char *alw_append_filename(char *dest, const char *path, const char *filename, in
 char *alw_fix_filename_case(char *path) ;
 char *alw_fix_filename_slashes(char *path) ;
 void alw_put_backslash(char *filename) ;
-char* alw_get_filename(char *path) ;
+const char* alw_get_filename(const char *path) ;
 
 // also involve pack files.
 int alw_exists(const char *filename) ;

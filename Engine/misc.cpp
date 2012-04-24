@@ -89,7 +89,7 @@ char *ci_find_file(const char *dir_name_in, const char *file_name_in)
   alw_fix_filename_slashes(file_name);
 
   if (dir_name == NULL) {
-    char  *match = NULL;
+    const char  *match = NULL;
     int   match_len = NULL;
     int   dir_len = NULL;
 
