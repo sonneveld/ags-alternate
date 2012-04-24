@@ -94,4 +94,7 @@ typedef alw_fixed fixed;
 
 #define set_trans_blender alw_set_trans_blender
 
+#define hline alw_hline
+#define vline alw_vline
+
 #endif

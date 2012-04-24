@@ -120,8 +120,7 @@ void _vtable_blit_to_self_backward(int for_depth, ALW_BITMAP *src, ALW_BITMAP *d
 }
 
 
-
-void _vtable_putpixel(ALW_BITMAP *dst, int dx, int dy, int color, bool solid) {
+void _vtable_putpixel_ex(ALW_BITMAP *dst, int dx, int dy, int color, bool solid) {
   switch (alw_bitmap_color_depth(dst)){
     case 8: _linear_putpixel8(dst, dx, dy, color, solid); break;
     case 15:_linear_putpixel15(dst, dx, dy, color, solid); break;
@@ -130,6 +129,11 @@ void _vtable_putpixel(ALW_BITMAP *dst, int dx, int dy, int color, bool solid) {
     case 32:_linear_putpixel32(dst, dx, dy, color, solid); break;
   }
 }
+
+void _vtable_putpixel(ALW_BITMAP *dst, int dx, int dy, int color) {
+  _vtable_putpixel_ex(dst, dx, dy, color, true);
+}
+
 
 int _vtable_getpixel(ALW_BITMAP *src, int sx, int sy) {
   switch (alw_bitmap_color_depth(src)){
@@ -150,6 +154,10 @@ void _vtable_hline(ALW_BITMAP *dst, int dx1, int dy, int dx2, int color) {
     case 24: _linear_hline24(dst,dx1,dy,dx2,color); break;
     case 32: _linear_hline32(dst,dx1,dy,dx2,color); break;
   }
+}
+
+void _vtable_hfill(ALW_BITMAP *dst, int dx1, int dy, int dx2, int color) {
+  _vtable_hline(dst, dx1, dy, dx2, color);
 }
 void _vtable_vline(ALW_BITMAP *dst, int dx, int dy1, int dy2, int color){
   switch (alw_bitmap_color_depth(dst)){

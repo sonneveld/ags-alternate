@@ -592,7 +592,7 @@ void alw_putpixel ( ALW_BITMAP *bmp, int x, int y, int color)
 
 void alw_putpixel_ex ( ALW_BITMAP *bmp, int x, int y, int color, int alpha, int is_solid) 
 { 
-  _vtable_putpixel(bmp, x, y, color, is_solid);
+  _vtable_putpixel_ex(bmp, x, y, color, is_solid);
 }
 
 void alw_clear_to_color(ALW_BITMAP *bitmap, int color) 
@@ -607,23 +607,56 @@ void alw_hline(ALW_BITMAP *bmp, int x1, int y, int x2, int color)
 {
   _vtable_hline(bmp, x1, y, x2, color);
 }
+void alw_vline(ALW_BITMAP *dst, int dx, int dy1, int dy2, int color)
+{
+  _vtable_vline(dst, dx, dy1, dy2, color);
+}
 
-void alw_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color) { PRINT_STUB; }
-//void alw_do_line(ALW_BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(ALW_BITMAP *bmp, int x, int y, int d))  { PRINT_STUB; }
-void alw_rect(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)  { PRINT_STUB; }
+extern void _normal_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
+void alw_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)
+{ 
+  PRINT_STUB;
+  _normal_line(bmp, x1, y1, x2, y2, color);
+}
+
+void alw_do_line(ALW_BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(ALW_BITMAP *bmp, int x, int y, int d))
+{ 
+  PRINT_STUB; 
+}
+
+extern void _soft_rect(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
+void alw_rect(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)
+{ 
+  PRINT_STUB; 
+  _soft_rect(bmp, x1, y1, x2, y2, color);
+}
+
 extern void _soft_floodfill(ALW_BITMAP *bmp, int x, int y, int color);
 void alw_floodfill(ALW_BITMAP *bmp, int x, int y, int color) {
   _soft_floodfill(bmp, x, y, color);
 }
-void alw_rectfill ( ALW_BITMAP *bmp, int x1, int y_1, int x2, int y2, int color)  { PRINT_STUB; }
-void alw_triangle(ALW_BITMAP *bmp, int x1,int y1,int x2,int y2,int x3,int y3, int color)  { PRINT_STUB; }
-void alw_circlefill(ALW_BITMAP *bmp, int x, int y, int radius, int color)  { PRINT_STUB; }
 
-void alw_hfill(ALW_BITMAP *dst, int dx1, int dy, int dx2, int color) {
-  // possibly wrong? otherwise how is this different from hline?
-  SDL_Rect dstrect = {dx1, dy, dx2-dx1+1, 1};
-  SDL_FillRect(dst->surf, &dstrect, color);
+extern void _normal_rectfill(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
+void alw_rectfill ( ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)
+{ 
+  PRINT_STUB; 
+  _normal_rectfill(bmp, x1, y1, x2, y2, color);
 }
+
+void alw_triangle(ALW_BITMAP *bmp, int x1,int y1,int x2,int y2,int x3,int y3, int color)
+{ 
+  PRINT_STUB; 
+  // requires polygon.c from allegro.  do we need this too?
+}
+
+extern void _soft_circlefill(ALW_BITMAP *bmp, int x, int y, int radius, int color);
+void alw_circlefill(ALW_BITMAP *bmp, int x, int y, int radius, int color)
+{ 
+  PRINT_STUB; 
+  _soft_circlefill(bmp, x, y, radius, color);
+}
+
+
 
 // MOUSE
 // ============================================================================
