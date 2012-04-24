@@ -26,6 +26,8 @@ char _debug_str[10000];
 //#define PRINT_STUB sprintf(_debug_str, "STUB %s:%d %s\n", __FILE__, __LINE__, __FUNCSIG__); OutputDebugString(_debug_str)
 #define PRINT_STUB
 
+static SDL_Surface *_actual_sdl_screen;
+
 // we should be using new/delete, so hopefully temporary
 template<class T> T* allocmem(size_t nelem=1, size_t extra=0)
 {
@@ -46,6 +48,89 @@ int _tmp_lookup_table[255] = {0};
 int *_palette_expansion_table(int color_depth) {
   return _tmp_lookup_table;
 }
+
+
+
+// RGB SHIFTS
+// ============================================================================
+
+
+/* default truecolor pixel format */
+#define DEFAULT_RGB_R_SHIFT_15  0
+#define DEFAULT_RGB_G_SHIFT_15  5
+#define DEFAULT_RGB_B_SHIFT_15  10
+#define DEFAULT_RGB_R_SHIFT_16  0
+#define DEFAULT_RGB_G_SHIFT_16  5
+#define DEFAULT_RGB_B_SHIFT_16  11
+#define DEFAULT_RGB_R_SHIFT_24  0
+#define DEFAULT_RGB_G_SHIFT_24  8
+#define DEFAULT_RGB_B_SHIFT_24  16
+#define DEFAULT_RGB_R_SHIFT_32  0
+#define DEFAULT_RGB_G_SHIFT_32  8
+#define DEFAULT_RGB_B_SHIFT_32  16
+#define DEFAULT_RGB_A_SHIFT_32  24
+
+int _rgb_r_shift_15 = DEFAULT_RGB_R_SHIFT_15;     /* truecolor pixel format */
+int _rgb_g_shift_15 = DEFAULT_RGB_G_SHIFT_15;
+int _rgb_b_shift_15 = DEFAULT_RGB_B_SHIFT_15;
+int _rgb_r_shift_16 = DEFAULT_RGB_R_SHIFT_16;
+int _rgb_g_shift_16 = DEFAULT_RGB_G_SHIFT_16;
+int _rgb_b_shift_16 = DEFAULT_RGB_B_SHIFT_16;
+int _rgb_r_shift_24 = DEFAULT_RGB_R_SHIFT_24;
+int _rgb_g_shift_24 = DEFAULT_RGB_G_SHIFT_24;
+int _rgb_b_shift_24 = DEFAULT_RGB_B_SHIFT_24;
+int _rgb_r_shift_32 = DEFAULT_RGB_R_SHIFT_32;
+int _rgb_g_shift_32 = DEFAULT_RGB_G_SHIFT_32;
+int _rgb_b_shift_32 = DEFAULT_RGB_B_SHIFT_32;
+int _rgb_a_shift_32 = DEFAULT_RGB_A_SHIFT_32;
+
+/* lookup table for scaling 5 bit colors up to 8 bits */
+static int _rgb_scale_5[32] =
+{
+	0,   8,   16,  24,  33,  41,  49,  57,
+	66,  74,  82,  90,  99,  107, 115, 123,
+	132, 140, 148, 156, 165, 173, 181, 189,
+	198, 206, 214, 222, 231, 239, 247, 255
+};
+
+
+/* lookup table for scaling 6 bit colors up to 8 bits */
+static int _rgb_scale_6[64] =
+{
+	0,   4,   8,   12,  16,  20,  24,  28,
+	32,  36,  40,  44,  48,  52,  56,  60,
+	65,  69,  73,  77,  81,  85,  89,  93,
+	97,  101, 105, 109, 113, 117, 121, 125,
+	130, 134, 138, 142, 146, 150, 154, 158,
+	162, 166, 170, 174, 178, 182, 186, 190,
+	195, 199, 203, 207, 211, 215, 219, 223,
+	227, 231, 235, 239, 243, 247, 251, 255
+};
+
+int alw_get_rgb_scale_5(int x) { return _rgb_scale_5[x]; }
+int alw_get_rgb_scale_6(int x){ return _rgb_scale_6[x]; }
+
+int  alw_get_rgb_r_shift_15() {return _rgb_r_shift_15;}
+int  alw_get_rgb_g_shift_15() {return _rgb_g_shift_15;}
+int  alw_get_rgb_b_shift_15() {return _rgb_b_shift_15;}
+int  alw_get_rgb_r_shift_16() {return _rgb_r_shift_16;}
+int  alw_get_rgb_g_shift_16() {return _rgb_g_shift_16;}
+int  alw_get_rgb_b_shift_16() {return _rgb_b_shift_16;}
+int  alw_get_rgb_r_shift_32() {return _rgb_r_shift_32;}
+int  alw_get_rgb_g_shift_32() {return _rgb_g_shift_32;}
+int  alw_get_rgb_b_shift_32() {return _rgb_b_shift_32;}
+int  alw_get_rgb_a_shift_32() {return _rgb_a_shift_32;}
+void  alw_set_rgb_r_shift_15(int x) {_rgb_r_shift_15 = x;}
+void  alw_set_rgb_g_shift_15(int x) {_rgb_g_shift_15 = x;}
+void  alw_set_rgb_b_shift_15(int x) {_rgb_b_shift_15 = x;}
+void  alw_set_rgb_r_shift_16(int x) {_rgb_r_shift_16 = x;}
+void  alw_set_rgb_g_shift_16(int x) {_rgb_g_shift_16 = x;}
+void  alw_set_rgb_b_shift_16(int x) {_rgb_b_shift_16 = x;}
+void  alw_set_rgb_r_shift_32(int x) {_rgb_r_shift_32 = x;}
+void  alw_set_rgb_g_shift_32(int x) {_rgb_g_shift_32 = x;}
+void  alw_set_rgb_b_shift_32(int x) {_rgb_b_shift_32 = x;}
+void  alw_set_rgb_a_shift_32(int x) {_rgb_a_shift_32 = x;}
+
 
 
 // INIT
@@ -178,7 +263,37 @@ static void _bmp_set_color_key(ALW_BITMAP *bmp) {
 
 ALW_BITMAP *alw_create_bitmap_ex(int color_depth, int width, int height) {
 	// depth (8, 15, 16, 24 or 32 bits per pixel)
-	SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, color_depth, 0,0,0,0);
+  
+  Uint32 rmask=0, gmask=0, bmask=0, amask =0;
+  
+  switch (color_depth) {
+    case 8: break;
+    case 15:
+      rmask = 0x1f << _rgb_r_shift_15;
+      gmask = 0x1f << _rgb_g_shift_15;
+      bmask = 0x1f << _rgb_b_shift_15;
+      break;
+    case 16:
+      rmask = 0x1f << _rgb_r_shift_16;
+      gmask = 0x3f << _rgb_g_shift_16;
+      bmask = 0x1f << _rgb_b_shift_16;
+      break;
+    case 24:
+      rmask = 0xff << _rgb_r_shift_32;
+      gmask = 0xff << _rgb_g_shift_32;
+      bmask = 0xff << _rgb_b_shift_32;
+      break;
+    case 32:
+      rmask = 0xff << _rgb_r_shift_32;
+      gmask = 0xff << _rgb_g_shift_32;
+      bmask = 0xff << _rgb_b_shift_32;
+      amask = 0xff << _rgb_a_shift_32;
+      break;
+  }
+  
+	SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, color_depth, rmask, gmask, bmask, amask);
+  SDL_SetAlpha(surf, 0, 0xff);  // i think specifying amask sets the SDL_SRCALPHA flag which screws with sdl blits.
+  
   _add_palette_to_surface(surf);
 	ALW_BITMAP *bmp = wrap_sdl_surface(surf);
   _bmp_set_color_key(bmp);
@@ -262,10 +377,10 @@ void alw_release_bitmap(ALW_BITMAP *bmp) {
     SDL_UnlockSurface(bmp->surf);
 }
 void alw_acquire_screen() {
-  SDL_LockSurface(alw_screen->surf);
+  SDL_LockSurface(_actual_sdl_screen);
 }
 void alw_release_screen() {
-	SDL_UnlockSurface(alw_screen->surf);
+	SDL_UnlockSurface(_actual_sdl_screen);
 }
 void alw_set_clip_rect(ALW_BITMAP *bitmap, int x1, int y1, int x2, int y2) {
   /* internal clipping is inclusive-exclusive */
@@ -287,7 +402,8 @@ void alw_set_clip_state(ALW_BITMAP *bitmap, int state) {
 // GRAPHICS MODES
 // ============================================================================
 
-static SDL_Surface *_actual_sdl_screen;
+// original virtual screen (before alw_screen gets changed)
+static ALW_BITMAP *_original_screen = 0;
 
 //void alw_set_color_depth(int depth) { PRINT_STUB;}
 int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
@@ -297,9 +413,36 @@ int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
 	_actual_sdl_screen = SDL_SetVideoMode(w, h, _colour_depth, SDL_SWSURFACE|SDL_HWPALETTE);
 	if (_actual_sdl_screen == NULL)
 		return 1;
-
-	alw_screen = wrap_sdl_surface(_actual_sdl_screen);
-  _bmp_set_color_key(alw_screen);
+  
+  // are we meant to set rgb_shifts after setting video mode?
+#if 0
+  switch (_colour_depth) {
+    case 15:
+      _rgb_r_shift_15 = _actual_sdl_screen->format->Rshift;
+      _rgb_g_shift_15 = _actual_sdl_screen->format->Gshift;
+      _rgb_b_shift_15 = _actual_sdl_screen->format->Bshift;
+      break;
+    case 16:
+      _rgb_r_shift_16 = _actual_sdl_screen->format->Rshift;
+      _rgb_g_shift_16 = _actual_sdl_screen->format->Gshift;
+      _rgb_b_shift_16 = _actual_sdl_screen->format->Bshift;
+      break;
+    case 24:
+      _rgb_r_shift_24 = _actual_sdl_screen->format->Rshift;
+      _rgb_g_shift_24 = _actual_sdl_screen->format->Gshift;
+      _rgb_b_shift_24 = _actual_sdl_screen->format->Bshift;
+      break;
+    case 32:
+      _rgb_r_shift_32 = _actual_sdl_screen->format->Rshift;
+      _rgb_g_shift_32 = _actual_sdl_screen->format->Gshift;
+      _rgb_b_shift_32 = _actual_sdl_screen->format->Bshift;
+      _rgb_a_shift_32 = _actual_sdl_screen->format->Ashift;
+      break;
+  }
+#endif
+  
+  _original_screen = alw_create_bitmap_ex(_colour_depth, w, h);
+  alw_screen = _original_screen;
 	return 0;
 }
 
@@ -310,6 +453,7 @@ int alw_set_display_switch_mode(int mode) { PRINT_STUB; return 0;}
 int alw_set_display_switch_callback(int dir, void (*cb)()){ PRINT_STUB; return 0;}
 
 void alw_vsync(){
+  SDL_BlitSurface(_original_screen->surf, 0, _actual_sdl_screen, 0);
 	SDL_Flip(_actual_sdl_screen);
 }
 
@@ -338,7 +482,8 @@ void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
   SDL_SetPalette(surface, flags, colors, firstcolor, ncolors);
   
   if (vsync)
-    SDL_Flip(_actual_sdl_screen);
+    alw_vsync();
+//    SDL_Flip(_actual_sdl_screen);
 }
 void alw_get_palette_range(ALW_PALETTE p, int from, int to) { PRINT_STUB; }
 
@@ -506,7 +651,6 @@ int alw_pack_fclose(ALW_PACKFILE *f) {
 // ============================================================================
 
 extern void blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height);
-
 void alw_blit(ALW_BITMAP *source, ALW_BITMAP *dest, int source_x, int source_y, int dest_x, int dest_y, int width, int height) {
   PRINT_STUB;
   blit(source, dest, source_x, source_y, dest_x, dest_y, width, height);
@@ -542,38 +686,85 @@ void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) 
 // ============================================================================
 
 int alw_makecol_depth(int color_depth, int r, int g, int b) {
-  PRINT_STUB; 
-  return SDL_MapRGB(_actual_sdl_screen->format, r, g, b);
+  PRINT_STUB;
+  switch (color_depth) {
+    case 8:
+      return 1; // fix later.
+    case 15:
+      return (((r >> 3) << _rgb_r_shift_15) |
+              ((g >> 3) << _rgb_g_shift_15) |
+              ((b >> 3) << _rgb_b_shift_15));
+    case 16:
+      return (((r >> 3) << _rgb_r_shift_16) |
+              ((g >> 2) << _rgb_g_shift_16) |
+              ((b >> 3) << _rgb_b_shift_16));
+    case 24:
+      return ((r << _rgb_r_shift_24) |
+              (g << _rgb_g_shift_24) |
+              (b << _rgb_b_shift_24));
+    case 32:
+      return ((r << _rgb_r_shift_32) |
+              (g << _rgb_g_shift_32) |
+              (b << _rgb_b_shift_32));
+  }
   return 0;
 }
-int alw_makeacol_depth(int color_depth, int r, int g, int b, int a) { PRINT_STUB; return 0;}
-int alw_getr_depth(int color_depth, int c)
-{ 
+int alw_makeacol_depth(int color_depth, int r, int g, int b, int a) { 
   PRINT_STUB;
-  Uint8 r,g,b;
-  SDL_GetRGB(c, _actual_sdl_screen->format, &r, &g, &b);
-  return r;
+  switch (color_depth) {
+    case 32:
+      return ((r << _rgb_r_shift_32) |
+              (g << _rgb_g_shift_32) |
+              (b << _rgb_b_shift_32) |
+              (a << _rgb_a_shift_32));
+    default:
+      return alw_makecol_depth(color_depth, r,g, b);
+  }
+
+}
+int alw_getr_depth(int color_depth, int c)
+{
+  PRINT_STUB;
+  switch (color_depth) {
+    case 8: return _rgb_scale_6[(int)alw_current_palette[c].r];
+    case 15: return _rgb_scale_5[(c >> _rgb_r_shift_15) & 0x1F];
+    case 16: return _rgb_scale_5[(c >> _rgb_r_shift_16) & 0x1F];
+    case 24: return ((c >> _rgb_r_shift_24) & 0xFF);
+    case 32: return ((c >> _rgb_r_shift_32) & 0xFF);
+  }
+  return 0;
 }
 int alw_getg_depth(int color_depth, int c)
 { 
   PRINT_STUB;
-  Uint8 r,g,b;
-  SDL_GetRGB(c, _actual_sdl_screen->format, &r, &g, &b);
-  return g;
+  switch (color_depth) {
+    case 8: return _rgb_scale_6[(int)alw_current_palette[c].g];
+    case 15: return _rgb_scale_5[(c >> _rgb_g_shift_15) & 0x1F];
+    case 16: return _rgb_scale_6[(c >> _rgb_g_shift_16) & 0x3F];
+    case 24: return ((c >> _rgb_g_shift_24) & 0xFF);
+    case 32: return ((c >> _rgb_g_shift_32) & 0xFF);
+  }
+  return 0;
 }
 int alw_getb_depth(int color_depth, int c)
 { 
   PRINT_STUB;
-  Uint8 r,g,b;
-  SDL_GetRGB(c, _actual_sdl_screen->format, &r, &g, &b);
-  return b;
+  switch (color_depth) {
+    case 8: return _rgb_scale_6[(int)alw_current_palette[c].b];
+    case 15: return _rgb_scale_5[(c >> _rgb_b_shift_15) & 0x1F];
+    case 16: return _rgb_scale_5[(c >> _rgb_b_shift_16) & 0x1F];
+    case 24: return ((c >> _rgb_b_shift_24) & 0xFF);
+    case 32: return ((c >> _rgb_b_shift_32) & 0xFF);
+  }
+  return 0;
 }
 int alw_geta_depth(int color_depth, int c)
 {  
   PRINT_STUB;
-  Uint8 r,g,b,a;
-  SDL_GetRGBA(c, _actual_sdl_screen->format, &r, &g, &b, &a);
-  return a;
+  switch (color_depth) {
+    case 32: return ((c >> _rgb_a_shift_32) & 0xFF);
+  }
+  return 0;
 }
 
 
@@ -1618,66 +1809,6 @@ void alw_rest(unsigned int time) {
 extern "C" {
 	ALW_GFX_VTABLE *_get_vtable(int color_depth){ PRINT_STUB; return 0;}
 }
-
-
-/* lookup table for scaling 5 bit colors up to 8 bits */
-static int _rgb_scale_5[32] =
-{
-	0,   8,   16,  24,  33,  41,  49,  57,
-	66,  74,  82,  90,  99,  107, 115, 123,
-	132, 140, 148, 156, 165, 173, 181, 189,
-	198, 206, 214, 222, 231, 239, 247, 255
-};
-
-
-/* lookup table for scaling 6 bit colors up to 8 bits */
-static int _rgb_scale_6[64] =
-{
-	0,   4,   8,   12,  16,  20,  24,  28,
-	32,  36,  40,  44,  48,  52,  56,  60,
-	65,  69,  73,  77,  81,  85,  89,  93,
-	97,  101, 105, 109, 113, 117, 121, 125,
-	130, 134, 138, 142, 146, 150, 154, 158,
-	162, 166, 170, 174, 178, 182, 186, 190,
-	195, 199, 203, 207, 211, 215, 219, 223,
-	227, 231, 235, 239, 243, 247, 251, 255
-};
-
-int alw_get_rgb_scale_5(int x) { return _rgb_scale_5[x]; }
-int alw_get_rgb_scale_6(int x){ return _rgb_scale_6[x]; }
-
-
-static int  _rgb_r_shift_15;
-static int  _rgb_g_shift_15;
-static int  _rgb_b_shift_15;
-static int  _rgb_r_shift_16;
-static int  _rgb_g_shift_16;
-static int  _rgb_b_shift_16;
-static int  _rgb_r_shift_32;
-static int  _rgb_g_shift_32;
-static int  _rgb_b_shift_32;
-static int  _rgb_a_shift_32;
-
-int  alw_get_rgb_r_shift_15() {return _rgb_r_shift_15;}
-int  alw_get_rgb_g_shift_15() {return _rgb_g_shift_15;}
-int  alw_get_rgb_b_shift_15() {return _rgb_b_shift_15;}
-int  alw_get_rgb_r_shift_16() {return _rgb_r_shift_16;}
-int  alw_get_rgb_g_shift_16() {return _rgb_g_shift_16;}
-int  alw_get_rgb_b_shift_16() {return _rgb_b_shift_16;}
-int  alw_get_rgb_r_shift_32() {return _rgb_r_shift_32;}
-int  alw_get_rgb_g_shift_32() {return _rgb_g_shift_32;}
-int  alw_get_rgb_b_shift_32() {return _rgb_b_shift_32;}
-int  alw_get_rgb_a_shift_32() {return _rgb_a_shift_32;}
-void  alw_set_rgb_r_shift_15(int x) {_rgb_r_shift_15 = x;}
-void  alw_set_rgb_g_shift_15(int x) {_rgb_g_shift_15 = x;}
-void  alw_set_rgb_b_shift_15(int x) {_rgb_b_shift_15 = x;}
-void  alw_set_rgb_r_shift_16(int x) {_rgb_r_shift_16 = x;}
-void  alw_set_rgb_g_shift_16(int x) {_rgb_g_shift_16 = x;}
-void  alw_set_rgb_b_shift_16(int x) {_rgb_b_shift_16 = x;}
-void  alw_set_rgb_r_shift_32(int x) {_rgb_r_shift_32 = x;}
-void  alw_set_rgb_g_shift_32(int x) {_rgb_g_shift_32 = x;}
-void  alw_set_rgb_b_shift_32(int x) {_rgb_b_shift_32 = x;}
-void  alw_set_rgb_a_shift_32(int x) {_rgb_a_shift_32 = x;}
 
 #ifdef WINDOWS_VERSION
 static HWND _allegro_wnd = NULL;
