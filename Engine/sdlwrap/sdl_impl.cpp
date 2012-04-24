@@ -619,9 +619,11 @@ void alw_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)
   _normal_line(bmp, x1, y1, x2, y2, color);
 }
 
+extern void do_line(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int d, void (*proc)(ALW_BITMAP *, int, int, int));
 void alw_do_line(ALW_BITMAP *bmp, int x1, int y1,int x2,int y2, int d, void (*proc)(ALW_BITMAP *bmp, int x, int y, int d))
 { 
   PRINT_STUB; 
+  do_line(bmp, x1, y1, x2, y2, d, proc);
 }
 
 extern void _soft_rect(ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color);
