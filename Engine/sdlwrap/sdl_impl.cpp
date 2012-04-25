@@ -244,27 +244,27 @@ static void _add_palette_to_surface(SDL_Surface *surf) {
 }
 
 static void _bmp_set_color_key(ALW_BITMAP *bmp) {
-  SDL_Surface *surf = bmp->surf;
+  //SDL_Surface *surf = bmp->surf;
 
-  switch (surf->format->BitsPerPixel) {
+  switch (bmp->vtable->color_depth) {
     case 8:
-      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_8);
+      //SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_8);
       bmp->vtable->mask_color = MASK_COLOR_8;
       break;
     case 15:
-      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_15);
+      //SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_15);
       bmp->vtable->mask_color =MASK_COLOR_15;
       break;
     case 16:
-      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_16);
+      //SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_16);
       bmp->vtable->mask_color =MASK_COLOR_16;
       break;
     case 24:
-      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_24);
+      //SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_24);
       bmp->vtable->mask_color =MASK_COLOR_24;
       break;
     case 32:
-      SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_32);
+      //SDL_SetColorKey(surf, SDL_SRCCOLORKEY, MASK_COLOR_32);
       bmp->vtable->mask_color =MASK_COLOR_32;
       break;
   }
@@ -466,6 +466,8 @@ int alw_set_display_switch_mode(int mode) { PRINT_STUB; return 0;}
 int alw_set_display_switch_callback(int dir, void (*cb)()){ PRINT_STUB; return 0;}
 
 void alw_vsync(){
+  // TODO why does demo game require this, why is the screen not being cleared?
+  SDL_FillRect(_actual_sdl_screen, 0, 0);
   SDL_BlitSurface(_original_screen->surf, 0, _actual_sdl_screen, 0);
 	SDL_Flip(_actual_sdl_screen);
 }

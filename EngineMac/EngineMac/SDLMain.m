@@ -108,7 +108,7 @@ static NSString *getApplicationName(void)
 /* Set the working directory to the .app's parent directory */
 - (void) setupWorkingDirectory:(BOOL)shouldChdir
 {
-#if 0
+#if MAC_GAME_IN_BUNDLE
     // By changing the working directory to the application’s Resources folder, you 
     // should be able to use the same code to load files on Linux, Mac OS X, and Windows.
     // http://meandmark.com/blog/2009/12/sdl-tips-for-mac-os-x/
@@ -323,7 +323,9 @@ static void CustomApplicationMain (int argc, char **argv)
 {
     int status;
 
+#ifndef MAC_GAME_IN_BUNDLE
     [self askUserForExePath];
+#endif
   
     /* Set the working directory to the .app's parent directory */
     [self setupWorkingDirectory:gFinderLaunch];
