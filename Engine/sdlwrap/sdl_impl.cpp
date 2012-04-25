@@ -21,6 +21,12 @@
 #include "auderr.h"
 #include "sampleloader.h"
 
+// TODO: support 2x filters
+// TODO: opengl version
+// TODO: migrate from using MAC/WIN/LINUX_VERISON to feature specific defines.
+// TODO: port to 64bit version
+// TODO: port to ios
+
 char _debug_str[10000];
 
 //#define PRINT_STUB sprintf(_debug_str, "STUB %s:%d %s\n", __FILE__, __LINE__, __FUNCSIG__); OutputDebugString(_debug_str)
@@ -40,12 +46,14 @@ template<class T> T* allocmem(size_t nelem=1, size_t extra=0)
 
 
 int _bestfit_color_for_current_palette(int r, int g, int b) {
+  // TODO: implement bestfit color, if needed
   //return bestfit_color(_current_palette, r, g, b);
   return 0;
 }
 
 int _tmp_lookup_table[255] = {0};
 int *_palette_expansion_table(int color_depth) {
+  // TODO: implement palette expansion tables?
   return _tmp_lookup_table;
 }
 
@@ -190,6 +198,7 @@ void alw_set_color_depth(int depth) {
 GFX_VTABLE _default_vtable = {0};
 
 static ALW_BITMAP *wrap_sdl_surface(SDL_Surface *surf) {
+  // TODO: allow vtable overrides (like how the engine does in places)
   
   int nr_pointers = 2;
   if (surf->h > nr_pointers) nr_pointers = surf->h;
@@ -377,6 +386,7 @@ void alw_release_bitmap(ALW_BITMAP *bmp) {
     SDL_UnlockSurface(bmp->surf);
 }
 void alw_acquire_screen() {
+  // TODO: shouldn't we be using the fake screen?
   SDL_LockSurface(_actual_sdl_screen);
 }
 void alw_release_screen() {
@@ -415,6 +425,7 @@ int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
 		return 1;
   
   // are we meant to set rgb_shifts after setting video mode?
+  // TODO: investigate rgb_shifts.. how are they used when set by engine?
 #if 0
   switch (_colour_depth) {
     case 15:
@@ -446,9 +457,11 @@ int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
 	return 0;
 }
 
+// TODO: support gfx mode lists?
 ALW_GFX_MODE_LIST *alw_get_gfx_mode_list(int card){ PRINT_STUB; return 0;}
 void alw_destroy_gfx_mode_list(ALW_GFX_MODE_LIST *mode_list) { PRINT_STUB;}
 
+// TODO: support display switches?
 int alw_set_display_switch_mode(int mode) { PRINT_STUB; return 0;}
 int alw_set_display_switch_callback(int dir, void (*cb)()){ PRINT_STUB; return 0;}
 
@@ -461,7 +474,7 @@ void alw_vsync(){
 // ALW_PALETTE
 // ============================================================================
 
-// we might be able to get away with no setting palettes yet.
+// TODO: fix palette implementations
 
 ALW_PALETTE alw_black_palette;
 ALW_PALETTE alw_current_palette; 
@@ -692,6 +705,8 @@ void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) 
 // COLOURS
 // ============================================================================
 
+// TODO: fix 8bit makecol, getcol with palettes
+
 int alw_makecol_depth(int color_depth, int r, int g, int b) {
   PRINT_STUB;
   switch (color_depth) {
@@ -846,6 +861,7 @@ void alw_rectfill ( ALW_BITMAP *bmp, int x1, int y1, int x2, int y2, int color)
 void alw_triangle(ALW_BITMAP *bmp, int x1,int y1,int x2,int y2,int x3,int y3, int color)
 { 
   PRINT_STUB; 
+  // TODO implement triangle?
   // requires polygon.c from allegro.  do we need this too?
 }
 
@@ -989,6 +1005,10 @@ int alw_poll_mouse() {
 
 // KEYBOARD
 // ============================================================================
+
+// TODO: what does it mean when readkey returns 0?
+
+// TODO: can we handle events asyncronously?
 
 static int _scancode_sdl_to_allegro(int sdl_key_sym);
 static int _scancode_allegro_to_sdl(int allegro_scancode);
@@ -1349,6 +1369,7 @@ static int _scancode_allegro_to_sdl(int allegro_scancode) {
   }
 }
 
+// TODO: do we still need this?
 const unsigned char alw_hw_to_mycode[256] = {
 	/* 0x00 */ 0, KEY_ESC, KEY_1, KEY_2,
 	/* 0x04 */ KEY_3, KEY_4, KEY_5, KEY_6,
@@ -1421,6 +1442,7 @@ LPDIRECTINPUTDEVICE alw_key_dinput_device;
 // TRANSPARENCY
 // ============================================================================
 
+// TODO: fix light table... and check where color_map is used.
 // 256-color transparency
 static ALW_COLOR_MAP *_alw_color_map;
 void alw_create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos)) { PRINT_STUB; }
@@ -1492,6 +1514,8 @@ int _blender_alpha = 0;                /* for truecolor translucent drawing */
 
 //static int _snd_digi_voices = -1;
 //static int _snd_midi_voices = -1;
+
+// TODO: create sound manager that runs in seperate thread
 
 static ALCdevice* _openal_device;
 static ALCcontext* _openal_context;
@@ -1630,7 +1654,7 @@ void AlwSample::set_volume(int vol) {
 }
 
 void AlwSample::set_pan(int pan) {
-  
+  // TODO: implement panning
 }
 
 void AlwSample::set_loop(int isloop) {
@@ -1700,6 +1724,8 @@ AlwSample *alw_load_sample(const char *filename){   //***
 // MIDI
 // ============================================================================
 
+// TODO implement midi playing
+
 volatile long alw_midi_pos = 0;
 
 ALW_MIDI *alw_load_midi(const char *filename){ PRINT_STUB; return 0;}
@@ -1720,6 +1746,8 @@ void alw_stop_audio_stream(ALW_AUDIOSTREAM *stream){ PRINT_STUB; }
 // COLOR FORMATS
 // ============================================================================
 
+// TODO: fix rgb maps
+
 //ALW_RGB_MAP *alw_rgb_map;
 void alw_set_rgb_map(ALW_RGB_MAP *rgb_map) { PRINT_STUB; }
 //void alw_rgb_to_hsv(int r, int g, int b, float h, float *s, float *v){ PRINT_STUB; }
@@ -1738,15 +1766,24 @@ int alw_wnd_call_proc(int (*proc)(void)){ PRINT_STUB;  return 0;}
 
 // AASTRETCH
 // ============================================================================
+
+// TODO: implement stretched sprites
+
 void aa_stretch_sprite (ALW_BITMAP* dst, ALW_BITMAP* src, int dx, int dy, int dw, int dh){ PRINT_STUB;}
 
 // FLI
 // ============================================================================
+
+// TODO: FLI support
+
 int alw_play_fli(const char *filename, ALW_BITMAP *bmp, int loop, int (*callback)()){ PRINT_STUB; return ALW_FLI_OK;}
 
 
 // IMAGE FILES
 // ============================================================================
+
+// TODO: save/load bitmaps, color conversions...
+
 int alw_save_bitmap(const char *filename, ALW_BITMAP *bmp, const ALW_RGB *pal){ PRINT_STUB; return 0;}
 ALW_BITMAP *alw_load_bitmap(const char *filename, ALW_RGB *pal){ PRINT_STUB; return 0;}
 ALW_BITMAP *alw_load_pcx(const char *filename, ALW_RGB *pal) { PRINT_STUB; return 0;}
@@ -1766,6 +1803,9 @@ int alw_get_color_conversion() {
 
 // UNICODE
 // ============================================================================
+
+// TODO: how to support unicode...
+
 char *alw_uconvert(const char *s, int type, char *buf, int newtype, int size){ PRINT_STUB; return 0;}
 void alw_set_uformat(int type){ PRINT_STUB;}
 
@@ -1813,6 +1853,7 @@ void alw_rest(unsigned int time) {
 // MISC
 // ============================================================================
 
+// TODO: find where _get_vtable used.. find why used.
 extern "C" {
 	ALW_GFX_VTABLE *_get_vtable(int color_depth){ PRINT_STUB; return 0;}
 }
@@ -1853,6 +1894,8 @@ int alfont_text_length(ALFONT_FONT *f, const char *str){ PRINT_STUB; return 0;}
 // CDLIB
 // ============================================================================
 
+// TODO: what to do with cd playing?
+
 extern "C" {
 	int cd_init(void){ PRINT_STUB; return 0;}
 	void cd_exit(void){ PRINT_STUB;}
@@ -1868,6 +1911,8 @@ extern "C" {
 
 // DUMB
 // ============================================================================
+
+// TODO: support dumb
 
 DUMB_IT_SIGRENDERER *duh_get_it_sigrenderer(DUH_SIGRENDERER *sigrenderer){ PRINT_STUB; return 0;}
 int dumb_it_sr_get_current_order(DUMB_IT_SIGRENDERER *sr){ PRINT_STUB; return 0;}

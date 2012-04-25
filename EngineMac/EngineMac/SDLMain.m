@@ -90,8 +90,8 @@ static NSString *getApplicationName(void)
   [openDlg setCanChooseDirectories:NO]; // no dirs
   [openDlg setAllowsMultipleSelection:NO];
   [openDlg setAllowedFileTypes:fileTypes];
-  NSURL *homeUrl = [NSURL fileURLWithPath: NSHomeDirectory()];
-  [openDlg setDirectoryURL:homeUrl ];
+  //NSURL *homeUrl = [NSURL fileURLWithPath: NSHomeDirectory()];
+  //[openDlg setDirectoryURL:homeUrl ];
   
   // Display the dialog.  If the OK button was pressed,
   // process the files.
