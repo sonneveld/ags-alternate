@@ -27,7 +27,6 @@
 		511BCC341544D53300BE1A4F /* math.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC211544D53300BE1A4F /* math.cpp */; };
 		511BCC351544D53300BE1A4F /* rotate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC221544D53300BE1A4F /* rotate.cpp */; };
 		511BCC381544DCE500BE1A4F /* vtable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC371544DCE500BE1A4F /* vtable.cpp */; };
-		511BCC411544E70F00BE1A4F /* libfreetype.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 511BCC401544E70F00BE1A4F /* libfreetype.dylib */; };
 		511BCC431544E88F00BE1A4F /* alfont.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC421544E88F00BE1A4F /* alfont.cpp */; };
 		511BCC4A1544F20800BE1A4F /* cgfx8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC451544F20800BE1A4F /* cgfx8.cpp */; };
 		511BCC4B1544F20800BE1A4F /* cgfx15.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 511BCC461544F20800BE1A4F /* cgfx15.cpp */; };
@@ -116,6 +115,30 @@
 		513DDB97153BEAD000CF4C88 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 513DDB93153BEAB200CF4C88 /* Vorbis.framework */; };
 		513DDB98153BEAD000CF4C88 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 513DDB91153BEAA900CF4C88 /* Ogg.framework */; };
 		5184BD461546DEFD00C4BC2C /* ufile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD451546DEFD00C4BC2C /* ufile.cpp */; };
+		5184BD4D1547CD7D00C4BC2C /* autohint.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD4C1547CD7D00C4BC2C /* autohint.c */; };
+		5184BD4F1547CDA400C4BC2C /* bdf.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD4E1547CDA400C4BC2C /* bdf.c */; };
+		5184BD551547CDCD00C4BC2C /* ftcache.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD541547CDCD00C4BC2C /* ftcache.c */; };
+		5184BD5D1547CE9500C4BC2C /* ftdebug.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD571547CE9500C4BC2C /* ftdebug.c */; };
+		5184BD5E1547CE9500C4BC2C /* ftglyph.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD581547CE9500C4BC2C /* ftglyph.c */; };
+		5184BD5F1547CE9500C4BC2C /* ftinit.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD591547CE9500C4BC2C /* ftinit.c */; };
+		5184BD601547CE9500C4BC2C /* ftmm.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD5A1547CE9500C4BC2C /* ftmm.c */; };
+		5184BD611547CE9500C4BC2C /* ftsystem.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD5B1547CE9500C4BC2C /* ftsystem.c */; };
+		5184BD631547CEBF00C4BC2C /* cff.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD621547CEBF00C4BC2C /* cff.c */; };
+		5184BD651547CECF00C4BC2C /* type1cid.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD641547CECF00C4BC2C /* type1cid.c */; };
+		5184BD671547CEE000C4BC2C /* ftgzip.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD661547CEE000C4BC2C /* ftgzip.c */; };
+		5184BD691547CEFB00C4BC2C /* pcf.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD681547CEFB00C4BC2C /* pcf.c */; };
+		5184BD6B1547CF0500C4BC2C /* pfr.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD6A1547CF0500C4BC2C /* pfr.c */; };
+		5184BD6D1547CF1600C4BC2C /* psaux.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD6C1547CF1600C4BC2C /* psaux.c */; };
+		5184BD6F1547CF2700C4BC2C /* pshinter.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD6E1547CF2600C4BC2C /* pshinter.c */; };
+		5184BD711547CF3A00C4BC2C /* psmodule.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD701547CF3A00C4BC2C /* psmodule.c */; };
+		5184BD731547CF4B00C4BC2C /* raster.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD721547CF4B00C4BC2C /* raster.c */; };
+		5184BD751547CF5800C4BC2C /* sfnt.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD741547CF5800C4BC2C /* sfnt.c */; };
+		5184BD771547CF7100C4BC2C /* smooth.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD761547CF7100C4BC2C /* smooth.c */; };
+		5184BD791547CF8100C4BC2C /* truetype.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD781547CF8100C4BC2C /* truetype.c */; };
+		5184BD7B1547CF8B00C4BC2C /* type1.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD7A1547CF8B00C4BC2C /* type1.c */; };
+		5184BD7D1547CF9500C4BC2C /* type42.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD7C1547CF9500C4BC2C /* type42.c */; };
+		5184BD7F1547CF9E00C4BC2C /* winfnt.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD7E1547CF9E00C4BC2C /* winfnt.c */; };
+		51990EFD1547D65700192312 /* ftbase.c in Sources */ = {isa = PBXBuildFile; fileRef = 51990EFC1547D65700192312 /* ftbase.c */; };
 		519E332E153137400026C374 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 519E332D153137400026C374 /* Cocoa.framework */; };
 		519E3338153137400026C374 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 519E3336153137400026C374 /* InfoPlist.strings */; };
 		519E333E153137400026C374 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 519E333C153137400026C374 /* Credits.rtf */; };
@@ -140,6 +163,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		5184BD491546F0A000C4BC2C /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 6;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		519E336815314CBD0026C374 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -184,7 +216,6 @@
 		511BCC221544D53300BE1A4F /* rotate.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rotate.cpp; sourceTree = "<group>"; };
 		511BCC371544DCE500BE1A4F /* vtable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vtable.cpp; sourceTree = "<group>"; };
 		511BCC3A1544E14200BE1A4F /* alfont.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alfont.h; sourceTree = "<group>"; };
-		511BCC401544E70F00BE1A4F /* libfreetype.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libfreetype.dylib; path = /usr/X11/lib/libfreetype.dylib; sourceTree = "<absolute>"; };
 		511BCC421544E88F00BE1A4F /* alfont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alfont.cpp; sourceTree = "<group>"; };
 		511BCC441544F20800BE1A4F /* cgfx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cgfx.h; sourceTree = "<group>"; };
 		511BCC451544F20800BE1A4F /* cgfx8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cgfx8.cpp; sourceTree = "<group>"; };
@@ -199,7 +230,31 @@
 		513DDB91153BEAA900CF4C88 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = Library/Frameworks/Ogg.framework; sourceTree = SDKROOT; };
 		513DDB93153BEAB200CF4C88 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = Library/Frameworks/Vorbis.framework; sourceTree = SDKROOT; };
 		5184BD451546DEFD00C4BC2C /* ufile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ufile.cpp; sourceTree = "<group>"; };
+		5184BD4C1547CD7D00C4BC2C /* autohint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = autohint.c; path = "../../External/freetype-2.1.3/src/autohint/autohint.c"; sourceTree = "<group>"; };
+		5184BD4E1547CDA400C4BC2C /* bdf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bdf.c; path = "../../External/freetype-2.1.3/src/bdf/bdf.c"; sourceTree = "<group>"; };
+		5184BD541547CDCD00C4BC2C /* ftcache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftcache.c; path = "../../External/freetype-2.1.3/src/cache/ftcache.c"; sourceTree = "<group>"; };
+		5184BD571547CE9500C4BC2C /* ftdebug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftdebug.c; path = "../../External/freetype-2.1.3/src/base/ftdebug.c"; sourceTree = "<group>"; };
+		5184BD581547CE9500C4BC2C /* ftglyph.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftglyph.c; path = "../../External/freetype-2.1.3/src/base/ftglyph.c"; sourceTree = "<group>"; };
+		5184BD591547CE9500C4BC2C /* ftinit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftinit.c; path = "../../External/freetype-2.1.3/src/base/ftinit.c"; sourceTree = "<group>"; };
+		5184BD5A1547CE9500C4BC2C /* ftmm.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftmm.c; path = "../../External/freetype-2.1.3/src/base/ftmm.c"; sourceTree = "<group>"; };
+		5184BD5B1547CE9500C4BC2C /* ftsystem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftsystem.c; path = "../../External/freetype-2.1.3/src/base/ftsystem.c"; sourceTree = "<group>"; };
+		5184BD621547CEBF00C4BC2C /* cff.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cff.c; path = "../../External/freetype-2.1.3/src/cff/cff.c"; sourceTree = "<group>"; };
+		5184BD641547CECF00C4BC2C /* type1cid.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type1cid.c; path = "../../External/freetype-2.1.3/src/cid/type1cid.c"; sourceTree = "<group>"; };
+		5184BD661547CEE000C4BC2C /* ftgzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftgzip.c; path = "../../External/freetype-2.1.3/src/gzip/ftgzip.c"; sourceTree = "<group>"; };
+		5184BD681547CEFB00C4BC2C /* pcf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pcf.c; path = "../../External/freetype-2.1.3/src/pcf/pcf.c"; sourceTree = "<group>"; };
+		5184BD6A1547CF0500C4BC2C /* pfr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pfr.c; path = "../../External/freetype-2.1.3/src/pfr/pfr.c"; sourceTree = "<group>"; };
+		5184BD6C1547CF1600C4BC2C /* psaux.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psaux.c; path = "../../External/freetype-2.1.3/src/psaux/psaux.c"; sourceTree = "<group>"; };
+		5184BD6E1547CF2600C4BC2C /* pshinter.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = pshinter.c; path = "../../External/freetype-2.1.3/src/pshinter/pshinter.c"; sourceTree = "<group>"; };
+		5184BD701547CF3A00C4BC2C /* psmodule.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = psmodule.c; path = "../../External/freetype-2.1.3/src/psnames/psmodule.c"; sourceTree = "<group>"; };
+		5184BD721547CF4B00C4BC2C /* raster.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = raster.c; path = "../../External/freetype-2.1.3/src/raster/raster.c"; sourceTree = "<group>"; };
+		5184BD741547CF5800C4BC2C /* sfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = sfnt.c; path = "../../External/freetype-2.1.3/src/sfnt/sfnt.c"; sourceTree = "<group>"; };
+		5184BD761547CF7100C4BC2C /* smooth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = smooth.c; path = "../../External/freetype-2.1.3/src/smooth/smooth.c"; sourceTree = "<group>"; };
+		5184BD781547CF8100C4BC2C /* truetype.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = truetype.c; path = "../../External/freetype-2.1.3/src/truetype/truetype.c"; sourceTree = "<group>"; };
+		5184BD7A1547CF8B00C4BC2C /* type1.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type1.c; path = "../../External/freetype-2.1.3/src/type1/type1.c"; sourceTree = "<group>"; };
+		5184BD7C1547CF9500C4BC2C /* type42.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = type42.c; path = "../../External/freetype-2.1.3/src/type42/type42.c"; sourceTree = "<group>"; };
+		5184BD7E1547CF9E00C4BC2C /* winfnt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = winfnt.c; path = "../../External/freetype-2.1.3/src/winfonts/winfnt.c"; sourceTree = "<group>"; };
 		5192339B15411B44007332B6 /* alw_to_allegro.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = alw_to_allegro.h; sourceTree = "<group>"; };
+		51990EFC1547D65700192312 /* ftbase.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ftbase.c; path = "../../External/freetype-2.1.3/src/base/ftbase.c"; sourceTree = "<group>"; };
 		519E3329153137400026C374 /* EngineMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EngineMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		519E332D153137400026C374 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		519E3330153137400026C374 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -406,7 +461,6 @@
 				51AC3DF1153AEA6B004F7194 /* OpenAL.framework in Frameworks */,
 				51325BF6153162A100335A54 /* SDL.framework in Frameworks */,
 				51325BF7153162A100335A54 /* SDL_ttf.framework in Frameworks */,
-				511BCC411544E70F00BE1A4F /* libfreetype.dylib in Frameworks */,
 				513DDB95153BEACC00CF4C88 /* Vorbis.framework in Frameworks */,
 				513DDB96153BEACC00CF4C88 /* Ogg.framework in Frameworks */,
 			);
@@ -475,6 +529,37 @@
 			name = SDLMain;
 			sourceTree = "<group>";
 		};
+		5184BD4B1547CD3600C4BC2C /* freetype-2.1.3 */ = {
+			isa = PBXGroup;
+			children = (
+				5184BD4C1547CD7D00C4BC2C /* autohint.c */,
+				5184BD4E1547CDA400C4BC2C /* bdf.c */,
+				5184BD621547CEBF00C4BC2C /* cff.c */,
+				51990EFC1547D65700192312 /* ftbase.c */,
+				5184BD541547CDCD00C4BC2C /* ftcache.c */,
+				5184BD571547CE9500C4BC2C /* ftdebug.c */,
+				5184BD581547CE9500C4BC2C /* ftglyph.c */,
+				5184BD661547CEE000C4BC2C /* ftgzip.c */,
+				5184BD591547CE9500C4BC2C /* ftinit.c */,
+				5184BD5A1547CE9500C4BC2C /* ftmm.c */,
+				5184BD5B1547CE9500C4BC2C /* ftsystem.c */,
+				5184BD681547CEFB00C4BC2C /* pcf.c */,
+				5184BD6A1547CF0500C4BC2C /* pfr.c */,
+				5184BD6C1547CF1600C4BC2C /* psaux.c */,
+				5184BD6E1547CF2600C4BC2C /* pshinter.c */,
+				5184BD701547CF3A00C4BC2C /* psmodule.c */,
+				5184BD721547CF4B00C4BC2C /* raster.c */,
+				5184BD741547CF5800C4BC2C /* sfnt.c */,
+				5184BD761547CF7100C4BC2C /* smooth.c */,
+				5184BD781547CF8100C4BC2C /* truetype.c */,
+				5184BD7A1547CF8B00C4BC2C /* type1.c */,
+				5184BD641547CECF00C4BC2C /* type1cid.c */,
+				5184BD7C1547CF9500C4BC2C /* type42.c */,
+				5184BD7E1547CF9E00C4BC2C /* winfnt.c */,
+			);
+			name = "freetype-2.1.3";
+			sourceTree = "<group>";
+		};
 		519E331E153137400026C374 = {
 			isa = PBXGroup;
 			children = (
@@ -495,7 +580,6 @@
 		519E332C153137400026C374 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				511BCC401544E70F00BE1A4F /* libfreetype.dylib */,
 				51E12B77153E417700473584 /* AudioToolbox.framework */,
 				513DDB93153BEAB200CF4C88 /* Vorbis.framework */,
 				513DDB91153BEAA900CF4C88 /* Ogg.framework */,
@@ -521,6 +605,7 @@
 		519E3333153137400026C374 /* EngineMac */ = {
 			isa = PBXGroup;
 			children = (
+				5184BD4B1547CD3600C4BC2C /* freetype-2.1.3 */,
 				51DCFA5E153155170074E19B /* include */,
 				519E343615314EEC0026C374 /* sdlwrap */,
 				511BCC071544D53300BE1A4F /* allegro4 */,
@@ -761,6 +846,7 @@
 				519E3326153137400026C374 /* Frameworks */,
 				519E3327153137400026C374 /* Resources */,
 				519E336815314CBD0026C374 /* CopyFiles */,
+				5184BD491546F0A000C4BC2C /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -930,6 +1016,30 @@
 				511BCC4D1544F20800BE1A4F /* cgfx24.cpp in Sources */,
 				511BCC4E1544F20800BE1A4F /* cgfx32.cpp in Sources */,
 				5184BD461546DEFD00C4BC2C /* ufile.cpp in Sources */,
+				5184BD4D1547CD7D00C4BC2C /* autohint.c in Sources */,
+				5184BD4F1547CDA400C4BC2C /* bdf.c in Sources */,
+				5184BD551547CDCD00C4BC2C /* ftcache.c in Sources */,
+				5184BD5D1547CE9500C4BC2C /* ftdebug.c in Sources */,
+				5184BD5E1547CE9500C4BC2C /* ftglyph.c in Sources */,
+				5184BD5F1547CE9500C4BC2C /* ftinit.c in Sources */,
+				5184BD601547CE9500C4BC2C /* ftmm.c in Sources */,
+				5184BD611547CE9500C4BC2C /* ftsystem.c in Sources */,
+				5184BD631547CEBF00C4BC2C /* cff.c in Sources */,
+				5184BD651547CECF00C4BC2C /* type1cid.c in Sources */,
+				5184BD671547CEE000C4BC2C /* ftgzip.c in Sources */,
+				5184BD691547CEFB00C4BC2C /* pcf.c in Sources */,
+				5184BD6B1547CF0500C4BC2C /* pfr.c in Sources */,
+				5184BD6D1547CF1600C4BC2C /* psaux.c in Sources */,
+				5184BD6F1547CF2700C4BC2C /* pshinter.c in Sources */,
+				5184BD711547CF3A00C4BC2C /* psmodule.c in Sources */,
+				5184BD731547CF4B00C4BC2C /* raster.c in Sources */,
+				5184BD751547CF5800C4BC2C /* sfnt.c in Sources */,
+				5184BD771547CF7100C4BC2C /* smooth.c in Sources */,
+				5184BD791547CF8100C4BC2C /* truetype.c in Sources */,
+				5184BD7B1547CF8B00C4BC2C /* type1.c in Sources */,
+				5184BD7D1547CF9500C4BC2C /* type42.c in Sources */,
+				5184BD7F1547CF9E00C4BC2C /* winfnt.c in Sources */,
+				51990EFD1547D65700192312 /* ftbase.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1017,14 +1127,12 @@
 				HEADER_SEARCH_PATHS = (
 					"/Library/Frameworks/SDL.framework/Headers/**",
 					"/Library/Frameworks/SDL_ttf.framework/Headers/**",
-					"/usr/X11/include/**",
+					"../External/freetype-2.1.3/include",
+					"../External/freetype-2.1.3/include/freetype2",
 				);
 				INFOPLIST_FILE = "EngineMac/EngineMac-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/usr/X11/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -1051,14 +1159,12 @@
 				HEADER_SEARCH_PATHS = (
 					"/Library/Frameworks/SDL.framework/Headers/**",
 					"/Library/Frameworks/SDL_ttf.framework/Headers/**",
-					"/usr/X11/include/**",
+					"../External/freetype-2.1.3/include",
+					"../External/freetype-2.1.3/include/freetype2",
 				);
 				INFOPLIST_FILE = "EngineMac/EngineMac-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/usr/X11/lib,
-				);
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

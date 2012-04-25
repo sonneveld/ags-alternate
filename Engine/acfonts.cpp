@@ -398,12 +398,19 @@ void TTFFontRenderer::RenderText(const char *text, int fontNumber, ALW_BITMAP *d
   //if (y > destination->cb)  // optimisation
   //  return;
 
+#ifdef WINDOWS_VERSION
+  // I'm not sure why there is slight difference between windows and mac.
+  // TODO.. investigate?
+  
+  y -= 1; // Y - 1 because it seems to get drawn down a bit
+#endif
+  
   ALFONT_FONT *alfpt = get_ttf_block(fonts[fontNumber]);
-  // Y - 1 because it seems to get drawn down a bit
+  
   if ((ShouldAntiAliasText()) && (alw_bitmap_color_depth(abuf) > 8))
-    alfont_textout_aa(abuf, alfpt, text, x, y - 1, colour);
+    alfont_textout_aa(abuf, alfpt, text, x, y, colour);
   else
-    alfont_textout(abuf, alfpt, text, x, y - 1, colour);
+    alfont_textout(abuf, alfpt, text, x, y, colour);
 }
 
 bool TTFFontRenderer::LoadFromDisk(int fontNumber, int fontSize)
