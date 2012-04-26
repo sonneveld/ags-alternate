@@ -12769,11 +12769,16 @@ int initialize_graphics_filter(const char *filterID, int width, int height, int 
   int idx = 0;
   GFXFilter **filterList;
 
+  filterList = 0;
+  
+#ifdef WINDOWS_VERSION
   if (ac_stricmp(usetup.gfxDriverID, "D3D9") == 0)
   {
     filterList = get_d3d_gfx_filter_list(false);
   }
-  else
+#endif
+    
+  if (filterList == 0)
   {
     filterList = get_allegro_gfx_filter_list(false);
   }
@@ -13770,18 +13775,18 @@ void initeng_init_screen_settings(int &initasx, int &initasy, int &firstDepth, i
 
 void create_gfx_driver() 
 {
-#ifdef ENABLE_THIS_LATER
+  gfxDriver = 0;
+  
 #ifdef WINDOWS_VERSION
-  if (ac_stricmp(usetup.gfxDriverID, "D3D9") == 0)
+  if (stricmp(usetup.gfxDriverID, "D3D9") == 0) {
     gfxDriver = GetD3DGraphicsDriver(filter);
-  else
+  }
 #endif
+
+  if (gfxDriver == 0) {
     gfxDriver = GetSoftwareGraphicsDriver(filter);
-#else
-  gfxDriver = GetStubGraphicsDriver(filter);
-#endif
-  //gfxDriver = GetD3DGraphicsDriver(filter);
-  gfxDriver = GetSoftwareGraphicsDriver(filter);
+  }
+
   gfxDriver->SetCallbackOnInit(GfxDriverOnInitCallback);
   gfxDriver->SetTintMethod(TintReColourise);
 }
