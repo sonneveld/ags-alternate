@@ -93,7 +93,7 @@ int _rgb_b_shift_32 = DEFAULT_RGB_B_SHIFT_32;
 int _rgb_a_shift_32 = DEFAULT_RGB_A_SHIFT_32;
 
 /* lookup table for scaling 5 bit colors up to 8 bits */
-static int _rgb_scale_5[32] =
+ int _rgb_scale_5[32] =
 {
 	0,   8,   16,  24,  33,  41,  49,  57,
 	66,  74,  82,  90,  99,  107, 115, 123,
@@ -103,7 +103,7 @@ static int _rgb_scale_5[32] =
 
 
 /* lookup table for scaling 6 bit colors up to 8 bits */
-static int _rgb_scale_6[64] =
+ int _rgb_scale_6[64] =
 {
 	0,   4,   8,   12,  16,  20,  24,  28,
 	32,  36,  40,  44,  48,  52,  56,  60,
@@ -188,11 +188,11 @@ ALW_COLOR_MAP * color_map;
 
 ALW_BITMAP *alw_screen;
 
-static int _colour_depth = 0;
+int _color_depth = 0;
 
 void alw_set_color_depth(int depth) {
 	// depth (8, 15, 16, 24 or 32 bits per pixel)
-	_colour_depth = depth;
+	_color_depth = depth;
 }
 
 GFX_VTABLE _default_vtable = {0};
@@ -312,9 +312,9 @@ ALW_BITMAP *alw_create_bitmap_ex(int color_depth, int width, int height) {
 
 
 ALW_BITMAP *alw_create_bitmap(int width, int height) {
-  return alw_create_bitmap_ex(_colour_depth, width, height);
+  return alw_create_bitmap_ex(_color_depth, width, height);
 
-  //SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, _colour_depth, 0,0,0,0);
+  //SDL_Surface *surf = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, _color_depth, 0,0,0,0);
   //SDL_SetColorKey(surf, SDL_SRCCOLORKEY, 0);
   //_add_palette_to_surface(surf);
   //return wrap_sdl_surface(surf);
@@ -428,14 +428,14 @@ int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
 	assert(v_w == 0);
 	assert(v_h == 0);
 
-	_actual_sdl_screen = SDL_SetVideoMode(w, h, _colour_depth, SDL_SWSURFACE|SDL_HWPALETTE);
+	_actual_sdl_screen = SDL_SetVideoMode(w, h, _color_depth, SDL_SWSURFACE|SDL_HWPALETTE);
 	if (_actual_sdl_screen == NULL)
 		return 1;
   
   // are we meant to set rgb_shifts after setting video mode?
   // TODO: investigate rgb_shifts.. how are they used when set by engine?
 #if 0
-  switch (_colour_depth) {
+  switch (_color_depth) {
     case 15:
       _rgb_r_shift_15 = _actual_sdl_screen->format->Rshift;
       _rgb_g_shift_15 = _actual_sdl_screen->format->Gshift;
@@ -460,7 +460,7 @@ int alw_set_gfx_mode(int card, int w, int h, int v_w, int v_h){
   }
 #endif
   
-  _original_screen = alw_create_bitmap_ex(_colour_depth, w, h);
+  _original_screen = alw_create_bitmap_ex(_color_depth, w, h);
   alw_screen = _original_screen;
 	return 0;
 }
@@ -486,10 +486,12 @@ void alw_vsync(){
 
 // TODO: fix palette implementations
 
-ALW_PALETTE alw_black_palette;
-ALW_PALETTE alw_current_palette; 
+ALW_PALETTE alw_black_palette = {0};
+ALW_PALETTE _current_palette; 
 
-void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
+
+void alw_sys_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync)
+{
   SDL_Surface *surface = _actual_sdl_screen;
   int flags = SDL_PHYSPAL;
   int firstcolor = from;
@@ -504,21 +506,57 @@ void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) {
 
   SDL_SetPalette(surface, flags, colors, firstcolor, ncolors);
   
+  free(colors);
+  
   if (vsync)
     alw_vsync();
-//    SDL_Flip(_actual_sdl_screen);
 }
-void alw_get_palette_range(ALW_PALETTE p, int from, int to) { PRINT_STUB; }
 
-void alw_set_palette(const ALW_PALETTE p) { alw_set_palette_range(p, 0, ALW_PAL_SIZE-1, TRUE); }
-void alw_get_palette(ALW_PALETTE p) { alw_get_palette_range(p, 0, ALW_PAL_SIZE-1); }
+extern void set_palette_range(const ALW_PALETTE p, int from, int to, int vsync);
+void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync)
+{
+  PRINT_STUB;
+  set_palette_range(p, from, to, vsync);
+}
 
+extern void get_palette_range(ALW_PALETTE p, int from, int to);
+void alw_get_palette_range(ALW_PALETTE p, int from, int to)
+{
+  PRINT_STUB;
+  get_palette_range(p, from, to);
+}
 
-void alw_fade_interpolate(const ALW_PALETTE source, const ALW_PALETTE dest, ALW_PALETTE output, int pos, int from, int to) {PRINT_STUB; }
+void alw_set_palette(const ALW_PALETTE p)
+{
+  PRINT_STUB;
+  set_palette_range(p, 0, ALW_PAL_SIZE-1, TRUE);
+}
+void alw_get_palette(ALW_PALETTE p)
+{
+  PRINT_STUB;
+  get_palette_range(p, 0, ALW_PAL_SIZE-1);
+}
+
+extern void fade_interpolate(const ALW_PALETTE source, const ALW_PALETTE dest, ALW_PALETTE output, int pos, int from, int to);
+void alw_fade_interpolate(const ALW_PALETTE source, const ALW_PALETTE dest, ALW_PALETTE output, int pos, int from, int to)
+{
+  PRINT_STUB;
+  fade_interpolate(source, dest, output, pos, from, to);
+}
 
 // temp palette storage
-void alw_select_palette(const ALW_PALETTE p) { PRINT_STUB; }
-void alw_unselect_palette() { PRINT_STUB; }
+extern void select_palette(const ALW_PALETTE p);
+void alw_select_palette(const ALW_PALETTE p)
+{
+  PRINT_STUB;
+  select_palette(p);
+}
+extern void unselect_palette(void);
+void alw_unselect_palette()
+{
+  PRINT_STUB;
+  unselect_palette();
+}
 
 
 // FILE
@@ -717,6 +755,10 @@ void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) 
 
 // TODO: fix 8bit makecol, getcol with palettes
 
+int alw_makecol(int r, int g, int b) {
+  return alw_makecol_depth(_color_depth, r, g, b);
+}
+
 int alw_makecol_depth(int color_depth, int r, int g, int b) {
   PRINT_STUB;
   switch (color_depth) {
@@ -758,7 +800,7 @@ int alw_getr_depth(int color_depth, int c)
 {
   PRINT_STUB;
   switch (color_depth) {
-    case 8: return _rgb_scale_6[(int)alw_current_palette[c].r];
+    case 8: return _rgb_scale_6[(int)_current_palette[c].r];
     case 15: return _rgb_scale_5[(c >> _rgb_r_shift_15) & 0x1F];
     case 16: return _rgb_scale_5[(c >> _rgb_r_shift_16) & 0x1F];
     case 24: return ((c >> _rgb_r_shift_24) & 0xFF);
@@ -770,7 +812,7 @@ int alw_getg_depth(int color_depth, int c)
 { 
   PRINT_STUB;
   switch (color_depth) {
-    case 8: return _rgb_scale_6[(int)alw_current_palette[c].g];
+    case 8: return _rgb_scale_6[(int)_current_palette[c].g];
     case 15: return _rgb_scale_5[(c >> _rgb_g_shift_15) & 0x1F];
     case 16: return _rgb_scale_6[(c >> _rgb_g_shift_16) & 0x3F];
     case 24: return ((c >> _rgb_g_shift_24) & 0xFF);
@@ -782,7 +824,7 @@ int alw_getb_depth(int color_depth, int c)
 { 
   PRINT_STUB;
   switch (color_depth) {
-    case 8: return _rgb_scale_6[(int)alw_current_palette[c].b];
+    case 8: return _rgb_scale_6[(int)_current_palette[c].b];
     case 15: return _rgb_scale_5[(c >> _rgb_b_shift_15) & 0x1F];
     case 16: return _rgb_scale_5[(c >> _rgb_b_shift_16) & 0x1F];
     case 24: return ((c >> _rgb_b_shift_24) & 0xFF);

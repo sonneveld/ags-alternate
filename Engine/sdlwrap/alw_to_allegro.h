@@ -25,6 +25,7 @@ typedef ALW_BITMAP BITMAP;
 typedef ALW_BLENDER_FUNC BLENDER_FUNC;
 typedef ALW_COLOR_MAP COLOR_MAP;
 typedef alw_fixed fixed;
+typedef ALW_PALETTE PALETTE;
 
 #define AL_CONST const
 #define ASSERT assert
@@ -34,6 +35,8 @@ typedef alw_fixed fixed;
 #define BMP_ID_MASK ALW_BMP_ID_MASK
 #define BMP_ID_SUB ALW_BMP_ID_SUB
 #define BMP_ID_LOCKED ALW_BMP_ID_SUB
+
+#define PAL_SIZE ALW_PAL_SIZE
 
 #define acquire_bitmap alw_acquire_bitmap
 #define bestfit_color alw_bestfit_color
@@ -49,6 +52,7 @@ typedef alw_fixed fixed;
 #define is_memory_bitmap alw_is_memory_bitmap
 #define is_same_bitmap alw_is_same_bitmap
 #define makecol_depth alw_makecol_depth
+#define makecol alw_makecol
 #define release_bitmap alw_release_bitmap
 
 #define getr8 alw_getr8

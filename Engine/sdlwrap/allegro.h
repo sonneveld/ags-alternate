@@ -407,6 +407,7 @@ int alw_get_color_conversion();
 
 // ALW_PALETTE
 extern ALW_PALETTE alw_black_palette;
+extern void alw_sys_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync);
 extern void alw_set_palette(const ALW_PALETTE p);
 extern void alw_get_palette(ALW_PALETTE p) ;
 extern void alw_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync) ;
@@ -422,6 +423,7 @@ extern void alw_unselect_palette() ;
 #define ALW_MASK_COLOR_24      0xFF00FF
 #define ALW_MASK_COLOR_32      0xFF00FF
 
+extern int alw_makecol(int r, int g, int b);
 int alw_makecol_depth(int color_depth, int r, int g, int b) ;
 int alw_makeacol_depth(int color_depth, int r, int g, int b, int a) ;
 int alw_getr_depth(int color_depth, int c);

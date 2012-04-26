@@ -26,6 +26,223 @@
 #include "allegro.h"
 #include "alw_to_allegro.h"
 
+extern ALW_PALETTE _current_palette; 
+extern int _color_depth;
+extern  int _rgb_scale_5[32];
+extern  int _rgb_scale_6[32];
+
+int _current_palette_changed = 0xFFFFFFFF;
+
+int _palette_color8[256];               /* palette -> pixel mapping */
+int _palette_color15[256];
+int _palette_color16[256];
+int _palette_color24[256];
+int _palette_color32[256];
+
+int *palette_color = _palette_color8; 
+
+/* set_palette_range:
+ *  Sets a part of the color palette.
+ */
+void set_palette_range(AL_CONST PALETTE p, int from, int to, int vsync)
+{
+   int c;
+
+   ASSERT(from >= 0 && from < PAL_SIZE);
+   ASSERT(to >= 0 && to < PAL_SIZE);
+
+   for (c=from; c<=to; c++) {
+      _current_palette[c] = p[c];
+
+      if (_color_depth != 8)
+	 palette_color[c] = makecol(_rgb_scale_6[p[c].r], _rgb_scale_6[p[c].g], _rgb_scale_6[p[c].b]);
+   }
+
+   _current_palette_changed = 0xFFFFFFFF & ~(1<<(_color_depth-1));
+
+  alw_sys_set_palette_range(p, from, to, vsync);
+  
+#if 0
+   if (gfx_driver) {
+      if ((screen->vtable->color_depth == 8) && (!_dispsw_status))
+	 gfx_driver->set_palette(p, from, to, vsync);
+   }
+   else if ((system_driver) && (system_driver->set_palette_range))
+      system_driver->set_palette_range(p, from, to, vsync);
+#endif
+}
+
+/* set_palette:
+ *  Sets the entire color palette.
+ */
+void set_palette(AL_CONST PALETTE p)
+{
+  set_palette_range(p, 0, PAL_SIZE-1, TRUE);
+}
+
+
+/* previous palette, so the image loaders can restore it when they are done */
+int _got_prev_current_palette = FALSE;
+PALETTE _prev_current_palette;
+static int prev_palette_color[PAL_SIZE];
+
+
+
+/* select_palette:
+ *  Sets the aspects of the palette tables that are used for converting
+ *  between different image formats, without altering the display settings.
+ *  The previous settings are copied onto a one-deep stack, from where they
+ *  can be restored by calling unselect_palette().
+ */
+void select_palette(AL_CONST PALETTE p)
+{
+   int c;
+
+   for (c=0; c<PAL_SIZE; c++) {
+      _prev_current_palette[c] = _current_palette[c];
+      _current_palette[c] = p[c];
+   }
+
+   if (_color_depth != 8) {
+      for (c=0; c<PAL_SIZE; c++) {
+	 prev_palette_color[c] = palette_color[c];
+	 palette_color[c] = makecol(_rgb_scale_6[p[c].r], _rgb_scale_6[p[c].g], _rgb_scale_6[p[c].b]);
+      }
+   }
+
+   _got_prev_current_palette = TRUE;
+
+   _current_palette_changed = 0xFFFFFFFF & ~(1<<(_color_depth-1));
+}
+
+
+
+/* unselect_palette:
+ *  Restores palette settings from before the last call to select_palette().
+ */
+void unselect_palette(void)
+{
+   int c;
+
+   for (c=0; c<PAL_SIZE; c++)
+      _current_palette[c] = _prev_current_palette[c];
+
+   if (_color_depth != 8) {
+      for (c=0; c<PAL_SIZE; c++)
+	 palette_color[c] = prev_palette_color[c];
+   }
+
+   ASSERT(_got_prev_current_palette == TRUE);
+   _got_prev_current_palette = FALSE;
+
+   _current_palette_changed = 0xFFFFFFFF & ~(1<<(_color_depth-1));
+}
+
+
+
+/* _palette_expansion_table:
+ *  Creates a lookup table for expanding 256->truecolor.
+ */
+static int *palette_expansion_table(int bpp)
+{
+   int *table;
+   int c;
+
+   switch (bpp) {
+      case 15: table = _palette_color15; break;
+      case 16: table = _palette_color16; break;
+      case 24: table = _palette_color24; break;
+      case 32: table = _palette_color32; break;
+      default: ASSERT(FALSE); return NULL;
+   }
+
+   if (_current_palette_changed & (1<<(bpp-1))) {
+      for (c=0; c<PAL_SIZE; c++) {
+	 table[c] = makecol_depth(bpp,
+				  _rgb_scale_6[_current_palette[c].r], 
+				  _rgb_scale_6[_current_palette[c].g], 
+				  _rgb_scale_6[_current_palette[c].b]);
+      }
+
+      _current_palette_changed &= ~(1<<(bpp-1));
+   } 
+
+   return table;
+}
+
+
+/* generate_332_palette:
+ *  Used when loading a truecolor image into an 8 bit bitmap, to generate
+ *  a 3.3.2 RGB palette.
+ */
+void generate_332_palette(PALETTE pal)
+{
+   int c;
+
+   for (c=0; c<PAL_SIZE; c++) {
+      pal[c].r = ((c>>5)&7) * 63/7;
+      pal[c].g = ((c>>2)&7) * 63/7;
+      pal[c].b = (c&3) * 63/3;
+   }
+
+   pal[0].r = 63;
+   pal[0].g = 0;
+   pal[0].b = 63;
+
+   pal[254].r = pal[254].g = pal[254].b = 0;
+}
+
+
+/* get_palette_range:
+ *  Retrieves a part of the color palette.
+ */
+void get_palette_range(PALETTE p, int from, int to)
+{
+   int c;
+
+   ASSERT(from >= 0 && from < PAL_SIZE);
+   ASSERT(to >= 0 && to < PAL_SIZE);
+
+#if 0
+  // writes to _current_palette
+   if ((system_driver) && (system_driver->read_hardware_palette))
+      system_driver->read_hardware_palette();
+#endif
+  
+   for (c=from; c<=to; c++)
+      p[c] = _current_palette[c];
+}
+
+/* get_palette:
+ *  Retrieves the entire color palette.
+ */
+void get_palette(PALETTE p)
+{
+  get_palette_range(p, 0, PAL_SIZE-1);
+}
+
+
+/* fade_interpolate: 
+ *  Calculates a palette part way between source and dest, returning it
+ *  in output. The pos indicates how far between the two extremes it should
+ *  be: 0 = return source, 64 = return dest, 32 = return exactly half way.
+ *  Only affects colors between from and to (inclusive).
+ */
+void fade_interpolate(AL_CONST PALETTE source, AL_CONST PALETTE dest, PALETTE output, int pos, int from, int to)
+{
+   int c;
+
+   ASSERT(pos >= 0 && pos <= 64);
+   ASSERT(from >= 0 && from < PAL_SIZE);
+   ASSERT(to >= 0 && to < PAL_SIZE);
+
+   for (c=from; c<=to; c++) { 
+      output[c].r = ((int)source[c].r * (63-pos) + (int)dest[c].r * pos) / 64;
+      output[c].g = ((int)source[c].g * (63-pos) + (int)dest[c].g * pos) / 64;
+      output[c].b = ((int)source[c].b * (63-pos) + (int)dest[c].b * pos) / 64;
+   }
+}
+
 
 /* rect:
  *  Draws an outline rectangle.
