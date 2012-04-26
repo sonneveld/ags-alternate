@@ -26,6 +26,7 @@ typedef ALW_BLENDER_FUNC BLENDER_FUNC;
 typedef ALW_COLOR_MAP COLOR_MAP;
 typedef alw_fixed fixed;
 typedef ALW_PALETTE PALETTE;
+typedef ALW_RGB_MAP RGB_MAP;
 
 #define AL_CONST const
 #define ASSERT assert
@@ -106,5 +107,7 @@ typedef ALW_PALETTE PALETTE;
 
 #define is_screen_bitmap alw_is_screen_bitmap
 #define is_planar_bitmap alw_is_planar_bitmap
+
+#define color_map _alw_color_map
 
 #endif

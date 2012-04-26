@@ -27,6 +27,9 @@
 // TODO: port to 64bit version
 // TODO: port to ios
 
+ALW_PALETTE alw_black_palette = {0};
+ALW_PALETTE _current_palette; 
+
 char _debug_str[10000];
 
 //#define PRINT_STUB sprintf(_debug_str, "STUB %s:%d %s\n", __FILE__, __LINE__, __FUNCSIG__); OutputDebugString(_debug_str)
@@ -42,19 +45,6 @@ template<class T> T* allocmem(size_t nelem=1, size_t extra=0)
   assert(x != 0);
   memset(x, 0, s);
   return x;
-}
-
-
-int _bestfit_color_for_current_palette(int r, int g, int b) {
-  // TODO: implement bestfit color, if needed
-  //return bestfit_color(_current_palette, r, g, b);
-  return 0;
-}
-
-int _tmp_lookup_table[255] = {0};
-int *_palette_expansion_table(int color_depth) {
-  // TODO: implement palette expansion tables?
-  return _tmp_lookup_table;
 }
 
 
@@ -183,8 +173,6 @@ int alw_get_desktop_resolution(int *width, int *height){
 
 // ALW_BITMAP
 // ============================================================================
-
-ALW_COLOR_MAP * color_map;
 
 ALW_BITMAP *alw_screen;
 
@@ -484,10 +472,7 @@ void alw_vsync(){
 // ALW_PALETTE
 // ============================================================================
 
-// TODO: fix palette implementations
 
-ALW_PALETTE alw_black_palette = {0};
-ALW_PALETTE _current_palette; 
 
 
 void alw_sys_set_palette_range(const ALW_PALETTE p, int from, int to, int vsync)
@@ -753,17 +738,16 @@ void alw_draw_sprite_vh_flip(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y) 
 // COLOURS
 // ============================================================================
 
-// TODO: fix 8bit makecol, getcol with palettes
-
 int alw_makecol(int r, int g, int b) {
   return alw_makecol_depth(_color_depth, r, g, b);
 }
 
+extern int make_col_8(int r, int g, int b);
 int alw_makecol_depth(int color_depth, int r, int g, int b) {
   PRINT_STUB;
   switch (color_depth) {
     case 8:
-      return 1; // fix later.
+      return make_col_8(r, g, b);
     case 15:
       return (((r >> 3) << _rgb_r_shift_15) |
               ((g >> 3) << _rgb_g_shift_15) |
@@ -1502,10 +1486,13 @@ LPDIRECTINPUTDEVICE alw_key_dinput_device;
 // TRANSPARENCY
 // ============================================================================
 
-// TODO: fix light table... and check where color_map is used.
 // 256-color transparency
-static ALW_COLOR_MAP *_alw_color_map;
-void alw_create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos)) { PRINT_STUB; }
+ALW_COLOR_MAP *_alw_color_map;
+extern void create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos));
+void alw_create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos)) 
+{
+  create_light_table(table, pal, r,g,b,callback);
+}
 void alw_set_color_map(ALW_COLOR_MAP *alw_color_map) {_alw_color_map = alw_color_map;};
 int alw_has_color_map(){return _alw_color_map != 0;}
 
@@ -1806,13 +1793,27 @@ void alw_stop_audio_stream(ALW_AUDIOSTREAM *stream){ PRINT_STUB; }
 // COLOR FORMATS
 // ============================================================================
 
-// TODO: fix rgb maps
+static ALW_RGB_MAP *_alw_rgb_map;
+void alw_set_rgb_map(ALW_RGB_MAP *rgb_map) { _alw_rgb_map = rgb_map; }
+ALW_RGB_MAP *alw_get_rgb_map(){ return _alw_rgb_map; }
 
-//ALW_RGB_MAP *alw_rgb_map;
-void alw_set_rgb_map(ALW_RGB_MAP *rgb_map) { PRINT_STUB; }
-//void alw_rgb_to_hsv(int r, int g, int b, float h, float *s, float *v){ PRINT_STUB; }
-//void alw_hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b){ PRINT_STUB; }
-void alw_create_rgb_table(ALW_RGB_MAP *table, const ALW_PALETTE pal, void (*callback)(int pos)){ PRINT_STUB; }
+extern void hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b);
+extern void rgb_to_hsv(int r, int g, int b, float *h, float *s, float *v);
+
+void alw_rgb_to_hsv(int r, int g, int b, float *h, float *s, float *v)
+{
+  rgb_to_hsv(r,g,b,h,s,v);
+}
+
+void alw_hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b)
+{
+  hsv_to_rgb(h,s,v,r,g,b);
+}
+extern void create_rgb_table(ALW_RGB_MAP *table, const ALW_PALETTE pal, void (*callback)(int pos));
+void alw_create_rgb_table(ALW_RGB_MAP *table, const ALW_PALETTE pal, void (*callback)(int pos))
+{
+  create_rgb_table(table, pal, callback);
+}
 
 
 // WINALLEG

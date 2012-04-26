@@ -125,8 +125,7 @@ void FUNC_LINEAR_DRAW_256_SPRITE(BITMAP *dst, BITMAP *src, int dx, int dy)
       dybeg = dy;
    }
 
-   //table = _palette_expansion_table(alw_bitmap_color_depth(dst));
-   table = 0;
+   table = _palette_expansion_table(alw_bitmap_color_depth(dst));
    ASSERT(table);
 
   

@@ -459,8 +459,6 @@ int alw_geta_depth(int color_depth, int c);
 #define alw_getb32(c) alw_getb_depth(32,c)
 #define alw_geta32(c) alw_geta_depth(32,c)
 
-extern ALW_COLOR_MAP *color_map;
-
 #define ALLEGRO_COLOR8
 #define ALLEGRO_COLOR15
 #define ALLEGRO_COLOR16
@@ -542,6 +540,7 @@ void alw_pivot_sprite(ALW_BITMAP *bmp, ALW_BITMAP *sprite, int x, int y, int cx,
 // TRANSPARENCY
 
 // 256-color transparency
+extern ALW_COLOR_MAP *_alw_color_map;
 void alw_create_light_table(ALW_COLOR_MAP *table, const ALW_PALETTE pal, int r, int g, int b, void (*callback)(int pos)) ;
 void alw_set_color_map(ALW_COLOR_MAP *alw_color_map);
 int alw_has_color_map();
@@ -569,8 +568,8 @@ extern int _blender_alpha;
 
 
 // COLOUR FORMATS
-//extern ALW_RGB_MAP *_alw_rgb_map;
 void alw_set_rgb_map(ALW_RGB_MAP *rgb_map);
+extern ALW_RGB_MAP *alw_get_rgb_map();
 void alw_rgb_to_hsv(int r, int g, int b, float *h, float *s, float *v);
 void alw_hsv_to_rgb(float h, float s, float v, int *r, int *g, int *b);
 void alw_create_rgb_table(ALW_RGB_MAP *table, const ALW_PALETTE pal, void (*callback)(int pos));

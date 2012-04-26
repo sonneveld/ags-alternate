@@ -143,7 +143,7 @@ void unselect_palette(void)
 /* _palette_expansion_table:
  *  Creates a lookup table for expanding 256->truecolor.
  */
-static int *palette_expansion_table(int bpp)
+int *_palette_expansion_table(int bpp)
 {
    int *table;
    int c;
