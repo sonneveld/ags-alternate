@@ -114,6 +114,8 @@
 		513DDB96153BEACC00CF4C88 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 513DDB91153BEAA900CF4C88 /* Ogg.framework */; };
 		513DDB97153BEAD000CF4C88 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 513DDB93153BEAB200CF4C88 /* Vorbis.framework */; };
 		513DDB98153BEAD000CF4C88 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 513DDB91153BEAA900CF4C88 /* Ogg.framework */; };
+		516049C015492ABC007422A7 /* aastr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 516049BA15492ABC007422A7 /* aastr.cpp */; };
+		516049C115492ABC007422A7 /* aautil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 516049BC15492ABC007422A7 /* aautil.cpp */; };
 		5184BD461546DEFD00C4BC2C /* ufile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD451546DEFD00C4BC2C /* ufile.cpp */; };
 		5184BD4D1547CD7D00C4BC2C /* autohint.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD4C1547CD7D00C4BC2C /* autohint.c */; };
 		5184BD4F1547CDA400C4BC2C /* bdf.c in Sources */ = {isa = PBXBuildFile; fileRef = 5184BD4E1547CDA400C4BC2C /* bdf.c */; };
@@ -229,6 +231,10 @@
 		51325C54153172E400335A54 /* hq2x3x.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hq2x3x.h; path = ../../External/hq2x/include/hq2x3x.h; sourceTree = "<group>"; };
 		513DDB91153BEAA900CF4C88 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = Library/Frameworks/Ogg.framework; sourceTree = SDKROOT; };
 		513DDB93153BEAB200CF4C88 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = Library/Frameworks/Vorbis.framework; sourceTree = SDKROOT; };
+		516049BA15492ABC007422A7 /* aastr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aastr.cpp; sourceTree = "<group>"; };
+		516049BB15492ABC007422A7 /* aastr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aastr.h; sourceTree = "<group>"; };
+		516049BC15492ABC007422A7 /* aautil.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = aautil.cpp; sourceTree = "<group>"; };
+		516049BD15492ABC007422A7 /* aautil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aautil.h; sourceTree = "<group>"; };
 		5184BD451546DEFD00C4BC2C /* ufile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ufile.cpp; sourceTree = "<group>"; };
 		5184BD4C1547CD7D00C4BC2C /* autohint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = autohint.c; path = "../../External/freetype-2.1.3/src/autohint/autohint.c"; sourceTree = "<group>"; };
 		5184BD4E1547CDA400C4BC2C /* bdf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bdf.c; path = "../../External/freetype-2.1.3/src/bdf/bdf.c"; sourceTree = "<group>"; };
@@ -529,6 +535,18 @@
 			name = SDLMain;
 			sourceTree = "<group>";
 		};
+		516049B815492ABB007422A7 /* aastr-0.1.1 */ = {
+			isa = PBXGroup;
+			children = (
+				516049BA15492ABC007422A7 /* aastr.cpp */,
+				516049BB15492ABC007422A7 /* aastr.h */,
+				516049BC15492ABC007422A7 /* aautil.cpp */,
+				516049BD15492ABC007422A7 /* aautil.h */,
+			);
+			name = "aastr-0.1.1";
+			path = "../../External/aastr-0.1.1";
+			sourceTree = "<group>";
+		};
 		5184BD4B1547CD3600C4BC2C /* freetype-2.1.3 */ = {
 			isa = PBXGroup;
 			children = (
@@ -605,6 +623,7 @@
 		519E3333153137400026C374 /* EngineMac */ = {
 			isa = PBXGroup;
 			children = (
+				516049B815492ABB007422A7 /* aastr-0.1.1 */,
 				5184BD4B1547CD3600C4BC2C /* freetype-2.1.3 */,
 				51DCFA5E153155170074E19B /* include */,
 				519E343615314EEC0026C374 /* sdlwrap */,
@@ -1040,6 +1059,8 @@
 				5184BD7D1547CF9500C4BC2C /* type42.c in Sources */,
 				5184BD7F1547CF9E00C4BC2C /* winfnt.c in Sources */,
 				51990EFD1547D65700192312 /* ftbase.c in Sources */,
+				516049C015492ABC007422A7 /* aastr.cpp in Sources */,
+				516049C115492ABC007422A7 /* aautil.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

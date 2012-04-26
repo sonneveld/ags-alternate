@@ -100,4 +100,7 @@ typedef alw_fixed fixed;
 
 #define al_ffblk alw_al_ffblk
 
+#define is_screen_bitmap alw_is_screen_bitmap
+#define is_planar_bitmap alw_is_planar_bitmap
+
 #endif

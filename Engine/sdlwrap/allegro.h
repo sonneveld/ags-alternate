@@ -388,6 +388,8 @@ extern int alw_is_same_bitmap(ALW_BITMAP *bmp1, ALW_BITMAP *bmp2);
 int alw_is_linear_bitmap(ALW_BITMAP *bmp) ;
 int alw_is_memory_bitmap(ALW_BITMAP *bmp) ;
 int alw_is_video_bitmap(ALW_BITMAP *bmp) ;
+int alw_is_screen_bitmap(ALW_BITMAP *bmp);
+int alw_is_planar_bitmap(ALW_BITMAP *bmp) ;
 void alw_acquire_bitmap(ALW_BITMAP *bmp) ;
 void alw_release_bitmap(ALW_BITMAP *bmp);
 void alw_acquire_screen() ;
@@ -433,6 +435,10 @@ int alw_geta_depth(int color_depth, int c);
 #define alw_makecol24(r,g,b) alw_makecol_depth(24,r,g,b)
 #define alw_makecol32(r,g,b) alw_makecol_depth(32,r,g,b)
 #define alw_makeacol32(r,g,b,a) alw_makeacol_depth(32,r,g,b,a)
+
+#define alw_getr8(c) alw_getr_depth(8,c)
+#define alw_getg8(c) alw_getg_depth(8,c)
+#define alw_getb8(c) alw_getb_depth(8,c)
 
 #define alw_getr15(c) alw_getr_depth(15,c)
 #define alw_getg15(c) alw_getg_depth(15,c)
@@ -967,10 +973,7 @@ extern int alfont_text_height(ALFONT_FONT *f);
 extern int alfont_text_length(ALFONT_FONT *f, const char *str);
 
 
-// AASTRETCH
-
-void aa_stretch_sprite (ALW_BITMAP* dst, ALW_BITMAP* src, int dx, int dy, int dw, int dh);
-
+// COLOUR
 
 int _bestfit_color_for_current_palette(int r, int g, int b) ;
 int *_palette_expansion_table(int color_depth) ;

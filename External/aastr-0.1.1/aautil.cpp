@@ -15,6 +15,11 @@
 
 #include "aautil.h"
 
+
+extern int _rgb_r_shift_24;
+extern int _rgb_g_shift_24;
+extern int _rgb_b_shift_24;
+
 /* Multiply b by a (0 <= a <= aa_SIZE). */
 #define MUL(a, b) ((b) * (a))
 

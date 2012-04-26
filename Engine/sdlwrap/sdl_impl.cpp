@@ -376,6 +376,14 @@ int alw_is_video_bitmap(ALW_BITMAP *bmp) {
 	PRINT_STUB;
 	return 0;
 }
+int alw_is_screen_bitmap(ALW_BITMAP *bmp) {
+  PRINT_STUB;
+	return 0;
+}
+int alw_is_planar_bitmap(ALW_BITMAP *bmp) {
+  PRINT_STUB;
+	return 0;
+}
 
 void alw_acquire_bitmap(ALW_BITMAP *bmp) {
   if (bmp->surf)
@@ -1773,13 +1781,6 @@ HWND alw_win_get_window(void){ PRINT_STUB;  return 0;}
 int alw_wnd_call_proc(int (*proc)(void)){ PRINT_STUB;  return 0;}
 
 
-
-// AASTRETCH
-// ============================================================================
-
-// TODO: implement stretched sprites
-
-void aa_stretch_sprite (ALW_BITMAP* dst, ALW_BITMAP* src, int dx, int dy, int dw, int dh){ PRINT_STUB;}
 
 // FLI
 // ============================================================================

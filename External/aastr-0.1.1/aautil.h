@@ -16,7 +16,8 @@
 #ifndef __bma_aautil_h
 #define __bma_aautil_h
 
-#include <allegro.h>
+#include "allegro.h"
+#include "alw_to_allegro.h"
 
 /*
  * Change aa_BITS, and never aa_SIZE or aa_MASK.
