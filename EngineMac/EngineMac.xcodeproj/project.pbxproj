@@ -1133,9 +1133,9 @@
 				INFOPLIST_FILE = "EngineMac/EngineMac-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers/** /Library/Frameworks/SDL_ttf.framework/Headers/**";
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = app;
@@ -1165,9 +1165,9 @@
 				INFOPLIST_FILE = "EngineMac/EngineMac-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = macosx;
+				SDKROOT = macosx10.6;
 				USER_HEADER_SEARCH_PATHS = "/Library/Frameworks/SDL.framework/Headers/** /Library/Frameworks/SDL_ttf.framework/Headers/**";
 				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = app;

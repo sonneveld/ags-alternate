@@ -880,6 +880,7 @@ void alw_circlefill(ALW_BITMAP *bmp, int x, int y, int radius, int color)
 // ============================================================================
 
 
+static int _mouse_range_rect_set = 0;
 static SDL_Rect _mouse_range_rect = {100, 100, 100, 100};
 
 volatile int alw_mouse_x = 0;
@@ -897,9 +898,11 @@ static int _custom_filter(const SDL_Event *event) {
 
 	switch (event->type){
 	   case SDL_MOUSEMOTION:
-		   return _within_rect(&_mouse_range_rect, event->motion.x, event->motion.y);
+       if (_mouse_range_rect_set)
+		     return _within_rect(&_mouse_range_rect, event->motion.x, event->motion.y);
 	   case SDL_MOUSEBUTTONDOWN:
-		   return _within_rect(&_mouse_range_rect, event->button.x, event->button.y);
+       if (_mouse_range_rect_set)
+		     return _within_rect(&_mouse_range_rect, event->button.x, event->button.y);
 	   case SDL_MOUSEBUTTONUP:
 		   // don't actually filter mouse up events!
 		   break;
@@ -914,16 +917,21 @@ int alw_install_mouse() {
 }
 
 void alw_position_mouse(int x, int y) {
+  // disabled cause it makes it difficult to actually close the window if we're
+  // constantly warping the mouse.
+#if 0
 	SDL_WarpMouse(x, y);
 	// the new pos appears in allegro, so make sure it is
 	// set even if the event doesn't occur.
 	alw_mouse_x = x;
 	alw_mouse_y = y;
+#endif
 }
 
 
 
 void alw_set_mouse_range(int x1, int y1, int x2, int y2) {
+  _mouse_range_rect_set = 1;
 	_mouse_range_rect.x = x1;
 	_mouse_range_rect.y = y1;
 	_mouse_range_rect.w = x2-x1+1;

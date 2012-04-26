@@ -12356,6 +12356,19 @@ void INIgetdirec(char *wasgv, char *inifil) {
   }
 
 }
+  
+  
+// Given a cstring, remove any white space characters at the end of line.
+// Performed in place.
+void str_strip_line_ending(char *line) {
+  char *p = line + strlen(line);
+  while (p != line) {
+    p -= 1;
+    if (!isspace(*p))
+      break;
+    *p = 0;
+  }
+}
 
 char *INIreaditem(const char *sectn, const char *entry) {
   FILE *fin = fopen(filetouse, "rt");
@@ -12378,7 +12391,7 @@ char *INIreaditem(const char *sectn, const char *entry) {
         if (feof(fin))
           break;
         // Strip CRLF
-        templine[strlen(templine)-1] = 0;
+        str_strip_line_ending(templine);
         // Have we found the entry?
         if (ac_strnicmp (templine, entry, strlen(entry)) == 0) {
           char *pptr = &templine[strlen(entry)];
