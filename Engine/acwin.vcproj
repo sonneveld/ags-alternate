@@ -361,7 +361,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".;..\common;..\common\libinclude"
-				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ACLIB_INITSPR_OVERRIDE"
 				RuntimeLibrary="1"
 				StructMemberAlignment="0"
 				PrecompiledHeaderFile="$(intdir)/acwinlib.pch"
@@ -421,6 +421,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy $(OutDir)\acwinlib.dll ..\Editor\AGS.Editor"
 			/>
 		</Configuration>
 	</Configurations>
@@ -463,6 +464,7 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="DebugDll|Win32"
+					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1109,13 +1111,6 @@
 				<FileConfiguration
 					Name="Release|Win32"
 					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
