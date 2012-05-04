@@ -1,27 +1,282 @@
 
 
 /* api for dll */
+// this replaces ac.cpp for the library version.
 
-#define WGT2ALLEGRO_NOFUNCTIONS
+#include <stdio.h>
+extern "C" {
+ extern int  csetlib(char*,char*);
+ extern FILE*clibfopen(char*,char*);
+ extern int  cfopenpriority;
+ }
+
 #include "wgt2allg.h"
 #include "sprcache.h"
-#define CROOM_NOFUNCTIONS
+#include "misc.h"
 #include "acroom.h"
+#include "acgui.h"
 
-extern roomstruct thisroom;
-extern color palette[256];
-extern SpriteCache spriteset;
+RGB *palette;
+GameSetupStruct thisgame;
+SpriteCache spriteset(1);
+roomstruct thisroom;
 
+bool outlineGuiObjects;
+int mousex;
+int mousey;
 
-#define DLLEXPORT extern "C" __declspec(dllexport)
-
-static color *local_palette_ptr;  // actually palette
-static GameSetupStruct thisgame;
 static char editor_version[1024];
 static int antiAliasFonts = 0;
 static int sxmult = 1;
 static int symult = 1;
+static int dsc_want_hires = 0;
 
+
+// VT Fixups
+// ============================================================================
+
+// code that jumps back to managed code.  We might be able to get away with
+// passing managed callbacks back to the dll?
+
+void quit(char *message) {
+  //throw new AGS.Types.AGSEditorException(message);
+  exit(0);
+}
+
+
+// AC Shared
+// ============================================================================
+
+// this code was in ac.cpp as well, we link our own versions of these functions.
+
+bool ShouldAntiAliasText() {
+  return antiAliasFonts != 0;
+}
+
+int multiply_up_coordinate(int x) {
+  return x * sxmult;
+}
+
+static void draw_stretched_sprite(int x, int y, BITMAP *bmp, int w, int h)
+{
+  int pixelsize;
+  if ( bitmap_color_depth(bmp) == 15 )
+    pixelsize = 2;
+  else
+    pixelsize = bitmap_color_depth(bmp) / 8;
+	
+  if ( pixelsize == thisgame.color_depth )
+  {
+    stretch_sprite(abuf, bmp, x, y, w, h);
+  }
+  else
+  {
+    BITMAP *tmpbmp = create_bitmap_ex(8 * thisgame.color_depth, bmp->w, bmp->h);
+    blit(bmp, tmpbmp, 0, 0, 0, 0, bmp->w, bmp->h);  // convert to color depth
+	// map mask colors to new colordepth's mask
+    for (int bmpx = 0; bmpx < bmp->w; ++bmpx )
+    {
+      for (int bmpy = 0; bmpy < bmp->h; ++bmpy )
+      {
+        if ( getpixel(bmp, bmpx, bmpy) == bitmap_mask_color(bmp) )
+          putpixel(tmpbmp, bmpx, bmpy, bitmap_mask_color(tmpbmp));
+      }
+    }
+    stretch_sprite(abuf, tmpbmp, x, y, w, h);
+    destroy_bitmap(tmpbmp);
+  }
+}
+
+void draw_sprite_compensate(int sprnum, int x, int y, int xray) {
+
+  BITMAP *sprbmp;
+  int sprnum_loaded = sprnum;
+  if ( sprnum >= 0 )
+  {
+    if ( !spriteset[sprnum] )
+      sprnum_loaded = 0;
+    sprbmp = spriteset[sprnum_loaded];
+  }
+  else
+  {
+    sprbmp = 0;
+  }
+  
+  BITMAP *destbmp = sprbmp;
+  bool destbmp_alloced = false;
+  
+  int pixelsize;
+  if ( bitmap_color_depth(sprbmp) == 15 )
+    pixelsize = 2;
+  else
+    pixelsize = bitmap_color_depth(sprbmp) / 8;
+  if ( (pixelsize > 1) && (8 * thisgame.color_depth == 8) )
+  {
+    destbmp = create_bitmap_ex(8, sprbmp->w, sprbmp->h);
+    destbmp_alloced = true;
+    clear_to_color(destbmp, bitmap_mask_color(destbmp));
+
+	  for (int spr_x = 0; spr_x < sprbmp->w; ++spr_x )
+        for (int spr_y = 0; spr_y < sprbmp->h; ++spr_y )
+        {
+          int pixelin = getpixel(sprbmp, spr_x, spr_y);
+          if ( pixelin != bitmap_mask_color(sprbmp)) 
+          {
+            int pixelout = makecol8(getr16(pixelin), getg16(pixelin), getb16(pixelin));
+            putpixel(destbmp, spr_x, spr_y, pixelout);
+          }
+        }
+
+  }
+  
+  int dest_w = destbmp->w;
+  int dest_h = destbmp->h;
+  if ( thisgame.spriteflags[sprnum] & 1 )
+  {
+    if ( !dsc_want_hires )
+    {
+      dest_w /= 2;
+      dest_h /= 2;
+    }
+  }
+  else
+  {
+    if ( dsc_want_hires )
+    {
+      dest_w *= 2;
+      dest_h *= 2;
+    }
+  }
+  draw_stretched_sprite(x, y, destbmp, dest_w, dest_h);
+  
+  if ( destbmp_alloced )
+    destroy_bitmap(destbmp);
+}
+
+int get_adjusted_spritewidth(int spritenum) {
+  if ( spritenum < 0 ) 	return 0;
+	
+  int actualspritenum = spritenum;
+  if (spriteset[spritenum] == 0)
+    actualspritenum = 0;
+  BITMAP *bmp = spriteset[actualspritenum];
+  if ( bmp  == 0) return 0;
+	
+    int width = bmp->w;
+    if ( thisgame.spriteflags[spritenum] & 1 )
+    {
+      if ( sxmult == 1 )
+        return width / 2;
+    }
+    else
+    {
+      if ( sxmult == 2 )
+        return width * 2;
+    }
+
+  return width;
+}
+
+int get_adjusted_spriteheight(int spritenum){
+  if ( spritenum < 0 ) 	return 0;
+	
+  int actualspritenum = spritenum;
+  if (spriteset[spritenum] == 0)
+    actualspritenum = 0;
+  BITMAP *bmp = spriteset[actualspritenum];
+  if ( bmp  == 0) return 0;
+	
+    int height = bmp->h;
+    if ( thisgame.spriteflags[spritenum] & 1 )
+    {
+      if ( symult == 1 )
+        return height / 2;
+    }
+    else
+    {
+      if ( symult == 2 )
+        return height * 2;
+    }
+
+  return height;
+}
+
+int get_fixed_pixel_size(int x) {
+  return multiply_up_coordinate(x);
+}
+
+void write_log(char *msg) {
+   // DO NOTHING
+}
+
+static void fix_block(BITMAP *bmp);
+
+void initialize_sprite (int spritenum) {
+  fix_block(spriteset[spritenum]);
+}
+
+void pre_save_sprite(int spritenum) {
+   initialize_sprite(spritenum);
+}
+
+long getlong(FILE * iii)
+{
+  long tmm;
+  fread(&tmm, 4, 1, iii);
+  return tmm;
+}
+
+#define SCRIPT_CONFIG_VERSION 1
+void load_script_configuration(FILE * iii)
+{
+  int aa;
+  if (getlong(iii) != SCRIPT_CONFIG_VERSION)
+    quit("ScriptEdit: invliad config version");
+
+  int numvarnames = getlong(iii);
+  for (aa = 0; aa < numvarnames; aa++) {
+    int lenoft = getc(iii);
+    fseek(iii, lenoft, SEEK_CUR);
+  }
+}
+
+
+void load_graphical_scripts(FILE * iii, roomstruct * rst)
+{
+  for (;;) {
+    long ct;
+    fread(&ct, 4, 1, iii);
+    if ((ct == -1) | (feof(iii) != 0))
+      break;
+
+    long lee;
+    fread(&lee, 4, 1, iii);
+
+    fseek(iii, lee, SEEK_CUR);
+  }
+}
+
+extern "C" {
+extern PACKFILE *__old_pack_fopen(const char *, const char *);
+}
+PACKFILE *pack_fopen(const char *filnam1, const char *modd1) {
+  return __old_pack_fopen(filnam1, modd1);// using original!
+}
+
+void GUIInv::Draw() {
+  wsetcolor(15);
+  wrectangle(x, y, x+wid, y+hit);
+}
+
+void NewInteractionCommand::remove() {
+  // DO NOTHING
+}
+
+
+// DLL Exports
+// ============================================================================
+
+#define DLLEXPORT extern "C" __declspec(dllexport)
 
 DLLEXPORT bool ac_initialize_native()
 {
@@ -30,7 +285,7 @@ DLLEXPORT bool ac_initialize_native()
   set_uformat('ASC8');
   install_allegro(SYSTEM_NONE, &errno, atexit);
 
-  local_palette_ptr = thisgame.defpal;
+  palette = thisgame.defpal;
   thisgame.color_depth = 2;
   abuf = create_bitmap_ex(32, 10, 10);
 
@@ -60,15 +315,15 @@ DLLEXPORT bool ac_initialize_native()
 
 
 DLLEXPORT void ac_get_local_palette_entry(int index, RGB *r) {
-  *r = local_palette_ptr[index];
+  *r = palette[index];
 }
 
 DLLEXPORT void ac_set_local_palette_entry(int index, RGB r) {
-  local_palette_ptr[index] = r;
+  palette[index] = r;
 }
 
 DLLEXPORT void ac_set_palette_from_local() {
-  set_palette(local_palette_ptr);
+  set_palette(palette);
 }
 
 DLLEXPORT void ac_set_editor_version_number(char *version) {
@@ -80,7 +335,7 @@ DLLEXPORT void ac_copy_global_palette_to_room_palette() {
   for(int index=0; index < 0x100; index++) 
 	{
 		if (thisgame.paluses[index] != 2) {
-			thisroom.bpalettes[0][index] =  local_palette_ptr[index];
+			thisroom.bpalettes[0][index] =  palette[index];
 		}
 	}
 }
@@ -165,7 +420,6 @@ DLLEXPORT void ac_thisgame_set_sprite_flags(int spriteNum, int flags){
 
 DLLEXPORT int ac_reset_sprite_file()
 {
-//  DebugBreak();
   spriteset.reset();
   if ( spriteset.initFile("acsprset.spr") )
 	  return 0;
@@ -235,7 +489,7 @@ DLLEXPORT BITMAP* ac_get_block_as_32bit(BITMAP* todraw, int width, int height)
     BITMAP* todrawConverted = create_bitmap_ex(32, todraw->w, todraw->h);
     if (bitmap_color_depth(todraw) == 8)
     {
-        select_palette(local_palette_ptr);
+        select_palette(palette);
     }
     blit(todraw, todrawConverted, 0, 0, 0, 0, todraw->w, todraw->h);
     if (bitmap_color_depth(todraw) == 8)
@@ -255,26 +509,15 @@ DLLEXPORT BITMAP* ac_get_block_as_32bit(BITMAP* todraw, int width, int height)
 }
 
 
-// override for on in ac.cpp
-void initialize_sprite (int ee) {
-  fix_block(spriteset[ee]);
-}
+
 
 DLLEXPORT BITMAP* ac_get_sprite(int spritenum){
-  //DebugBreak();
-  OutputDebugStringA("1\n");
   if ( spritenum < 0 )
 	  return 0;
   
-  OutputDebugStringA("2\n");
 	BITMAP* result = spriteset[spritenum];
-
-  OutputDebugStringA("3\n");
-
 	if (result == 0)
 		result = spriteset[0];
-
-  OutputDebugStringA("4\n");
 
 	return result;
 }

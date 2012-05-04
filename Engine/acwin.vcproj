@@ -327,103 +327,6 @@
 				CommandLine=""
 			/>
 		</Configuration>
-		<Configuration
-			Name="DebugDll|Win32"
-			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC60.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="NDEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="1"
-				HeaderFileName=""
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories=".;..\common;..\common\libinclude"
-				PreprocessorDefinitions="VS2005;_DEBUG;WIN32;NDEBUG;_WINDOWS;ALLEGRO_STATICLINK;THIS_IS_THE_ENGINE;WINDOWS_VERSION;DISABLE_MPEG_AUDIO;_CRT_SECURE_NO_WARNINGS;ACLIB_INITSPR_OVERRIDE"
-				RuntimeLibrary="1"
-				StructMemberAlignment="0"
-				PrecompiledHeaderFile="$(intdir)/acwinlib.pch"
-				AssemblerListingLocation="$(IntDir)\"
-				ObjectFile="$(IntDir)\"
-				ProgramDataBaseFileName="$(IntDir)\"
-				BrowseInformation="1"
-				WarningLevel="3"
-				DebugInformationFormat="3"
-				DisableSpecificWarnings="4996"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="2057"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib libcpmt.lib d3d9.lib quartz.lib strmiids.lib winmm.lib shlwapi.lib amstrmid.lib"
-				OutputFile="$(OutDir)\acwinlib.dll"
-				LinkIncremental="1"
-				SuppressStartupBanner="true"
-				IgnoreDefaultLibraryNames="LIBC,LIBCD,msvcrt"
-				GenerateDebugInformation="true"
-				GenerateMapFile="true"
-				SubSystem="2"
-				OptimizeReferences="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				TargetMachine="1"
-				Profile="true"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-				CommandLine="copy $(OutDir)\acwinlib.dll ..\Editor\AGS.Editor"
-			/>
-		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -455,16 +358,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					ExcludedFromBuild="true"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -507,15 +400,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="acdebug.cpp"
@@ -547,15 +431,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="acdialog.cpp"
@@ -580,15 +455,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -631,15 +497,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\acgui.cpp"
@@ -668,15 +525,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -719,15 +567,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="acwavi.cpp"
@@ -752,15 +591,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -799,15 +629,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ACWSETUP.CPP"
@@ -832,15 +653,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -879,15 +691,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ali3dsw.cpp"
@@ -912,15 +715,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -959,15 +753,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\common\compress.cpp"
@@ -992,15 +777,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1039,15 +815,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\common\CSRUN.CPP"
@@ -1079,43 +846,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\libapi.cpp"
-				>
-				<FileConfiguration
-					Name="ReleaseNoMP3|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugWorking|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\common\lzw.cpp"
@@ -1140,15 +870,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1187,15 +908,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\common\MOUSEW32.CPP"
@@ -1220,15 +932,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1267,15 +970,6 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="scrptrt.cpp"
@@ -1300,15 +994,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCCLCompilerTool"
@@ -1376,14 +1061,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="DebugDll|Win32"
 					>
 					<Tool
 						Name="VCResourceCompilerTool"
@@ -1472,15 +1149,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 			</Filter>
 			<Filter
@@ -1510,15 +1178,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1558,15 +1217,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\almp3-2.0.5\decoder\dct64_i386.c"
@@ -1592,15 +1242,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1640,15 +1281,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\almp3-2.0.5\decoder\interface.c"
@@ -1674,15 +1306,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1722,15 +1345,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\almp3-2.0.5\decoder\layer3.c"
@@ -1763,15 +1377,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\almp3-2.0.5\decoder\tabinit.c"
@@ -1797,15 +1402,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1848,15 +1444,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\apeg-1.2.1\display.c"
@@ -1881,15 +1468,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -1928,15 +1506,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\apeg-1.2.1\getblk.c"
@@ -1961,15 +1530,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2008,15 +1568,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\apeg-1.2.1\getpic.c"
@@ -2041,15 +1592,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2088,15 +1630,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\apeg-1.2.1\motion.c"
@@ -2121,15 +1654,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2168,15 +1692,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\apeg-1.2.1\audio\mpg123.c"
@@ -2201,15 +1716,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2248,15 +1754,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\apeg-1.2.1\recon.c"
@@ -2281,15 +1778,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2332,15 +1820,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\core\atexit.c"
@@ -2365,15 +1844,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2412,15 +1882,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\allegro\datduh.c"
@@ -2445,15 +1906,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2492,15 +1944,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\allegro\datmod.c"
@@ -2525,15 +1968,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2572,15 +2006,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\allegro\datunld.c"
@@ -2605,15 +2030,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2652,15 +2068,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\core\duhlen.c"
@@ -2685,15 +2092,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2732,15 +2130,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\it\itload.c"
@@ -2765,15 +2154,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2812,15 +2192,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\it\itorder.c"
@@ -2845,15 +2216,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2892,15 +2254,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\it\itrender.c"
@@ -2925,15 +2278,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -2972,15 +2316,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\core\loadduh.c"
@@ -3005,15 +2340,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3052,15 +2378,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\it\loads3m.c"
@@ -3085,15 +2402,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3132,15 +2440,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\core\makeduh.c"
@@ -3165,15 +2464,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3212,15 +2502,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\allegro\packfile.c"
@@ -3245,15 +2526,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3292,15 +2564,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\core\readduh.c"
@@ -3325,15 +2588,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3372,15 +2626,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\it\reads3m.c"
@@ -3405,15 +2650,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3452,15 +2688,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\core\register.c"
@@ -3485,15 +2712,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3532,15 +2750,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\core\rendsig.c"
@@ -3565,15 +2774,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3612,15 +2812,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\helpers\sampbuf.c"
@@ -3645,15 +2836,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3692,15 +2874,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\helpers\stdfile.c"
@@ -3725,15 +2898,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"
@@ -3772,15 +2936,6 @@
 							PreprocessorDefinitions=""
 						/>
 					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="libsrc\dumb-0.9.2\it\xmeffect.c"
@@ -3805,15 +2960,6 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-							AdditionalIncludeDirectories=""
-							PreprocessorDefinitions=""
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="DebugDll|Win32"
 						>
 						<Tool
 							Name="VCCLCompilerTool"

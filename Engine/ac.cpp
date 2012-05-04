@@ -25888,7 +25888,6 @@ void pre_save_sprite(int ee) {
 // these vars are global to help with debugging
 block tmpdbl, curspr;
 int newwid, newhit;
-#ifndef  ACLIB_INITSPR_OVERRIDE
 void initialize_sprite (int ee) {
 
   if ((ee < 0) || (ee > spriteset.elements))
@@ -26013,7 +26012,6 @@ void initialize_sprite (int ee) {
     our_eip = oldeip;
   }
 }
-#endif
 
 #ifdef WINDOWS_VERSION
 CONTEXT cpustate;
