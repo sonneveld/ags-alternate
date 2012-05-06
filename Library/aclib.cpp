@@ -3,6 +3,8 @@
 /* api for dll */
 // this replaces ac.cpp for the library version.
 
+#pragma unmanaged
+
 #include <stdio.h>
 extern "C" {
  extern int  csetlib(char*,char*);
@@ -18,7 +20,7 @@ extern "C" {
 
 RGB *palette;
 GameSetupStruct thisgame;
-SpriteCache spriteset(1);
+SpriteCache spriteset(30000);
 roomstruct thisroom;
 
 bool outlineGuiObjects;
