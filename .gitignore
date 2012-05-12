@@ -1,0 +1,8 @@
+*.o
+*.user
+*.suo
+*.log
+_ReSharper.*
+*__Win32_DebugWorking
+*.ncb
+.*
