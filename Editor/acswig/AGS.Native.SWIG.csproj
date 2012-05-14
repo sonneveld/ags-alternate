@@ -23,6 +23,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -55,10 +56,45 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="acswig.cs" />
-    <Compile Include="acswigPINVOKE.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="NativeMethodsUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="swigout\acswig.cs" />
+    <Compile Include="swigout\acswigPINVOKE.cs" />
+    <Compile Include="swigout\BITMAP.cs" />
+    <Compile Include="swigout\GameSetupStruct.cs" />
+    <Compile Include="swigout\GameSetupStructBase.cs" />
+    <Compile Include="swigout\RGB.cs" />
+    <Compile Include="swigout\rgbArray.cs" />
+    <Compile Include="swigout\RoomAreaMask.cs" />
+    <Compile Include="swigout\roomstruct.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_AudioClipType.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_a_20__char.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_a_50__char.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_ccScript.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_CharacterInfo.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_color.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_CustomProperties.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_CustomPropertySchema.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_DialogTopic.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_FILE.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_GFX_VTABLE.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_GUIMain.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_int.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_InventoryItemInfo.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_MouseCursor.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_p_BITMAP.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_p_char.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_p_InteractionScripts.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_p_NewInteraction.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_p_unsigned_char.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_ScriptAudioClip.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_ScriptModule.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_unsigned_char.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_ViewStruct.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_ViewStruct272.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_void.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_WordsDictionary.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AGS.Types\AGS.Types.csproj">

@@ -23,10 +23,20 @@ namespace AGS.Native
 	        }
         }
 
-        public void NewGameLoaded(Game game){ throw new NotImplementedException(); }
+        public void NewGameLoaded(Game game)
+        {
+            this.PaletteColoursUpdated(game);
+            NativeMethodsUtil.GameUpdated(game);
+            NativeMethodsUtil.UpdateSpriteFlags(game.RootSpriteFolder);
+        }
+
         public void SaveGame(Game game){ throw new NotImplementedException(); }
         public void GameSettingsChanged(Game game){ throw new NotImplementedException(); }
-        public void PaletteColoursUpdated(Game game){ throw new NotImplementedException(); }
+        public void PaletteColoursUpdated(Game game)
+        {
+            //lastPaletteSet = game.Palette;
+            NativeMethodsUtil.PaletteUpdated(game.Palette);
+        }
         public void DrawGUI(int hDC, int x, int y, GUI gui, int scaleFactor, int selectedControl){ throw new NotImplementedException(); }
         public void DrawSprite(int hDC, int x, int y, int width, int height, int spriteNum){ throw new NotImplementedException(); }
         public void DrawSprite(int hDC, int x, int y, int spriteNum, bool flipImage){ throw new NotImplementedException(); }
@@ -35,8 +45,14 @@ namespace AGS.Native
         public void DrawViewLoop(int hdc, ViewLoop loopToDraw, int x, int y, int size, int cursel){ throw new NotImplementedException(); }
         public Sprite SetSpriteFromBitmap(int spriteSlot, Bitmap bmp, int spriteImportMethod, bool remapColours, bool useRoomBackgroundColours, bool alphaChannel){ throw new NotImplementedException(); }
         public void ReplaceSpriteWithBitmap(Sprite spr, Bitmap bmp, int spriteImportMethod, bool remapColours, bool useRoomBackgroundColours, bool alphaChannel){ throw new NotImplementedException(); }
-        public Bitmap GetBitmapForSprite(int spriteSlot, int width, int height){ throw new NotImplementedException(); }
-        public Bitmap GetBitmapForSpritePreserveColDepth(int spriteSlot){ throw new NotImplementedException(); }
+        public Bitmap GetBitmapForSprite(int spriteSlot, int width, int height)
+        {
+            return NativeMethodsUtil.getSpriteAsBitmap32bit(spriteSlot, width, height);
+        }
+        public Bitmap GetBitmapForSpritePreserveColDepth(int spriteSlot)
+        {
+            return NativeMethodsUtil.getSpriteAsBitmap(spriteSlot);
+        }
         public void DeleteSprite(int spriteSlot){ throw new NotImplementedException(); }
         public int  GetFreeSpriteSlot(){ throw new NotImplementedException(); }
         public int  GetRelativeSpriteWidth(int spriteSlot){ throw new NotImplementedException(); }
@@ -48,12 +64,20 @@ namespace AGS.Native
         public bool DoesSpriteExist(int spriteNumber){ throw new NotImplementedException(); }
         public void ChangeSpriteNumber(Sprite sprite, int newNumber){ throw new NotImplementedException(); }
         public void SpriteResolutionsChanged(Sprite[] sprites){ throw new NotImplementedException(); }
-        public void Shutdown(){ throw new NotImplementedException(); }
+        public void Shutdown()
+        {
+            //acswig.shutdown_native();
+        }
         public Game ImportOldGameFile(String fileName){ throw new NotImplementedException(); }
         public void ImportSCIFont(String fileName, int fontSlot){ throw new NotImplementedException(); }
         public void ReloadTTFFont(int fontSlot){ throw new NotImplementedException(); }
         public Dictionary<int,Sprite> LoadAllSpriteDimensions(){ throw new NotImplementedException(); }
-        public void LoadNewSpriteFile(){ throw new NotImplementedException(); }
+        public void LoadNewSpriteFile(){ 	
+            if (!acswig.reset_sprite_file())
+			{
+				throw new AGSEditorException("Unable to load the sprite file ACSPRSET.SPR. The file may be missing, corrupt or it may require a newer version of AGS.");
+			} 
+        }
         public Room LoadRoomFile(UnloadedRoom roomToLoad){ throw new NotImplementedException(); }
         public void SaveRoomFile(Room roomToSave){ throw new NotImplementedException(); }
         public void DrawRoomBackground(int hDC, Room room, int x, int y, int backgroundNumber, float scaleFactor, RoomAreaMaskType maskType, int selectedArea, int maskTransparency){ throw new NotImplementedException(); }
@@ -93,18 +117,18 @@ namespace AGS.Native
 
 	public class SourceCodeControl
 		{
-        public SourceCodeControl(){ throw new NotImplementedException(); }
-        public bool Initialize(string dllName, int mainWindowHwnd){ throw new NotImplementedException(); }
-        public void Shutdown(){ throw new NotImplementedException(); }
-        public SourceControlProject AddToSourceControl(){ throw new NotImplementedException(); }
-        public bool OpenProject(SourceControlProject project){ throw new NotImplementedException(); }
-        public void CloseProject(){ throw new NotImplementedException(); }
-        public SourceControlFileStatus[] GetFileStatuses(string[] fileNames){ throw new NotImplementedException(); }
-        public void AddFilesToSourceControl(string[] fileNames, string comment) { throw new NotImplementedException(); }
-        public void CheckInFiles(string[] fileNames, string comment) { throw new NotImplementedException(); }
-        public void CheckOutFiles(string[] fileNames, string comment) { throw new NotImplementedException(); }
-        public void RenameFile(string currentPath, string newPath) { throw new NotImplementedException(); }
-        public void DeleteFiles(string[] fileNames, string comment) { throw new NotImplementedException(); }
+        public SourceCodeControl(){ }
+        public bool Initialize(string dllName, int mainWindowHwnd) { return false; }
+        public void Shutdown(){  }
+        public SourceControlProject AddToSourceControl() { return null; }
+        public bool OpenProject(SourceControlProject project) { return false; }
+        public void CloseProject(){  }
+        public SourceControlFileStatus[] GetFileStatuses(string[] fileNames){ return new SourceControlFileStatus[0]; }
+        public void AddFilesToSourceControl(string[] fileNames, string comment) {  }
+        public void CheckInFiles(string[] fileNames, string comment) { }
+        public void CheckOutFiles(string[] fileNames, string comment) { }
+        public void RenameFile(string currentPath, string newPath) { }
+        public void DeleteFiles(string[] fileNames, string comment) { }
 	};
 
 }

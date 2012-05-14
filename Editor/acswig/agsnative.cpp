@@ -2562,6 +2562,34 @@ const char* make_data_file(int numFiles, char * const*fileNames, long splitSize,
 
 #pragma managed
 
+ void set_rgb_mask_from_alpha_channel(block image)
+{
+    for (int y = 0; y < image->h; y++)
+    {
+        unsigned long* thisLine = (unsigned long*)image->line[y];
+        for (int x = 0; x < image->w; x++)
+        {
+	        if ((thisLine[x] & 0xff000000) == 0)
+	        {
+		        thisLine[x] = MASK_COLOR_32;
+	        }
+        }
+    }
+}
+
+void set_opaque_alpha_channel(block image)
+{
+    for (int y = 0; y < image->h; y++)
+    {
+        unsigned long* thisLine = (unsigned long*)image->line[y];
+        for (int x = 0; x < image->w; x++)
+        {
+	        if (thisLine[x] != MASK_COLOR_32)
+	          thisLine[x] |= 0xff000000;
+        }
+    }
+}
+
 
 void ThrowManagedException(const char *message) 
 {

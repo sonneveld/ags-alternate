@@ -246,7 +246,7 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="..\swigwin\swig.exe -c++ -csharp &quot;$(InputPath)&quot;"
+						CommandLine="..\swigwin\swig.exe  -v  -c++ -csharp  -outdir swigout &quot;$(InputPath)&quot;&#x0D;&#x0A;"
 						Outputs="$(InputName)_wrap.cxx"
 					/>
 				</FileConfiguration>
@@ -311,6 +311,10 @@
 			>
 			<File
 				RelativePath="..\..\acroom.h"
+				>
+			</File>
+			<File
+				RelativePath=".\agsnative.h"
 				>
 			</File>
 			<File

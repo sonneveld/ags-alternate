@@ -10,10 +10,18 @@
 using System;
 using System.Runtime.InteropServices;
 
-public class acswig {
-  public static bool initialize_native() {
-    bool ret = acswigPINVOKE.initialize_native();
-    return ret;
+public class SWIGTYPE_p_ViewStruct272 {
+  private HandleRef swigCPtr;
+
+  internal SWIGTYPE_p_ViewStruct272(IntPtr cPtr, bool futureUse) {
+    swigCPtr = new HandleRef(this, cPtr);
   }
 
+  protected SWIGTYPE_p_ViewStruct272() {
+    swigCPtr = new HandleRef(null, IntPtr.Zero);
+  }
+
+  internal static HandleRef getCPtr(SWIGTYPE_p_ViewStruct272 obj) {
+    return (obj == null) ? new HandleRef(null, IntPtr.Zero) : obj.swigCPtr;
+  }
 }
