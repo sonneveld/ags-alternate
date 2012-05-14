@@ -22,6 +22,10 @@ namespace UpdateCPPVersion
             string rcFileName = Path.Combine(executingDir, CPP_RESOURCE_FILE);
             string fileName = Path.Combine(executingDir, @"..\..\..\AGS.Types\bin\Release\AGS.Types.dll");
 			//string fileName = args[0];
+
+            if (!File.Exists(fileName))
+                return;
+
 			Assembly assembly = Assembly.LoadFile(fileName);
 			Version typesVersion = assembly.GetName().Version;
 
