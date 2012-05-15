@@ -6,7 +6,7 @@
 #include "agsnative.h"
 %}
 
-
+%include "arrays_csharp.i"
 %include "carrays.i"
 
 // ============================================================================
@@ -58,6 +58,10 @@ typedef int int32;
 
 // ============================================================================
 
+bool Scintilla_RegisterClasses(void *hInstance);
+
+// ============================================================================
+
 #define COLORCONV_KEEP_TRANS        0x4000000
 
 // allegro
@@ -85,6 +89,8 @@ typedef struct RGB
    unsigned char filler;
 } RGB;
 
+%array_class(RGB , RgbArray);
+
 #define PAL_SIZE     256
 
 typedef RGB PALETTE[PAL_SIZE];
@@ -108,7 +114,7 @@ void blit (struct BITMAP *source, struct BITMAP *dest, int source_x, int source_
 
 
 
-%array_class(RGB , RgbArray);
+
 void select_palette(RGB pal[]);
 
 void unselect_palette(void);
@@ -297,6 +303,20 @@ struct GameSetupStruct: public GameSetupStructBase {
 
 };
 
+#define VFLG_FLIPSPRITE 1
+%rename(NativeViewFrame) ViewFrame;
+struct ViewFrame {
+  int   pic;
+  short xoffs, yoffs;
+  short speed;
+  int   flags;
+  int   sound;  // play sound when this frame comes round
+  ViewFrame() { pic = 0; xoffs = 0; yoffs = 0; speed = 0; }
+};
+
+%array_class(ViewFrame , NativeViewFrameArray);
+
+
 #define color RGB
 
 %inline %{
@@ -311,6 +331,9 @@ struct roomstruct {
 %extend roomstruct {
 	block GetEbScene(int index) { return $self->ebscene[index];}
 };
+
+%apply int INPUT[]  {int *sprites}
+extern int crop_sprite_edges(int numSprites, int *sprites, bool symmetric);
 
 %include "agsnative.h"
 
@@ -329,3 +352,5 @@ block get_bitmap_for_mask_from_void(void *voidptr, RoomAreaMask maskType) {
 
 
 %}
+
+

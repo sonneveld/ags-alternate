@@ -188,6 +188,9 @@ class acswigPINVOKE {
   }
 
 
+  [DllImport("acswig", EntryPoint="CSharp_Scintilla_RegisterClasses")]
+  public static extern bool Scintilla_RegisterClasses(IntPtr jarg1);
+
   [DllImport("acswig", EntryPoint="CSharp_COLORCONV_KEEP_TRANS_get")]
   public static extern int COLORCONV_KEEP_TRANS_get();
 
@@ -308,6 +311,24 @@ class acswigPINVOKE {
   [DllImport("acswig", EntryPoint="CSharp_delete_RGB")]
   public static extern void delete_RGB(HandleRef jarg1);
 
+  [DllImport("acswig", EntryPoint="CSharp_new_RgbArray")]
+  public static extern IntPtr new_RgbArray(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_delete_RgbArray")]
+  public static extern void delete_RgbArray(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_RgbArray_getitem")]
+  public static extern IntPtr RgbArray_getitem(HandleRef jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_RgbArray_setitem")]
+  public static extern void RgbArray_setitem(HandleRef jarg1, int jarg2, HandleRef jarg3);
+
+  [DllImport("acswig", EntryPoint="CSharp_RgbArray_cast")]
+  public static extern IntPtr RgbArray_cast(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_RgbArray_frompointer")]
+  public static extern IntPtr RgbArray_frompointer(HandleRef jarg1);
+
   [DllImport("acswig", EntryPoint="CSharp_PAL_SIZE_get")]
   public static extern int PAL_SIZE_get();
 
@@ -328,24 +349,6 @@ class acswigPINVOKE {
 
   [DllImport("acswig", EntryPoint="CSharp_blit")]
   public static extern void blit(HandleRef jarg1, HandleRef jarg2, int jarg3, int jarg4, int jarg5, int jarg6, int jarg7, int jarg8);
-
-  [DllImport("acswig", EntryPoint="CSharp_new_RgbArray")]
-  public static extern IntPtr new_RgbArray(int jarg1);
-
-  [DllImport("acswig", EntryPoint="CSharp_delete_RgbArray")]
-  public static extern void delete_RgbArray(HandleRef jarg1);
-
-  [DllImport("acswig", EntryPoint="CSharp_RgbArray_getitem")]
-  public static extern IntPtr RgbArray_getitem(HandleRef jarg1, int jarg2);
-
-  [DllImport("acswig", EntryPoint="CSharp_RgbArray_setitem")]
-  public static extern void RgbArray_setitem(HandleRef jarg1, int jarg2, HandleRef jarg3);
-
-  [DllImport("acswig", EntryPoint="CSharp_RgbArray_cast")]
-  public static extern IntPtr RgbArray_cast(HandleRef jarg1);
-
-  [DllImport("acswig", EntryPoint="CSharp_RgbArray_frompointer")]
-  public static extern IntPtr RgbArray_frompointer(HandleRef jarg1);
 
   [DllImport("acswig", EntryPoint="CSharp_select_palette")]
   public static extern void select_palette(HandleRef jarg1);
@@ -1013,6 +1016,69 @@ class acswigPINVOKE {
   [DllImport("acswig", EntryPoint="CSharp_delete_GameSetupStruct")]
   public static extern void delete_GameSetupStruct(HandleRef jarg1);
 
+  [DllImport("acswig", EntryPoint="CSharp_VFLG_FLIPSPRITE_get")]
+  public static extern int VFLG_FLIPSPRITE_get();
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_pic_set")]
+  public static extern void NativeViewFrame_pic_set(HandleRef jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_pic_get")]
+  public static extern int NativeViewFrame_pic_get(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_xoffs_set")]
+  public static extern void NativeViewFrame_xoffs_set(HandleRef jarg1, short jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_xoffs_get")]
+  public static extern short NativeViewFrame_xoffs_get(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_yoffs_set")]
+  public static extern void NativeViewFrame_yoffs_set(HandleRef jarg1, short jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_yoffs_get")]
+  public static extern short NativeViewFrame_yoffs_get(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_speed_set")]
+  public static extern void NativeViewFrame_speed_set(HandleRef jarg1, short jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_speed_get")]
+  public static extern short NativeViewFrame_speed_get(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_flags_set")]
+  public static extern void NativeViewFrame_flags_set(HandleRef jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_flags_get")]
+  public static extern int NativeViewFrame_flags_get(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_sound_set")]
+  public static extern void NativeViewFrame_sound_set(HandleRef jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrame_sound_get")]
+  public static extern int NativeViewFrame_sound_get(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_new_NativeViewFrame")]
+  public static extern IntPtr new_NativeViewFrame();
+
+  [DllImport("acswig", EntryPoint="CSharp_delete_NativeViewFrame")]
+  public static extern void delete_NativeViewFrame(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_new_NativeViewFrameArray")]
+  public static extern IntPtr new_NativeViewFrameArray(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_delete_NativeViewFrameArray")]
+  public static extern void delete_NativeViewFrameArray(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrameArray_getitem")]
+  public static extern IntPtr NativeViewFrameArray_getitem(HandleRef jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrameArray_setitem")]
+  public static extern void NativeViewFrameArray_setitem(HandleRef jarg1, int jarg2, HandleRef jarg3);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrameArray_cast")]
+  public static extern IntPtr NativeViewFrameArray_cast(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_NativeViewFrameArray_frompointer")]
+  public static extern IntPtr NativeViewFrameArray_frompointer(HandleRef jarg1);
+
   [DllImport("acswig", EntryPoint="CSharp_get_palette_entry")]
   public static extern IntPtr get_palette_entry(int jarg1);
 
@@ -1033,6 +1099,9 @@ class acswigPINVOKE {
 
   [DllImport("acswig", EntryPoint="CSharp_delete_roomstruct")]
   public static extern void delete_roomstruct(HandleRef jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_crop_sprite_edges")]
+  public static extern int crop_sprite_edges(int jarg1, [In, MarshalAs(UnmanagedType.LPArray)]int[] jarg2, bool jarg3);
 
   [DllImport("acswig", EntryPoint="CSharp_antiAliasFonts_set")]
   public static extern void antiAliasFonts_set(int jarg1);
@@ -1250,9 +1319,6 @@ class acswigPINVOKE {
   [DllImport("acswig", EntryPoint="CSharp_cfopenpriority_get")]
   public static extern int cfopenpriority_get();
 
-  [DllImport("acswig", EntryPoint="CSharp_Scintilla_RegisterClasses")]
-  public static extern bool Scintilla_RegisterClasses(IntPtr jarg1);
-
   [DllImport("acswig", EntryPoint="CSharp_Scintilla_LinkLexers")]
   public static extern int Scintilla_LinkLexers();
 
@@ -1315,6 +1381,135 @@ class acswigPINVOKE {
 
   [DllImport("acswig", EntryPoint="CSharp_get_sprite")]
   public static extern IntPtr get_sprite(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_drawSprite")]
+  public static extern void drawSprite(int jarg1, int jarg2, int jarg3, int jarg4, bool jarg5);
+
+  [DllImport("acswig", EntryPoint="CSharp_multiply_up_coordinate")]
+  public static extern int multiply_up_coordinate(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_get_fixed_pixel_size")]
+  public static extern int get_fixed_pixel_size(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_initialize_sprite")]
+  public static extern void initialize_sprite(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_pre_save_sprite")]
+  public static extern void pre_save_sprite(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_shutdown_native")]
+  public static extern void shutdown_native();
+
+  [DllImport("acswig", EntryPoint="CSharp_free_old_game_data")]
+  public static extern void free_old_game_data();
+
+  [DllImport("acswig", EntryPoint="CSharp_import_sci_font")]
+  public static extern string import_sci_font(string jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_drawFontAt")]
+  public static extern void drawFontAt(int jarg1, int jarg2, int jarg3, int jarg4);
+
+  [DllImport("acswig", EntryPoint="CSharp_drawSpriteStretch")]
+  public static extern void drawSpriteStretch(int jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6);
+
+  [DllImport("acswig", EntryPoint="CSharp_drawBlockOfColour")]
+  public static extern void drawBlockOfColour(int jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6);
+
+  [DllImport("acswig", EntryPoint="CSharp_SetNewSpriteFromHBitmap")]
+  public static extern void SetNewSpriteFromHBitmap(int jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetSpriteAsHBitmap")]
+  public static extern int GetSpriteAsHBitmap(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetRawSpriteData")]
+  public static extern IntPtr GetRawSpriteData(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_find_free_sprite_slot")]
+  public static extern int find_free_sprite_slot();
+
+  [DllImport("acswig", EntryPoint="CSharp_deleteSprite")]
+  public static extern void deleteSprite(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetSpriteWidth")]
+  public static extern int GetSpriteWidth(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetSpriteHeight")]
+  public static extern int GetSpriteHeight(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetRelativeSpriteWidth")]
+  public static extern int GetRelativeSpriteWidth(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetRelativeSpriteHeight")]
+  public static extern int GetRelativeSpriteHeight(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetSpriteColorDepth")]
+  public static extern int GetSpriteColorDepth(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetPaletteAsHPalette")]
+  public static extern int GetPaletteAsHPalette();
+
+  [DllImport("acswig", EntryPoint="CSharp_DoesSpriteExist")]
+  public static extern bool DoesSpriteExist(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetMaxSprites")]
+  public static extern int GetMaxSprites();
+
+  [DllImport("acswig", EntryPoint="CSharp_load_template_file")]
+  public static extern int load_template_file(string jarg1, HandleRef jarg2, HandleRef jarg3, bool jarg4);
+
+  [DllImport("acswig", EntryPoint="CSharp_extract_template_files")]
+  public static extern int extract_template_files(string jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_extract_room_template_files")]
+  public static extern int extract_room_template_files(string jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_change_sprite_number")]
+  public static extern void change_sprite_number(int jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_update_sprite_resolution")]
+  public static extern void update_sprite_resolution(int jarg1, bool jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_GetSpriteResolutionMultiplier")]
+  public static extern int GetSpriteResolutionMultiplier(int jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_draw_room_background")]
+  public static extern void draw_room_background(IntPtr jarg1, int jarg2, int jarg3, int jarg4, int jarg5, float jarg6, int jarg7, int jarg8, int jarg9);
+
+  [DllImport("acswig", EntryPoint="CSharp_draw_line_onto_mask")]
+  public static extern void draw_line_onto_mask(IntPtr jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6, int jarg7);
+
+  [DllImport("acswig", EntryPoint="CSharp_draw_filled_rect_onto_mask")]
+  public static extern void draw_filled_rect_onto_mask(IntPtr jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6, int jarg7);
+
+  [DllImport("acswig", EntryPoint="CSharp_draw_fill_onto_mask")]
+  public static extern void draw_fill_onto_mask(IntPtr jarg1, int jarg2, int jarg3, int jarg4, int jarg5);
+
+  [DllImport("acswig", EntryPoint="CSharp_copy_walkable_to_regions")]
+  public static extern void copy_walkable_to_regions(IntPtr jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_get_mask_pixel")]
+  public static extern int get_mask_pixel(IntPtr jarg1, int jarg2, int jarg3, int jarg4);
+
+  [DllImport("acswig", EntryPoint="CSharp_create_undo_buffer")]
+  public static extern void create_undo_buffer(IntPtr jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_does_undo_buffer_exist")]
+  public static extern bool does_undo_buffer_exist();
+
+  [DllImport("acswig", EntryPoint="CSharp_clear_undo_buffer")]
+  public static extern void clear_undo_buffer();
+
+  [DllImport("acswig", EntryPoint="CSharp_restore_from_undo_buffer")]
+  public static extern void restore_from_undo_buffer(IntPtr jarg1, int jarg2);
+
+  [DllImport("acswig", EntryPoint="CSharp_transform_string")]
+  public static extern void transform_string(string jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_save_sprites")]
+  public static extern string save_sprites(bool jarg1);
+
+  [DllImport("acswig", EntryPoint="CSharp_doDrawViewLoop")]
+  public static extern void doDrawViewLoop(int jarg1, int jarg2, HandleRef jarg3, int jarg4, int jarg5, int jarg6, int jarg7);
 
   [DllImport("acswig", EntryPoint="CSharp_cast_to_roomstruct")]
   public static extern IntPtr cast_to_roomstruct(IntPtr jarg1);

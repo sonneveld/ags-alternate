@@ -11,6 +11,11 @@ using System;
 using System.Runtime.InteropServices;
 
 public class acswig {
+  public static bool Scintilla_RegisterClasses(IntPtr hInstance) {
+    bool ret = acswigPINVOKE.Scintilla_RegisterClasses(hInstance);
+    return ret;
+  }
+
   public static void allegro_set_palette(RGB pal) {
     acswigPINVOKE.allegro_set_palette(RGB.getCPtr(pal));
   }
@@ -70,6 +75,11 @@ public class acswig {
   public static void set_palette_entry(int index, RGB value) {
     acswigPINVOKE.set_palette_entry(index, RGB.getCPtr(value));
     if (acswigPINVOKE.SWIGPendingException.Pending) throw acswigPINVOKE.SWIGPendingException.Retrieve();
+  }
+
+  public static int crop_sprite_edges(int numSprites, int[] sprites, bool symmetric) {
+    int ret = acswigPINVOKE.crop_sprite_edges(numSprites, sprites, symmetric);
+    return ret;
   }
 
   public static int antiAliasFonts {
@@ -441,11 +451,6 @@ public class acswig {
     } 
   }
 
-  public static bool Scintilla_RegisterClasses(IntPtr hInstance) {
-    bool ret = acswigPINVOKE.Scintilla_RegisterClasses(hInstance);
-    return ret;
-  }
-
   public static int Scintilla_LinkLexers() {
     int ret = acswigPINVOKE.Scintilla_LinkLexers();
     return ret;
@@ -537,6 +542,200 @@ public class acswig {
     IntPtr cPtr = acswigPINVOKE.get_sprite(spnr);
     BITMAP ret = (cPtr == IntPtr.Zero) ? null : new BITMAP(cPtr, false);
     return ret;
+  }
+
+  public static void drawSprite(int hdc, int x, int y, int spriteNum, bool flipImage) {
+    acswigPINVOKE.drawSprite(hdc, x, y, spriteNum, flipImage);
+  }
+
+  public static int multiply_up_coordinate(int coord) {
+    int ret = acswigPINVOKE.multiply_up_coordinate(coord);
+    return ret;
+  }
+
+  public static int get_fixed_pixel_size(int coord) {
+    int ret = acswigPINVOKE.get_fixed_pixel_size(coord);
+    return ret;
+  }
+
+  public static void initialize_sprite(int spnum) {
+    acswigPINVOKE.initialize_sprite(spnum);
+  }
+
+  public static void pre_save_sprite(int spnum) {
+    acswigPINVOKE.pre_save_sprite(spnum);
+  }
+
+  public static void shutdown_native() {
+    acswigPINVOKE.shutdown_native();
+  }
+
+  public static void free_old_game_data() {
+    acswigPINVOKE.free_old_game_data();
+  }
+
+  public static string import_sci_font(string fnn, int fslot) {
+    string ret = acswigPINVOKE.import_sci_font(fnn, fslot);
+    return ret;
+  }
+
+  public static void drawFontAt(int hdc, int fontnum, int x, int y) {
+    acswigPINVOKE.drawFontAt(hdc, fontnum, x, y);
+  }
+
+  public static void drawSpriteStretch(int hdc, int x, int y, int width, int height, int spriteNum) {
+    acswigPINVOKE.drawSpriteStretch(hdc, x, y, width, height, spriteNum);
+  }
+
+  public static void drawBlockOfColour(int hdc, int x, int y, int width, int height, int colNum) {
+    acswigPINVOKE.drawBlockOfColour(hdc, x, y, width, height, colNum);
+  }
+
+  public static void SetNewSpriteFromHBitmap(int slot, int hBmp) {
+    acswigPINVOKE.SetNewSpriteFromHBitmap(slot, hBmp);
+  }
+
+  public static int GetSpriteAsHBitmap(int spriteSlot) {
+    int ret = acswigPINVOKE.GetSpriteAsHBitmap(spriteSlot);
+    return ret;
+  }
+
+  public static SWIGTYPE_p_unsigned_char GetRawSpriteData(int spriteSlot) {
+    IntPtr cPtr = acswigPINVOKE.GetRawSpriteData(spriteSlot);
+    SWIGTYPE_p_unsigned_char ret = (cPtr == IntPtr.Zero) ? null : new SWIGTYPE_p_unsigned_char(cPtr, false);
+    return ret;
+  }
+
+  public static int find_free_sprite_slot() {
+    int ret = acswigPINVOKE.find_free_sprite_slot();
+    return ret;
+  }
+
+  public static void deleteSprite(int sprslot) {
+    acswigPINVOKE.deleteSprite(sprslot);
+  }
+
+  public static int GetSpriteWidth(int slot) {
+    int ret = acswigPINVOKE.GetSpriteWidth(slot);
+    return ret;
+  }
+
+  public static int GetSpriteHeight(int slot) {
+    int ret = acswigPINVOKE.GetSpriteHeight(slot);
+    return ret;
+  }
+
+  public static int GetRelativeSpriteWidth(int slot) {
+    int ret = acswigPINVOKE.GetRelativeSpriteWidth(slot);
+    return ret;
+  }
+
+  public static int GetRelativeSpriteHeight(int slot) {
+    int ret = acswigPINVOKE.GetRelativeSpriteHeight(slot);
+    return ret;
+  }
+
+  public static int GetSpriteColorDepth(int slot) {
+    int ret = acswigPINVOKE.GetSpriteColorDepth(slot);
+    return ret;
+  }
+
+  public static int GetPaletteAsHPalette() {
+    int ret = acswigPINVOKE.GetPaletteAsHPalette();
+    return ret;
+  }
+
+  public static bool DoesSpriteExist(int slot) {
+    bool ret = acswigPINVOKE.DoesSpriteExist(slot);
+    return ret;
+  }
+
+  public static int GetMaxSprites() {
+    int ret = acswigPINVOKE.GetMaxSprites();
+    return ret;
+  }
+
+  public static int load_template_file(string fileName, SWIGTYPE_p_p_char iconDataBuffer, SWIGTYPE_p_long iconDataSize, bool isRoomTemplate) {
+    int ret = acswigPINVOKE.load_template_file(fileName, SWIGTYPE_p_p_char.getCPtr(iconDataBuffer), SWIGTYPE_p_long.getCPtr(iconDataSize), isRoomTemplate);
+    return ret;
+  }
+
+  public static int extract_template_files(string templateFileName) {
+    int ret = acswigPINVOKE.extract_template_files(templateFileName);
+    return ret;
+  }
+
+  public static int extract_room_template_files(string templateFileName, int newRoomNumber) {
+    int ret = acswigPINVOKE.extract_room_template_files(templateFileName, newRoomNumber);
+    return ret;
+  }
+
+  public static void change_sprite_number(int oldNumber, int newNumber) {
+    acswigPINVOKE.change_sprite_number(oldNumber, newNumber);
+  }
+
+  public static void update_sprite_resolution(int spriteNum, bool isHighRes) {
+    acswigPINVOKE.update_sprite_resolution(spriteNum, isHighRes);
+  }
+
+  public static int GetSpriteResolutionMultiplier(int slot) {
+    int ret = acswigPINVOKE.GetSpriteResolutionMultiplier(slot);
+    return ret;
+  }
+
+  public static void draw_room_background(IntPtr roomptr, int hdc, int x, int y, int bgnum, float scaleFactor, int maskType, int selectedArea, int maskTransparency) {
+    acswigPINVOKE.draw_room_background(roomptr, hdc, x, y, bgnum, scaleFactor, maskType, selectedArea, maskTransparency);
+  }
+
+  public static void draw_line_onto_mask(IntPtr roomptr, int maskType, int x1, int y1, int x2, int y2, int RGB) {
+    acswigPINVOKE.draw_line_onto_mask(roomptr, maskType, x1, y1, x2, y2, RGB);
+  }
+
+  public static void draw_filled_rect_onto_mask(IntPtr roomptr, int maskType, int x1, int y1, int x2, int y2, int RGB) {
+    acswigPINVOKE.draw_filled_rect_onto_mask(roomptr, maskType, x1, y1, x2, y2, RGB);
+  }
+
+  public static void draw_fill_onto_mask(IntPtr roomptr, int maskType, int x1, int y1, int RGB) {
+    acswigPINVOKE.draw_fill_onto_mask(roomptr, maskType, x1, y1, RGB);
+  }
+
+  public static void copy_walkable_to_regions(IntPtr roomptr) {
+    acswigPINVOKE.copy_walkable_to_regions(roomptr);
+  }
+
+  public static int get_mask_pixel(IntPtr roomptr, int maskType, int x, int y) {
+    int ret = acswigPINVOKE.get_mask_pixel(roomptr, maskType, x, y);
+    return ret;
+  }
+
+  public static void create_undo_buffer(IntPtr roomptr, int maskType) {
+    acswigPINVOKE.create_undo_buffer(roomptr, maskType);
+  }
+
+  public static bool does_undo_buffer_exist() {
+    bool ret = acswigPINVOKE.does_undo_buffer_exist();
+    return ret;
+  }
+
+  public static void clear_undo_buffer() {
+    acswigPINVOKE.clear_undo_buffer();
+  }
+
+  public static void restore_from_undo_buffer(IntPtr roomptr, int maskType) {
+    acswigPINVOKE.restore_from_undo_buffer(roomptr, maskType);
+  }
+
+  public static void transform_string(string text) {
+    acswigPINVOKE.transform_string(text);
+  }
+
+  public static string save_sprites(bool compressSprites) {
+    string ret = acswigPINVOKE.save_sprites(compressSprites);
+    return ret;
+  }
+
+  public static void doDrawViewLoop(int hdc, int numFrames, NativeViewFrame frames, int x, int y, int size, int cursel) {
+    acswigPINVOKE.doDrawViewLoop(hdc, numFrames, NativeViewFrame.getCPtr(frames), x, y, size, cursel);
   }
 
   public static roomstruct cast_to_roomstruct(IntPtr voidptr) {
@@ -646,5 +845,6 @@ public class acswig {
   public static readonly int MAX_GUID_LENGTH = acswigPINVOKE.MAX_GUID_LENGTH_get();
   public static readonly int MAX_SG_EXT_LENGTH = acswigPINVOKE.MAX_SG_EXT_LENGTH_get();
   public static readonly int MAX_SG_FOLDER_LEN = acswigPINVOKE.MAX_SG_FOLDER_LEN_get();
+  public static readonly int VFLG_FLIPSPRITE = acswigPINVOKE.VFLG_FLIPSPRITE_get();
   public static readonly int SAVEBUFFERSIZE = acswigPINVOKE.SAVEBUFFERSIZE_get();
 }

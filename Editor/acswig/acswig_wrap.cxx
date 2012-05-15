@@ -313,6 +313,27 @@ SWIGINTERN void GameSetupStruct_SetPalUse(GameSetupStruct *self,int index,unsign
 SWIGINTERN unsigned char GameSetupStruct_GetFontFlag(GameSetupStruct *self,int index){ return self-> fontflags [index];}
 SWIGINTERN void GameSetupStruct_SetFontFlag(GameSetupStruct *self,int index,unsigned char value){ self-> fontflags [index] = value; }
 
+typedef ViewFrame NativeViewFrameArray;
+
+SWIGINTERN NativeViewFrameArray *new_NativeViewFrameArray(int nelements){
+  return new ViewFrame[nelements];
+}
+SWIGINTERN void delete_NativeViewFrameArray(NativeViewFrameArray *self){
+  delete [] self;
+}
+SWIGINTERN ViewFrame NativeViewFrameArray_getitem(NativeViewFrameArray *self,int index){
+  return self[index];
+}
+SWIGINTERN void NativeViewFrameArray_setitem(NativeViewFrameArray *self,int index,ViewFrame value){
+  self[index] = value;
+}
+SWIGINTERN ViewFrame *NativeViewFrameArray_cast(NativeViewFrameArray *self){
+  return self;
+}
+SWIGINTERN NativeViewFrameArray *NativeViewFrameArray_frompointer(ViewFrame *t){
+  return (NativeViewFrameArray *) t;
+}
+
 color get_palette_entry(int index) { return palette[index]; }
 void set_palette_entry(int index, color value) { palette[index] = value; }
 
@@ -334,6 +355,18 @@ block get_bitmap_for_mask_from_void(void *voidptr, RoomAreaMask maskType) {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Scintilla_RegisterClasses(void * jarg1) {
+  unsigned int jresult ;
+  void *arg1 = (void *) 0 ;
+  bool result;
+  
+  arg1 = jarg1; 
+  result = (bool)Scintilla_RegisterClasses(arg1);
+  jresult = result; 
+  return jresult;
+}
+
 
 SWIGEXPORT int SWIGSTDCALL CSharp_COLORCONV_KEEP_TRANS_get() {
   int jresult ;
@@ -773,6 +806,82 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_RGB(void * jarg1) {
 }
 
 
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_RgbArray(int jarg1) {
+  void * jresult ;
+  int arg1 ;
+  RgbArray *result = 0 ;
+  
+  arg1 = (int)jarg1; 
+  result = (RgbArray *)new_RgbArray(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_RgbArray(void * jarg1) {
+  RgbArray *arg1 = (RgbArray *) 0 ;
+  
+  arg1 = (RgbArray *)jarg1; 
+  delete_RgbArray(arg1);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_RgbArray_getitem(void * jarg1, int jarg2) {
+  void * jresult ;
+  RgbArray *arg1 = (RgbArray *) 0 ;
+  int arg2 ;
+  RGB result;
+  
+  arg1 = (RgbArray *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = RgbArray_getitem(arg1,arg2);
+  jresult = new RGB((const RGB &)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_RgbArray_setitem(void * jarg1, int jarg2, void * jarg3) {
+  RgbArray *arg1 = (RgbArray *) 0 ;
+  int arg2 ;
+  RGB arg3 ;
+  RGB *argp3 ;
+  
+  arg1 = (RgbArray *)jarg1; 
+  arg2 = (int)jarg2; 
+  argp3 = (RGB *)jarg3; 
+  if (!argp3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null RGB", 0);
+    return ;
+  }
+  arg3 = *argp3; 
+  RgbArray_setitem(arg1,arg2,arg3);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_RgbArray_cast(void * jarg1) {
+  void * jresult ;
+  RgbArray *arg1 = (RgbArray *) 0 ;
+  RGB *result = 0 ;
+  
+  arg1 = (RgbArray *)jarg1; 
+  result = (RGB *)RgbArray_cast(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_RgbArray_frompointer(void * jarg1) {
+  void * jresult ;
+  RGB *arg1 = (RGB *) 0 ;
+  RgbArray *result = 0 ;
+  
+  arg1 = (RGB *)jarg1; 
+  result = (RgbArray *)RgbArray_frompointer(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
 SWIGEXPORT int SWIGSTDCALL CSharp_PAL_SIZE_get() {
   int jresult ;
   int result;
@@ -852,82 +961,6 @@ SWIGEXPORT void SWIGSTDCALL CSharp_blit(void * jarg1, void * jarg2, int jarg3, i
   arg7 = (int)jarg7; 
   arg8 = (int)jarg8; 
   blit(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_new_RgbArray(int jarg1) {
-  void * jresult ;
-  int arg1 ;
-  RgbArray *result = 0 ;
-  
-  arg1 = (int)jarg1; 
-  result = (RgbArray *)new_RgbArray(arg1);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_delete_RgbArray(void * jarg1) {
-  RgbArray *arg1 = (RgbArray *) 0 ;
-  
-  arg1 = (RgbArray *)jarg1; 
-  delete_RgbArray(arg1);
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_RgbArray_getitem(void * jarg1, int jarg2) {
-  void * jresult ;
-  RgbArray *arg1 = (RgbArray *) 0 ;
-  int arg2 ;
-  RGB result;
-  
-  arg1 = (RgbArray *)jarg1; 
-  arg2 = (int)jarg2; 
-  result = RgbArray_getitem(arg1,arg2);
-  jresult = new RGB((const RGB &)result); 
-  return jresult;
-}
-
-
-SWIGEXPORT void SWIGSTDCALL CSharp_RgbArray_setitem(void * jarg1, int jarg2, void * jarg3) {
-  RgbArray *arg1 = (RgbArray *) 0 ;
-  int arg2 ;
-  RGB arg3 ;
-  RGB *argp3 ;
-  
-  arg1 = (RgbArray *)jarg1; 
-  arg2 = (int)jarg2; 
-  argp3 = (RGB *)jarg3; 
-  if (!argp3) {
-    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null RGB", 0);
-    return ;
-  }
-  arg3 = *argp3; 
-  RgbArray_setitem(arg1,arg2,arg3);
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_RgbArray_cast(void * jarg1) {
-  void * jresult ;
-  RgbArray *arg1 = (RgbArray *) 0 ;
-  RGB *result = 0 ;
-  
-  arg1 = (RgbArray *)jarg1; 
-  result = (RGB *)RgbArray_cast(arg1);
-  jresult = (void *)result; 
-  return jresult;
-}
-
-
-SWIGEXPORT void * SWIGSTDCALL CSharp_RgbArray_frompointer(void * jarg1) {
-  void * jresult ;
-  RGB *arg1 = (RGB *) 0 ;
-  RgbArray *result = 0 ;
-  
-  arg1 = (RGB *)jarg1; 
-  result = (RgbArray *)RgbArray_frompointer(arg1);
-  jresult = (void *)result; 
-  return jresult;
 }
 
 
@@ -3399,6 +3432,242 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_GameSetupStruct(void * jarg1) {
 }
 
 
+SWIGEXPORT int SWIGSTDCALL CSharp_VFLG_FLIPSPRITE_get() {
+  int jresult ;
+  int result;
+  
+  result = (int)(1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_NativeViewFrame_pic_set(void * jarg1, int jarg2) {
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  int arg2 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->pic = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NativeViewFrame_pic_get(void * jarg1) {
+  int jresult ;
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  int result;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  result = (int) ((arg1)->pic);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_NativeViewFrame_xoffs_set(void * jarg1, short jarg2) {
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  short arg2 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  arg2 = (short)jarg2; 
+  if (arg1) (arg1)->xoffs = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_NativeViewFrame_xoffs_get(void * jarg1) {
+  short jresult ;
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  short result;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  result = (short) ((arg1)->xoffs);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_NativeViewFrame_yoffs_set(void * jarg1, short jarg2) {
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  short arg2 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  arg2 = (short)jarg2; 
+  if (arg1) (arg1)->yoffs = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_NativeViewFrame_yoffs_get(void * jarg1) {
+  short jresult ;
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  short result;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  result = (short) ((arg1)->yoffs);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_NativeViewFrame_speed_set(void * jarg1, short jarg2) {
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  short arg2 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  arg2 = (short)jarg2; 
+  if (arg1) (arg1)->speed = arg2;
+}
+
+
+SWIGEXPORT short SWIGSTDCALL CSharp_NativeViewFrame_speed_get(void * jarg1) {
+  short jresult ;
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  short result;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  result = (short) ((arg1)->speed);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_NativeViewFrame_flags_set(void * jarg1, int jarg2) {
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  int arg2 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->flags = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NativeViewFrame_flags_get(void * jarg1) {
+  int jresult ;
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  int result;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  result = (int) ((arg1)->flags);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_NativeViewFrame_sound_set(void * jarg1, int jarg2) {
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  int arg2 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  arg2 = (int)jarg2; 
+  if (arg1) (arg1)->sound = arg2;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_NativeViewFrame_sound_get(void * jarg1) {
+  int jresult ;
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  int result;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  result = (int) ((arg1)->sound);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_NativeViewFrame() {
+  void * jresult ;
+  ViewFrame *result = 0 ;
+  
+  result = (ViewFrame *)new ViewFrame();
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_NativeViewFrame(void * jarg1) {
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  delete arg1;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_new_NativeViewFrameArray(int jarg1) {
+  void * jresult ;
+  int arg1 ;
+  NativeViewFrameArray *result = 0 ;
+  
+  arg1 = (int)jarg1; 
+  result = (NativeViewFrameArray *)new_NativeViewFrameArray(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_delete_NativeViewFrameArray(void * jarg1) {
+  NativeViewFrameArray *arg1 = (NativeViewFrameArray *) 0 ;
+  
+  arg1 = (NativeViewFrameArray *)jarg1; 
+  delete_NativeViewFrameArray(arg1);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_NativeViewFrameArray_getitem(void * jarg1, int jarg2) {
+  void * jresult ;
+  NativeViewFrameArray *arg1 = (NativeViewFrameArray *) 0 ;
+  int arg2 ;
+  ViewFrame result;
+  
+  arg1 = (NativeViewFrameArray *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = NativeViewFrameArray_getitem(arg1,arg2);
+  jresult = new ViewFrame((const ViewFrame &)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_NativeViewFrameArray_setitem(void * jarg1, int jarg2, void * jarg3) {
+  NativeViewFrameArray *arg1 = (NativeViewFrameArray *) 0 ;
+  int arg2 ;
+  ViewFrame arg3 ;
+  ViewFrame *argp3 ;
+  
+  arg1 = (NativeViewFrameArray *)jarg1; 
+  arg2 = (int)jarg2; 
+  argp3 = (ViewFrame *)jarg3; 
+  if (!argp3) {
+    SWIG_CSharpSetPendingExceptionArgument(SWIG_CSharpArgumentNullException, "Attempt to dereference null ViewFrame", 0);
+    return ;
+  }
+  arg3 = *argp3; 
+  NativeViewFrameArray_setitem(arg1,arg2,arg3);
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_NativeViewFrameArray_cast(void * jarg1) {
+  void * jresult ;
+  NativeViewFrameArray *arg1 = (NativeViewFrameArray *) 0 ;
+  ViewFrame *result = 0 ;
+  
+  arg1 = (NativeViewFrameArray *)jarg1; 
+  result = (ViewFrame *)NativeViewFrameArray_cast(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_NativeViewFrameArray_frompointer(void * jarg1) {
+  void * jresult ;
+  ViewFrame *arg1 = (ViewFrame *) 0 ;
+  NativeViewFrameArray *result = 0 ;
+  
+  arg1 = (ViewFrame *)jarg1; 
+  result = (NativeViewFrameArray *)NativeViewFrameArray_frompointer(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
 SWIGEXPORT void * SWIGSTDCALL CSharp_get_palette_entry(int jarg1) {
   void * jresult ;
   int arg1 ;
@@ -3482,6 +3751,24 @@ SWIGEXPORT void SWIGSTDCALL CSharp_delete_roomstruct(void * jarg1) {
   
   arg1 = (roomstruct *)jarg1; 
   delete arg1;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_crop_sprite_edges(int jarg1, int* jarg2, unsigned int jarg3) {
+  int jresult ;
+  int arg1 ;
+  int *arg2 = (int *) 0 ;
+  bool arg3 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  arg2 = jarg2;
+  arg3 = jarg3 ? true : false; 
+  result = (int)crop_sprite_edges(arg1,arg2,arg3);
+  jresult = result; 
+  
+  
+  return jresult;
 }
 
 
@@ -4208,18 +4495,6 @@ SWIGEXPORT int SWIGSTDCALL CSharp_cfopenpriority_get() {
 }
 
 
-SWIGEXPORT unsigned int SWIGSTDCALL CSharp_Scintilla_RegisterClasses(void * jarg1) {
-  unsigned int jresult ;
-  void *arg1 = (void *) 0 ;
-  bool result;
-  
-  arg1 = jarg1; 
-  result = (bool)Scintilla_RegisterClasses(arg1);
-  jresult = result; 
-  return jresult;
-}
-
-
 SWIGEXPORT int SWIGSTDCALL CSharp_Scintilla_LinkLexers() {
   int jresult ;
   int result;
@@ -4451,6 +4726,537 @@ SWIGEXPORT void * SWIGSTDCALL CSharp_get_sprite(int jarg1) {
   result = (block)get_sprite(arg1);
   jresult = (void *)result; 
   return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_drawSprite(int jarg1, int jarg2, int jarg3, int jarg4, unsigned int jarg5) {
+  int arg1 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  bool arg5 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = jarg5 ? true : false; 
+  drawSprite(arg1,arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_multiply_up_coordinate(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)multiply_up_coordinate(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_get_fixed_pixel_size(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)get_fixed_pixel_size(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_initialize_sprite(int jarg1) {
+  int arg1 ;
+  
+  arg1 = (int)jarg1; 
+  initialize_sprite(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_pre_save_sprite(int jarg1) {
+  int arg1 ;
+  
+  arg1 = (int)jarg1; 
+  pre_save_sprite(arg1);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_shutdown_native() {
+  shutdown_native();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_free_old_game_data() {
+  free_old_game_data();
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_import_sci_font(char * jarg1, int jarg2) {
+  char * jresult ;
+  char *arg1 = (char *) 0 ;
+  int arg2 ;
+  char *result = 0 ;
+  
+  arg1 = (char *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (char *)import_sci_font((char const *)arg1,arg2);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_drawFontAt(int jarg1, int jarg2, int jarg3, int jarg4) {
+  int arg1 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  drawFontAt(arg1,arg2,arg3,arg4);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_drawSpriteStretch(int jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6) {
+  int arg1 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  drawSpriteStretch(arg1,arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_drawBlockOfColour(int jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6) {
+  int arg1 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  drawBlockOfColour(arg1,arg2,arg3,arg4,arg5,arg6);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_SetNewSpriteFromHBitmap(int jarg1, int jarg2) {
+  int arg1 ;
+  int arg2 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  SetNewSpriteFromHBitmap(arg1,arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetSpriteAsHBitmap(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)GetSpriteAsHBitmap(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void * SWIGSTDCALL CSharp_GetRawSpriteData(int jarg1) {
+  void * jresult ;
+  int arg1 ;
+  unsigned char *result = 0 ;
+  
+  arg1 = (int)jarg1; 
+  result = (unsigned char *)GetRawSpriteData(arg1);
+  jresult = (void *)result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_find_free_sprite_slot() {
+  int jresult ;
+  int result;
+  
+  result = (int)find_free_sprite_slot();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_deleteSprite(int jarg1) {
+  int arg1 ;
+  
+  arg1 = (int)jarg1; 
+  deleteSprite(arg1);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetSpriteWidth(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)GetSpriteWidth(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetSpriteHeight(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)GetSpriteHeight(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetRelativeSpriteWidth(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)GetRelativeSpriteWidth(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetRelativeSpriteHeight(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)GetRelativeSpriteHeight(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetSpriteColorDepth(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)GetSpriteColorDepth(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetPaletteAsHPalette() {
+  int jresult ;
+  int result;
+  
+  result = (int)GetPaletteAsHPalette();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_DoesSpriteExist(int jarg1) {
+  unsigned int jresult ;
+  int arg1 ;
+  bool result;
+  
+  arg1 = (int)jarg1; 
+  result = (bool)DoesSpriteExist(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetMaxSprites() {
+  int jresult ;
+  int result;
+  
+  result = (int)GetMaxSprites();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_load_template_file(char * jarg1, void * jarg2, void * jarg3, unsigned int jarg4) {
+  int jresult ;
+  char *arg1 = (char *) 0 ;
+  char **arg2 = (char **) 0 ;
+  long *arg3 = (long *) 0 ;
+  bool arg4 ;
+  int result;
+  
+  arg1 = (char *)jarg1; 
+  arg2 = (char **)jarg2; 
+  arg3 = (long *)jarg3; 
+  arg4 = jarg4 ? true : false; 
+  result = (int)load_template_file((char const *)arg1,arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_extract_template_files(char * jarg1) {
+  int jresult ;
+  char *arg1 = (char *) 0 ;
+  int result;
+  
+  arg1 = (char *)jarg1; 
+  result = (int)extract_template_files((char const *)arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_extract_room_template_files(char * jarg1, int jarg2) {
+  int jresult ;
+  char *arg1 = (char *) 0 ;
+  int arg2 ;
+  int result;
+  
+  arg1 = (char *)jarg1; 
+  arg2 = (int)jarg2; 
+  result = (int)extract_room_template_files((char const *)arg1,arg2);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_change_sprite_number(int jarg1, int jarg2) {
+  int arg1 ;
+  int arg2 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  change_sprite_number(arg1,arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_update_sprite_resolution(int jarg1, unsigned int jarg2) {
+  int arg1 ;
+  bool arg2 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = jarg2 ? true : false; 
+  update_sprite_resolution(arg1,arg2);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_GetSpriteResolutionMultiplier(int jarg1) {
+  int jresult ;
+  int arg1 ;
+  int result;
+  
+  arg1 = (int)jarg1; 
+  result = (int)GetSpriteResolutionMultiplier(arg1);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_draw_room_background(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, float jarg6, int jarg7, int jarg8, int jarg9) {
+  void *arg1 = (void *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  float arg6 ;
+  int arg7 ;
+  int arg8 ;
+  int arg9 ;
+  
+  arg1 = jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = (float)jarg6; 
+  arg7 = (int)jarg7; 
+  arg8 = (int)jarg8; 
+  arg9 = (int)jarg9; 
+  draw_room_background(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_draw_line_onto_mask(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6, int jarg7) {
+  void *arg1 = (void *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  
+  arg1 = jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  draw_line_onto_mask(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_draw_filled_rect_onto_mask(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5, int jarg6, int jarg7) {
+  void *arg1 = (void *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  
+  arg1 = jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  draw_filled_rect_onto_mask(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_draw_fill_onto_mask(void * jarg1, int jarg2, int jarg3, int jarg4, int jarg5) {
+  void *arg1 = (void *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  int arg5 ;
+  
+  arg1 = jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  draw_fill_onto_mask(arg1,arg2,arg3,arg4,arg5);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_copy_walkable_to_regions(void * jarg1) {
+  void *arg1 = (void *) 0 ;
+  
+  arg1 = jarg1; 
+  copy_walkable_to_regions(arg1);
+}
+
+
+SWIGEXPORT int SWIGSTDCALL CSharp_get_mask_pixel(void * jarg1, int jarg2, int jarg3, int jarg4) {
+  int jresult ;
+  void *arg1 = (void *) 0 ;
+  int arg2 ;
+  int arg3 ;
+  int arg4 ;
+  int result;
+  
+  arg1 = jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (int)jarg3; 
+  arg4 = (int)jarg4; 
+  result = (int)get_mask_pixel(arg1,arg2,arg3,arg4);
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_create_undo_buffer(void * jarg1, int jarg2) {
+  void *arg1 = (void *) 0 ;
+  int arg2 ;
+  
+  arg1 = jarg1; 
+  arg2 = (int)jarg2; 
+  create_undo_buffer(arg1,arg2);
+}
+
+
+SWIGEXPORT unsigned int SWIGSTDCALL CSharp_does_undo_buffer_exist() {
+  unsigned int jresult ;
+  bool result;
+  
+  result = (bool)does_undo_buffer_exist();
+  jresult = result; 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_clear_undo_buffer() {
+  clear_undo_buffer();
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_restore_from_undo_buffer(void * jarg1, int jarg2) {
+  void *arg1 = (void *) 0 ;
+  int arg2 ;
+  
+  arg1 = jarg1; 
+  arg2 = (int)jarg2; 
+  restore_from_undo_buffer(arg1,arg2);
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_transform_string(char * jarg1) {
+  char *arg1 = (char *) 0 ;
+  
+  arg1 = (char *)jarg1; 
+  transform_string(arg1);
+}
+
+
+SWIGEXPORT char * SWIGSTDCALL CSharp_save_sprites(unsigned int jarg1) {
+  char * jresult ;
+  bool arg1 ;
+  char *result = 0 ;
+  
+  arg1 = jarg1 ? true : false; 
+  result = (char *)save_sprites(arg1);
+  jresult = SWIG_csharp_string_callback((const char *)result); 
+  return jresult;
+}
+
+
+SWIGEXPORT void SWIGSTDCALL CSharp_doDrawViewLoop(int jarg1, int jarg2, void * jarg3, int jarg4, int jarg5, int jarg6, int jarg7) {
+  int arg1 ;
+  int arg2 ;
+  ViewFrame *arg3 = (ViewFrame *) 0 ;
+  int arg4 ;
+  int arg5 ;
+  int arg6 ;
+  int arg7 ;
+  
+  arg1 = (int)jarg1; 
+  arg2 = (int)jarg2; 
+  arg3 = (ViewFrame *)jarg3; 
+  arg4 = (int)jarg4; 
+  arg5 = (int)jarg5; 
+  arg6 = (int)jarg6; 
+  arg7 = (int)jarg7; 
+  doDrawViewLoop(arg1,arg2,arg3,arg4,arg5,arg6,arg7);
 }
 
 

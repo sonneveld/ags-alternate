@@ -26,24 +26,33 @@ namespace AGS.Native
         {
 	        throw new AGS.Types.AGSEditorException(new String((const char*)message));
         }
-
-        void save_game(bool compressSprites)
+#endif
+        public static void save_game(bool compressSprites)
         {
-	        const char *errorMsg = save_sprites(compressSprites);
-	        if (errorMsg != NULL)
+	        var errorMsg = acswig.save_sprites(compressSprites);
+	        if (errorMsg != null)
 	        {
-		        throw new AGSEditorException(new String(errorMsg));
+		        throw new AGSEditorException(errorMsg);
 	        }
         }
 
-        void CreateBuffer(int width, int height)
+
+        public static void CreateBuffer(int width, int height)
         {
+            throw new NotImplementedException();
+        
+#if false
 	        drawBuffer = create_bitmap_ex(32, width, height);
 	        clear_to_color(drawBuffer, 0x00D0D0D0);
+#endif
+
         }
 
-        void DrawSpriteToBuffer(int sprNum, int x, int y, int scaleFactor) {
-	        block todraw = spriteset[sprNum];
+        public static void DrawSpriteToBuffer(int sprNum, int x, int y, int scaleFactor)
+        {
+            throw new NotImplementedException();
+#if false
+     block todraw = spriteset[sprNum];
 	        if (todraw == NULL)
 	          todraw = spriteset[0];
 
@@ -89,16 +98,21 @@ namespace AGS.Native
 
 	        if (imageToDraw != todraw)
 		        destroy_bitmap(imageToDraw);
+#endif
+
         }
 
-        void RenderBufferToHDC(int hdc) 
+        public static void RenderBufferToHDC(int hdc) 
         {
+            throw new NotImplementedException();
+#if false
 	        blit_to_hdc(drawBuffer, (HDC)hdc, 0, 0, 0, 0, drawBuffer.w, drawBuffer.h);
 	        destroy_bitmap(drawBuffer);
 	        drawBuffer = NULL;
+            #endif
         }
 
-#endif
+
 
         // 2654
         public static void UpdateSpriteFlags(SpriteFolder folder) 
@@ -157,15 +171,17 @@ namespace AGS.Native
                 acswig.reload_font(i);
             }
         }
-#if false
+
                 
-        void drawViewLoop (int hdc, ViewLoop loopToDraw, int x, int y, int size, int cursel)
+        public static void drawViewLoop (int hdc, ViewLoop loopToDraw, int x, int y, int size, int cursel)
         {
-          .ViewFrame * frames = (.ViewFrame*)malloc(sizeof(.ViewFrame) * loopToDraw.Frames.Count);
-	        for (int i = 0; i < loopToDraw.Frames.Count; i++) 
+            var frames = new NativeViewFrameArray(loopToDraw.Frames.Count);
+	        for (int i = 0; i < loopToDraw.Frames.Count; i++)
 	        {
-		        frames[i].pic = loopToDraw.Frames[i].Image;
-		        frames[i].flags = (loopToDraw.Frames[i].Flipped) ? VFLG_FLIPSPRITE : 0;
+	            var frame = frames.getitem(i);
+                frame.pic = loopToDraw.Frames[i].Image;
+                frame.flags = (loopToDraw.Frames[i].Flipped) ? acswig.VFLG_FLIPSPRITE : 0;
+	            frames.setitem(i, frame);
 	        }
           // stretch_sprite is dodgy, retry a few times if it crashes
           int retries = 0;
@@ -173,7 +189,7 @@ namespace AGS.Native
           {
             try
             {
-	            doDrawViewLoop(hdc, loopToDraw.Frames.Count, frames, x, y, size, cursel);
+                acswig.doDrawViewLoop(hdc, loopToDraw.Frames.Count, frames.cast(), x, y, size, cursel);
               break;
             }
             catch (AccessViolationException )
@@ -181,10 +197,8 @@ namespace AGS.Native
               retries++;
             }
           }
-          free(frames);
         }
 
-#endif
 
         public static unsafe void memcpy(byte* dest, byte* src, int count)
         {
@@ -342,9 +356,11 @@ namespace AGS.Native
 	        return tempsprite;
         }
 
-#if false
-        void DeleteBackground(Room room, int backgroundNumber) 
+
+        public static void DeleteBackground(Room room, int backgroundNumber) 
         {
+            throw new NotImplementedException();
+#if false
 	        roomstruct *theRoom = (roomstruct*)(void*)room._roomStructPtr;
 	        if (theRoom.ebscene[backgroundNumber] != NULL) 
 	        {
@@ -358,10 +374,13 @@ namespace AGS.Native
 		        theRoom.ebscene[i] = theRoom.ebscene[i + 1];
 		        theRoom.ebpalShared[i] = theRoom.ebpalShared[i + 1];
 	        }
+#endif
         }
 
-        void ImportBackground(Room room, int backgroundNumber, Bitmap bmp, bool useExactPalette, bool sharePalette) 
+        public static void ImportBackground(Room room, int backgroundNumber, Bitmap bmp, bool useExactPalette, bool sharePalette)
         {
+            throw new NotImplementedException();
+#if false
 	        var oldpale = new RgbArray(256);
 	        block newbg = CreateBlockFromBitmap(bmp, oldpale, true, false, NULL);
 	        roomstruct *theRoom = (roomstruct*)(void*)room._roomStructPtr;
@@ -426,8 +445,9 @@ namespace AGS.Native
 
 	        room.BackgroundCount = theRoom.num_bscenes;
 	        room.ColorDepth = bitmap_color_depth(theRoom.ebscene[0]);
-        }
 #endif
+        }
+
 
         //2949        
         public static void import_area_mask(IntPtr roomptr, int maskType, Bitmap bmp)
@@ -669,9 +689,11 @@ namespace AGS.Native
             acswig.copy_global_palette_to_room_palette();
         }
 
-#if false
-        void ConvertGUIToBinaryFormat(GUI guiObj, GUIMain *gui) 
+
+            #if false
+        public static void ConvertGUIToBinaryFormat(GUI guiObj, GUIMain *gui) 
         {
+      
           NormalGUI normalGui = dynamic_cast<NormalGUI>(guiObj);
           if (normalGui)
           {
@@ -830,9 +852,12 @@ namespace AGS.Native
 
           gui.rebuild_array();
           gui.resort_zorder();
-        }
 
-        void drawGUI(int hdc, int x,int y, GUI guiObj, int scaleFactor, int selectedControl) {
+        }
+#endif
+        public static void drawGUI(int hdc, int x,int y, GUI guiObj, int scaleFactor, int selectedControl) {
+            throw new NotImplementedException();
+#if false
           numguibuts = 0;
           numguilabels = 0;
           numguitext = 0;
@@ -845,11 +870,15 @@ namespace AGS.Native
           tempgui.highlightobj = selectedControl;
 
           drawGUIAt(hdc, x, y, -1, -1, -1, -1, scaleFactor);
+#endif
         }
 
-        Dictionary<int, Sprite> load_sprite_dimensions()
+
+        public static Dictionary<int, Sprite> load_sprite_dimensions()
         {
-	        Dictionary<int, Sprite> sprites = new Dictionary<int, Sprite>();
+            throw new NotImplementedException();
+#if false
+        Dictionary<int, Sprite> sprites = new Dictionary<int, Sprite>();
 
 	        for (int i = 0; i < spriteset.elements; i++)
 	        {
@@ -861,8 +890,10 @@ namespace AGS.Native
 	        }
 
 	        return sprites;
-        }
+#endif
 
+        }
+#if false
         void ConvertCustomProperties(AGS.Types.CustomProperties insertInto, .CustomProperties *propToConvert)
         {
 	        for (int j = 0; j < propToConvert.numProps; j++) 
@@ -1159,10 +1190,12 @@ namespace AGS.Native
 		        }
 	        }
         }
-
-        Game load_old_game_dta_file(const char *fileName)
-        {
-	        const char *errorMsg = load_dta_file_into_thisgame(fileName);
+#endif
+        public static Game load_old_game_dta_file(string fileName)
+    {
+        throw new NotImplementedException();
+#if false
+   const char *errorMsg = load_dta_file_into_thisgame(fileName);
 	        if (errorMsg != NULL)
 	        {
 		        throw new AGS.Types.AGSEditorException(new String(errorMsg));
@@ -1619,10 +1652,14 @@ namespace AGS.Native
 	        free_old_game_data();
 
 	        return game;
-        }
+#endif
 
-        System.String load_room_script(System.String fileName)
+    }
+
+        public static System.String load_room_script(System.String fileName)
         {
+            throw new NotImplementedException();
+#if false
 	        char roomFileNameBuffer[MAX_PATH];
 	        ConvertStringToCharArray(fileName, roomFileNameBuffer);
 
@@ -1674,16 +1711,20 @@ namespace AGS.Native
 	        fclose(opty);
 
 	        return scriptToReturn;
+#endif
         }
 
-        int GetCurrentlyLoadedRoomNumber()
+
+        public static int GetCurrentlyLoadedRoomNumber()
         {
-          return loaded_room_number;
+          return acswig.loaded_room_number;
         }
 
-        AGS.Types.Room load_crm_file(UnloadedRoom roomToLoad)
+        public static AGS.Types.Room load_crm_file(UnloadedRoom roomToLoad)
         {
-	        char roomFileNameBuffer[MAX_PATH];
+            throw new NotImplementedException();
+#if false
+ char roomFileNameBuffer[MAX_PATH];
 	        ConvertStringToCharArray(roomToLoad.FileName, roomFileNameBuffer);
 
 	        const char *errorMsg = load_room_file(roomFileNameBuffer);
@@ -1876,11 +1917,15 @@ namespace AGS.Native
           clear_undo_buffer();
 
 	        return room;
+#endif
+
         }
 
-        void save_crm_file(Room room)
+        public static void save_crm_file(Room room)
         {
-	        thisroom.gameId = room.GameID;
+            throw new NotImplementedException();
+#if false
+thisroom.gameId = room.GameID;
 	        thisroom.bottom = room.BottomEdgeY;
 	        thisroom.left = room.LeftEdgeX;
 	        thisroom.options[ST_VOLUME] = (int)room.MusicVolumeAdjustment;
@@ -2008,8 +2053,11 @@ namespace AGS.Native
 		        free(thisroom.hotspotnames[i]);
 		        thisroom.hotspotnames[i] = NULL;
 	        }
+#endif
+
         }
 
+#if false
         static int CountViews(ViewFolder folder) 
         {
 	        int highestViewNumber = 0;

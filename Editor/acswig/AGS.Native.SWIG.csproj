@@ -64,6 +64,8 @@
     <Compile Include="swigout\BITMAP.cs" />
     <Compile Include="swigout\GameSetupStruct.cs" />
     <Compile Include="swigout\GameSetupStructBase.cs" />
+    <Compile Include="swigout\NativeViewFrame.cs" />
+    <Compile Include="swigout\NativeViewFrameArray.cs" />
     <Compile Include="swigout\RGB.cs" />
     <Compile Include="swigout\rgbArray.cs" />
     <Compile Include="swigout\RoomAreaMask.cs" />
@@ -82,6 +84,7 @@
     <Compile Include="swigout\SWIGTYPE_p_GUIMain.cs" />
     <Compile Include="swigout\SWIGTYPE_p_int.cs" />
     <Compile Include="swigout\SWIGTYPE_p_InventoryItemInfo.cs" />
+    <Compile Include="swigout\SWIGTYPE_p_long.cs" />
     <Compile Include="swigout\SWIGTYPE_p_MouseCursor.cs" />
     <Compile Include="swigout\SWIGTYPE_p_p_BITMAP.cs" />
     <Compile Include="swigout\SWIGTYPE_p_p_char.cs" />
@@ -93,7 +96,6 @@
     <Compile Include="swigout\SWIGTYPE_p_unsigned_char.cs" />
     <Compile Include="swigout\SWIGTYPE_p_ViewStruct.cs" />
     <Compile Include="swigout\SWIGTYPE_p_ViewStruct272.cs" />
-    <Compile Include="swigout\SWIGTYPE_p_void.cs" />
     <Compile Include="swigout\SWIGTYPE_p_WordsDictionary.cs" />
   </ItemGroup>
   <ItemGroup>
